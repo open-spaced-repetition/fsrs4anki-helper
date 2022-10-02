@@ -52,9 +52,7 @@ def reschedule(cids):
 
     (maxInterval, maxIntervalResp) = getMaximumIntervalWithResponse()
     if maxInterval is None:
-        if maxIntervalResp:
-            showWarning("Please enter an integral number of interval")
-        return
+        maxInterval = 36500
 
     if maxInterval <= 0:
         if maxIntervalResp:
@@ -66,8 +64,10 @@ def reschedule(cids):
 
     for cid in cids:
         card = mw.col.getCard(cid)
-        if card.type != 2 or "s" not in json.loads(card.custom_data):
+        if card.type != 2:
             continue
+        if "s" not in card.custom_data:
+            card.custom_data = "{\"s\":" + str(card.ivl) + "}"
         s = get_card_stability(card)
         newIvl = reschedule_interval(s, retention/100, maxInterval)
         offset = newIvl - card.ivl
@@ -101,6 +101,7 @@ def rescheduleFromDid(did):
 
 
 def get_card_stability(card: Card):
+    card.flush()
     return json.loads(card.custom_data)['s']
 
 
