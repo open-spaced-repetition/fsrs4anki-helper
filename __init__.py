@@ -52,8 +52,8 @@ def reschedule(cids):
 
     (maxInterval, maxIntervalResp) = getMaximumIntervalWithResponse()
     if maxInterval is None:
-        if retentionResp:
-            maxIntervalResp("Please enter an integral number of interval")
+        if maxIntervalResp:
+            showWarning("Please enter an integral number of interval")
         return
 
     if maxInterval <= 0:
