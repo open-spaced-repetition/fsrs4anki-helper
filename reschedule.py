@@ -14,7 +14,7 @@ class FSRS():
         return max(0.1, self.w[0] + self.w[1] * (rating-1))
 
     def init_difficulty(self, rating: int) -> float:
-        return self.w[2] + self.w[3] * (rating-3)
+        return self.constrain_difficulty(self.w[2] + self.w[3] * (rating-3))
 
     def next_difficulty(self, d: float, rating: int) -> float:
         new_d = d + self.w[4] * (rating - 3)
