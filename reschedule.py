@@ -11,7 +11,7 @@ class FSRS():
         self.w = w
 
     def init_stability(self, rating: int) -> float:
-        return self.w[0] + self.w[1] * (rating-1)
+        return max(0.1, self.w[0] + self.w[1] * (rating-1))
 
     def init_difficulty(self, rating: int) -> float:
         return self.w[2] + self.w[3] * (rating-3)
@@ -57,6 +57,7 @@ def reschedule():
     mw.checkpoint("Rescheduling")
     mw.progress.start()
 
+    cnt = 0
     for deck in mw.col.decks.all():
         w = deck_w['global']
         retention = deck_r['global']
@@ -99,9 +100,10 @@ def reschedule():
             else:
                 card.due += offset
             card.flush()
+            cnt += 1
 
     mw.progress.finish()
     mw.col.reset()
     mw.reset()
 
-    tooltip(_("""Rescheduled"""))
+    tooltip(_(f"""{cnt} card rescheduled"""))
