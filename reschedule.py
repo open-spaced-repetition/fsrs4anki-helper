@@ -70,9 +70,11 @@ def reschedule():
         for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""):
             last_date = 0
             revlogs = mw.col.card_stats_data(cid).revlog
-            for id, revlog in enumerate(reversed(revlogs)):
-                if id == 0:
-                    rating = revlog.button_chosen
+            for revlog in reversed(revlogs):
+                rating = revlog.button_chosen
+                if rating == 0:
+                    continue
+                if last_date == 0:
                     d = scheduler.init_difficulty(rating)
                     s = scheduler.init_stability(rating)
                     last_date = datetime.fromtimestamp(revlog.time).toordinal()
@@ -82,7 +84,6 @@ def reschedule():
                     if ivl <= 0:
                         continue
                     r = math.pow(0.9, ivl / s)
-                    rating = revlog.button_chosen
                     d = scheduler.next_difficulty(d, rating)
                     s = scheduler.next_recall_stability(
                         d, s, r) if rating > 1 else scheduler.next_forget_stability(d, s, r)
