@@ -37,10 +37,12 @@ def reschedule():
     custom_scheduler = mw.col.all_config()['cardStateCustomizer']
     if "FSRS4Anki" not in custom_scheduler:
         showWarning("Please use FSRS4Anki scheduler.")
+        return
     version = list(
         map(int, re.findall(f'v(\d).(\d).(\d)', custom_scheduler)[0]))
     if version[0] < 3:
         showWarning("Require FSRS4Anki version >= 3.0.0")
+        return
     ws = re.findall(r'[var ]?w ?= ?(.*);', custom_scheduler)
     weights = [list(map(float, w.strip('][').split(', '))) for w in ws]
     deck_names = re.findall(
