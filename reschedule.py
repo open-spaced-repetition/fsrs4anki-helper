@@ -35,7 +35,7 @@ class FSRS():
 def next_interval(stability, retention, max_ivl):
     return min(max(int(round(math.log(retention)/math.log(0.9) * stability)), 1), max_ivl)
 
-def reschedule():
+def reschedule(did):
     custom_scheduler = mw.col.all_config()['cardStateCustomizer']
     if "FSRS4Anki" not in custom_scheduler:
         showWarning("Please use FSRS4Anki scheduler.")
@@ -57,7 +57,8 @@ def reschedule():
     mw.progress.start()
 
     cnt = 0
-    for deck in mw.col.decks.all():
+    decks = mw.col.decks.all() if did is None else [mw.col.decks.get(did)];
+    for deck in decks:
         w = deck_w['global']
         retention = deck_retention['global']
         max_ivl = deck_max_ivl['global']
