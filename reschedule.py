@@ -109,7 +109,7 @@ def reschedule(did):
                     d = scheduler.next_difficulty(d, rating)
                     s = scheduler.next_recall_stability(d, s, r) if rating > 1 else scheduler.next_forget_stability(d, s, r)
                     last_date = datetime.fromtimestamp(revlog.time).toordinal()
-            if rating is None:
+            if rating is None or s is None:
                 continue
             card = mw.col.get_card(cid)
             card.custom_data = json.dumps({"s": round(s, 4), "d": round(d, 4), "v": "3.4.0"})
