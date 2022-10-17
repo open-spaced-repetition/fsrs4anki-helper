@@ -2,6 +2,7 @@ import re
 import math
 import json
 from datetime import datetime
+from collections import OrderedDict
 from aqt import mw
 from aqt.utils import showWarning, tooltip
 
@@ -44,42 +45,55 @@ def reschedule(did):
     if version[0] < 3:
         showWarning("Require FSRS4Anki version >= 3.0.0")
         return
-    weights = [list(map(float, w.strip('][').split(', '))) for w in re.findall(r'[var ]?w ?= ?(.*);', custom_scheduler)]
+    weight_list = [list(map(float, w.strip('][').split(', '))) for w in re.findall(r'[var ]?w ?= ?(.*);', custom_scheduler)]
+    retention_list = re.findall(r'requestRetention ?= ?(.*);', custom_scheduler)
+    max_ivl_list = re.findall(r'maximumInterval ?= ?(.*);', custom_scheduler)
+    easy_bonus_list = re.findall(r'easyBonus ?= ?(.*);', custom_scheduler)
+    hard_ivl_list = re.findall(r'hardInterval ?= ?(.*);', custom_scheduler)
     deck_names = re.findall(r'deck_name(?: ?== ?|.startsWith\()+"(.*)"', custom_scheduler)
     deck_names.insert(0, "global")
-    deck_w = {k: v for k, v in zip(deck_names, weights)}
-    deck_retention = {k: float(v) for k, v in zip(deck_names, re.findall(r'requestRetention ?= ?(.*);', custom_scheduler))}
-    deck_max_ivl = {k: int(v) for k, v in zip(deck_names, re.findall(r'maximumInterval ?= ?(.*);', custom_scheduler))}
-    deck_easy_bonus = {k: float(v) for k, v in zip(deck_names, re.findall(r'easyBonus ?= ?(.*);', custom_scheduler))}
-    deck_hard_ivl = {k: float(v) for k, v in zip(deck_names, re.findall(r'hardInterval ?= ?(.*);', custom_scheduler))}
+    deck_parameters = {
+        k: {
+            "w": w,
+            "r": float(r),
+            "m": int(m),
+            "e": float(e),
+            "h": float(h)
+        }
+        for k, w, r, m, e, h in zip(deck_names, weight_list, retention_list, max_ivl_list, easy_bonus_list, hard_ivl_list)
+    }
+    deck_parameters = OrderedDict({k: v for k, v in sorted(deck_parameters.items(), key=lambda item: item[0], reverse=True)})
 
     mw.checkpoint("Rescheduling")
     mw.progress.start()
 
     cnt = 0
-    decks = mw.col.decks.all() if did is None else [mw.col.decks.get(did)];
+    rescheudled_cards = set()
+    decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
     for deck in decks:
-        w = deck_w['global']
-        retention = deck_retention['global']
-        max_ivl = deck_max_ivl['global']
-        easy_bonus = deck_easy_bonus['global']
-        hard_ivl = deck_hard_ivl['global']
-        if deck['name'] in deck_names:
-            w = deck_w[deck['name']]
-            retention = deck_retention[deck['name']]
-            max_ivl = deck_max_ivl[deck['name']]
-            easy_bonus = deck_easy_bonus[deck['name']]
-            hard_ivl = deck_hard_ivl[deck['name']]
-        else:
-            for deck_name in deck_names:
-                if deck['name'].startswith(deck_name):
-                    w = deck_w[deck_name]
-                    retention = deck_retention[deck_name]
-                    max_ivl = deck_max_ivl[deck_name]
-                    easy_bonus = deck_easy_bonus[deck_name]
-                    hard_ivl = deck_hard_ivl[deck_name]
+        if did is not None:
+            deck_name = mw.col.decks.get(did)['name']
+            if not deck['name'].startswith(deck_name):
+                continue
+        w = deck_parameters['global']['w']
+        retention = deck_parameters['global']['r']
+        max_ivl = deck_parameters['global']['m']
+        easy_bonus = deck_parameters['global']['e']
+        hard_ivl = deck_parameters['global']['h']
+        for key, value in deck_parameters.items():
+            if deck['name'].startswith(key):
+                w = value['w']
+                retention = value['r']
+                max_ivl = value['m']
+                easy_bonus = value['e']
+                hard_ivl = value['h']
+                break
         scheduler = FSRS(w)
         for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""):
+            if cid not in rescheudled_cards:
+                rescheudled_cards.add(cid)
+            else:
+                continue
             last_date = None
             last_s = None
             s = None
@@ -88,7 +102,15 @@ def reschedule(did):
                 last_s = s
                 rating = revlog.button_chosen
                 if rating == 0:
-                    continue
+                    if revlog.ease != 0:
+                        # set due date
+                        continue
+                    else:
+                        # forget card
+                        last_date = None
+                        last_s = None
+                        s = None
+                        continue
                 if last_date is None:
                     again_s = scheduler.init_stability(1)
                     hard_s = scheduler.init_stability(2)
