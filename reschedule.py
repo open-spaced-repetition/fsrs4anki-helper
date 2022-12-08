@@ -37,9 +37,12 @@ def next_interval(stability, retention, max_ivl):
     return min(max(int(round(math.log(retention)/math.log(0.9) * stability)), 1), max_ivl)
 
 def reschedule(did):
+    if 'cardStateCustomizer' not in mw.col.all_config():
+        showWarning("Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
+        return
     custom_scheduler = mw.col.all_config()['cardStateCustomizer']
     if "FSRS4Anki" not in custom_scheduler:
-        showWarning("Please use FSRS4Anki scheduler.")
+        showWarning("Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
         return
     version = list(map(int, re.findall(f'v(\d).(\d).(\d)', custom_scheduler)[0]))
     if version[0] < 3:
