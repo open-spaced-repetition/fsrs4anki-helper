@@ -14,13 +14,17 @@ def addToMain(fun, text, shortcut=None):
     if shortcut:
         action.setShortcut(QKeySequence(shortcut))
 
+
 def addActionToGear(fun, text):
     """fun -- takes an argument, the did
     text -- what's written in the gear."""
+
     def aux(m, did):
         a = m.addAction(text)
         a.triggered.connect(lambda b, did=did: fun(did))
+
     deck_browser_will_show_options_menu.append(aux)
+
 
 addToMain(reschedule, _("Reschedule all cards"))
 addActionToGear(reschedule, "Reschedule cards in deck")
