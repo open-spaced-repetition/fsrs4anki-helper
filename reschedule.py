@@ -152,7 +152,7 @@ def reschedule(did):
             card = mw.col.get_card(cid)
             card.custom_data = json.dumps({"s": round(s, 4), "d": round(d, 4), "v": "3.4.0"})
             if last_s is None:
-                again_ivl = next_interval(rescheduled_cards, retention, max_ivl)
+                again_ivl = next_interval(again_s, retention, max_ivl)
                 hard_ivl = next_interval(hard_s, retention, max_ivl)
                 good_ivl = next_interval(good_s, retention, max_ivl)
                 easy_ivl = next_interval(easy_s * easy_bonus, retention, max_ivl)
