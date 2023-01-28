@@ -16,8 +16,9 @@ def RepresentsInt(s):
 
 def get_target_retention_with_response():
     inquire_text = "Postpone due cards whose retention is higher than your input retention (suggest 70~95).\n"
-    info_text = "Only affect cards scheduled by FSRS4Anki Scheduler or rescheduled by FSRS4Anki Helper."
-    (s, r) = getText(inquire_text + info_text)
+    info_text = "Only affect cards scheduled by FSRS4Anki Scheduler or rescheduled by FSRS4Anki Helper.\n"
+    ivl_text = "The new intervals are scheduled corresponding to your input retention.\n"
+    (s, r) = getText(inquire_text + info_text + ivl_text)
     if r:
         return (RepresentsInt(s), r)
     return (None, r)
