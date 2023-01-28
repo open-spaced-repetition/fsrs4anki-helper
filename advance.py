@@ -15,7 +15,7 @@ def RepresentsInt(s):
 
 
 def get_target_retention_with_response():
-    inquire_text = "Advance undue cards whose retention is less than your input retention (1, 99).\n"
+    inquire_text = "Advance undue cards whose retention is lower than your input retention (1, 99).\n"
     info_text = "Only affect cards scheduled by FSRS4Anki Scheduler or rescheduled by FSRS4Anki Helper."
     (s, r) = getText(inquire_text + info_text)
     if r:
@@ -97,7 +97,7 @@ def advance(did):
             r = math.pow(0.9, ivl / s)
             if r < target_retention:
                 new_ivl = min(max(int(round(math.log(target_retention) / math.log(0.9) * s)), 1), max_ivl)
-                offset = min(-1, new_ivl - card.ivl)
+                offset = new_ivl - card.ivl
                 card.ivl = new_ivl
                 if card.odid:  # Also update cards in filtered decks
                     card.odue += offset
