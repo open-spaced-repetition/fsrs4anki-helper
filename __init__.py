@@ -3,6 +3,7 @@ from aqt.gui_hooks import deck_browser_will_show_options_menu
 from aqt import mw
 
 from .reschedule import reschedule
+from .postpone import postpone
 
 
 def addToMain(fun, text, shortcut=None):
@@ -28,3 +29,6 @@ def addActionToGear(fun, text):
 
 addToMain(reschedule, _("Reschedule all cards"))
 addActionToGear(reschedule, "Reschedule cards in deck")
+
+addToMain(postpone, _("Postpone all cards"))
+addActionToGear(postpone, "Postpone cards in deck")
