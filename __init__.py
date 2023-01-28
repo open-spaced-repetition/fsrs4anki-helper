@@ -4,6 +4,7 @@ from aqt import mw
 
 from .reschedule import reschedule
 from .postpone import postpone
+from .advance import advance
 
 
 def addToMain(fun, text, shortcut=None):
@@ -32,3 +33,6 @@ addActionToGear(reschedule, "Reschedule cards in deck")
 
 addToMain(postpone, _("Postpone all cards"))
 addActionToGear(postpone, "Postpone cards in deck")
+
+addToMain(advance, _("Advance all cards"))
+addActionToGear(advance, "Advance cards in deck")

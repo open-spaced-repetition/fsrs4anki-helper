@@ -15,7 +15,7 @@ def RepresentsInt(s):
 
 
 def get_target_retention_with_response():
-    inquire_text = "Postpone due cards whose retention is higher than your input retention (suggest 70~95).\n"
+    inquire_text = "Advance undue cards whose retention is less than your input retention (1, 99).\n"
     info_text = "Only affect cards scheduled by FSRS4Anki Scheduler or rescheduled by FSRS4Anki Helper."
     (s, r) = getText(inquire_text + info_text)
     if r:
@@ -23,7 +23,7 @@ def get_target_retention_with_response():
     return (None, r)
 
 
-def postpone(did):
+def advance(did):
     # postpone card whose retention is higher than target_retention
     if 'cardStateCustomizer' not in mw.col.all_config():
         showWarning(
@@ -62,7 +62,7 @@ def postpone(did):
     deck_parameters = OrderedDict(
         {k: v for k, v in sorted(deck_parameters.items(), key=lambda item: item[0], reverse=True)})
 
-    mw.checkpoint("Postponing")
+    mw.checkpoint("Advancing")
     mw.progress.start()
 
     cnt = 0
@@ -78,7 +78,7 @@ def postpone(did):
             if deck['name'].startswith(key):
                 max_ivl = value['m']
                 break
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:due\" \"is:review\""):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" -\"is:due\" \"is:review\" -\"is:suspended\""):
             if cid not in postponed_cards:
                 postponed_cards.add(cid)
             else:
@@ -95,9 +95,9 @@ def postpone(did):
 
             ivl = datetime.today().toordinal() - datetime.fromtimestamp(revlog.time).toordinal()
             r = math.pow(0.9, ivl / s)
-            if r > target_retention:
+            if r < target_retention:
                 new_ivl = min(max(int(round(math.log(target_retention) / math.log(0.9) * s)), 1), max_ivl)
-                offset = max(1, new_ivl - card.ivl)
+                offset = min(-1, new_ivl - card.ivl)
                 card.ivl = new_ivl
                 if card.odid:  # Also update cards in filtered decks
                     card.odue += offset
@@ -110,4 +110,4 @@ def postpone(did):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} card postponed"""))
+    tooltip(_(f"""{cnt} card advanced"""))
