@@ -1,10 +1,10 @@
-import re
 import json
 import math
 from datetime import datetime
 from collections import OrderedDict
 from aqt import mw
 from aqt.utils import getText, showWarning, tooltip
+from .utils import *
 
 
 def RepresentsInt(s):
@@ -35,7 +35,7 @@ def postpone(did):
         showWarning(
             "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
         return
-    version = list(map(int, re.findall(f'v(\d).(\d).(\d)', custom_scheduler)[0]))
+    version = get_version(custom_scheduler)
     if version[0] < 3:
         showWarning("Require FSRS4Anki version >= 3.0.0")
         return
