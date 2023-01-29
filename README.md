@@ -12,6 +12,10 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 - Enable V3 Scheduler
 - FSRS4Anki scheduler version >= 3.0.0
 
+## Installation
+
+The easiest way to install FSRS4Anki Helper is through AnkiWeb: https://ankiweb.net/shared/info/759844606
+
 ## Usage
 
 ### Reschedule
