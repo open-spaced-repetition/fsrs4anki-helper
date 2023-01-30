@@ -1,7 +1,6 @@
 import json
 import math
 from datetime import datetime
-from collections import OrderedDict
 from aqt import mw
 from .utils import *
 
@@ -36,14 +35,8 @@ def postpone(did):
             return
         target_retention = target_retention / 100
 
-    max_ivl_list = re.findall(r'maximumInterval ?= ?(.*);', custom_scheduler)
-    deck_names = re.findall(r'deck_name(?: ?== ?|.startsWith\()+"(.*)"', custom_scheduler)
-    deck_names.insert(0, "global")
-    deck_parameters = {k: {"m": int(m)} for k, m in zip(deck_names, max_ivl_list)}
-    deck_parameters = OrderedDict(
-        {k: v for k, v in sorted(deck_parameters.items(), key=lambda item: item[0], reverse=True)})
-    skip_decks = list(
-        map(lambda x: x.strip(']["'), re.findall(r'[const ]?skip_decks ?= ?(.*);', custom_scheduler)[0].split(', ')))
+    deck_parameters = get_deck_parameters(custom_scheduler)
+    skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
 
     mw.checkpoint("Postponing")
     mw.progress.start()

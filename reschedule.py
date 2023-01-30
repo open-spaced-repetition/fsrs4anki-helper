@@ -1,7 +1,6 @@
-import math
 import json
+import math
 from datetime import datetime
-from collections import OrderedDict
 from aqt import mw
 from .utils import *
 
@@ -46,29 +45,9 @@ def reschedule(did):
     if version[0] < 3:
         showWarning("Require FSRS4Anki version >= 3.0.0")
         return
-    weight_list = [list(map(float, w.strip('][').split(', '))) for w in
-                   re.findall(r'[var ]?w ?= ?(.*);', custom_scheduler)]
-    retention_list = re.findall(r'requestRetention ?= ?(.*);', custom_scheduler)
-    max_ivl_list = re.findall(r'maximumInterval ?= ?(.*);', custom_scheduler)
-    easy_bonus_list = re.findall(r'easyBonus ?= ?(.*);', custom_scheduler)
-    hard_ivl_list = re.findall(r'hardInterval ?= ?(.*);', custom_scheduler)
-    deck_names = re.findall(r'deck_name(?: ?== ?|.startsWith\()+"(.*)"', custom_scheduler)
-    deck_names.insert(0, "global")
-    deck_parameters = {
-        k: {
-            "w": w,
-            "r": float(r),
-            "m": int(m),
-            "e": float(e),
-            "h": float(h)
-        }
-        for k, w, r, m, e, h in
-        zip(deck_names, weight_list, retention_list, max_ivl_list, easy_bonus_list, hard_ivl_list)
-    }
-    deck_parameters = OrderedDict(
-        {k: v for k, v in sorted(deck_parameters.items(), key=lambda item: item[0], reverse=True)})
-    skip_decks = list(
-        map(lambda x: x.strip(']["'), re.findall(r'[const ]?skip_decks ?= ?(.*);', custom_scheduler)[0].split(', ')))
+
+    deck_parameters = get_deck_parameters(custom_scheduler)
+    skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
 
     mw.checkpoint("Rescheduling")
     mw.progress.start()
