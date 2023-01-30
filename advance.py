@@ -3,15 +3,7 @@ import math
 from datetime import datetime
 from collections import OrderedDict
 from aqt import mw
-from aqt.utils import getText, showWarning, tooltip
 from .utils import *
-
-
-def RepresentsInt(s):
-    try:
-        return int(s)
-    except ValueError:
-        return None
 
 
 def get_target_retention_with_response():
@@ -25,15 +17,8 @@ def get_target_retention_with_response():
 
 
 def advance(did):
-    # postpone card whose retention is higher than target_retention
-    if 'cardStateCustomizer' not in mw.col.all_config():
-        showWarning(
-            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
-        return
-    custom_scheduler = mw.col.all_config()['cardStateCustomizer']
-    if "FSRS4Anki" not in custom_scheduler:
-        showWarning(
-            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
+    custom_scheduler = check_fsrs4anki(mw.col.all_config())
+    if custom_scheduler is None:
         return
     version = get_version(custom_scheduler)
     if version[0] < 3:
@@ -54,22 +39,22 @@ def advance(did):
     max_ivl_list = re.findall(r'maximumInterval ?= ?(.*);', custom_scheduler)
     deck_names = re.findall(r'deck_name(?: ?== ?|.startsWith\()+"(.*)"', custom_scheduler)
     deck_names.insert(0, "global")
-    deck_parameters = {
-        k: {
-            "m": int(m)
-        }
-        for k, m in zip(deck_names, max_ivl_list)
-    }
+    deck_parameters = {k: {"m": int(m)} for k, m in zip(deck_names, max_ivl_list)}
     deck_parameters = OrderedDict(
         {k: v for k, v in sorted(deck_parameters.items(), key=lambda item: item[0], reverse=True)})
+    skip_decks = list(
+        map(lambda x: x.strip(']["'), re.findall(r'[const ]?skip_decks ?= ?(.*);', custom_scheduler)[0].split(', ')))
 
     mw.checkpoint("Advancing")
     mw.progress.start()
 
     cnt = 0
-    postponed_cards = set()
+    advanced_cards = set()
     decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
     for deck in decks:
+        if any([deck['name'].startswith(i) for i in skip_decks]):
+            advanced_cards = advanced_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""))
+            continue
         if did is not None:
             deck_name = mw.col.decks.get(did)['name']
             if not deck['name'].startswith(deck_name):
@@ -80,8 +65,8 @@ def advance(did):
                 max_ivl = value['m']
                 break
         for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" -\"is:due\" \"is:review\" -\"is:suspended\""):
-            if cid not in postponed_cards:
-                postponed_cards.add(cid)
+            if cid not in advanced_cards:
+                advanced_cards.add(cid)
             else:
                 continue
             card = mw.col.get_card(cid)
