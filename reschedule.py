@@ -84,6 +84,7 @@ def reschedule(did):
                 continue
             last_date = None
             last_s = None
+            last_rating = None
             s = None
             d = None
             rating = None
@@ -110,6 +111,7 @@ def reschedule(did):
                     d = scheduler.init_difficulty(rating)
                     s = scheduler.init_stability(rating)
                     last_date = datetime.fromtimestamp(revlog.time).toordinal()
+                    last_rating = rating
                 else:
                     ivl = datetime.fromtimestamp(revlog.time).toordinal() - last_date
                     if ivl <= 0:
@@ -124,6 +126,7 @@ def reschedule(did):
                                                                                                                     s,
                                                                                                                     r)
                     last_date = datetime.fromtimestamp(revlog.time).toordinal()
+                    last_rating = rating
             if rating is None or s is None:
                 continue
             card = mw.col.get_card(cid)
@@ -145,7 +148,7 @@ def reschedule(did):
             if rating == 0:
                 new_ivl = card.ivl
             else:
-                new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][rating - 1]
+                new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
             offset = new_ivl - card.ivl
             card.ivl = new_ivl
             if card.odid:  # Also update cards in filtered decks
