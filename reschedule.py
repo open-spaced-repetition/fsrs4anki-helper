@@ -48,6 +48,7 @@ def reschedule(did):
 
     deck_parameters = get_deck_parameters(custom_scheduler)
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
+    rollover = mw.col.all_config()['rollover']
 
     mw.checkpoint("Rescheduling")
     mw.progress.start()
@@ -110,11 +111,11 @@ def reschedule(did):
                     easy_s = scheduler.init_stability(4)
                     d = scheduler.init_difficulty(rating)
                     s = scheduler.init_stability(rating)
-                    last_date = datetime.fromtimestamp(revlog.time).toordinal()
+                    last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
                     last_rating = rating
                 else:
-                    ivl = datetime.fromtimestamp(revlog.time).toordinal() - last_date
-                    if ivl <= 0:
+                    ivl = datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal() - last_date.toordinal()
+                    if ivl <= 0 and revlog.review_kind == 0:
                         continue
                     r = math.pow(0.9, ivl / s)
                     again_s = scheduler.next_forget_stability(scheduler.next_difficulty(d, 1), s, r)
@@ -125,7 +126,7 @@ def reschedule(did):
                     s = scheduler.next_recall_stability(d, s, r) if rating > 1 else scheduler.next_forget_stability(d,
                                                                                                                     s,
                                                                                                                     r)
-                    last_date = datetime.fromtimestamp(revlog.time).toordinal()
+                    last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
                     last_rating = rating
             if rating is None or s is None:
                 continue
