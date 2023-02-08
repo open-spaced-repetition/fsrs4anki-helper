@@ -90,8 +90,6 @@ def reschedule(did):
             d = None
             rating = None
             for revlog in reversed(mw.col.card_stats_data(cid).revlog):
-                if revlog.review_kind == 2:
-                    continue
                 last_s = s
                 rating = revlog.button_chosen
                 if rating == 0:
@@ -115,7 +113,7 @@ def reschedule(did):
                     last_rating = rating
                 else:
                     ivl = datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal() - last_date.toordinal()
-                    if ivl <= 0 and revlog.review_kind == 0:
+                    if ivl <= 0 and (revlog.review_kind == 0 or revlog.review_kind == 2):
                         continue
                     r = math.pow(0.9, ivl / s)
                     again_s = scheduler.next_forget_stability(scheduler.next_difficulty(d, 1), s, r)
