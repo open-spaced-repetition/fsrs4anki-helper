@@ -128,8 +128,13 @@ def reschedule(did):
                     last_rating = rating
             if rating is None or s is None:
                 continue
+            new_custom_data = {"s": round(s, 2), "d": round(d, 2), "v": "helper"}
             card = mw.col.get_card(cid)
-            card.custom_data = json.dumps({"s": round(s, 4), "d": round(d, 4), "v": "3.4.0"})
+            if card.custom_data != "":
+                old_custom_data = json.loads(card.custom_data)
+                if "seed" in old_custom_data:
+                    new_custom_data["seed"] = old_custom_data["seed"]
+            card.custom_data = json.dumps(new_custom_data)
             if last_s is None:
                 again_ivl = next_interval(again_s, retention, max_ivl)
                 hard_ivl = next_interval(hard_s, retention, max_ivl)
