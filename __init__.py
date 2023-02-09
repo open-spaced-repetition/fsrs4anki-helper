@@ -14,7 +14,7 @@ def addToMain(fun, text, shortcut=None):
     action = mw.form.menuTools.addAction(text)
     action.triggered.connect(lambda b, did=None: fun(did))
     if shortcut:
-        action.setShortcut(QKeySequence(shortcut))
+        action.setShortcut(shortcut)
 
 
 def addActionToGear(fun, text):
@@ -28,7 +28,7 @@ def addActionToGear(fun, text):
     deck_browser_will_show_options_menu.append(aux)
 
 
-addToMain(reschedule, _("Reschedule all cards"))
+addToMain(reschedule, _("Reschedule all cards"), "CTRL+R")
 addActionToGear(reschedule, "Reschedule cards in deck")
 
 addToMain(postpone, _("Postpone all cards"))
