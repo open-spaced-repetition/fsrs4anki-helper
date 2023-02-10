@@ -1,7 +1,7 @@
 import json
 import math
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from aqt import mw
 from .utils import *
 
@@ -11,9 +11,14 @@ def constrain_difficulty(difficulty: float) -> float:
 
 
 class FSRS:
-    def __init__(self, w: list[float]) -> None:
-        self.w = w
+    w: list[float]
+    enable_fuzz: bool
+    enable_load_balance: bool
+
+    def __init__(self) -> None:
+        self.w = [1., 1., 5., -0.5, -0.5, 0.2, 1.4, -0.12, 0.8, 2., -0.2, 0.2, 1.]
         self.enable_fuzz = False
+        self.enable_load_balance = True
 
     def init_stability(self, rating: int) -> float:
         return max(0.1, self.w[0] + self.w[1] * (rating - 1))
@@ -42,15 +47,26 @@ class FSRS:
     def apply_fuzz(self, ivl):
         if not self.enable_fuzz or ivl < 2.5:
             return ivl
-        ivl = round(ivl, 0)
-        min_ivl = max(2, round(ivl * 0.95 - 1, 0))
-        max_ivl = round(ivl * 1.05 + 1)
+        ivl = int(round(ivl))
+        min_ivl = max(2, int(round(ivl * 0.95 - 1)))
+        max_ivl = int(round(ivl * 1.05 + 1))
+        if self.enable_load_balance:
+            min_num_cards = 18446744073709551616
+            best_ivl = ivl
+            for check_ivl in reversed(range(min_ivl, max_ivl + 1)):
+                num_cards = mw.col.db.scalar("select count() from cards where due = ? and queue = 2", self.card.due + check_ivl - self.card.ivl)
+                if num_cards < min_num_cards:
+                    best_ivl = check_ivl
+                    min_num_cards = num_cards
+            return best_ivl
         return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
 
     def next_interval(self, stability, retention, max_ivl):
         new_interval = self.apply_fuzz(stability * math.log(retention) / math.log(0.9))
         return min(max(int(round(new_interval)), 1), max_ivl)
 
+    def set_card(self, card):
+        self.card = card
 
 def reschedule(did):
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -64,7 +80,6 @@ def reschedule(did):
     deck_parameters = get_deck_parameters(custom_scheduler)
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
     rollover = mw.col.all_config()['rollover']
-    enable_fuzz = get_fuzz_bool(custom_scheduler)
 
     mw.checkpoint("Rescheduling")
     mw.progress.start()
@@ -72,6 +87,9 @@ def reschedule(did):
     cnt = 0
     rescheduled_cards = set()
     decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
+    fsrs = FSRS()
+    fsrs.enable_fuzz = get_fuzz_bool(custom_scheduler)
+
     for deck in decks:
         if any([deck['name'].startswith(i) for i in skip_decks]):
             rescheduled_cards = rescheduled_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""))
@@ -84,18 +102,16 @@ def reschedule(did):
         retention = deck_parameters['global']['r']
         max_ivl = deck_parameters['global']['m']
         easy_bonus = deck_parameters['global']['e']
-        hard_ivl = deck_parameters['global']['h']
+        hard_factor = deck_parameters['global']['h']
         for key, value in deck_parameters.items():
             if deck['name'].startswith(key):
                 w = value['w']
                 retention = value['r']
                 max_ivl = value['m']
                 easy_bonus = value['e']
-                hard_ivl = value['h']
+                hard_factor = value['h']
                 break
-        scheduler = FSRS(w)
-        if enable_fuzz:
-            scheduler.enable_fuzz = True
+        fsrs.w = w
         for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""):
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
@@ -123,12 +139,12 @@ def reschedule(did):
                         s = None
                         continue
                 if last_date is None:
-                    again_s = scheduler.init_stability(1)
-                    hard_s = scheduler.init_stability(2)
-                    good_s = scheduler.init_stability(3)
-                    easy_s = scheduler.init_stability(4)
-                    d = scheduler.init_difficulty(rating)
-                    s = scheduler.init_stability(rating)
+                    again_s = fsrs.init_stability(1)
+                    hard_s = fsrs.init_stability(2)
+                    good_s = fsrs.init_stability(3)
+                    easy_s = fsrs.init_stability(4)
+                    d = fsrs.init_difficulty(rating)
+                    s = fsrs.init_stability(rating)
                     last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
                     last_rating = rating
                 else:
@@ -136,21 +152,19 @@ def reschedule(did):
                     if ivl <= 0 and (revlog.review_kind == 0 or revlog.review_kind == 2):
                         continue
                     r = math.pow(0.9, ivl / s)
-                    again_s = scheduler.next_forget_stability(scheduler.next_difficulty(d, 1), s, r)
-                    hard_s = scheduler.next_recall_stability(scheduler.next_difficulty(d, 2), s, r)
-                    good_s = scheduler.next_recall_stability(scheduler.next_difficulty(d, 3), s, r)
-                    easy_s = scheduler.next_recall_stability(scheduler.next_difficulty(d, 4), s, r)
-                    d = scheduler.next_difficulty(d, rating)
-                    s = scheduler.next_recall_stability(d, s, r) if rating > 1 else scheduler.next_forget_stability(d,
-                                                                                                                    s,
-                                                                                                                    r)
+                    again_s = fsrs.next_forget_stability(fsrs.next_difficulty(d, 1), s, r)
+                    hard_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 2), s, r)
+                    good_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 3), s, r)
+                    easy_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 4), s, r)
+                    d = fsrs.next_difficulty(d, rating)
+                    s = fsrs.next_recall_stability(d, s, r) if rating > 1 else fsrs.next_forget_stability(d, s, r)
                     last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
                     last_rating = rating
             if rating is None or s is None:
                 continue
             new_custom_data = {"s": round(s, 2), "d": round(d, 2), "v": "helper"}
             card = mw.col.get_card(cid)
-            seed = scheduler.set_fuzz_factor(cid, reps)
+            seed = fsrs.set_fuzz_factor(cid, reps)
             if card.custom_data != "":
                 old_custom_data = json.loads(card.custom_data)
                 if "seed" in old_custom_data:
@@ -158,17 +172,18 @@ def reschedule(did):
             if "seed" not in new_custom_data:
                 new_custom_data["seed"] = seed
             card.custom_data = json.dumps(new_custom_data)
+            fsrs.set_card(card)
             if last_s is None:
-                again_ivl = scheduler.next_interval(again_s, retention, max_ivl)
-                hard_ivl = scheduler.next_interval(hard_s, retention, max_ivl)
-                good_ivl = scheduler.next_interval(good_s, retention, max_ivl)
-                easy_ivl = scheduler.next_interval(easy_s * easy_bonus, retention, max_ivl)
+                again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
+                hard_ivl = fsrs.next_interval(hard_s, retention, max_ivl)
+                good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
+                easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl)
                 easy_ivl = max(good_ivl + 1, easy_ivl)
             else:
-                again_ivl = scheduler.next_interval(again_s, retention, max_ivl)
-                hard_ivl = scheduler.next_interval(last_s * hard_ivl, retention, max_ivl)
-                good_ivl = scheduler.next_interval(good_s, retention, max_ivl)
-                easy_ivl = scheduler.next_interval(easy_s * easy_bonus, retention, max_ivl)
+                again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
+                hard_ivl = fsrs.next_interval(last_s * hard_factor, retention, max_ivl)
+                good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
+                easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl)
                 hard_ivl = min(hard_ivl, good_ivl)
                 good_ivl = max(hard_ivl + 1, good_ivl)
                 easy_ivl = max(good_ivl + 1, easy_ivl)
