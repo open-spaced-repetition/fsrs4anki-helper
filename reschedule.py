@@ -84,14 +84,14 @@ def reschedule(did):
         retention = deck_parameters['global']['r']
         max_ivl = deck_parameters['global']['m']
         easy_bonus = deck_parameters['global']['e']
-        hard_ivl = deck_parameters['global']['h']
+        hard_factor = deck_parameters['global']['h']
         for key, value in deck_parameters.items():
             if deck['name'].startswith(key):
                 w = value['w']
                 retention = value['r']
                 max_ivl = value['m']
                 easy_bonus = value['e']
-                hard_ivl = value['h']
+                hard_factor = value['h']
                 break
         scheduler = FSRS(w)
         if enable_fuzz:
@@ -166,7 +166,7 @@ def reschedule(did):
                 easy_ivl = max(good_ivl + 1, easy_ivl)
             else:
                 again_ivl = scheduler.next_interval(again_s, retention, max_ivl)
-                hard_ivl = scheduler.next_interval(last_s * hard_ivl, retention, max_ivl)
+                hard_ivl = scheduler.next_interval(last_s * hard_factor, retention, max_ivl)
                 good_ivl = scheduler.next_interval(good_s, retention, max_ivl)
                 easy_ivl = scheduler.next_interval(easy_s * easy_bonus, retention, max_ivl)
                 hard_ivl = min(hard_ivl, good_ivl)
