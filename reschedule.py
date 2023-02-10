@@ -109,7 +109,9 @@ def reschedule(did):
             rating = None
             revlogs = mw.col.card_stats_data(cid).revlog
             reps = len(revlogs)
-            for revlog in reversed(revlogs):
+            for i, revlog in enumerate(reversed(revlogs)):
+                if i == 0 and revlog.review_kind != 0:
+                    break
                 last_s = s
                 rating = revlog.button_chosen
                 if rating == 0:
