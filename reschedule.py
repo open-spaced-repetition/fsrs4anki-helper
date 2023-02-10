@@ -1,5 +1,6 @@
 import json
 import math
+import random
 from datetime import datetime
 from aqt import mw
 from .utils import *
@@ -12,6 +13,7 @@ def constrain_difficulty(difficulty: float) -> float:
 class FSRS:
     def __init__(self, w: list[float]) -> None:
         self.w = w
+        self.enable_fuzz = False
 
     def init_stability(self, rating: int) -> float:
         return max(0.1, self.w[0] + self.w[1] * (rating - 1))
@@ -32,9 +34,22 @@ class FSRS:
     def next_forget_stability(self, d: float, s: float, r: float) -> float:
         return self.w[9] * math.pow(d, self.w[10]) * math.pow(s, self.w[11]) * math.exp((1 - r) * self.w[12])
 
+    def set_fuzz_factor(self, cid: int, reps: int):
+        random.seed(cid + reps)
+        self.fuzz_factor = random.random()
+        return round(self.fuzz_factor * 10000, 0)
 
-def next_interval(stability, retention, max_ivl):
-    return min(max(int(round(math.log(retention) / math.log(0.9) * stability)), 1), max_ivl)
+    def apply_fuzz(self, ivl):
+        if not self.enable_fuzz or ivl < 2.5:
+            return ivl
+        ivl = round(ivl, 0)
+        min_ivl = max(2, round(ivl * 0.95 - 1, 0))
+        max_ivl = round(ivl * 1.05 + 1)
+        return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
+
+    def next_interval(self, stability, retention, max_ivl):
+        new_interval = self.apply_fuzz(stability * math.log(retention) / math.log(0.9))
+        return min(max(int(round(new_interval)), 1), max_ivl)
 
 
 def reschedule(did):
@@ -49,6 +64,7 @@ def reschedule(did):
     deck_parameters = get_deck_parameters(custom_scheduler)
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
     rollover = mw.col.all_config()['rollover']
+    enable_fuzz = get_fuzz_bool(custom_scheduler)
 
     mw.checkpoint("Rescheduling")
     mw.progress.start()
@@ -78,6 +94,8 @@ def reschedule(did):
                 hard_ivl = value['h']
                 break
         scheduler = FSRS(w)
+        if enable_fuzz:
+            scheduler.enable_fuzz = True
         for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""):
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
@@ -89,7 +107,9 @@ def reschedule(did):
             s = None
             d = None
             rating = None
-            for revlog in reversed(mw.col.card_stats_data(cid).revlog):
+            revlogs = mw.col.card_stats_data(cid).revlog
+            reps = len(revlogs)
+            for revlog in reversed(revlogs):
                 last_s = s
                 rating = revlog.button_chosen
                 if rating == 0:
@@ -130,22 +150,25 @@ def reschedule(did):
                 continue
             new_custom_data = {"s": round(s, 2), "d": round(d, 2), "v": "helper"}
             card = mw.col.get_card(cid)
+            seed = scheduler.set_fuzz_factor(cid, reps)
             if card.custom_data != "":
                 old_custom_data = json.loads(card.custom_data)
                 if "seed" in old_custom_data:
                     new_custom_data["seed"] = old_custom_data["seed"]
+            if "seed" not in new_custom_data:
+                new_custom_data["seed"] = seed
             card.custom_data = json.dumps(new_custom_data)
             if last_s is None:
-                again_ivl = next_interval(again_s, retention, max_ivl)
-                hard_ivl = next_interval(hard_s, retention, max_ivl)
-                good_ivl = next_interval(good_s, retention, max_ivl)
-                easy_ivl = next_interval(easy_s * easy_bonus, retention, max_ivl)
+                again_ivl = scheduler.next_interval(again_s, retention, max_ivl)
+                hard_ivl = scheduler.next_interval(hard_s, retention, max_ivl)
+                good_ivl = scheduler.next_interval(good_s, retention, max_ivl)
+                easy_ivl = scheduler.next_interval(easy_s * easy_bonus, retention, max_ivl)
                 easy_ivl = max(good_ivl + 1, easy_ivl)
             else:
-                again_ivl = next_interval(again_s, retention, max_ivl)
-                hard_ivl = next_interval(last_s * hard_ivl, retention, max_ivl)
-                good_ivl = next_interval(good_s, retention, max_ivl)
-                easy_ivl = next_interval(easy_s * easy_bonus, retention, max_ivl)
+                again_ivl = scheduler.next_interval(again_s, retention, max_ivl)
+                hard_ivl = scheduler.next_interval(last_s * hard_ivl, retention, max_ivl)
+                good_ivl = scheduler.next_interval(good_s, retention, max_ivl)
+                easy_ivl = scheduler.next_interval(easy_s * easy_bonus, retention, max_ivl)
                 hard_ivl = min(hard_ivl, good_ivl)
                 good_ivl = max(hard_ivl + 1, good_ivl)
                 easy_ivl = max(good_ivl + 1, easy_ivl)
