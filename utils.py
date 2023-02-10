@@ -17,7 +17,17 @@ def check_fsrs4anki(all_config):
 
 
 def get_version(custom_scheduler):
-    return list(map(int, re.findall(f'v(\d+).(\d+).(\d+)', custom_scheduler)[0]))
+    return list(map(int, re.findall(r'v(\d+).(\d+).(\d+)', custom_scheduler)[0]))
+
+
+def get_fuzz_bool(custom_scheduler):
+    enable_fuzz = re.findall(r"const enable_fuzz ?= ?(true|false);?", custom_scheduler)[0]
+    if enable_fuzz == "true":
+        return True
+    elif enable_fuzz == "false":
+        return False
+    showWarning("Unable to get the value of enable_fuzz.")
+    return None
 
 
 def get_deck_parameters(custom_scheduler):
