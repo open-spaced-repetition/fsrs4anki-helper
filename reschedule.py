@@ -96,7 +96,7 @@ def reschedule(did):
         scheduler = FSRS(w)
         if enable_fuzz:
             scheduler.enable_fuzz = True
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\""):
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
             else:
