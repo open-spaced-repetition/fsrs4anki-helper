@@ -5,6 +5,8 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 - Reschedule cards based on their entire review histories.
 - Postpone due cards whose retention is higher than your target.
 - Advance undue cards whose retention is lower than your target.
+- Balance the load during rescheduling (based on fuzz).
+- Free the weekend (or other weekdays) during rescheduling (based on load balance).
 
 ## Requirement
 
@@ -20,26 +22,29 @@ The easiest way to install FSRS4Anki Helper is through AnkiWeb: https://ankiweb.
 
 ### Reschedule
 
-Set parameters for your FSRS4Anki scheduler. Then click `Tools -> Reschedule all cards`:
+Set parameters for your FSRS4Anki scheduler. Then click `Tools -> FSRS4Anki Helper -> Reschedule all cards (Ctrl+R)`:
 
-![](https://user-images.githubusercontent.com/32575846/195558914-199d41c2-011d-4618-9778-311b2d1a89be.png)
+![image](https://user-images.githubusercontent.com/32575846/218268780-1c757764-bd2b-42ba-8fab-3f42f526fdb4.png)
 
 If you only want to reschedule a specific deck, you can click `Reschedule cards in deck`.
 
-![](https://user-images.githubusercontent.com/32575846/195559101-91d356d7-d5a5-410d-a342-54172ef3141b.png)
+![image](https://user-images.githubusercontent.com/32575846/218268855-b3f42550-538d-43d1-a711-daf111e74ddb.png)
+
 
 ### Postpone
 
-![](https://user-images.githubusercontent.com/32575846/215248309-25893d12-92e9-489f-9acd-b393272c823c.png)
+![image](https://user-images.githubusercontent.com/32575846/218268927-b47050d0-bf4f-4ebd-b84f-c51b28e00012.png)
 
-![](https://user-images.githubusercontent.com/32575846/215248331-a580468a-4937-478e-a578-7e812aa600f4.png)
+![image](https://user-images.githubusercontent.com/32575846/218268959-ee1f49d7-b41e-4de9-8d65-25fecb63474f.png)
+
 
 
 ### Advance
 
-![](https://user-images.githubusercontent.com/32575846/215248367-bed8fb78-ad1b-44aa-8904-d2c68e870cf2.png)
+![image](https://user-images.githubusercontent.com/32575846/218268901-8b735296-fea4-426d-949e-11b1f3a410a8.png)
 
-![](https://user-images.githubusercontent.com/32575846/215248388-09b07f55-9815-4922-9da3-199fdcc30ba1.png)
+![image](https://user-images.githubusercontent.com/32575846/218268974-4d6f8983-24c5-48aa-b942-b3f82a05ec37.png)
 
+### Load Balance & Free Weekend
 
-
+![image](https://user-images.githubusercontent.com/32575846/218268644-7432790e-4665-430d-aa22-5826700e17bd.png)
