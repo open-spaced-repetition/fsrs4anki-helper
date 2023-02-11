@@ -12,6 +12,15 @@ from .configuration import (
     run_on_configuration_change
 )
 
+
+"""
+Acknowledgement to Arthur Milchior, Carlos Duarte and oakkitten.
+I learnt a lot from their add-ons.
+https://github.com/Arthur-Milchior/Anki-postpone-reviews
+https://github.com/cjdduarte/Free_Weekend_Load_Balancer
+https://github.com/oakkitten/anki-delay-siblings
+"""
+
 config = Config()
 config.load()
 
