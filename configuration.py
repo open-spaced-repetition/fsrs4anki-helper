@@ -4,6 +4,7 @@ from aqt import mw
 tag = mw.addonManager.addonFromModule(__name__)
 
 LOAD_BALANCE = "load_balance"
+FREE_DAYS = "free_days"
 
 
 def load_config():
@@ -32,4 +33,18 @@ class Config:
     @load_balance.setter
     def load_balance(self, value):
         self.data[LOAD_BALANCE] = value
+        self.save()
+    
+    @property
+    def free_days(self):
+        return self.data[FREE_DAYS]
+    
+    @free_days.setter
+    def free_days(self, day_enable):
+        day, enable = day_enable
+        if enable:
+            self.data[FREE_DAYS] = sorted(set(self.data[FREE_DAYS] + [day]))
+        else:
+            if day in self.data[FREE_DAYS]:
+                self.data[FREE_DAYS].remove(day)
         self.save()

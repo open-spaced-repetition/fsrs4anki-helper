@@ -3,6 +3,7 @@ import math
 import random
 from datetime import datetime, timedelta
 from aqt import mw
+from anki import scheduler
 from .utils import *
 from .configuration import Config
 
@@ -15,11 +16,13 @@ class FSRS:
     w: list[float]
     enable_fuzz: bool
     enable_load_balance: bool
+    free_days: list
 
     def __init__(self) -> None:
         self.w = [1., 1., 5., -0.5, -0.5, 0.2, 1.4, -0.12, 0.8, 2., -0.2, 0.2, 1.]
         self.enable_fuzz = False
         self.enable_load_balance = False
+        self.free_days = []
 
     def init_stability(self, rating: int) -> float:
         return max(0.1, self.w[0] + self.w[1] * (rating - 1))
@@ -55,8 +58,9 @@ class FSRS:
             min_num_cards = 18446744073709551616
             best_ivl = ivl
             for check_ivl in reversed(range(min_ivl, max_ivl + 1)):
+                due_date = datetime.now() + timedelta(days=self.card.due + check_ivl - self.card.ivl - mw.col.sched.today)
                 num_cards = mw.col.db.scalar("select count() from cards where due = ? and queue = 2", self.card.due + check_ivl - self.card.ivl)
-                if num_cards < min_num_cards:
+                if num_cards < min_num_cards and due_date.weekday() not in self.free_days:
                     best_ivl = check_ivl
                     min_num_cards = num_cards
             return best_ivl
@@ -93,6 +97,7 @@ def reschedule(did):
     fsrs = FSRS()
     fsrs.enable_fuzz = get_fuzz_bool(custom_scheduler)
     fsrs.enable_load_balance = config.load_balance
+    fsrs.free_days = config.free_days
 
     for deck in decks:
         if any([deck['name'].startswith(i) for i in skip_decks]):
@@ -116,7 +121,7 @@ def reschedule(did):
                 hard_factor = value['h']
                 break
         fsrs.w = w
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\""):
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
             else:

@@ -1,3 +1,4 @@
 {
-    "load_balance": false
+    "load_balance": false,
+    "free_days": []
 }

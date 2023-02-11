@@ -50,7 +50,7 @@ def set_load_balance(checked):
 
 
 menu_load_balance = checkable(
-    title="Enable load balance during rescheduling",
+    title="Load Balance during rescheduling (require fuzz)",
     on_click=set_load_balance
 )
 
@@ -65,15 +65,50 @@ add_action_to_gear(advance, "Advance cards in deck")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_load_balance)
+menu_for_free_days = menu_for_helper.addMenu("Free Days (require load balance)")
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
 
 
+def set_free_days(day, checked):
+    config.free_days = (day, checked)
+
+
+menu_for_free_0 = checkable(
+    title="Free Mon", on_click=lambda x: set_free_days(0, x))
+menu_for_free_1 = checkable(
+    title="Free Tue", on_click=lambda x: set_free_days(1, x))
+menu_for_free_2 = checkable(
+    title="Free Wed", on_click=lambda x: set_free_days(2, x))
+menu_for_free_3 = checkable(
+    title="Free Thu", on_click=lambda x: set_free_days(3, x))
+menu_for_free_4 = checkable(
+    title="Free Fri", on_click=lambda x: set_free_days(4, x))
+menu_for_free_5 = checkable(
+    title="Free Sat", on_click=lambda x: set_free_days(5, x))
+menu_for_free_6 = checkable(
+    title="Free Sun", on_click=lambda x: set_free_days(6, x))
+menu_for_free_days.addAction(menu_for_free_0)
+menu_for_free_days.addAction(menu_for_free_1)
+menu_for_free_days.addAction(menu_for_free_2)
+menu_for_free_days.addAction(menu_for_free_3)
+menu_for_free_days.addAction(menu_for_free_4)
+menu_for_free_days.addAction(menu_for_free_5)
+menu_for_free_days.addAction(menu_for_free_6)
+
+
 def adjust_menu():
     if mw.col is not None:
         menu_load_balance.setChecked(config.load_balance)
+        menu_for_free_0.setChecked(0 in config.free_days)
+        menu_for_free_1.setChecked(1 in config.free_days)
+        menu_for_free_2.setChecked(2 in config.free_days)
+        menu_for_free_3.setChecked(3 in config.free_days)
+        menu_for_free_4.setChecked(4 in config.free_days)
+        menu_for_free_5.setChecked(5 in config.free_days)
+        menu_for_free_6.setChecked(6 in config.free_days)
 
 
 @run_on_configuration_change
