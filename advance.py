@@ -57,7 +57,7 @@ def advance(did):
             if deck['name'].startswith(key):
                 max_ivl = value['m']
                 break
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" -\"is:due\" \"is:review\" -\"is:suspended\""):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" -\"is:due\" \"is:review\" -\"is:learn\" -\"is:suspended\""):
             if cid not in advanced_cards:
                 advanced_cards.add(cid)
             else:
