@@ -1,0 +1,35 @@
+
+from aqt import mw
+
+tag = mw.addonManager.addonFromModule(__name__)
+
+LOAD_BALANCE = "load_balance"
+
+
+def load_config():
+    return mw.addonManager.getConfig(tag)
+
+
+def save_config(data):
+    mw.addonManager.writeConfig(tag, data)
+
+
+def run_on_configuration_change(function):
+    mw.addonManager.setConfigUpdatedAction(__name__, lambda *_: function())
+
+
+class Config:
+    def load(self):
+        self.data = load_config()
+
+    def save(self):
+        save_config(self.data)
+
+    @property
+    def load_balance(self):
+        return self.data[LOAD_BALANCE]
+
+    @load_balance.setter
+    def load_balance(self, value):
+        self.data[LOAD_BALANCE] = value
+        self.save()

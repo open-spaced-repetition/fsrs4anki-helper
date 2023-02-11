@@ -4,6 +4,7 @@ import random
 from datetime import datetime, timedelta
 from aqt import mw
 from .utils import *
+from .configuration import Config
 
 
 def constrain_difficulty(difficulty: float) -> float:
@@ -18,7 +19,7 @@ class FSRS:
     def __init__(self) -> None:
         self.w = [1., 1., 5., -0.5, -0.5, 0.2, 1.4, -0.12, 0.8, 2., -0.2, 0.2, 1.]
         self.enable_fuzz = False
-        self.enable_load_balance = True
+        self.enable_load_balance = False
 
     def init_stability(self, rating: int) -> float:
         return max(0.1, self.w[0] + self.w[1] * (rating - 1))
@@ -69,6 +70,8 @@ class FSRS:
         self.card = card
 
 def reschedule(did):
+    config = Config()
+    config.load()
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
     if custom_scheduler is None:
         return
@@ -89,6 +92,7 @@ def reschedule(did):
     decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
     fsrs = FSRS()
     fsrs.enable_fuzz = get_fuzz_bool(custom_scheduler)
+    fsrs.enable_load_balance = config.load_balance
 
     for deck in decks:
         if any([deck['name'].startswith(i) for i in skip_decks]):
