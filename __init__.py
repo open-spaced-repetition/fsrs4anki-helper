@@ -1,5 +1,5 @@
 from anki.lang import _
-from aqt.gui_hooks import deck_browser_will_show_options_menu
+from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
 from aqt import mw
 from aqt.qt import QAction
 from typing import Callable
@@ -109,6 +109,11 @@ def adjust_menu():
         menu_for_free_4.setChecked(4 in config.free_days)
         menu_for_free_5.setChecked(5 in config.free_days)
         menu_for_free_6.setChecked(6 in config.free_days)
+
+
+@state_did_change.append
+def state_did_change(_next_state, _previous_state):
+    adjust_menu()
 
 
 @run_on_configuration_change
