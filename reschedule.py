@@ -8,6 +8,13 @@ from .utils import *
 from .configuration import Config
 
 
+def has_again(revlog):
+    for r in revlog:
+        if r.button_chosen == 1:
+            return True
+    return False
+
+
 def constrain_difficulty(difficulty: float) -> float:
     return min(10., max(1., difficulty))
 
@@ -135,7 +142,7 @@ def reschedule(did):
             revlogs = mw.col.card_stats_data(cid).revlog
             reps = len(revlogs)
             for i, revlog in enumerate(reversed(revlogs)):
-                if i == 0 and revlog.review_kind != 0:
+                if i == 0 and (revlog.review_kind not in (0, 2)) and not has_again(revlogs):
                     break
                 last_s = s
                 rating = revlog.button_chosen
