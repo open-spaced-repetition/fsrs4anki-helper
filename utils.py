@@ -41,18 +41,23 @@ def get_deck_parameters(custom_scheduler):
     deck_names = re.findall(r'deck_name(?: ?== ?|.startsWith\()+"(.*)"', custom_scheduler)
     deck_names.insert(0, "global")
     deck_parameters = {
-        k: {
+        d: {
             "w": w,
             "r": float(r),
             "m": int(m),
             "e": float(e),
             "h": float(h)
-        }
-        for k, w, r, m, e, h in
-        zip(deck_names, weight_list, retention_list, max_ivl_list, easy_bonus_list, hard_ivl_list)
+        } for d, w, r, m, e, h in zip(
+            decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
+        )
     }
     deck_parameters = OrderedDict(
-        {k: v for k, v in sorted(deck_parameters.items(), key=lambda item: item[0], reverse=True)})
+        {name: parameters for name, parameters in sorted(
+            deck_parameters.items(),
+            key=lambda item: item[0],
+            reverse=True
+        )}
+    )
     return deck_parameters
 
 
