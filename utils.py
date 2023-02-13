@@ -32,14 +32,13 @@ def get_fuzz_bool(custom_scheduler):
 
 
 def get_deck_parameters(custom_scheduler):
-    weight_list = [list(map(float, w.strip('][').split(', '))) for w in
-                   re.findall(r'[var ]?w ?= ?([0-9\-., \[\]]*)', custom_scheduler)]
-    retention_list = re.findall(r'requestRetention ?= ?([0-9.]*)', custom_scheduler)
-    max_ivl_list = re.findall(r'maximumInterval ?= ?([0-9.]*)', custom_scheduler)
-    easy_bonus_list = re.findall(r'easyBonus ?= ?([0-9.]*)', custom_scheduler)
-    hard_ivl_list = re.findall(r'hardInterval ?= ?([0-9.]*)', custom_scheduler)
-    deck_names = re.findall(r'deck_name(?: ?== ?|.startsWith\()+"(.*)"', custom_scheduler)
-    deck_names.insert(0, "global")
+    decks = re.findall(r'"deckName".*"(.*)"', custom_scheduler)
+    str_matches = re.findall(r'"w".*\[(.*)]', custom_scheduler)
+    weights = [list(map(float, w.split(", "))) for w in str_matches]
+    retentions = re.findall(r'"requestRetention"[:\s]+([\d.]+)', custom_scheduler)
+    max_intervals = re.findall(r'"maximumInterval"[:\s]+(\d+)', custom_scheduler)
+    easy_bonuses = re.findall(r'"easyBonus"[:\s]+([\d.]+)', custom_scheduler)
+    hard_intervals = re.findall(r'"hardInterval"[:\s]+([\d.]+)', custom_scheduler)
     deck_parameters = {
         d: {
             "w": w,
