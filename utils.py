@@ -17,17 +17,18 @@ def check_fsrs4anki(all_config):
 
 
 def get_version(custom_scheduler):
-    return list(map(int, re.findall(r'v(\d+).(\d+).(\d+)', custom_scheduler)[0]))
+    str_matches = re.findall(r'// FSRS4Anki v(\d+).(\d+).(\d+) Scheduler', custom_scheduler)
+    return list(map(int, str_matches[0]))
 
 
 def get_fuzz_bool(custom_scheduler):
-    enable_fuzz = re.findall(r"const enable_fuzz ?= ?(true|false);?", custom_scheduler)[0]
-    if enable_fuzz == "true":
-        return True
-    elif enable_fuzz == "false":
-        return False
+    enable_fuzz = re.findall(
+        r"const enable_fuzz *= *(true|false) *;", custom_scheduler
+    )[0]
+    if enable_fuzz:
+        return True if enable_fuzz == "true" else False
     showWarning("Unable to get the value of enable_fuzz.")
-    return None
+    return
 
 
 def get_deck_parameters(custom_scheduler):
@@ -56,7 +57,10 @@ def get_deck_parameters(custom_scheduler):
 
 
 def get_skip_decks(custom_scheduler):
-    return list(map(lambda x: x.strip(']["'), re.findall(r'[const ]?skip_decks ?= ?(.*);', custom_scheduler)[0].split(', ')))
+    pattern = r'[const ]?skip_decks ?= ?(.*);'
+    str_matches = re.findall(pattern, custom_scheduler)
+    names = str_matches[0].split(', ')
+    return list(map(lambda x: x.strip(']["'), names))
 
 
 def RepresentsInt(s):
