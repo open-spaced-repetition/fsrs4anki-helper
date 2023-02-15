@@ -7,6 +7,8 @@ from anki import scheduler
 from .utils import *
 from .configuration import Config
 
+GLOBAL_DECK_CONFIG_NAME = "global config for FSRS4Anki"
+
 
 def has_again(revlog):
     for r in revlog:
@@ -114,11 +116,13 @@ def reschedule(did):
             deck_name = mw.col.decks.get(did)['name']
             if not deck['name'].startswith(deck_name):
                 continue
-        w = deck_parameters['global']['w']
-        retention = deck_parameters['global']['r']
-        max_ivl = deck_parameters['global']['m']
-        easy_bonus = deck_parameters['global']['e']
-        hard_factor = deck_parameters['global']['h']
+        (
+            w,
+            retention,
+            max_ivl,
+            easy_bonus,
+            hard_factor
+        ) = deck_parameters[GLOBAL_DECK_CONFIG_NAME].values()
         for key, value in deck_parameters.items():
             if deck['name'].startswith(key):
                 w = value['w']
