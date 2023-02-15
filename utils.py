@@ -39,15 +39,17 @@ def get_deck_parameters(custom_scheduler):
     max_intervals = re.findall(r'"maximumInterval"[:\s]+(\d+)', custom_scheduler)
     easy_bonuses = re.findall(r'"easyBonus"[:\s]+([\d.]+)', custom_scheduler)
     hard_intervals = re.findall(r'"hardInterval"[:\s]+([\d.]+)', custom_scheduler)
+    includes_subdecks = re.findall(r'"includeSubdecks\?"[:\s]+(true|false)', custom_scheduler)
     deck_parameters = {
         d: {
             "w": w,
             "r": float(r),
             "m": int(m),
             "e": float(e),
-            "h": float(h)
-        } for d, w, r, m, e, h in zip(
-            decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
+            "h": float(h),
+            "i": bool(i),
+        } for d, w, r, m, e, h, i in zip(
+            decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals, includes_subdecks
         )
     }
     deck_parameters = OrderedDict(

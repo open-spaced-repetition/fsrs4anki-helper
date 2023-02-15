@@ -121,15 +121,15 @@ def reschedule(did):
             retention,
             max_ivl,
             easy_bonus,
-            hard_factor
+            hard_factor,
+            include_subdecks,
         ) = deck_parameters[GLOBAL_DECK_CONFIG_NAME].values()
-        for key, value in deck_parameters.items():
-            if deck['name'].startswith(key):
-                w = value['w']
-                retention = value['r']
-                max_ivl = value['m']
-                easy_bonus = value['e']
-                hard_factor = value['h']
+        for name, params in deck_parameters.items():
+            if (
+                    (params['i'] and deck['name'].startswith(name))
+                    or (not params['i'] and len(name) == len(deck['name']))
+            ):
+                w, retention, max_ivl, easy_bonus, hard_factor, include_subdecks = params.values()
                 break
         fsrs.w = w
         for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\""):
