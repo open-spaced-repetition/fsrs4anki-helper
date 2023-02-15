@@ -7,8 +7,6 @@ from anki import scheduler
 from .utils import *
 from .configuration import Config
 
-GLOBAL_DECK_CONFIG_NAME = "global config for FSRS4Anki"
-
 
 def has_again(revlog):
     for r in revlog:
@@ -82,6 +80,7 @@ class FSRS:
     def set_card(self, card):
         self.card = card
 
+
 def reschedule(did):
     config = Config()
     config.load()
@@ -95,6 +94,7 @@ def reschedule(did):
 
     deck_parameters = get_deck_parameters(custom_scheduler)
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
+    global_deck_name = get_global_config_deck_name(version)
     rollover = mw.col.all_config()['rollover']
 
     mw.checkpoint("Rescheduling")
@@ -123,7 +123,7 @@ def reschedule(did):
             easy_bonus,
             hard_factor,
             include_subdecks,
-        ) = deck_parameters[GLOBAL_DECK_CONFIG_NAME].values()
+        ) = deck_parameters[global_deck_name].values()
         for name, params in deck_parameters.items():
             if (
                     (params['i'] and deck['name'].startswith(name))

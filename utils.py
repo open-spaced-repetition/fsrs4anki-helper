@@ -3,6 +3,10 @@ from aqt.utils import getText, showWarning, tooltip
 from collections import OrderedDict
 
 
+NEW_CODE_INITIAL_VERSION = (3, 14, 3)  # todo define the version number
+GLOBAL_DECK_CONFIG_NAME = "global config for FSRS4Anki"
+
+
 def check_fsrs4anki(all_config):
     if "cardStateCustomizer" not in all_config:
         showWarning(
@@ -31,15 +35,92 @@ def get_fuzz_bool(custom_scheduler):
     return
 
 
+def uses_new_code(version):
+    qty_version_labels = 3
+    initial_version = NEW_CODE_INITIAL_VERSION
+    assert len(initial_version) == qty_version_labels
+    for ii in range(qty_version_labels):
+        if version[ii] != initial_version[ii]:
+            return True if version[ii] > initial_version[ii] else False
+    return True
+
+
+if __name__ == '__main__':
+    """Small test for 'uses_new_code'. Will check numbers of versions below, at
+    and above the version number defined in the global configuration.
+    Base 3 is used because all we need to check are the numbers one unit above 
+    or below the version.
+    """
+    initial_version = NEW_CODE_INITIAL_VERSION
+    print('does each version use the new code?:')
+    for i in range(27):  # 222 in base 3
+        modifier = (i // 9 - 1, i % 9 // 3 - 1, i % 3-1)  # produces numbers in base 3
+        modified = tuple(sum(tup) for tup in zip(initial_version, modifier))
+        print(modified, end=' is ')
+        if i >= 13:  # 111 in base 3
+            print(' True', end='. ')
+        else:
+            print(False, end='. ')
+        print(uses_new_code(modified), end=' ')
+        print('<-- Func returns ')
+
+
+def get_global_config_deck_name(version):
+    if uses_new_code(version):
+        return GLOBAL_DECK_CONFIG_NAME
+    return 'global'
+
+
+def _get_regex_patterns(version):
+    if uses_new_code(version):
+        decks = r'"deckName".*"(.*)"'
+        weights = r'"w".*\[(.*)]'
+        retentions = r'"requestRetention"[:\s]+([\d.]+)'
+        max_intervals = r'"maximumInterval"[:\s]+(\d+)'
+        easy_bonuses = r'"easyBonus"[:\s]+([\d.]+)'
+        hard_intervals = r'"hardInterval"[:\s]+([\d.]+)'
+        includes_subdecks = r'"includeSubdecks\?"[:\s]+(true|false)'
+    else:
+        decks = r'deck_name(?: ?== ?|.startsWith\()+"(.*)"'
+        weights = r'[var ]?w ?= ?([0-9\-., \[\]]*)'
+        retentions = r'requestRetention ?= ?([0-9.]*)'
+        max_intervals = r'maximumInterval ?= ?([0-9.]*)'
+        easy_bonuses = r'easyBonus ?= ?([0-9.]*)'
+        hard_intervals = r'hardInterval ?= ?([0-9.]*)'
+        includes_subdecks = r'"includeSubdecks\?"[:\s]+(true|false)'  # empty list
+    return decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals, includes_subdecks
+
+
+def _get_weights(version, str_matches):
+    if uses_new_code(version):
+        return [list(map(float, w.split(", "))) for w in str_matches]
+    else:
+        return [list(map(float, w.strip('][').split(', '))) for w in str_matches]
+
+
+def _get_deck_names(version, str_matches):
+    if uses_new_code(version):
+        return str_matches
+    else:
+        str_matches.insert(0, get_global_config_deck_name(version))
+        return str_matches
+
+
 def get_deck_parameters(custom_scheduler):
-    decks = re.findall(r'"deckName".*"(.*)"', custom_scheduler)
-    str_matches = re.findall(r'"w".*\[(.*)]', custom_scheduler)
-    weights = [list(map(float, w.split(", "))) for w in str_matches]
-    retentions = re.findall(r'"requestRetention"[:\s]+([\d.]+)', custom_scheduler)
-    max_intervals = re.findall(r'"maximumInterval"[:\s]+(\d+)', custom_scheduler)
-    easy_bonuses = re.findall(r'"easyBonus"[:\s]+([\d.]+)', custom_scheduler)
-    hard_intervals = re.findall(r'"hardInterval"[:\s]+([\d.]+)', custom_scheduler)
-    includes_subdecks = re.findall(r'"includeSubdecks\?"[:\s]+(true|false)', custom_scheduler)
+    version = get_version(custom_scheduler)
+    d_pat, w_pat, r_pat, m_pat, e_pat, h_pat, i_pat = _get_regex_patterns(version)
+    d_str_matches = re.findall(d_pat, custom_scheduler)
+    decks = _get_deck_names(version, d_str_matches)
+    w_str_matches = re.findall(w_pat, custom_scheduler)
+    weights = _get_weights(version, w_str_matches)
+    retentions = re.findall(r_pat, custom_scheduler)
+    max_intervals = re.findall(m_pat, custom_scheduler)
+    easy_bonuses = re.findall(e_pat, custom_scheduler)
+    hard_intervals = re.findall(h_pat, custom_scheduler)
+    includes_subdecks = re.findall(i_pat, custom_scheduler) or [True] * len(decks)
+    assert all([len(x) == len(decks)for x in [
+        decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals, includes_subdecks
+    ]])  # wanted to use zip(..., strict=True) instead of this
     deck_parameters = {
         d: {
             "w": w,
