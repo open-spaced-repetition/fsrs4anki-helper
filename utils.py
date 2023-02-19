@@ -79,7 +79,6 @@ def _get_regex_patterns(version):
         max_intervals = r'"maximumInterval"[:\s]+(\d+)'
         easy_bonuses = r'"easyBonus"[:\s]+([\d.]+)'
         hard_intervals = r'"hardInterval"[:\s]+([\d.]+)'
-        includes_subdecks = r'"includeSubdecks\?"[:\s]+(true|false)'
     else:
         decks = r'deck_name(?: ?== ?|.startsWith\()+"(.*)"'
         weights = r'[var ]?w ?= ?([0-9\-., \[\]]*)'
@@ -87,8 +86,7 @@ def _get_regex_patterns(version):
         max_intervals = r'maximumInterval ?= ?([0-9.]*)'
         easy_bonuses = r'easyBonus ?= ?([0-9.]*)'
         hard_intervals = r'hardInterval ?= ?([0-9.]*)'
-        includes_subdecks = r'"includeSubdecks\?"[:\s]+(true|false)'  # empty list
-    return decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals, includes_subdecks
+    return decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
 
 
 def _get_weights(version, str_matches):
@@ -117,9 +115,8 @@ def get_deck_parameters(custom_scheduler):
     max_intervals = re.findall(m_pat, custom_scheduler)
     easy_bonuses = re.findall(e_pat, custom_scheduler)
     hard_intervals = re.findall(h_pat, custom_scheduler)
-    includes_subdecks = re.findall(i_pat, custom_scheduler) or [True] * len(decks)
     assert all([len(x) == len(decks)for x in [
-        decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals, includes_subdecks
+        decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
     ]])  # wanted to use zip(..., strict=True) instead of this
     deck_parameters = {
         d: {
@@ -128,9 +125,8 @@ def get_deck_parameters(custom_scheduler):
             "m": int(m),
             "e": float(e),
             "h": float(h),
-            "i": bool(i),
         } for d, w, r, m, e, h, i in zip(
-            decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals, includes_subdecks
+            decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
         )
     }
     deck_parameters = OrderedDict(
