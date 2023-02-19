@@ -106,7 +106,7 @@ def _get_deck_names(version, str_matches):
 
 def get_deck_parameters(custom_scheduler):
     version = get_version(custom_scheduler)
-    d_pat, w_pat, r_pat, m_pat, e_pat, h_pat, i_pat = _get_regex_patterns(version)
+    d_pat, w_pat, r_pat, m_pat, e_pat, h_pat = _get_regex_patterns(version)
     d_str_matches = re.findall(d_pat, custom_scheduler)
     decks = _get_deck_names(version, d_str_matches)
     w_str_matches = re.findall(w_pat, custom_scheduler)
@@ -125,7 +125,7 @@ def get_deck_parameters(custom_scheduler):
             "m": int(m),
             "e": float(e),
             "h": float(h),
-        } for d, w, r, m, e, h, i in zip(
+        } for d, w, r, m, e, h in zip(
             decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
         )
     }
