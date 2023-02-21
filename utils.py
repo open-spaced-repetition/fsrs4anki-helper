@@ -3,9 +3,9 @@ from aqt.utils import getText, showWarning, tooltip
 from collections import OrderedDict
 
 
-NEW_CODE_INITIAL_VERSION = (3, 14, 3)  # todo define the version number
+DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)  # todo define the version number
 GLOBAL_DECK_CONFIG_NAME = "global config for FSRS4Anki"
-
+VERSION_NUMBER_LEN = 3
 
 def check_fsrs4anki(all_config):
     if "cardStateCustomizer" not in all_config:
@@ -36,12 +36,17 @@ def get_fuzz_bool(custom_scheduler):
 
 
 def uses_new_code(version):
-    qty_version_labels = 3
-    initial_version = NEW_CODE_INITIAL_VERSION
-    assert len(initial_version) == qty_version_labels
-    for ii in range(qty_version_labels):
-        if version[ii] != initial_version[ii]:
-            return True if version[ii] > initial_version[ii] else False
+    initial_version = DECOUPLE_PARAMS_CODE_INITIAL_VERSION
+    assert len(initial_version) == VERSION_NUMBER_LEN
+    return beq_version(version, initial_version)
+
+
+def beq_version(version_1, version_2):
+    assert len(version_1) == VERSION_NUMBER_LEN
+    assert len(version_2) == VERSION_NUMBER_LEN
+    for ii in range(VERSION_NUMBER_LEN):
+        if version_1[ii] != version_2[ii]:
+            return True if version_1[ii] > version_2[ii] else False
     return True
 
 
@@ -51,7 +56,7 @@ if __name__ == '__main__':
     Base 3 is used because all we need to check are the numbers one unit above 
     or below the version.
     """
-    initial_version = NEW_CODE_INITIAL_VERSION
+    initial_version = DECOUPLE_PARAMS_CODE_INITIAL_VERSION
     print('does each version use the new code?:')
     for i in range(27):  # 222 in base 3
         modifier = (i // 9 - 1, i % 9 // 3 - 1, i % 3-1)  # produces numbers in base 3

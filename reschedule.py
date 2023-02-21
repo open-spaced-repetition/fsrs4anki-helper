@@ -93,7 +93,7 @@ def reschedule(did):
         return
 
     deck_parameters = get_deck_parameters(custom_scheduler)
-    skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
+    skip_decks = get_skip_decks(custom_scheduler) if beq_version(version, (3, 12, 0)) else []
     global_deck_name = get_global_config_deck_name(version)
     rollover = mw.col.all_config()['rollover']
 
@@ -109,7 +109,7 @@ def reschedule(did):
     fsrs.free_days = config.free_days
 
     for deck in decks:
-        if any([deck['name'].startswith(i) for i in skip_decks]):
+        if any([deck['name'].startswith(i) for i in skip_decks if i != ""]):
             rescheduled_cards = rescheduled_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""))
             continue
         if did is not None:
