@@ -3,7 +3,7 @@ from aqt.utils import getText, showWarning, tooltip
 from collections import OrderedDict
 
 
-DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)  # todo define the version number
+DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)
 GLOBAL_DECK_CONFIG_NAME = "global config for FSRS4Anki"
 VERSION_NUMBER_LEN = 3
 
