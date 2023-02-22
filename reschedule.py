@@ -80,6 +80,7 @@ class FSRS:
     def set_card(self, card):
         self.card = card
 
+
 def reschedule(did):
     config = Config()
     config.load()
@@ -92,7 +93,8 @@ def reschedule(did):
         return
 
     deck_parameters = get_deck_parameters(custom_scheduler)
-    skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
+    skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
+    global_deck_name = get_global_config_deck_name(version)
     rollover = mw.col.all_config()['rollover']
 
     mw.checkpoint("Rescheduling")
@@ -107,25 +109,23 @@ def reschedule(did):
     fsrs.free_days = config.free_days
 
     for deck in decks:
-        if any([deck['name'].startswith(i) for i in skip_decks]):
+        if any([deck['name'].startswith(i) for i in skip_decks if i != ""]):
             rescheduled_cards = rescheduled_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""))
             continue
         if did is not None:
             deck_name = mw.col.decks.get(did)['name']
             if not deck['name'].startswith(deck_name):
                 continue
-        w = deck_parameters['global']['w']
-        retention = deck_parameters['global']['r']
-        max_ivl = deck_parameters['global']['m']
-        easy_bonus = deck_parameters['global']['e']
-        hard_factor = deck_parameters['global']['h']
-        for key, value in deck_parameters.items():
-            if deck['name'].startswith(key):
-                w = value['w']
-                retention = value['r']
-                max_ivl = value['m']
-                easy_bonus = value['e']
-                hard_factor = value['h']
+        (
+            w,
+            retention,
+            max_ivl,
+            easy_bonus,
+            hard_factor,
+        ) = deck_parameters[global_deck_name].values()
+        for name, params in deck_parameters.items():
+            if deck['name'].startswith(name):
+                w, retention, max_ivl, easy_bonus, hard_factor = params.values()
                 break
         fsrs.w = w
         for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\""):
