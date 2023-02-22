@@ -35,13 +35,12 @@ def get_fuzz_bool(custom_scheduler):
     return
 
 
-def uses_new_code(version):
+def uses_new_params_config(version):
     initial_version = DECOUPLE_PARAMS_CODE_INITIAL_VERSION
-    assert len(initial_version) == VERSION_NUMBER_LEN
-    return beq_version(version, initial_version)
+    return geq_version(version, initial_version)
 
 
-def beq_version(version_1, version_2):
+def geq_version(version_1, version_2):
     assert len(version_1) == VERSION_NUMBER_LEN
     assert len(version_2) == VERSION_NUMBER_LEN
     for ii in range(VERSION_NUMBER_LEN):
@@ -66,18 +65,18 @@ if __name__ == '__main__':
             print(' True', end='. ')
         else:
             print(False, end='. ')
-        print(uses_new_code(modified), end=' ')
+        print(uses_new_params_config(modified), end=' ')
         print('<-- Func returns ')
 
 
 def get_global_config_deck_name(version):
-    if uses_new_code(version):
+    if uses_new_params_config(version):
         return GLOBAL_DECK_CONFIG_NAME
     return 'global'
 
 
 def _get_regex_patterns(version):
-    if uses_new_code(version):
+    if uses_new_params_config(version):
         decks = r'"deckName".*"(.*)"'
         weights = r'"w".*\[(.*)]'
         retentions = r'"requestRetention"[:\s]+([\d.]+)'
@@ -95,14 +94,14 @@ def _get_regex_patterns(version):
 
 
 def _get_weights(version, str_matches):
-    if uses_new_code(version):
+    if uses_new_params_config(version):
         return [list(map(float, w.split(", "))) for w in str_matches]
     else:
         return [list(map(float, w.strip('][').split(', '))) for w in str_matches]
 
 
 def _get_deck_names(version, str_matches):
-    if uses_new_code(version):
+    if uses_new_params_config(version):
         return str_matches
     else:
         str_matches.insert(0, get_global_config_deck_name(version))
