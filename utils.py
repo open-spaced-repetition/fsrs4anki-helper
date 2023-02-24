@@ -140,7 +140,7 @@ def get_deck_parameters(custom_scheduler):
             "e": float(e),
             "h": float(h),
         } for d, w, r, m, e, h in zip(
-            decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals, strict=True
+            decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
         )
     }
     deck_parameters = OrderedDict(
