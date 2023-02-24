@@ -93,6 +93,9 @@ def reschedule(did):
         return
 
     deck_parameters = get_deck_parameters(custom_scheduler)
+    if deck_parameters is None:
+        return
+    
     skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
     global_deck_name = get_global_config_deck_name(version)
     rollover = mw.col.all_config()['rollover']

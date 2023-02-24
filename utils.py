@@ -11,18 +11,23 @@ def check_fsrs4anki(all_config):
     if "cardStateCustomizer" not in all_config:
         showWarning(
             "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
-        return None
+        return
     custom_scheduler = all_config['cardStateCustomizer']
     if "// FSRS4Anki" not in custom_scheduler:
         showWarning(
             "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
-        return None
+        return
     return custom_scheduler
 
 
 def get_version(custom_scheduler):
     str_matches = re.findall(r'// FSRS4Anki v(\d+).(\d+).(\d+) Scheduler', custom_scheduler)
-    return list(map(int, str_matches[0]))
+    version = tuple(map(int, str_matches[0]))
+    if len(version) != VERSION_NUMBER_LEN:
+        showWarning(
+            "Please check whether the version of FSRS4Anki scheduler matches X.Y.Z.")
+        return
+    return version
 
 
 def get_fuzz_bool(custom_scheduler):
@@ -119,9 +124,14 @@ def get_deck_parameters(custom_scheduler):
     max_intervals = re.findall(m_pat, custom_scheduler)
     easy_bonuses = re.findall(e_pat, custom_scheduler)
     hard_intervals = re.findall(h_pat, custom_scheduler)
-    assert all([len(x) == len(decks)for x in [
+    if not all([len(x) == len(decks) for x in [
         decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
-    ]])  # wanted to use zip(..., strict=True) instead of this
+    ]]):
+        showWarning(
+            "The number of deckName, w, requestRetention, maximumInterval, easyBonus, or hardInterval unmatch.\n" +
+            "Please confirm each item of deckParams have deckName, w, requestRetention, maximumInterval, easyBonus, and hardInterval."
+        )
+        return
     deck_parameters = {
         d: {
             "w": w,
@@ -130,7 +140,7 @@ def get_deck_parameters(custom_scheduler):
             "e": float(e),
             "h": float(h),
         } for d, w, r, m, e, h in zip(
-            decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
+            decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals, strict=True
         )
     }
     deck_parameters = OrderedDict(
