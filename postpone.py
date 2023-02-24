@@ -36,6 +36,9 @@ def postpone(did):
         target_retention = target_retention / 100
 
     deck_parameters = get_deck_parameters(custom_scheduler)
+    if deck_parameters is None:
+        return
+    
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
 
     mw.checkpoint("Postponing")
