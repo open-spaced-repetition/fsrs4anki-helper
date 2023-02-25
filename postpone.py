@@ -40,6 +40,7 @@ def postpone(did):
         return
     
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
+    global_deck_name = get_global_config_deck_name(version)
 
     mw.checkpoint("Postponing")
     mw.progress.start()
@@ -55,7 +56,7 @@ def postpone(did):
             deck_name = mw.col.decks.get(did)['name']
             if not deck['name'].startswith(deck_name):
                 continue
-        max_ivl = deck_parameters['global']['m']
+        max_ivl = deck_parameters[global_deck_name]['m']
         for key, value in deck_parameters.items():
             if deck['name'].startswith(key):
                 max_ivl = value['m']
