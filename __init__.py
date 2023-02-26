@@ -58,9 +58,18 @@ def set_load_balance(checked):
     config.load_balance = checked
 
 
+def set_reschedule_only_today(checked):
+    config.reschedule_only_today = checked
+
+
 menu_load_balance = checkable(
     title="Load Balance when rescheduling (require fuzz)",
     on_click=set_load_balance
+)
+
+menu_reschedule_only_today = checkable(
+    title="Reschedule only cards studied today",
+    on_click=set_reschedule_only_today
 )
 
 menu_reschedule = build_action(reschedule, _("Reschedule all cards"), "CTRL+R")
@@ -73,6 +82,7 @@ menu_advance = build_action(advance, _("Advance all cards"))
 add_action_to_gear(advance, "Advance cards in deck")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
+menu_for_helper.addAction(menu_reschedule_only_today)
 menu_for_helper.addAction(menu_load_balance)
 menu_for_free_days = menu_for_helper.addMenu("No Anki on Free Days (require load balance)")
 menu_for_helper.addSeparator()
@@ -110,6 +120,7 @@ menu_for_free_days.addAction(menu_for_free_6)
 
 def adjust_menu():
     if mw.col is not None:
+        menu_reschedule_only_today.setChecked(config.reschedule_only_today)
         menu_load_balance.setChecked(config.load_balance)
         menu_for_free_0.setChecked(0 in config.free_days)
         menu_for_free_1.setChecked(1 in config.free_days)

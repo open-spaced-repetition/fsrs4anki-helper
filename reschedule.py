@@ -131,7 +131,10 @@ def reschedule(did):
                 w, retention, max_ivl, easy_bonus, hard_factor = params.values()
                 break
         fsrs.w = w
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\""):
+        query = f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\""
+        if config.reschedule_only_today:
+            query += " \"rated:1\""
+        for cid in mw.col.find_cards(query):
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
             else:
