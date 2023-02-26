@@ -68,7 +68,7 @@ menu_load_balance = checkable(
 )
 
 menu_reschedule_only_today = checkable(
-    title="Reschedule only cards studied today",
+    title="Only reschedule cards studied today",
     on_click=set_reschedule_only_today
 )
 
