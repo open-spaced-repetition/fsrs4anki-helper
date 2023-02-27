@@ -59,7 +59,7 @@ def set_load_balance(checked):
 
 
 menu_load_balance = checkable(
-    title="Load Balance when rescheduling (require fuzz)",
+    title="Load Balance when rescheduling (requires fuzz)",
     on_click=set_load_balance
 )
 
@@ -74,7 +74,7 @@ add_action_to_gear(advance, "Advance cards in deck")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_load_balance)
-menu_for_free_days = menu_for_helper.addMenu("No Anki on Free Days (require load balance)")
+menu_for_free_days = menu_for_helper.addMenu("No Anki on Free Days (requires load balance)")
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_postpone)
