@@ -3,7 +3,6 @@ import math
 import random
 from datetime import datetime, timedelta
 from aqt import mw
-from anki import scheduler
 from .utils import *
 from .configuration import Config
 
@@ -81,7 +80,7 @@ class FSRS:
         self.card = card
 
 
-def reschedule(did):
+def reschedule(did, only_today=False):
     config = Config()
     config.load()
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -132,7 +131,7 @@ def reschedule(did):
                 break
         fsrs.w = w
         query = f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\""
-        if config.reschedule_only_today:
+        if only_today:
             query += " \"rated:1\""
         for cid in mw.col.find_cards(query):
             if cid not in rescheduled_cards:

@@ -5,7 +5,6 @@ tag = mw.addonManager.addonFromModule(__name__)
 
 LOAD_BALANCE = "load_balance"
 FREE_DAYS = "free_days"
-RESCHEDULE_ONLY_TODAY = "reschedule_only_today"
 
 
 def load_config():
@@ -35,11 +34,11 @@ class Config:
     def load_balance(self, value):
         self.data[LOAD_BALANCE] = value
         self.save()
-    
+
     @property
     def free_days(self):
         return self.data[FREE_DAYS]
-    
+
     @free_days.setter
     def free_days(self, day_enable):
         day, enable = day_enable
@@ -48,13 +47,4 @@ class Config:
         else:
             if day in self.data[FREE_DAYS]:
                 self.data[FREE_DAYS].remove(day)
-        self.save()
-
-    @property
-    def reschedule_only_today(self):
-        return self.data[RESCHEDULE_ONLY_TODAY]
-
-    @reschedule_only_today.setter
-    def reschedule_only_today(self, value):
-        self.data[RESCHEDULE_ONLY_TODAY] = value
         self.save()

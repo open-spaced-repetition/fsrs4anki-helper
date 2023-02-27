@@ -1,5 +1,4 @@
 {
     "load_balance": false,
-    "free_days": [],
-    "reschedule_only_today": false
+    "free_days": []
 }
