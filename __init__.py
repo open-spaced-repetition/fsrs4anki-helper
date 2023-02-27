@@ -66,10 +66,10 @@ menu_load_balance = checkable(
 menu_reschedule = build_action(reschedule, _("Reschedule all cards"), "CTRL+R")
 add_action_to_gear(reschedule, "Reschedule cards in deck")
 
-menu_postpone = build_action(postpone, _("Postpone all cards"))
+menu_postpone = build_action(postpone, _("Postpone cards in all decks"))
 add_action_to_gear(postpone, "Postpone cards in deck")
 
-menu_advance = build_action(advance, _("Advance all cards"))
+menu_advance = build_action(advance, _("Advance cards in all decks"))
 add_action_to_gear(advance, "Advance cards in deck")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
