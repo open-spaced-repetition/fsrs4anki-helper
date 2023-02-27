@@ -74,7 +74,7 @@ add_action_to_gear(advance, "Advance cards in deck")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_load_balance)
-menu_for_free_days = menu_for_helper.addMenu("No Anki on Free Days (requires Load Balance)")
+menu_for_free_days = menu_for_helper.addMenu("No Anki on Free Days (requires Load Balancing)")
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_postpone)
