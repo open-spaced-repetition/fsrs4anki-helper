@@ -73,7 +73,7 @@ menu_reschedule = build_action(reschedule, _(
 add_action_to_gear(reschedule, "Reschedule cards in deck")
 
 menu_reschedule_recent = build_action(
-    reschedule_recent, _("Reschedule only recently reviewed cards"), "CTRL+R")
+    reschedule_recent, _(f"Reschedule cards reviewed in the last {config.days_to_reschedule} days"), "CTRL+R")
 
 menu_postpone = build_action(postpone, _("Postpone all cards"))
 add_action_to_gear(postpone, "Postpone cards in deck")
@@ -120,6 +120,7 @@ menu_for_free_days.addAction(menu_for_free_6)
 
 def adjust_menu():
     if mw.col is not None:
+        menu_reschedule_recent.setText(f"Reschedule cards reviewed in the last {config.days_to_reschedule} days")
         menu_load_balance.setChecked(config.load_balance)
         menu_for_free_0.setChecked(0 in config.free_days)
         menu_for_free_1.setChecked(1 in config.free_days)
