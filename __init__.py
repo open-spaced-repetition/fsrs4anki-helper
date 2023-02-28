@@ -73,7 +73,7 @@ menu_reschedule = build_action(reschedule, _(
 add_action_to_gear(reschedule, "Reschedule cards in deck")
 
 menu_reschedule_recent = build_action(
-    reschedule_recent, _("Reschedule only recently reviewed cards"), "CTRL+R")
+    reschedule_recent, _("Reschedule cards reviewed in the last {} days").format(config.days_to_reschedule), "CTRL+R")
 
 menu_postpone = build_action(postpone, _("Postpone all cards"))
 add_action_to_gear(postpone, "Postpone cards in deck")
