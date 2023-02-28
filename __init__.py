@@ -63,8 +63,17 @@ menu_load_balance = checkable(
     on_click=set_load_balance
 )
 
-menu_reschedule = build_action(reschedule, _("Reschedule all cards"), "CTRL+R")
+
+def reschedule_recent(did):
+    reschedule(did, recent=True)
+
+
+menu_reschedule = build_action(reschedule, _(
+    "Reschedule all cards"), "CTRL+SHIFT+R")
 add_action_to_gear(reschedule, "Reschedule cards in deck")
+
+menu_reschedule_recent = build_action(
+    reschedule_recent, _(f"Reschedule cards reviewed in the last {config.days_to_reschedule} days"), "CTRL+R")
 
 menu_postpone = build_action(postpone, _("Postpone cards in all decks"))
 add_action_to_gear(postpone, "Postpone cards in deck")
@@ -77,6 +86,7 @@ menu_for_helper.addAction(menu_load_balance)
 menu_for_free_days = menu_for_helper.addMenu("No Anki on Free Days (requires Load Balancing)")
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
+menu_for_helper.addAction(menu_reschedule_recent)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
 
@@ -110,6 +120,7 @@ menu_for_free_days.addAction(menu_for_free_6)
 
 def adjust_menu():
     if mw.col is not None:
+        menu_reschedule_recent.setText(f"Reschedule cards reviewed in the last {config.days_to_reschedule} days")
         menu_load_balance.setChecked(config.load_balance)
         menu_for_free_0.setChecked(0 in config.free_days)
         menu_for_free_1.setChecked(1 in config.free_days)
