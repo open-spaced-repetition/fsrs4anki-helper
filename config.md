@@ -1,4 +1,4 @@
-## Configure here
+## Configure in this screen
 
 ### `days_to_reschedule`
 
