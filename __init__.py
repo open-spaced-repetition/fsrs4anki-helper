@@ -58,26 +58,22 @@ def set_load_balance(checked):
     config.load_balance = checked
 
 
-def set_reschedule_only_today(checked):
-    config.reschedule_only_today = checked
-
-
 menu_load_balance = checkable(
     title="Load Balance when rescheduling (require fuzz)",
     on_click=set_load_balance
 )
 
 
-def reschedule_only_today(did):
-    reschedule(did, only_today=True)
+def reschedule_recent(did):
+    reschedule(did, recent=True)
 
 
 menu_reschedule = build_action(reschedule, _(
     "Reschedule all cards"), "CTRL+SHIFT+R")
 add_action_to_gear(reschedule, "Reschedule cards in deck")
 
-menu_reschedule_only_today = build_action(
-    reschedule_only_today, _("Reschedule the cards studied today"), "CTRL+R")
+menu_reschedule_recent = build_action(
+    reschedule_recent, _("Reschedule only recently reviewed cards"), "CTRL+R")
 
 menu_postpone = build_action(postpone, _("Postpone all cards"))
 add_action_to_gear(postpone, "Postpone cards in deck")
@@ -90,7 +86,7 @@ menu_for_helper.addAction(menu_load_balance)
 menu_for_free_days = menu_for_helper.addMenu("No Anki on Free Days (require load balance)")
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
-menu_for_helper.addAction(menu_reschedule_only_today)
+menu_for_helper.addAction(menu_reschedule_recent)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
 

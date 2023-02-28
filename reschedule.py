@@ -80,7 +80,7 @@ class FSRS:
         self.card = card
 
 
-def reschedule(did, only_today=False):
+def reschedule(did, recent=False):
     config = Config()
     config.load()
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -131,8 +131,8 @@ def reschedule(did, only_today=False):
                 break
         fsrs.w = w
         query = f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\""
-        if only_today:
-            query += " \"rated:1\""
+        if recent:
+            query += f" \"rated:{config.days_to_reschedule}\""
         for cid in mw.col.find_cards(query):
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
