@@ -12,4 +12,4 @@ Load Balancing must be enabled for this. Select any day of the week (e.g., Sunda
 
 ### `load_balance`
 
-Fuzz must be enabled for this (default: enabled). During rescheduling, it keeps the daily number consistent instead of fluctuating.
+Fuzz must be enabled for this (default: enabled, set in the scheduler code). During rescheduling, it keeps the daily number consistent instead of fluctuating.
