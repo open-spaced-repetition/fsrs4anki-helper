@@ -64,8 +64,12 @@ class FSRS:
             min_num_cards = 18446744073709551616
             best_ivl = ivl
             for check_ivl in reversed(range(min_ivl, max_ivl + 1)):
-                due_date = datetime.now() + timedelta(days=self.card.due + check_ivl - self.card.ivl - mw.col.sched.today)
-                num_cards = mw.col.db.scalar("select count() from cards where due = ? and queue = 2", self.card.due + check_ivl - self.card.ivl)
+                check_due = self.card.due + check_ivl - self.card.ivl
+                day_offset = check_due - mw.col.sched.today
+                due_date = datetime.now() + timedelta(days=day_offset)
+                due_cards = mw.col.db.scalar("select count() from cards where due = ? and queue = 2", check_due)
+                rated_cards = len(mw.col.find_cards(f"prop:rated={day_offset}")) if day_offset <= 0 else 0
+                num_cards = due_cards + rated_cards
                 if num_cards < min_num_cards and due_date.weekday() not in self.free_days:
                     best_ivl = check_ivl
                     min_num_cards = num_cards
