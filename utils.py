@@ -89,13 +89,14 @@ def _get_regex_patterns(version):
         easy_bonuses = r'"easyBonus"[:\s]+([\d.]+)'
         hard_intervals = r'"hardInterval"[:\s]+([\d.]+)'
     else:
-        decks = r'deck_name(?: ?== ?|.startsWith\()+"(.*)"'
-        weights = r'[var ]?w ?= ?([0-9\-., \[\]]*)'
-        retentions = r'requestRetention ?= ?([0-9.]*)'
-        max_intervals = r'maximumInterval ?= ?([0-9.]*)'
-        easy_bonuses = r'easyBonus ?= ?([0-9.]*)'
-        hard_intervals = r'hardInterval ?= ?([0-9.]*)'
-    return decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
+        decks = r'(?:if|\}? else if) ?\(deck_name(?: ?== ?|.startsWith\()+"(.*)"'
+        weights = r'(?:var )?w ?= ?([0-9\-., \[\]]*)'
+        retentions = r'(?:let )?requestRetention ?= ?([0-9.]*)'
+        max_intervals = r'(?:let )?maximumInterval ?= ?([0-9.]*)'
+        easy_bonuses = r'(?:let )?easyBonus ?= ?([0-9.]*)'
+        hard_intervals = r'(?:let )?hardInterval ?= ?([0-9.]*)'
+    not_match_comments = r'\n(?<!\/\/)\s*'
+    return (not_match_comments + i for i in (decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals))
 
 
 def _get_weights(version, str_matches):
