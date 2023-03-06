@@ -68,7 +68,12 @@ class FSRS:
                 day_offset = check_due - mw.col.sched.today
                 due_date = datetime.now() + timedelta(days=day_offset)
                 due_cards = mw.col.db.scalar("select count() from cards where due = ? and queue = 2", check_due)
-                rated_cards = len(mw.col.find_cards(f"prop:rated={day_offset}")) if day_offset <= 0 else 0
+                rated_cards = 0
+                if day_offset <= 0:
+                    today_cutoff = mw.col.sched.day_cutoff
+                    target_cutoff_ms = (today_cutoff + 86400 * day_offset) * 1000
+                    day_before_cutoff_ms = (today_cutoff + 86400 * (day_offset - 1)) * 1000
+                    rated_cards = mw.col.db.scalar(f"select count(distinct cid) from revlog where id between ? and ? and ease > 0", day_before_cutoff_ms, target_cutoff_ms - 1)
                 num_cards = due_cards + rated_cards
                 if num_cards < min_num_cards and due_date.weekday() not in self.free_days:
                     best_ivl = check_ivl
