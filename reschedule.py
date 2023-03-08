@@ -225,13 +225,15 @@ def reschedule(did, recent=False):
                 new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
             offset = new_ivl - card.ivl
             card.ivl = new_ivl
+            due_before = card.odue if card.odid else card.due
+            fsrs.due_cnt_perday_from_first_day[due_before] -= 1
             if card.odid:  # Also update cards in filtered decks
                 card.odue += offset
             else:
-                fsrs.due_cnt_perday_from_first_day[card.due] -= 1
                 card.due += offset
-                fsrs.due_cnt_perday_from_first_day.setdefault(card.due, 0)
-                fsrs.due_cnt_perday_from_first_day[card.due] += 1
+            due_after = card.odue if card.odid else card.due
+            fsrs.due_cnt_perday_from_first_day.setdefault(due_after, 0)
+            fsrs.due_cnt_perday_from_first_day[due_after] += 1
             card.flush()
             cnt += 1
 
