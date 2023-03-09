@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from aqt import mw
 from .utils import *
 from .configuration import Config
+from typing import List
 
 
 def has_again(revlog):
@@ -19,16 +20,18 @@ def constrain_difficulty(difficulty: float) -> float:
 
 
 class FSRS:
-    w: list[float]
+    w: List[float]
     enable_fuzz: bool
     enable_load_balance: bool
-    free_days: list
+    free_days: List
 
     def __init__(self) -> None:
         self.w = [1., 1., 5., -0.5, -0.5, 0.2, 1.4, -0.12, 0.8, 2., -0.2, 0.2, 1.]
         self.enable_fuzz = False
         self.enable_load_balance = False
         self.free_days = []
+        self.due_cnt_perday_from_first_day = {day: cnt for day, cnt in mw.col.db.all("select due, count() from cards where queue = 2 group by due")}
+        self.learned_cnt_perday_from_today = {day: cnt for day, cnt in mw.col.db.all(f"select (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid) from revlog where ease > 0 group by (id/1000-{mw.col.sched.day_cutoff})/86400")}
 
     def init_stability(self, rating: int) -> float:
         return max(0.1, self.w[0] + self.w[1] * (rating - 1))
@@ -67,8 +70,10 @@ class FSRS:
                 check_due = self.card.due + check_ivl - self.card.ivl
                 day_offset = check_due - mw.col.sched.today
                 due_date = datetime.now() + timedelta(days=day_offset)
-                due_cards = mw.col.db.scalar("select count() from cards where due = ? and queue = 2", check_due)
-                rated_cards = len(mw.col.find_cards(f"prop:rated={day_offset}")) if day_offset <= 0 else 0
+                due_cards = self.due_cnt_perday_from_first_day.setdefault(check_due, 0)
+                rated_cards = 0
+                if day_offset <= 0:
+                    rated_cards = self.learned_cnt_perday_from_today.setdefault(day_offset, 0)
                 num_cards = due_cards + rated_cards
                 if num_cards < min_num_cards and due_date.weekday() not in self.free_days:
                     best_ivl = check_ivl
@@ -220,10 +225,15 @@ def reschedule(did, recent=False):
                 new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
             offset = new_ivl - card.ivl
             card.ivl = new_ivl
+            due_before = card.odue if card.odid else card.due
+            fsrs.due_cnt_perday_from_first_day[due_before] -= 1
             if card.odid:  # Also update cards in filtered decks
                 card.odue += offset
             else:
                 card.due += offset
+            due_after = card.odue if card.odid else card.due
+            fsrs.due_cnt_perday_from_first_day.setdefault(due_after, 0)
+            fsrs.due_cnt_perday_from_first_day[due_after] += 1
             card.flush()
             cnt += 1
 
