@@ -140,7 +140,7 @@ def reschedule(did, recent=False):
                 w, retention, max_ivl, easy_bonus, hard_factor = params.values()
                 break
         fsrs.w = w
-        query = f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\""
+        query = f"\"deck:{deck['name']}\" \"is:review\" {DONT_RESCHEDULE}"
         if recent:
             query += f" \"rated:{config.days_to_reschedule}\""
         for cid in mw.col.find_cards(query):
