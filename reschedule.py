@@ -30,7 +30,8 @@ class FSRS:
         self.enable_fuzz = False
         self.enable_load_balance = False
         self.free_days = []
-        self.due_cnt_perday_from_first_day = {day: cnt for day, cnt in mw.col.db.all("select due, count() from cards where queue = 2 group by due")}
+        true_due = "case when odid==0 then due else odue end"
+        self.due_cnt_perday_from_first_day = {day: cnt for day, cnt in mw.col.db.all(f"select {true_due}, count() from cards where queue = 2 group by {true_due}")}
         self.learned_cnt_perday_from_today = {day: cnt for day, cnt in mw.col.db.all(f"select (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid) from revlog where ease > 0 group by (id/1000-{mw.col.sched.day_cutoff})/86400")}
 
     def init_stability(self, rating: int) -> float:
