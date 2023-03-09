@@ -89,14 +89,13 @@ def _get_regex_patterns(version):
         easy_bonuses = r'"easyBonus"[:\s]+([\d.]+)'
         hard_intervals = r'"hardInterval"[:\s]+([\d.]+)'
     else:
-        decks = r'(?:if|\}? else if) ?\(deck_name(?: ?== ?|.startsWith\()+"(.*)"'
-        weights = r'(?:var )?w ?= ?([0-9\-., \[\]]*)'
-        retentions = r'(?:let )?requestRetention ?= ?([0-9.]*)'
-        max_intervals = r'(?:let )?maximumInterval ?= ?([0-9.]*)'
-        easy_bonuses = r'(?:let )?easyBonus ?= ?([0-9.]*)'
-        hard_intervals = r'(?:let )?hardInterval ?= ?([0-9.]*)'
-    not_match_comments = r'\n(?<!\/\/)\s*'
-    return (not_match_comments + i for i in (decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals))
+        decks = r'deck_name(?: ?== ?|.startsWith\()+"(.*)"'
+        weights = r'[var ]?w ?= ?([0-9\-., \[\]]*)'
+        retentions = r'requestRetention ?= ?([0-9.]*)'
+        max_intervals = r'maximumInterval ?= ?([0-9.]*)'
+        easy_bonuses = r'easyBonus ?= ?([0-9.]*)'
+        hard_intervals = r'hardInterval ?= ?([0-9.]*)'
+    return decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
 
 
 def _get_weights(version, str_matches):
@@ -114,9 +113,15 @@ def _get_deck_names(version, str_matches):
         return str_matches
 
 
+def _remove_comment_line(custom_scheduler):
+    not_comment_line = '\n'.join([re.sub('^ *//..*$', '', _) for _ in custom_scheduler.split('\n')])
+    return not_comment_line
+
+
 def get_deck_parameters(custom_scheduler):
     version = get_version(custom_scheduler)
     d_pat, w_pat, r_pat, m_pat, e_pat, h_pat = _get_regex_patterns(version)
+    custom_scheduler = _remove_comment_line(custom_scheduler)
     d_str_matches = re.findall(d_pat, custom_scheduler)
     decks = _get_deck_names(version, d_str_matches)
     w_str_matches = re.findall(w_pat, custom_scheduler)
