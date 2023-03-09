@@ -4,6 +4,7 @@ from aqt import mw
 from aqt.qt import QAction
 from typing import Callable
 
+from .sync_hook import init_sync_hook
 from .reschedule import reschedule
 from .postpone import postpone
 from .advance import advance
@@ -54,6 +55,16 @@ def add_action_to_gear(fun, text):
     deck_browser_will_show_options_menu.append(aux)
 
 
+def set_auto_reschedule(checked):
+    config.auto_reschedule_after_sync = checked
+
+
+menu_auto_reschedule = checkable(
+    title="Auto reschedule recent reviews after sync",
+    on_click=set_auto_reschedule
+)
+
+
 def set_load_balance(checked):
     config.load_balance = checked
 
@@ -82,6 +93,7 @@ menu_advance = build_action(advance, _("Advance cards in all decks"))
 add_action_to_gear(advance, "Advance cards in deck")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
+menu_for_helper.addAction(menu_auto_reschedule)
 menu_for_helper.addAction(menu_load_balance)
 menu_for_free_days = menu_for_helper.addMenu("No Anki on Free Days (requires Load Balancing)")
 menu_for_helper.addSeparator()
@@ -121,6 +133,7 @@ menu_for_free_days.addAction(menu_for_free_6)
 def adjust_menu():
     if mw.col is not None:
         menu_reschedule_recent.setText(f"Reschedule cards reviewed in the last {config.days_to_reschedule} days")
+        menu_auto_reschedule.setChecked(config.auto_reschedule_after_sync)
         menu_load_balance.setChecked(config.load_balance)
         menu_for_free_0.setChecked(0 in config.free_days)
         menu_for_free_1.setChecked(1 in config.free_days)
@@ -140,3 +153,6 @@ def state_did_change(_next_state, _previous_state):
 def configuration_changed():
     config.load()
     adjust_menu()
+
+
+init_sync_hook()
