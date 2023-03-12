@@ -57,7 +57,7 @@ def get_shared_config_name_and_decks(
     decks_as_list = []
     for decks in decks_as_string:
         deck = decks.lstrip("[").rstrip("]").split(",")
-        deck = [dd.strip().lstrip('"').rstrip('"') for dd in deck]
+        deck = [dd.strip().lstrip(""""'""").rstrip(""""'""") for dd in deck]
         deck = [dd for dd in deck if dd != ""]
         decks_as_list += (deck,)
     return config, decks_as_list
