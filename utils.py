@@ -1,94 +1,16 @@
 import re
-from aqt.utils import getText, showWarning, tooltip
+
+import shared_config_decks
+
 from collections import OrderedDict
+
+from aqt.utils import showWarning
 
 
 DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)
 GLOBAL_DECK_CONFIG_NAME = "global config for FSRS4Anki"
 VERSION_NUMBER_LEN = 3
 DONT_RESCHEDULE = "-\"is:learn\" -\"is:suspended\" -\"is:buried\""
-
-# Type alias
-Config = list[str]
-Decks = list[list[str]]
-
-
-def has_const_decks_with_shared_config_in_code(custom_scheduler):
-    return bool(re.search(r"decks_with_shared_config", custom_scheduler))
-
-
-def get_patterns_for_shared_config():
-    pattern_to_find_the_const = r"""
-            const
-            [ ]
-            decks_with_shared_config    
-            [ ]*                        
-            =                           # equal sign with any amount of spacing around it
-            [ ]*
-            \{                          # opening of JS object
-            [^}]*                       # anything inside the curly braces that is not a curly brace
-            \}                          # ending of JS object
-        """
-    pattern_to_find_config = r"""
-                "       # opening of the config name
-                (      
-                [^"]*   # anything besides an ending quote
-                )       
-                "       # ending of the config name
-                :       # colon after the deck name
-            """
-    pattern_to_find_decks = r"""           
-                \[      # opening of decks list
-                [^]]*   # anything besides an ending bracket
-                \]      # ending of decks list
-            """
-    return pattern_to_find_the_const, pattern_to_find_config, pattern_to_find_decks
-
-
-def get_shared_config_name_and_decks(
-    custom_scheduler,
-) -> tuple[Config, Decks]:
-    """Returns the config names and the decks that share config from the custom_scheduler code."""
-    (
-        pattern_to_find_the_const,
-        pattern_to_find_config,
-        pattern_to_find_decks,
-    ) = get_patterns_for_shared_config()
-    match = re.search(pattern_to_find_the_const, custom_scheduler, re.VERBOSE)
-    config = re.findall(pattern_to_find_config, match.group(), re.VERBOSE)
-    decks_as_string = re.findall(pattern_to_find_decks, match.group(), re.VERBOSE)
-    decks_as_list = []
-    for decks in decks_as_string:
-        deck = decks.lstrip("[").rstrip("]").split(",")
-        deck = [dd.strip().lstrip('"').rstrip('"') for dd in deck]
-        deck = [dd for dd in deck if dd != ""]
-        decks_as_list += (deck,)
-    return config, decks_as_list
-
-
-def create_shared_config_decks(deck_parameters: dict, configs: list, decks: list):
-    filtered_deck_p = [{dd: pp} for dd, pp in deck_parameters.items() if dd in configs]
-    created_decks = []
-    for cfg_name, decks_list in zip(configs, decks):
-        for deck_p in filtered_deck_p:
-            deck_name = list(deck_p.keys())[0]
-            if deck_name != cfg_name:
-                continue
-            for deck_list_item in decks_list:
-                _temp_deck = deck_p.copy()
-                _temp_deck[deck_list_item] = _temp_deck.pop(cfg_name)
-                created_decks += (_temp_deck,)
-    return created_decks
-
-
-def add_shared_config_decks(deck_parameters: dict, shared_decks: list):
-    for dd in shared_decks:
-        deck_parameters.update(dd)
-
-
-def remove_shared_config_decks(deck_parameters: dict, configs: list):
-    for cfg in configs:
-        deck_parameters.pop(cfg)
 
 
 def check_fsrs4anki(all_config):
@@ -232,11 +154,8 @@ def get_deck_parameters(custom_scheduler):
             decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
         )
     }
-    if has_const_decks_with_shared_config_in_code(custom_scheduler):
-        config, decks = get_shared_config_name_and_decks(custom_scheduler)
-        shared_decks = create_shared_config_decks(deck_parameters, config, decks)
-        add_shared_config_decks(deck_parameters, shared_decks)
-        remove_shared_config_decks(deck_parameters, config)
+    if shared_config_decks.has_const_decks_with_shared_config_in_code(custom_scheduler):
+        shared_config_decks.set_shared_decks(deck_parameters, custom_scheduler)
     deck_parameters = OrderedDict(
         {name: parameters for name, parameters in sorted(
             deck_parameters.items(),
