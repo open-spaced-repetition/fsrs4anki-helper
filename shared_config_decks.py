@@ -32,7 +32,11 @@ def get_patterns_for_shared_config() -> tuple[str, str, str]:
             """
     pattern_to_find_decks = r"""           
                 \[      # opening of decks list
+                [ ]*
+                ["']    # opening quote
                 [^]]*   # anything besides an ending bracket
+                ["']    # ending quote
+                [ ]*
                 \]      # ending of decks list
             """
     return pattern_to_find_the_const, pattern_to_find_config, pattern_to_find_decks
