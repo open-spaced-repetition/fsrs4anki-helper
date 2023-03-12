@@ -154,7 +154,7 @@ def get_deck_parameters(custom_scheduler):
             decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
         )
     }
-    if shared_config_decks.has_const_decks_with_shared_config_in_code(custom_scheduler):
+    if shared_config_decks.has_shared_config_decks_in(custom_scheduler):
         shared_config_decks.set_shared_decks(deck_parameters, custom_scheduler)
     deck_parameters = OrderedDict(
         {name: parameters for name, parameters in sorted(

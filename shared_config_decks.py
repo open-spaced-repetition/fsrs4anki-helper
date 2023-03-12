@@ -5,13 +5,13 @@ Config = list[str]
 Decks = list[list[str]]
 
 
-def has_const_decks_with_shared_config_in_code(custom_scheduler: str) -> bool:
+def has_shared_config_decks_in(custom_scheduler: str) -> bool:
     return bool(re.search(r"decks_with_shared_config", custom_scheduler))
 
 
-def get_patterns_for_shared_config() -> tuple[str, str, str]:
+def _get_patterns() -> tuple[str, str, str]:
     """Returns the regexp patterns to find the const, config name and decks list."""
-    pattern_to_find_the_const = r"""
+    pattern_to_find_const = r"""
             const
             [ ]
             decks_with_shared_config    
@@ -39,62 +39,63 @@ def get_patterns_for_shared_config() -> tuple[str, str, str]:
                 [ ]*
                 \]      # ending of decks list
             """
-    return pattern_to_find_the_const, pattern_to_find_config, pattern_to_find_decks
+    return pattern_to_find_const, pattern_to_find_config, pattern_to_find_decks
 
 
-def get_shared_config_name_and_decks(
+def get_shared_configs_and_decks(
     custom_scheduler: str,
 ) -> tuple[Config, Decks]:
-    """Gets the config names and its decks from the custom_scheduler code."""
-    (
-        pattern_to_find_the_const,
-        pattern_to_find_config,
-        pattern_to_find_decks,
-    ) = get_patterns_for_shared_config()
-    match = re.search(pattern_to_find_the_const, custom_scheduler, re.VERBOSE)
-    config = re.findall(pattern_to_find_config, match.group(), re.VERBOSE)
-    decks_as_string = re.findall(pattern_to_find_decks, match.group(), re.VERBOSE)
-    decks_as_list = []
-    for decks in decks_as_string:
-        deck = decks.lstrip("[").rstrip("]").split(",")
-        deck = [dd.strip().lstrip(""""'""").rstrip(""""'""") for dd in deck]
-        deck = [dd for dd in deck if dd != ""]
-        decks_as_list += (deck,)
-    return config, decks_as_list
+    """Gets the config names and their decks from the custom_scheduler code."""
+    const_pat, cfg_pat, decks_pat = _get_patterns()
+    const_match = re.search(const_pat, custom_scheduler, re.VERBOSE)
+    config = re.findall(cfg_pat, const_match.group(), re.VERBOSE)
+    decks_match = re.findall(decks_pat, const_match.group(), re.VERBOSE)
+    decks = []
+    for decks_full_str in decks_match:
+        _decks = decks_full_str.lstrip("[").rstrip("]").split(",")
+        _decks = [deck.strip().lstrip(""""'""").rstrip(""""'""") for deck in _decks]
+        _decks = [deck for deck in _decks if deck != ""]
+        decks += (_decks,)
+    return config, decks
 
 
 def get_shared_config_decks(deck_parameters: dict, configs: Config, decks: Decks) -> list[dict]:
-    filtered_deck_p = [{dd: pp} for dd, pp in deck_parameters.items() if dd in configs]
-    created_decks = []
-    for cfg_name, decks_list in zip(configs, decks):
-        for deck_p in filtered_deck_p:
-            deck_name = list(deck_p.keys())[0]
-            if deck_name != cfg_name:
+    configs_in_deck_params = [
+        {deck: param} for deck, param in deck_parameters.items() if deck in configs
+    ]
+    shared_config_decks = []
+    for config, shared_decks in zip(configs, decks):
+        for config_name_and_params in configs_in_deck_params:
+            deck_name = list(config_name_and_params.keys())[0]
+            if deck_name != config:
                 continue
-            for deck_list_item in decks_list:
-                _temp_deck = deck_p.copy()
-                _temp_deck[deck_list_item] = _temp_deck.pop(cfg_name)
-                created_decks += (_temp_deck,)
-    return created_decks
+            for deck in shared_decks:
+                _deck = config_name_and_params.copy()
+                # remove placeholder key 'config' from the _deck dict and add the key 'deck' to it
+                _deck[deck] = _deck.pop(config)
+                shared_config_decks += (_deck,)
+    return shared_config_decks
 
 
-def add_shared_config_decks(deck_parameters: dict, shared_decks: list[dict]) -> None:
+def add_shared_decks(deck_parameters: dict, shared_decks: list[dict]) -> None:
+    """Add to the deck parameters the shared decks."""
     for deck in shared_decks:
         deck_parameters.update(deck)
 
 
-def remove_shared_config_decks(deck_parameters: dict, configs: list) -> None:
+def remove_placeholder_decks(deck_parameters: dict, configs: list) -> None:
+    """Remove from the deck parameters the config placeholders."""
     for cfg in configs:
         deck_parameters.pop(cfg)
 
 
-def set_shared_decks(deck_parameters, custom_scheduler) -> None:
+def set_shared_decks(deck_parameters: dict, custom_scheduler: str) -> None:
     """Finds the shared configs in the custom scheduler and adds its decks to deck parameters.
 
     To avoid any issues it also removes the placeholders from the deck parameters.
 
     """
-    config, decks = get_shared_config_name_and_decks(custom_scheduler)
+    config, decks = get_shared_configs_and_decks(custom_scheduler)
     shared_decks = get_shared_config_decks(deck_parameters, config, decks)
-    add_shared_config_decks(deck_parameters, shared_decks)
-    remove_shared_config_decks(deck_parameters, config)
+    add_shared_decks(deck_parameters, shared_decks)
+    remove_placeholder_decks(deck_parameters, config)
