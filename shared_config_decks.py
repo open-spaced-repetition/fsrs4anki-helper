@@ -1,15 +1,16 @@
 import re
+from typing import List, Tuple
 
 # Type alias
-Config = list[str]
-Decks = list[list[str]]
+Config = List[str]
+Decks = List[List[str]]
 
 
 def has_shared_config_decks_in(custom_scheduler: str) -> bool:
     return bool(re.search(r"decks_with_shared_config", custom_scheduler))
 
 
-def _get_patterns() -> tuple[str, str, str]:
+def _get_patterns() -> Tuple[str, str, str]:
     """Returns the regexp patterns to find the const, config name and decks list."""
     pattern_to_find_const = r"""
             const
@@ -44,7 +45,7 @@ def _get_patterns() -> tuple[str, str, str]:
 
 def get_shared_configs_and_decks(
     custom_scheduler: str,
-) -> tuple[Config, Decks]:
+) -> Tuple[Config, Decks]:
     """Gets the config names and their decks from the custom_scheduler code."""
     const_pat, cfg_pat, decks_pat = _get_patterns()
     const_match = re.search(const_pat, custom_scheduler, re.VERBOSE)
@@ -59,7 +60,7 @@ def get_shared_configs_and_decks(
     return config, decks
 
 
-def get_shared_config_decks(deck_parameters: dict, configs: Config, decks: Decks) -> list[dict]:
+def get_shared_config_decks(deck_parameters: dict, configs: Config, decks: Decks) -> List[dict]:
     configs_in_deck_params = [
         {deck: param} for deck, param in deck_parameters.items() if deck in configs
     ]
@@ -77,7 +78,7 @@ def get_shared_config_decks(deck_parameters: dict, configs: Config, decks: Decks
     return shared_config_decks
 
 
-def add_shared_decks(deck_parameters: dict, shared_decks: list[dict]) -> None:
+def add_shared_decks(deck_parameters: dict, shared_decks: List[dict]) -> None:
     """Add to the deck parameters the shared decks."""
     for deck in shared_decks:
         deck_parameters.update(deck)
