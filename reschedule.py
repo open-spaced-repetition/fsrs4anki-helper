@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 from aqt import mw
 from .utils import *
 from .configuration import Config
-from typing import List
+from typing import List, Dict
+from anki.cards import Card
 
 
 def has_again(revlog):
@@ -23,13 +24,19 @@ class FSRS:
     w: List[float]
     enable_fuzz: bool
     enable_load_balance: bool
-    free_days: List
+    free_days: List[int]
+    due_cnt_perday_from_first_day: Dict[int, int]
+    learned_cnt_perday_from_today: Dict[int, int]
+    card: Card
 
     def __init__(self) -> None:
         self.w = [1., 1., 5., -0.5, -0.5, 0.2, 1.4, -0.12, 0.8, 2., -0.2, 0.2, 1.]
         self.enable_fuzz = False
         self.enable_load_balance = False
         self.free_days = []
+    
+    def set_load_balance(self):
+        self.enable_load_balance = True
         true_due = "case when odid==0 then due else odue end"
         self.due_cnt_perday_from_first_day = {day: cnt for day, cnt in mw.col.db.all(f"select {true_due}, count() from cards where queue = 2 group by {true_due}")}
         self.learned_cnt_perday_from_today = {day: cnt for day, cnt in mw.col.db.all(f"select (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid) from revlog where ease > 0 group by (id/1000-{mw.col.sched.day_cutoff})/86400")}
@@ -86,7 +93,7 @@ class FSRS:
         new_interval = self.apply_fuzz(stability * math.log(retention) / math.log(0.9))
         return min(max(int(round(new_interval)), 1), max_ivl)
 
-    def set_card(self, card):
+    def set_card(self, card: Card):
         self.card = card
 
 
@@ -117,7 +124,8 @@ def reschedule(did, recent=False):
     decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
     fsrs = FSRS()
     fsrs.enable_fuzz = get_fuzz_bool(custom_scheduler)
-    fsrs.enable_load_balance = config.load_balance
+    if fsrs.enable_fuzz and config.load_balance:
+        fsrs.set_load_balance()
     fsrs.free_days = config.free_days
 
     for deck in decks:
@@ -227,14 +235,15 @@ def reschedule(did, recent=False):
             offset = new_ivl - card.ivl
             card.ivl = new_ivl
             due_before = card.odue if card.odid else card.due
-            fsrs.due_cnt_perday_from_first_day[due_before] -= 1
             if card.odid:  # Also update cards in filtered decks
                 card.odue += offset
             else:
                 card.due += offset
             due_after = card.odue if card.odid else card.due
-            fsrs.due_cnt_perday_from_first_day.setdefault(due_after, 0)
-            fsrs.due_cnt_perday_from_first_day[due_after] += 1
+            if fsrs.enable_load_balance:
+                fsrs.due_cnt_perday_from_first_day[due_before] -= 1
+                fsrs.due_cnt_perday_from_first_day.setdefault(due_after, 0)
+                fsrs.due_cnt_perday_from_first_day[due_after] += 1
             card.flush()
             cnt += 1
 
