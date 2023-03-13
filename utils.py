@@ -1,10 +1,7 @@
 import re
-
-import shared_config_decks
-
 from collections import OrderedDict
-
-from aqt.utils import showWarning
+from aqt.utils import getText, showWarning, tooltip
+from . import shared_config_decks
 
 
 DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)
