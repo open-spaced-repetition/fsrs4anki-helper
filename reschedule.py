@@ -7,6 +7,7 @@ from .utils import *
 from .configuration import Config
 from typing import List, Dict
 from anki.cards import Card
+from anki.stats import REVLOG_LRN, REVLOG_REV
 
 
 def has_again(revlog):
@@ -159,6 +160,7 @@ def reschedule(did, recent=False):
             last_date = None
             last_s = None
             last_rating = None
+            last_kind = None
             s = None
             d = None
             rating = None
@@ -169,6 +171,15 @@ def reschedule(did, recent=False):
                     break
                 last_s = s
                 rating = revlog.button_chosen
+
+                if last_kind is not None and last_kind == REVLOG_REV and revlog.review_kind == REVLOG_LRN:
+                    # forget card
+                    last_date = None
+                    last_s = None
+                    s = None
+                    d = None
+                last_kind = revlog.review_kind
+
                 if rating == 0:
                     if revlog.ease != 0:
                         # set due date
@@ -178,6 +189,7 @@ def reschedule(did, recent=False):
                         last_date = None
                         last_s = None
                         s = None
+                        d = None
                         continue
                 if last_date is None:
                     again_s = fsrs.init_stability(1)
