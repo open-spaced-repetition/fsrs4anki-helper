@@ -7,10 +7,22 @@ from .utils import *
 from .configuration import Config
 from typing import List, Dict
 from anki.cards import Card
-from anki.stats import REVLOG_LRN, REVLOG_REV
+from anki.stats import REVLOG_LRN, REVLOG_REV, REVLOG_RELRN
+from anki.stats_pb2 import RevlogEntry
 
 
-def has_again(revlog):
+def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
+    card = mw.col.get_card(cid)
+    card.ivl = int(revlogs[0].interval / 86400)
+    due = int(round((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today)
+    if card.odid:
+        card.odue = due
+    else:
+        card.due = due
+    card.flush()
+
+
+def has_again(revlog: List[RevlogEntry]):
     for r in revlog:
         if r.button_chosen == 1:
             return True
@@ -168,11 +180,12 @@ def reschedule(did, recent=False):
             reps = len(revlogs)
             for i, revlog in enumerate(reversed(revlogs)):
                 if i == 0 and (revlog.review_kind not in (0, 2)) and not has_again(revlogs):
+                    reset_ivl_and_due(cid, revlogs)
                     break
                 last_s = s
                 rating = revlog.button_chosen
 
-                if last_kind is not None and last_kind == REVLOG_REV and revlog.review_kind == REVLOG_LRN:
+                if last_kind is not None and last_kind in (REVLOG_REV, REVLOG_RELRN) and revlog.review_kind == REVLOG_LRN:
                     # forget card
                     last_date = None
                     last_s = None
