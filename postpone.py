@@ -74,7 +74,10 @@ def postpone(did):
                 continue
             s = custom_data['s']
 
-            revlog = mw.col.card_stats_data(cid).revlog[0]
+            try:
+                revlog = mw.col.card_stats_data(cid).revlog[0]
+            except IndexError:
+                continue
 
             ivl = datetime.today().toordinal() - datetime.fromtimestamp(revlog.time).toordinal()
             r = math.pow(0.9, ivl / s)
