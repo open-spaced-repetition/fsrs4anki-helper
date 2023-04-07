@@ -1,3 +1,4 @@
+import json
 from .utils import *
 
 
@@ -30,13 +31,19 @@ def reset(did):
             deck_name = mw.col.decks.get(did)['name']
             if not deck['name'].startswith(deck_name):
                 continue
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:due\" \"is:review\" {DONT_RESCHEDULE}"):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" {DONT_RESCHEDULE}"):
             if cid not in reseted_cards:
                 reseted_cards.add(cid)
             else:
                 continue
+            card = mw.col.get_card(cid)
+            if card.custom_data == '':
+                continue
             revlogs = mw.col.card_stats_data(cid).revlog
             reset_ivl_and_due(cid, revlogs)
+            card = mw.col.get_card(cid)
+            card.custom_data = json.dumps({})
+            card.flush()
             cnt += 1
 
     mw.progress.finish()
