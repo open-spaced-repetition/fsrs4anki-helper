@@ -8,6 +8,7 @@ from .sync_hook import init_sync_hook
 from .reschedule import reschedule
 from .postpone import postpone
 from .advance import advance
+from .reset import reset
 from .configuration import (
     Config,
     run_on_configuration_change
@@ -92,6 +93,8 @@ add_action_to_gear(postpone, "Postpone cards in deck")
 menu_advance = build_action(advance, _("Advance cards in all decks"))
 add_action_to_gear(advance, "Advance cards in deck")
 
+menu_reset = build_action(reset, _("Reset cards in all decks"))
+
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
 menu_for_helper.addAction(menu_load_balance)
@@ -101,6 +104,7 @@ menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_reschedule_recent)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
+menu_for_helper.addAction(menu_reset)
 
 
 def set_free_days(day, checked):

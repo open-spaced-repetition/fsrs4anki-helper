@@ -2,31 +2,10 @@ import json
 import math
 import random
 from datetime import datetime, timedelta
-from aqt import mw
 from .utils import *
 from .configuration import Config
-from typing import List, Dict
 from anki.cards import Card
 from anki.stats import REVLOG_LRN, REVLOG_REV, REVLOG_RELRN
-from anki.stats_pb2 import RevlogEntry
-
-
-def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
-    card = mw.col.get_card(cid)
-    card.ivl = int(revlogs[0].interval / 86400)
-    due = int(round((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today)
-    if card.odid:
-        card.odue = due
-    else:
-        card.due = due
-    card.flush()
-
-
-def has_again(revlog: List[RevlogEntry]):
-    for r in revlog:
-        if r.button_chosen == 1:
-            return True
-    return False
 
 
 def constrain_difficulty(difficulty: float) -> float:

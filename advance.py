@@ -1,7 +1,6 @@
 import json
 import math
 from datetime import datetime
-from aqt import mw
 from .utils import *
 
 
