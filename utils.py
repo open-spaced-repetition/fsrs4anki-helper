@@ -1,6 +1,10 @@
 import re
 from aqt.utils import getText, showWarning, tooltip
 from collections import OrderedDict
+from typing import List, Dict
+from anki.stats_pb2 import RevlogEntry
+from anki.stats import REVLOG_LRN, REVLOG_REV, REVLOG_RELRN
+from aqt import mw
 
 
 DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)
@@ -172,3 +176,32 @@ def RepresentsInt(s):
         return int(s)
     except ValueError:
         return None
+
+
+def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
+    card = mw.col.get_card(cid)
+    card.ivl = int(revlogs[0].interval / 86400)
+    due = int(round((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today)
+    if card.odid:
+        card.odue = due
+    else:
+        card.due = due
+    card.flush()
+
+
+def has_again(revlogs: List[RevlogEntry]):
+    for r in revlogs:
+        if r.button_chosen == 1:
+            return True
+    return False
+
+
+def has_manual_reset(revlogs: List[RevlogEntry]):
+    last_kind = None
+    for r in revlogs:
+        if r.button_chosen == 0:
+            return True
+        if last_kind is not None and last_kind in (REVLOG_REV, REVLOG_RELRN) and r.review_kind == REVLOG_LRN:
+            return True
+        last_kind = r.review_kind
+    return False
