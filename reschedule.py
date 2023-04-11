@@ -7,17 +7,6 @@ from .configuration import Config
 from anki.cards import Card
 
 
-def has_manual_reset(revlogs: List[RevlogEntry]):
-    last_kind = None
-    for r in revlogs:
-        if r.button_chosen == 0:
-            return True
-        if last_kind is not None and last_kind in (REVLOG_REV, REVLOG_RELRN) and r.review_kind == REVLOG_LRN:
-            return True
-        last_kind = r.review_kind
-    return False
-
-
 def constrain_difficulty(difficulty: float) -> float:
     return min(10., max(1., difficulty))
 
