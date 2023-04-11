@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from .utils import *
 from .configuration import Config
 from anki.cards import Card
-from anki.stats import REVLOG_LRN, REVLOG_REV, REVLOG_RELRN
 
 
 def constrain_difficulty(difficulty: float) -> float:

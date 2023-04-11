@@ -3,6 +3,7 @@ from aqt.utils import getText, showWarning, tooltip
 from collections import OrderedDict
 from typing import List, Dict
 from anki.stats_pb2 import RevlogEntry
+from anki.stats import REVLOG_LRN, REVLOG_REV, REVLOG_RELRN
 from aqt import mw
 
 
@@ -188,8 +189,19 @@ def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
     card.flush()
 
 
-def has_again(revlog: List[RevlogEntry]):
-    for r in revlog:
+def has_again(revlogs: List[RevlogEntry]):
+    for r in revlogs:
         if r.button_chosen == 1:
             return True
+    return False
+
+
+def has_manual_reset(revlogs: List[RevlogEntry]):
+    last_kind = None
+    for r in revlogs:
+        if r.button_chosen == 0:
+            return True
+        if last_kind is not None and last_kind in (REVLOG_REV, REVLOG_RELRN) and r.review_kind == REVLOG_LRN:
+            return True
+        last_kind = r.review_kind
     return False
