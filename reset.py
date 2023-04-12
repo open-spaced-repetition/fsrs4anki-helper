@@ -40,6 +40,8 @@ def reset(did):
             if card.custom_data == '':
                 continue
             revlogs = mw.col.card_stats_data(cid).revlog
+            if len(revlogs) == 0:
+                continue
             reset_ivl_and_due(cid, revlogs)
             card = mw.col.get_card(cid)
             card.custom_data = json.dumps({})
