@@ -7,7 +7,11 @@ import itertools
 
 did_to_target_retention = {}
 def maximize_siblings_due_gap(due_ranges):
-    all_combinations = itertools.product(*due_ranges.values())
+    if len(due_ranges) == 2:
+        range_list = list(due_ranges.values())
+        all_combinations = itertools.product((range_list[0].start, range_list[0].stop-1), (range_list[1].start, range_list[1].stop-1))
+    else:
+        all_combinations = itertools.product(*due_ranges.values())
 
     max_gap_sum = 0
     max_gap_min = 0
@@ -55,11 +59,13 @@ def get_due_range(cid, retention, stability):
     card = mw.col.get_card(cid)
     ivl = card.ivl
     due = card.due
-    last_due = due - ivl
     new_ivl = int(round(stability * math.log(retention) / math.log(0.9)))
+    if new_ivl <= 2.5:
+        return range(due, due + 1)
+    last_due = due - ivl
     min_ivl = max(2, int(round(new_ivl * 0.95 - 1)))
     max_ivl = int(round(new_ivl * 1.05 + 1))
-    step = math.ceil((max_ivl - min_ivl) / 5)
+    step = max(1, math.floor((max_ivl - min_ivl) / 5))
     due_range = range(last_due + min_ivl, last_due + max_ivl + 1, step)
     return due_range
 
