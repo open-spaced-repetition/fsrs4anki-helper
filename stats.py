@@ -1,5 +1,4 @@
 import anki.stats
-from datetime import datetime
 import math
 from .utils import *
 
@@ -33,12 +32,20 @@ def retention_stability_burden() -> float:
 def todayStats_new(self):
     i = []
     retention, stability, burden, count = retention_stability_burden()
-    _line_now(self, i, "average retention", f"{retention * 100: .2f}%")
-    _line_now(self, i, "average stability", f"{int(stability)}")
-    _line_now(self, i, "total burden", f"{burden: .2f}")
-    _line_now(self, i, "count", f"{count}")
+    _line_now(self, i, "Average retention", f"{retention * 100: .2f}%")
+    _line_now(self, i, "Average stability", f"{int(stability)} days")
+    _line_now(self, i, "Total burden", f"{burden: .2f} reviews")
+    _line_now(self, i, "Count", f"{count} cards")
+    stats_data = _lineTbl_now(self, i)
+    i = []
+    _line_now(self, i, "Retention", "0.9 ^ elapsed days / stability")
+    _line_now(self, i, "Stability", "elapsed days when retention = 90%")
+    _line_now(self, i, "Burden", "1 / interval")
+    _line_now(self, i, "Count", "number of cards with custom data")
+    stats_info = _lineTbl_now(self, i)
     return todayStats_old(self) + "<br><br><table style='text-align: center'><tr><td style='padding: 5px'>" \
-        + "<h2>FSRS Stats</h2>" + _lineTbl_now(self, i) + "</td></tr></table>"
+        + "<h2>FSRS Stats</h2>" + stats_data + "</td><td style='padding: 5px'>" \
+        + "<h2>Stats Info</h2>" + stats_info + "</td></tr></table>"
 
 
 def init_stats():
