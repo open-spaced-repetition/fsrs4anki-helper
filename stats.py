@@ -18,17 +18,25 @@ def _lineTbl_now(self, i):
     return "<table>" + "".join(i) + "</table>"
 
 
-def average_retention() -> float:
+def retention_stability_burden() -> float:
     today = mw.col.sched.today
-    last_due_and_custom_data_rows = mw.col.db.all("select due - ivl, data from cards where queue = 2 and data like '%\"cd\"%'")
-    ivl_and_stability_list = map(lambda x: (today - x[0], json.loads(json.loads(x[1])['cd'])['s']), last_due_and_custom_data_rows)
-    recall_list = list(map(lambda x: math.pow(0.9, x[0] / x[1]), ivl_and_stability_list))
-    return sum(recall_list) / len(recall_list)
+    last_due_and_custom_data_and_ivl_rows = mw.col.db.all("select due - ivl, data, ivl from cards where queue = 2 and data like '%\"cd\"%'")
+    delay_stability_ivl_list = map(lambda x: (today - x[0], json.loads(json.loads(x[1])['cd'])['s'], x[2]), last_due_and_custom_data_and_ivl_rows)
+    retention_stability_burden_list = list(map(lambda x: (math.pow(0.9, x[0] / x[1]), x[1], 1/x[2]), delay_stability_ivl_list))
+    recall_sum = sum(item[0] for item in retention_stability_burden_list)
+    stability_sum = sum(item[1] for item in retention_stability_burden_list)
+    burden_sum = sum(item[2] for item in retention_stability_burden_list)
+    cnt = len(retention_stability_burden_list)
+    return recall_sum / cnt, stability_sum / cnt, burden_sum, cnt
 
 
 def todayStats_new(self):
     i = []
-    _line_now(self, i, "average retention", f"{average_retention() * 100: .2f}%")
+    retention, stability, burnden, count = retention_stability_burden()
+    _line_now(self, i, "average retention", f"{retention * 100: .2f}%")
+    _line_now(self, i, "average stability", f"{int(stability)}")
+    _line_now(self, i, "total burnden", f"{burnden: .2f}")
+    _line_now(self, i, "count", f"{count}")
     return todayStats_old(self) + "<br><br><table style='text-align: center'><tr><td style='padding: 5px'>" \
         + "<h2>FSRS Stats</h2>" + _lineTbl_now(self, i) + "</td></tr></table>"
 
