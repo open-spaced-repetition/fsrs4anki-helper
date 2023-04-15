@@ -65,7 +65,7 @@ def get_due_range(cid, retention, stability):
     last_due = due - ivl
     min_ivl = max(2, int(round(new_ivl * 0.95 - 1)))
     max_ivl = int(round(new_ivl * 1.05 + 1))
-    step = max(1, math.floor((max_ivl - min_ivl) / 5))
+    step = max(1, math.floor((max_ivl - min_ivl) / 4))
     due_range = range(last_due + min_ivl, last_due + max_ivl + 1, step)
     return due_range
 
