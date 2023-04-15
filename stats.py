@@ -32,10 +32,10 @@ def retention_stability_burden() -> float:
 
 def todayStats_new(self):
     i = []
-    retention, stability, burnden, count = retention_stability_burden()
+    retention, stability, burden, count = retention_stability_burden()
     _line_now(self, i, "average retention", f"{retention * 100: .2f}%")
     _line_now(self, i, "average stability", f"{int(stability)}")
-    _line_now(self, i, "total burnden", f"{burnden: .2f}")
+    _line_now(self, i, "total burden", f"{burden: .2f}")
     _line_now(self, i, "count", f"{count}")
     return todayStats_old(self) + "<br><br><table style='text-align: center'><tr><td style='padding: 5px'>" \
         + "<h2>FSRS Stats</h2>" + _lineTbl_now(self, i) + "</td></tr></table>"
