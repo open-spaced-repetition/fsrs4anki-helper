@@ -9,11 +9,7 @@ did_to_deck_parameters = {}
 
 
 def maximize_siblings_due_gap(due_ranges):
-    if len(due_ranges) == 2:
-        range_list = list(due_ranges.values())
-        all_combinations = itertools.product((range_list[0].start, range_list[0].stop-1), (range_list[1].start, range_list[1].stop-1))
-    else:
-        all_combinations = itertools.product(*due_ranges.values())
+    all_combinations = itertools.product(*due_ranges.values())
 
     max_gap_sum = 0
     max_gap_min = 0
