@@ -3,7 +3,7 @@ from aqt.utils import getText, showWarning, tooltip
 from collections import OrderedDict
 from typing import List, Dict
 from anki.stats_pb2 import RevlogEntry
-from anki.stats import REVLOG_LRN, REVLOG_REV, REVLOG_RELRN
+from anki.stats import REVLOG_LRN, REVLOG_REV, REVLOG_RELRN, REVLOG_RESCHED
 from aqt import mw
 import json
 
