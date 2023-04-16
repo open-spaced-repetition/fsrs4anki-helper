@@ -6,6 +6,8 @@ import itertools
 
 
 did_to_deck_parameters = {}
+
+
 def maximize_siblings_due_gap(due_ranges):
     if len(due_ranges) == 2:
         range_list = list(due_ranges.values())
@@ -59,6 +61,7 @@ def get_due_range(cid, parameters, stability):
     card = mw.col.get_card(cid)
     ivl = card.ivl
     due = card.due
+    last_due = due - ivl
     revlogs = mw.col.card_stats_data(cid).revlog
     last_rating = revlogs[0].button_chosen
     if last_rating == 4:
@@ -67,24 +70,28 @@ def get_due_range(cid, parameters, stability):
         easy_bonus = 1
     new_ivl = int(round(stability * math.log(parameters['r']) * easy_bonus / math.log(0.9)))
     if new_ivl <= 2.5:
-        return range(due, due + 1)
-    last_due = due - ivl
+        return range(due, due + 1), last_due
     min_ivl = max(2, int(round(new_ivl * 0.95 - 1)))
     max_ivl = int(round(new_ivl * 1.05 + 1))
     step = max(1, math.floor((max_ivl - min_ivl) / 4))
     due_range = range(last_due + min_ivl, last_due + max_ivl + 1, step)
-    return due_range
+    if due_range.stop < mw.col.sched.today:
+        due_range = range(due, due + 1)
+    return due_range, last_due
 
 
 def disperse(siblings):
-    due_ranges = {cid: get_due_range(cid, did_to_deck_parameters[did], stability) for cid, did, stability in siblings}
+    due_ranges_last_due = {cid: get_due_range(cid, did_to_deck_parameters[did], stability) for cid, did, stability in siblings}
+    due_ranges = {cid: due_range for cid, (due_range, last_due) in due_ranges_last_due.items()}
+    last_due = {cid: last_due for cid, (due_range, last_due) in due_ranges_last_due.items()}
+    latest_due = max(last_due.values())
+    due_ranges[-1] = range(latest_due, latest_due + 1)
     best_due_dates = maximize_siblings_due_gap(due_ranges)
+    best_due_dates.pop(-1)
     return best_due_dates
 
 
-
 def disperse_siblings(did):
-    
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
     if custom_scheduler is None:
         return
