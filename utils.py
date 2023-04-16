@@ -5,6 +5,7 @@ from typing import List, Dict
 from anki.stats_pb2 import RevlogEntry
 from anki.stats import REVLOG_LRN, REVLOG_REV, REVLOG_RELRN
 from aqt import mw
+import json
 
 
 DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)
