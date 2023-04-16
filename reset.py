@@ -51,4 +51,4 @@ def reset(did):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} card reseted."""))
+    tooltip(_(f"""{cnt} cards reseted."""))

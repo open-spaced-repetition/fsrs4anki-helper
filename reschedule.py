@@ -253,4 +253,4 @@ def reschedule(did, recent=False):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} card rescheduled"""))
+    tooltip(_(f"""{cnt} cards rescheduled"""))
