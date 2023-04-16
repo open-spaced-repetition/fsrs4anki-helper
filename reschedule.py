@@ -162,6 +162,19 @@ def reschedule(did, recent=False):
                 last_s = s
                 rating = revlog.button_chosen
 
+                # Manually rescheduled last entry, user knows better, needs special handling
+                # Don't change the interval they set
+                if rating == 0 and revlog.review_kind == REVLOG_RESCHED and i == len(revlogs)-1:
+                    if last_date is None:
+                        d = fsrs.init_difficulty(3)
+                        s = fsrs.init_stability(3)
+                        
+                    ivl = revlog.interval 
+                    r = math.pow(0.9, ivl / s)
+                    d = fsrs.next_difficulty(d, 3)
+                    s = fsrs.next_recall_stability(d, s, r)
+                    break
+                    
                 if last_kind is not None and last_kind in (REVLOG_REV, REVLOG_RELRN) and revlog.review_kind == REVLOG_LRN:
                     # forget card
                     last_date = None
@@ -172,8 +185,9 @@ def reschedule(did, recent=False):
 
                 if rating == 0:
                     if revlog.ease != 0:
-                        # set due date
-                        continue
+                        # Treat it as a good review
+                        rating = 3
+                        last_kind = REVLOG_REV
                     else:
                         # forget card
                         last_date = None
@@ -231,7 +245,7 @@ def reschedule(did, recent=False):
                 good_ivl = max(hard_ivl + 1, good_ivl)
                 easy_ivl = max(good_ivl + 1, easy_ivl)
             if rating == 0:
-                new_ivl = card.ivl
+                new_ivl = int(revlogs[-1].interval / 86400)
             else:
                 new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
             offset = new_ivl - card.ivl
