@@ -95,4 +95,4 @@ def advance(did):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} card advanced"""))
+    tooltip(_(f"""{cnt} cards advanced"""))

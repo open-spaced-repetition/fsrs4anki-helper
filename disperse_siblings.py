@@ -5,7 +5,7 @@ import math
 import itertools
 
 
-did_to_target_retention = {}
+did_to_deck_parameters = {}
 def maximize_siblings_due_gap(due_ranges):
     if len(due_ranges) == 2:
         range_list = list(due_ranges.values())
@@ -55,11 +55,17 @@ def get_siblings():
         siblings_dict[nid].append((cid, did, stability))
     return siblings_dict
 
-def get_due_range(cid, retention, stability):
+def get_due_range(cid, parameters, stability):
     card = mw.col.get_card(cid)
     ivl = card.ivl
     due = card.due
-    new_ivl = int(round(stability * math.log(retention) / math.log(0.9)))
+    revlogs = mw.col.card_stats_data(cid).revlog
+    last_rating = revlogs[0].button_chosen
+    if last_rating == 4:
+        easy_bonus = parameters['e']
+    else:
+        easy_bonus = 1
+    new_ivl = int(round(stability * math.log(parameters['r']) * easy_bonus / math.log(0.9)))
     if new_ivl <= 2.5:
         return range(due, due + 1)
     last_due = due - ivl
@@ -71,7 +77,7 @@ def get_due_range(cid, retention, stability):
 
 
 def disperse(siblings):
-    due_ranges = {cid: get_due_range(cid, did_to_target_retention[did], stability) for cid, did, stability in siblings}
+    due_ranges = {cid: get_due_range(cid, did_to_deck_parameters[did], stability) for cid, did, stability in siblings}
     best_due_dates = maximize_siblings_due_gap(due_ranges)
     return best_due_dates
 
@@ -92,21 +98,21 @@ def disperse_siblings(did):
     global_deck_name = get_global_config_deck_name(version)
 
 
-    def get_target_retention(deckname, mapping):
+    def get_parameters(deckname, mapping):
         parts = deckname.split("::")
         for i in range(len(parts), 0, -1):
             prefix = "::".join(parts[:i])
             if prefix in mapping:
-                return mapping[prefix]['r']
-        return mapping[global_deck_name]['r']
+                return mapping[prefix]
+        return mapping[global_deck_name]
 
 
     deck_list = mw.col.decks.all()
 
-    global did_to_target_retention
+    global did_to_deck_parameters
     for d in deck_list:
-        target_retention = get_target_retention(d["name"], deck_parameters)
-        did_to_target_retention[d["id"]] = target_retention
+        parameters = get_parameters(d["name"], deck_parameters)
+        did_to_deck_parameters[d["id"]] = parameters
 
     mw.checkpoint("Siblings Dispersing")
     mw.progress.start()
@@ -127,4 +133,4 @@ def disperse_siblings(did):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} card in {len(siblings)} siblings dispersed."""))
+    tooltip(_(f"""{cnt} cards in {len(siblings)} notes dispersed."""))
