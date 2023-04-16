@@ -245,7 +245,7 @@ def reschedule(did, recent=False):
                 good_ivl = max(hard_ivl + 1, good_ivl)
                 easy_ivl = max(good_ivl + 1, easy_ivl)
             if rating == 0:
-                new_ivl = int(revlogs[-1].interval / 86400)
+                new_ivl = int(revlogs[0].interval / 86400)
             else:
                 new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
             offset = new_ivl - card.ivl
