@@ -87,7 +87,7 @@ class FSRS:
         self.card = card
 
 
-def reschedule(did, recent=False):
+def reschedule(did, recent=False, filter=False, filtered_cid={}):
     config = Config()
     config.load()
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -145,6 +145,8 @@ def reschedule(did, recent=False):
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
             else:
+                continue
+            if filter and cid not in filtered_cid:
                 continue
             last_date = None
             last_s = None
