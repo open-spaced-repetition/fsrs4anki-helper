@@ -37,6 +37,7 @@ def get_siblings(filter=False, filtered_nid_string=""):
         SELECT nid
         FROM cards
         WHERE type = 2
+        AND queue != -1
         AND data like '%"cd"%'
         {"AND nid IN (" + filtered_nid_string + ")" if filter else ""}
         GROUP BY nid
@@ -44,6 +45,7 @@ def get_siblings(filter=False, filtered_nid_string=""):
     )
     AND data like '%"cd"%'
     AND type = 2
+    AND queue != -1
     AND odid = 0
     """)
     siblings = map(lambda x: (x[0], x[1], x[2], json.loads(json.loads(x[3])['cd'])['s']), siblings)

@@ -36,11 +36,13 @@ def auto_reschedule(local_rids: List[int]):
         f"""SELECT DISTINCT nid 
             FROM cards 
             WHERE id IN ({remote_reviewed_cid_string}) 
-            and type = 2 
-            and nid IN (
+            AND type = 2 
+            AND queue != -1
+            AND nid IN (
                 SELECT nid
                 FROM cards
                 WHERE type = 2
+                AND queue != -1
                 AND data like '%"cd"%'
                 GROUP BY nid
                 HAVING count(*) > 1
