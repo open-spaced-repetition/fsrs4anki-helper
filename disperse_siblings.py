@@ -46,7 +46,6 @@ def get_siblings(filter=False, filtered_nid_string=""):
     AND data like '%"cd"%'
     AND type = 2
     AND queue != -1
-    AND odid = 0
     """)
     siblings = map(lambda x: (x[0], x[1], x[2], json.loads(json.loads(x[3])['cd'])['s']), siblings)
     siblings_dict = {}
@@ -59,7 +58,10 @@ def get_siblings(filter=False, filtered_nid_string=""):
 def get_due_range(cid, parameters, stability):
     card = mw.col.get_card(cid)
     ivl = card.ivl
-    due = card.due
+    if card.odid:
+        due = card.odue
+    else:
+        due = card.due
     last_due = due - ivl
     revlogs = mw.col.card_stats_data(cid).revlog
     last_rating = revlogs[0].button_chosen
@@ -129,8 +131,12 @@ def disperse_siblings(did, filter=False, filtered_nid_string=""):
         best_due_dates = disperse(cards)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
-            offset = card.due - due
-            card.due = due
+            if card.odid:
+                offset = card.odue - due
+                card.odue = due
+            else:
+                offset = card.due - due
+                card.due = due
             card.ivl = card.ivl - offset
             card.flush()
             cnt += 1
