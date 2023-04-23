@@ -28,8 +28,17 @@ class FSRS:
     def set_load_balance(self):
         self.enable_load_balance = True
         true_due = "case when odid==0 then due else odue end"
-        self.due_cnt_perday_from_first_day = {day: cnt for day, cnt in mw.col.db.all(f"select {true_due}, count() from cards where queue = 2 group by {true_due}")}
-        self.learned_cnt_perday_from_today = {day: cnt for day, cnt in mw.col.db.all(f"select (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid) from revlog where ease > 0 group by (id/1000-{mw.col.sched.day_cutoff})/86400")}
+        self.due_cnt_perday_from_first_day = {day: cnt for day, cnt in mw.col.db.all(
+            f"""select {true_due}, count() 
+                from cards 
+                where type = 2  
+                and queue != -1
+                group by {true_due}""")}
+        self.learned_cnt_perday_from_today = {day: cnt for day, cnt in mw.col.db.all(
+            f"""select (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid)
+                from revlog
+                where ease > 0
+                group by (id/1000-{mw.col.sched.day_cutoff})/86400""")}
 
     def init_stability(self, rating: int) -> float:
         return max(0.1, self.w[0] + self.w[1] * (rating - 1))
@@ -87,7 +96,7 @@ class FSRS:
         self.card = card
 
 
-def reschedule(did, recent=False):
+def reschedule(did, recent=False, filter=False, filtered_cids={}):
     config = Config()
     config.load()
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -145,6 +154,8 @@ def reschedule(did, recent=False):
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
             else:
+                continue
+            if filter and cid not in filtered_cids:
                 continue
             last_date = None
             last_s = None
@@ -267,4 +278,4 @@ def reschedule(did, recent=False):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} card rescheduled"""))
+    tooltip(_(f"""{cnt} cards rescheduled"""))

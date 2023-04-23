@@ -94,4 +94,4 @@ def postpone(did):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} card postponed"""))
+    tooltip(_(f"""{cnt} cards postponed"""))

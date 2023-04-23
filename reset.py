@@ -14,6 +14,11 @@ def reset(did):
     if deck_parameters is None:
         return
     
+    if not askUser("""Undo all changes made by rescheduling. 
+    It will set the interval and due of all cards to the original value set when ratings (not the previous rescheduling).
+    Are you sure?"""):
+        return
+    
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
 
     mw.checkpoint("Resetting")
@@ -51,4 +56,4 @@ def reset(did):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} card reseted."""))
+    tooltip(_(f"""{cnt} cards reseted."""))
