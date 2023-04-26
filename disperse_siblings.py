@@ -3,8 +3,11 @@ from .utils import *
 import json
 import math
 import itertools
+from anki.decks import DeckManager
+from anki.utils import ids2str
 
 
+DM = None
 did_to_deck_parameters = {}
 
 
@@ -30,7 +33,9 @@ def maximize_siblings_due_gap(due_ranges):
     return {card_id: due_date for card_id, due_date in sorted(zip(due_ranges.keys(), best_combination))}
 
 
-def get_siblings(filter=False, filtered_nid_string=""):
+def get_siblings(did=None, filter=False, filtered_nid_string=""):
+    if did is not None:
+        did_list = ids2str(DM.deck_and_child_ids(did))
     siblings = mw.col.db.all(f"""SELECT id, nid, did, data
     FROM cards
     WHERE nid IN (
@@ -46,6 +51,7 @@ def get_siblings(filter=False, filtered_nid_string=""):
     AND data like '%"cd"%'
     AND type = 2
     AND queue != -1
+    {"AND did IN %s" % did_list if did is not None else ""}
     """)
     siblings = map(lambda x: (x[0], x[1], x[2], json.loads(json.loads(x[3])['cd'])['s']), siblings)
     siblings_dict = {}
@@ -93,6 +99,8 @@ def disperse(siblings):
 
 
 def disperse_siblings(did, filter=False, filtered_nid_string=""):
+    global DM
+    DM = DeckManager(mw.col)
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
     if custom_scheduler is None:
         return
@@ -126,7 +134,7 @@ def disperse_siblings(did, filter=False, filtered_nid_string=""):
     mw.progress.start()
 
     cnt = 0
-    siblings = get_siblings(filter, filtered_nid_string)
+    siblings = get_siblings(did, filter, filtered_nid_string)
     for nid, cards in siblings.items():
         best_due_dates = disperse(cards)
         for cid, due in best_due_dates.items():

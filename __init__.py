@@ -100,6 +100,7 @@ add_action_to_gear(advance, "Advance cards")
 menu_reset = build_action(reset, _("Undo reschedulings in all cards"))
 
 menu_disperse_siblings = build_action(disperse_siblings, _("Disperse Siblings in all decks"))
+add_action_to_gear(disperse_siblings, "Disperse Siblings")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
