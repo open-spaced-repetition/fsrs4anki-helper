@@ -24,29 +24,55 @@ The easiest way to install FSRS4Anki Helper is through AnkiWeb: https://ankiweb.
 
 Set parameters for your FSRS4Anki scheduler. Then click `Tools -> FSRS4Anki Helper -> Reschedule all cards (Ctrl+R)`:
 
-![image](https://user-images.githubusercontent.com/32575846/218268780-1c757764-bd2b-42ba-8fab-3f42f526fdb4.png)
+![image](https://user-images.githubusercontent.com/32575846/234739908-336eda6f-11db-4db7-96c5-7e1fdb280119.png)
 
-If you only want to reschedule a specific deck, you can click `Reschedule cards in deck`.
+It will calculate the memory state by considering each card's full review history and then reschedules the review interval and due.
 
-![image](https://user-images.githubusercontent.com/32575846/218268855-b3f42550-538d-43d1-a711-daf111e74ddb.png)
+If the number of your revlogs exceeds 10k, the process may be time-consuming. So I don't recommend rescheduling all cards too much. Just use it after you modified the parameters.
 
-### Postpone
+It may induce backlog when your first rescheduling. If you feel uncomfortable, please use `Postpone` or set a lower `requestedRetention`.
 
-![image](https://user-images.githubusercontent.com/32575846/218268927-b47050d0-bf4f-4ebd-b84f-c51b28e00012.png)
+If you only want to reschedule a specific deck, you can click `Reschedule cards` in the options menu (gear icon in the right side of each deck).
 
-![image](https://user-images.githubusercontent.com/32575846/218268959-ee1f49d7-b41e-4de9-8d65-25fecb63474f.png)
+![image](https://user-images.githubusercontent.com/32575846/234741376-ac88bb39-c7be-40ea-b7cb-dbd7d1ac148e.png)
 
-### Advance
+#### Reschedule cards reviewed in the last X days
 
-![image](https://user-images.githubusercontent.com/32575846/218268901-8b735296-fea4-426d-949e-11b1f3a410a8.png)
+Due to the poor performance of rescheduling, I develop this feature. It filters the cards reviewed recently, so it is pretty fast.
 
-![image](https://user-images.githubusercontent.com/32575846/218268974-4d6f8983-24c5-48aa-b942-b3f82a05ec37.png)
+![image](https://user-images.githubusercontent.com/32575846/234741784-58510653-7c19-4f8c-a9e5-a8a466503e50.png)
 
-### Load Balance & Free Weekend
+You can configure the X in the config of FSRS4Anki Helper add-on.
 
-![image](https://user-images.githubusercontent.com/32575846/218268644-7432790e-4665-430d-aa22-5826700e17bd.png)
+![image](https://user-images.githubusercontent.com/32575846/234742188-9ee70dd8-009f-4371-a47d-d23282a7b2f2.png)
+
+#### Auto reschedule recent reviews after sync
+
+Many people use AnkiDroid which haven't supported FSRS. This feature can filter the cards reviewed in other devices after sync and auto apply rescheduling to them.
+
+![image](https://user-images.githubusercontent.com/32575846/234742500-c5bc748d-5f5e-4307-a27b-346edb0ae1d2.png)
+
+### Postpone & Advance
+
+These features can apply a temporary `requestedRetention` to cards which have been scheduled or rescheduled by FSRS. It doesn't modify the `requestedRetention` in the custom scheduling code.
+
+![image](https://user-images.githubusercontent.com/32575846/234742970-4733a244-aaad-4fab-9434-726ffac8b280.png)
+
+![image](https://user-images.githubusercontent.com/32575846/234743037-53a0d0bb-0ee5-4da4-984b-68a99b949c04.png)
+
+### Load Balance & No Anki
+
+Load Balance can smooth the number of reviews per day during rescheduling. But it doesn't guarantee perfect balance within a single rescheduling. It would have a smoother load after each rescheduling. This feature does render the rescheduling process more time-intensive.
+
+No Anki can avoid configured days of week when rescheduling. But it doesn't guarantee perfect avoidance because it should consider the fuzz range of cards.
+
+![image](https://user-images.githubusercontent.com/32575846/234743512-8a0761e1-cc2a-49d4-9f8e-1b37d23291be.png)
 
 ### Disperse Siblings
+
+Disperse Siblings can reschedule the date of siblings (cards from same note) to avoid showing them too closely.
+
+![image](https://user-images.githubusercontent.com/32575846/234745480-78d43334-0822-475a-a9ed-f3966cebc448.png)
 
 ## Mechanism
 
