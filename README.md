@@ -6,6 +6,7 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 - **Advance** undue cards whose retention is lower than your target.
 - **Balance** the load during rescheduling (based on fuzz).
 - **No Anki** on Free Days (such as weekends) during rescheduling (based on load balance).
+- **Disperse** Siblings (cards with the same note) to avoid interference & reminder.
 
 ## Requirement
 
@@ -29,14 +30,11 @@ If you only want to reschedule a specific deck, you can click `Reschedule cards 
 
 ![image](https://user-images.githubusercontent.com/32575846/218268855-b3f42550-538d-43d1-a711-daf111e74ddb.png)
 
-
 ### Postpone
 
 ![image](https://user-images.githubusercontent.com/32575846/218268927-b47050d0-bf4f-4ebd-b84f-c51b28e00012.png)
 
 ![image](https://user-images.githubusercontent.com/32575846/218268959-ee1f49d7-b41e-4de9-8d65-25fecb63474f.png)
-
-
 
 ### Advance
 
@@ -47,3 +45,9 @@ If you only want to reschedule a specific deck, you can click `Reschedule cards 
 ### Load Balance & Free Weekend
 
 ![image](https://user-images.githubusercontent.com/32575846/218268644-7432790e-4665-430d-aa22-5826700e17bd.png)
+
+### Disperse Siblings
+
+## Mechanism
+
+Please see this wiki page: [FSRS4Anki Helper WIKI](https://github.com/open-spaced-repetition/fsrs4anki-helper/wiki)
