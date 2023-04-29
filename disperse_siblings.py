@@ -61,7 +61,7 @@ def get_siblings(did=None, filter=False, filtered_nid_string=""):
         siblings_dict[nid].append((cid, did, stability))
     return siblings_dict
 
-def get_due_range(cid, parameters, stability):
+def get_due_range(cid, parameters, stability, siblings_cnt):
     card = mw.col.get_card(cid)
     ivl = card.ivl
     if card.odid:
@@ -80,7 +80,7 @@ def get_due_range(cid, parameters, stability):
         return range(due, due + 1), last_due
     min_ivl = max(2, int(round(new_ivl * 0.95 - 1)))
     max_ivl = int(round(new_ivl * 1.05 + 1))
-    step = max(1, math.floor((max_ivl - min_ivl) / 4))
+    step = max(1, math.floor((max_ivl - min_ivl) / (4 if siblings_cnt <= 4 else 2)))
     due_range = range(last_due + min_ivl, last_due + max_ivl + 1, step)
     if due_range.stop < mw.col.sched.today:
         due_range = range(due, due + 1)
@@ -88,7 +88,8 @@ def get_due_range(cid, parameters, stability):
 
 
 def disperse(siblings):
-    due_ranges_last_due = {cid: get_due_range(cid, did_to_deck_parameters[did], stability) for cid, did, stability in siblings}
+    siblings_cnt = len(siblings)
+    due_ranges_last_due = {cid: get_due_range(cid, did_to_deck_parameters[did], stability, siblings_cnt) for cid, did, stability in siblings}
     due_ranges = {cid: due_range for cid, (due_range, last_due) in due_ranges_last_due.items()}
     last_due = {cid: last_due for cid, (due_range, last_due) in due_ranges_last_due.items()}
     latest_due = max(last_due.values())
