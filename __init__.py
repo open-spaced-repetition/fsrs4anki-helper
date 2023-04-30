@@ -15,7 +15,7 @@ from .configuration import (
     Config,
     run_on_configuration_change
 )
-
+from .optimizer import optimize
 
 """
 Acknowledgement to Arthur Milchior, Carlos Duarte and oakkitten.
@@ -101,6 +101,7 @@ menu_reset = build_action(reset, _("Undo reschedulings in all cards"))
 
 menu_disperse_siblings = build_action(disperse_siblings, _("Disperse Siblings in all decks"))
 add_action_to_gear(disperse_siblings, "Disperse Siblings")
+add_action_to_gear(optimize, "Optimize")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
