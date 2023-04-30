@@ -85,20 +85,22 @@ def reschedule_recent(did):
 
 menu_reschedule = build_action(reschedule, _(
     "Reschedule all cards"), "CTRL+SHIFT+R")
-add_action_to_gear(reschedule, "Reschedule cards in deck")
+add_action_to_gear(reschedule, "Reschedule cards")
 
 menu_reschedule_recent = build_action(
     reschedule_recent, _(f"Reschedule cards reviewed in the last {config.days_to_reschedule} days"), "CTRL+R")
+add_action_to_gear(reschedule_recent, "Reschedule cards (recently reviewed)")
 
 menu_postpone = build_action(postpone, _("Postpone cards in all decks"))
-add_action_to_gear(postpone, "Postpone cards in deck")
+add_action_to_gear(postpone, "Postpone cards")
 
 menu_advance = build_action(advance, _("Advance cards in all decks"))
-add_action_to_gear(advance, "Advance cards in deck")
+add_action_to_gear(advance, "Advance cards")
 
 menu_reset = build_action(reset, _("Undo reschedulings in all cards"))
 
 menu_disperse_siblings = build_action(disperse_siblings, _("Disperse Siblings in all decks"))
+add_action_to_gear(disperse_siblings, "Disperse Siblings")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
