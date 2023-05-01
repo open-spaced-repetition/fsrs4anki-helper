@@ -6,6 +6,7 @@ from aqt.qt import QProcess
 from aqt.utils import showInfo, showCritical
 
 import os
+import shutil
 import sys
 import json
 
@@ -34,8 +35,6 @@ class ExclusiveWorker:
 
 _worker = ExclusiveWorker()
 
-
-
 def optimize(did: int):
     global _worker
 
@@ -63,7 +62,7 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
     exporter.includeMedia = False
     exporter.includeSched = True
 
-    filepath = f"{tmp_dir_path}/{name}.apkg"
+    filepath = f"{tmp_dir_path}/{did}.apkg"
     
     if not os.path.isdir(dir_path):
         os.mkdir(dir_path)
@@ -100,9 +99,28 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
         result[3] = f'"deckName": "{name}",'
         result = "\n".join(result)
 
-        showInfo(result)
+        saved_results_path = f"{dir_path}/saved.json"
+
+        try:
+            with open(saved_results_path, "r+") as f:
+                saved_results = json.load(f)
+        except FileNotFoundError:
+            saved_results = dict()
+
+        saved_results[did] = result
+
+        contents = '\n'.join(saved_results.values())
+        output = f"const deckParams = [\n{contents}]" 
+
+        showInfo(output)
+
+        with open(saved_results_path, "w+") as f:
+            json.dump(saved_results, f)
+
+        shutil.rmtree(tmp_dir_path)
 
     # Cant just call the library functions directly without anki freezing
+    print(" ".join([sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", optimized_out_path]))
     _worker.work(
         [sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", optimized_out_path],
         on_complete,
@@ -126,7 +144,7 @@ title="Install local optimizer?")
     if confirmed: 
         _worker.work(
             [sys.executable, "-m", "pip", "install", 
-                'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.0#subdirectory=pip',
+                'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.1#subdirectory=package',
                 ],
                 lambda: showInfo("Optimizer installed successfully, restart for it to take effect"),
                 "Installing optimizer"
