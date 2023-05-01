@@ -29,13 +29,21 @@ class ExclusiveWorker:
             self.locked.value = True
             self.process.start()
             self.message = message
-        tooltip(self.message) # Print the tooltip to the console even if nothing changed so that the user can see what its doing
+            tooltip(self.message) # Print the tooltip to the console even if nothing changed so that the user can see what its doing
+        else:
+            tooltip(f"Waiting for '{self.message}' to complete")
 
 _worker = ExclusiveWorker()
 install_checked = False
 
 def optimize(did: int):
     global _worker
+
+    try:
+        from fsrs4anki_optimizer import Optimizer
+    except ImportError:
+        showWarning("You need to have the optimizer installed in order to optimize your decks using this option")
+        return
 
     exporter = AnkiPackageExporter(mw.col)
 
@@ -72,14 +80,10 @@ def optimize(did: int):
 
     out_save = os.path.expanduser("~/fsrs4ankioptimized")
 
-    def noop():
-        pass
+    def optimize():
+        subprocess.run([sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", out_save])
 
-    _worker.work(noop)
-    # This should probably trigger a prompt warning the user its about to install the module
-
-    #tooltip("Generating optimized parameters (This can take some time)")
-    #subprocess.run([sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", out_save])
+    _worker.work(optimize)
 
     #tooltip(f"Parameters saved at \"{out_save}\"")
 
@@ -90,6 +94,9 @@ def install(_):
 """This will install the optimizer onto your system.
 This will occupy 0.5-1GB of space and can take some time.
 Anki will appear frozen until it is complete.
+
+There are other options if you just need to optimize a few decks
+(consult https://github.com/open-spaced-repetition/fsrs4anki/releases)
 
 Proceed?""",
 title="Install local optimizer?")
