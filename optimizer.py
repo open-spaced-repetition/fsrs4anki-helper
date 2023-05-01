@@ -1,35 +1,31 @@
 from .utils import *
 
 from anki.exporting import AnkiPackageExporter
+from aqt.qt import QProcess
+from aqt.utils import showInfo
 
 import os
-import subprocess
-from multiprocessing import Process, Value
-import ctypes
 import sys
 import json
 
 class ExclusiveWorker:
     """Used to ensure that 2 tasks dont run at once"""
-    process : None | Process = None
-    locked = Value(ctypes.c_bool, False)
+    process = QProcess()
+    working = False
     message = ""
 
-    def work(self, target, args=[], message="Something is processing"):
-        """DO NOT use tooltips in the target function, for some reason it crashes my whole computer"""
+    def work(self, args=[], on_complete=lambda:None, message="Something is processing"):
+        if not self.working:
+            
+            def wrapper():
+                on_complete()
+                self.process.finished.disconnect()
+                self.working = False
 
-        if not self.locked.value:
-            def wrapper(*args, **kwargs):
-                target(*args[:-1], **kwargs)
-                
-                working = args[-1]
-                working.value = False
+            self.process.start(args[0], args[1:])
+            self.process.finished.connect(wrapper)
+            self.working = True
 
-            self.process = Process(target=wrapper, args=[*args, self.locked])
-            self.locked.value = True
-            self.process.start()
-            self.message = message
-            tooltip(self.message) # Print the tooltip to the console even if nothing changed so that the user can see what its doing
         else:
             tooltip(f"Waiting for '{self.message}' to complete")
 
@@ -81,7 +77,7 @@ def optimize(did: int):
     out_save = os.path.expanduser("~/fsrs4ankioptimized")
 
     def optimize():
-        subprocess.run([sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", out_save])
+        _worker.work([sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", out_save])
 
     _worker.work(optimize)
 
@@ -93,7 +89,7 @@ def install(_):
     confirmed = askUser(
 """This will install the optimizer onto your system.
 This will occupy 0.5-1GB of space and can take some time.
-Anki will appear frozen until it is complete.
+Please dont close anki until the popup arrives telling you its complete
 
 There are other options if you just need to optimize a few decks
 (consult https://github.com/open-spaced-repetition/fsrs4anki/releases)
@@ -101,15 +97,11 @@ There are other options if you just need to optimize a few decks
 Proceed?""",
 title="Install local optimizer?")
 
-    if confirmed:
-        # I opted not to use subprocess's (and not freeze anki) purely because its impossible to notify the user when its completed
-        # If someone can figure it out I implore you to implement it
-        # _worker.work(_install,[],"installing/updating optimizer (Leave anki open. This may take some time)")
-
-        _install()
-        tooltip("Optimizer package installed successfully, Restart anki for it to take effect")
-
-def _install():
-    subprocess.run([sys.executable, "-m", "pip", "install", 
-            'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.0#subdirectory=pip']
-            ).check_returncode()
+    if confirmed: 
+        _worker.work(
+            [sys.executable, "-m", "pip", "install", 
+                'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.0#subdirectory=pip',
+                ],
+                lambda: showInfo("Optimizer installed successfully, restart for it to take effect"),
+                "Installing optimizer"
+            )
