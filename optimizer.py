@@ -25,8 +25,6 @@ class ExclusiveWorker:
                 working = args[-1]
                 working.value = False
 
-                print("In wrapper")
-
             self.process = Process(target=wrapper, args=[*args, self.locked])
             self.locked.value = True
             self.process.start()
@@ -37,7 +35,7 @@ _worker = ExclusiveWorker()
 install_checked = False
 
 def optimize(did: int):
-    global _worker, install_checked
+    global _worker
 
     exporter = AnkiPackageExporter(mw.col)
 
@@ -72,21 +70,6 @@ def optimize(did: int):
 
     # The actual optimizer bit
 
-    def install():
-        print("Hi")
-        subprocess.run([sys.executable, "-m", "pip", "install", 
-                'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.0#subdirectory=pip']
-                )
-        #tooltip("Installed")
-
-    print(f"{_worker.locked=}")
-
-    if not install_checked:
-        print("In this place for some reason ", install_checked)
-        _worker.work(install,[],"installing/updating optimizer")
-        install_checked = True
-        return
-
     out_save = os.path.expanduser("~/fsrs4ankioptimized")
 
     def noop():
@@ -99,3 +82,27 @@ def optimize(did: int):
     #subprocess.run([sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", out_save])
 
     #tooltip(f"Parameters saved at \"{out_save}\"")
+
+def install(_):
+    global _worker
+
+    confirmed = askUser(
+"""This will install the optimizer onto your system.
+This will occupy 0.5-1GB of space and can take some time.
+Anki will appear frozen until it is complete.
+
+Proceed?""",
+title="Install local optimizer?")
+
+    if confirmed:
+        # I opted not to use subprocess's (and not freeze anki) purely because its impossible to notify the user when its completed
+        # If someone can figure it out I implore you to implement it
+        _worker.work(_install,[],"installing/updating optimizer (Leave anki open. This may take some time)")
+
+        _install()
+        tooltip("Optimizer package installed successfully, Restart anki for it to take effect")
+
+def _install():
+    subprocess.run([sys.executable, "-m", "pip", "install", 
+            'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.0#subdirectory=pip']
+            ).check_returncode()

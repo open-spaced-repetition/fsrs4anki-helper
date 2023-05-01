@@ -15,7 +15,7 @@ from .configuration import (
     Config,
     run_on_configuration_change
 )
-from .optimizer import optimize
+from .optimizer import optimize, install as install_optimizer
 
 """
 Acknowledgement to Arthur Milchior, Carlos Duarte and oakkitten.
@@ -103,6 +103,8 @@ menu_disperse_siblings = build_action(disperse_siblings, _("Disperse Siblings in
 add_action_to_gear(disperse_siblings, "Disperse Siblings")
 add_action_to_gear(optimize, "Optimize")
 
+menu_install_optimizer = build_action(install_optimizer, _("Install local optimizer"))
+
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
 menu_for_helper.addAction(menu_load_balance)
@@ -114,6 +116,7 @@ menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
 menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
+menu_for_helper.addAction(menu_install_optimizer)
 
 
 def set_free_days(day, checked):
