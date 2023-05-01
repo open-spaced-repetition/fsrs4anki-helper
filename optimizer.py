@@ -22,10 +22,12 @@ class ExclusiveWorker:
                 self.process.finished.disconnect()
                 self.working = False
 
+            self.message = message
             self.process.start(args[0], args[1:])
             self.process.finished.connect(wrapper)
             self.working = True
-
+            
+            tooltip(self.message)
         else:
             tooltip(f"Waiting for '{self.message}' to complete")
 
