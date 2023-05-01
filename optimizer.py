@@ -89,20 +89,25 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
     with open(config_save, "w+") as f:
         json.dump(remembered_fallbacks, f)
 
-    # The actual optimizer bit
-
-    out_save = os.path.expanduser("~/fsrs4ankioptimized")
+    optimized_out_path = f"{tmp_dir_path}/tempresult.json"
 
     def on_complete():
-        showInfo(f"Optimized parameters saved at {out_save}")
+        with open(optimized_out_path, "r") as f:
+            result = f.read()
 
+        # Very dirty way of setting the decks name, todo: change this
+        result = result.split("\n")
+        result[3] = f'"deckName": "{name}",'
+        result = "\n".join(result)
+
+        showInfo(result)
+
+    # Cant just call the library functions directly without anki freezing
     _worker.work(
-        [sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", out_save],
+        [sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", optimized_out_path],
         on_complete,
         f"Optimizing {name}"
     )
-
-    #tooltip(f"Parameters saved at \"{out_save}\"")
 
 def install(_):
     global _worker
