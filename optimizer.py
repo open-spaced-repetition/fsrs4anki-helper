@@ -104,7 +104,7 @@ title="Install local optimizer?")
     if confirmed:
         # I opted not to use subprocess's (and not freeze anki) purely because its impossible to notify the user when its completed
         # If someone can figure it out I implore you to implement it
-        _worker.work(_install,[],"installing/updating optimizer (Leave anki open. This may take some time)")
+        # _worker.work(_install,[],"installing/updating optimizer (Leave anki open. This may take some time)")
 
         _install()
         tooltip("Optimizer package installed successfully, Restart anki for it to take effect")
