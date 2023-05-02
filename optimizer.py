@@ -125,9 +125,10 @@ f"""{{
     thread.finished.connect(worker.deleteLater)
     thread.start()
 
-def install(_):
-    global _worker
+downloader = QProcess()
 
+def install(_):
+    global downloader
     confirmed = askUser(
 """This will install the optimizer onto your system.
 This will occupy 0.5-1GB of space and can take some time.
@@ -140,10 +141,9 @@ Proceed?""",
 title="Install local optimizer?")
 
     if confirmed: 
-        _worker.work(
-            [sys.executable, "-m", "pip", "install", 
+        downloader.start(
+            sys.executable, ["-m", "pip", "install", 
                 'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.1#subdirectory=package',
-                ],
-                lambda: showInfo("Optimizer installed successfully, restart for it to take effect"),
-                "Installing optimizer"
-            )
+            ])
+        tooltip("Installing optimizer")
+        downloader.finished.connect(lambda: showInfo("Optimizer installed successfully, restart for it to take effect"),)
