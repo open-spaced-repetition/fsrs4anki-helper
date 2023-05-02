@@ -3,7 +3,7 @@ from .utils import *
 from anki.exporting import AnkiPackageExporter
 from anki.decks import DeckManager
 from aqt.qt import QProcess, QThread, QObject, pyqtSignal
-from aqt.utils import showInfo, showCritical
+from aqt.utils import showInfo, showCritical, askUserDialog
 
 import os
 import shutil
@@ -53,12 +53,13 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
     if not os.path.isdir(tmp_dir_path):
         os.mkdir(tmp_dir_path)
 
-
     preferences = mw.col.get_preferences()
 
     timezone = "Europe/London" # todo: Automate this
     revlog_start_date = "2000-01-01" # todo: implement this
     rollover = preferences.scheduling.rollover
+
+    get_optimal_retention = askUser("Find optional retention? (This takes a while)")
 
     class Worker(QObject):
         finished = pyqtSignal(str)
@@ -76,9 +77,12 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
             optimizer.define_model()
             optimizer.train()
 
-            self.stage.emit("Finding optimal retention")
-            optimizer.predict_memory_states()
-            optimizer.find_optimal_retention(False)
+            if get_optimal_retention:
+                self.stage.emit("Finding optimal retention")
+                optimizer.predict_memory_states()
+                optimizer.find_optimal_retention(False)
+            else:
+                optimizer.optimal_retention = 0.8
 
             result = \
 f"""{{
