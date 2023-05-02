@@ -10,6 +10,13 @@ import shutil
 import sys
 import json
 
+# https://stackoverflow.com/a/67238486
+# Disable this for anki to report a massive amount of errors
+from tqdm import tqdm
+from functools import partialmethod
+
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
+
 thread = QThread()
 
 def optimize(did: int):
@@ -77,14 +84,13 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
 f"""{{
     // Generated, Optimized anki deck settings
     // Need to add <div id=deck deck_name="{{{{Deck}}}}"></div> to your card's front template's first line.
-    "deckName": "{name}",// PLEASE CHANGE THIS TO THE DECKS PROPER NAME
+    "deckName": "{name}",
     "w": {optimizer.w},
     "requestRetention": {optimizer.optimal_retention},
     "maximumInterval": 36500,
     "easyBonus": 1.3,
     "hardInterval": 1.2,
-}},
-"""
+}},"""
 
             self.finished.emit(result)
 
