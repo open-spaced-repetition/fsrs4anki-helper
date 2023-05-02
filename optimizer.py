@@ -2,7 +2,7 @@ from .utils import *
 
 from anki.exporting import AnkiPackageExporter
 from anki.decks import DeckManager
-from aqt.qt import QProcess
+from aqt.qt import QProcess, QThread, QObject, pyqtSignal
 from aqt.utils import showInfo, showCritical
 
 import os
@@ -10,36 +10,13 @@ import shutil
 import sys
 import json
 
-class ExclusiveWorker:
-    """Used to ensure that 2 tasks dont run at once"""
-    process = QProcess()
-    working = False
-    message = ""
-
-    def work(self, args=[], on_complete=lambda:None, message="Something is processing"):
-        if not self.working:
-            
-            def wrapper():
-                on_complete()
-                self.process.finished.disconnect()
-                self.working = False
-
-            self.message = message
-            self.process.start(args[0], args[1:])
-            self.process.finished.connect(wrapper)
-            self.working = True
-
-            tooltip(self.message)
-        else:
-            tooltip(f"Waiting for '{self.message}' to complete")
-
-_worker = ExclusiveWorker()
+thread = QThread()
 
 def optimize(did: int):
-    global _worker
+    global thread
 
     try:
-        from fsrs4anki_optimizer import Optimizer # only used as a check to see if its installed
+        from fsrs4anki_optimizer import Optimizer
     except ImportError:
         showCritical(
 """
@@ -62,43 +39,56 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
     exporter.includeMedia = False
     exporter.includeSched = True
 
-    filepath = f"{tmp_dir_path}/{did}.apkg"
+    export_file_path = f"{tmp_dir_path}/{did}.apkg"
     
     if not os.path.isdir(dir_path):
         os.mkdir(dir_path)
     if not os.path.isdir(tmp_dir_path):
         os.mkdir(tmp_dir_path)
 
-    exporter.exportInto(filepath) 
 
     preferences = mw.col.get_preferences()
 
     timezone = "Europe/London" # todo: Automate this
-
     revlog_start_date = "2000-01-01" # todo: implement this
+    rollover = preferences.scheduling.rollover
 
-    # This is a workaround to the fact that module doesn't take these as arguments
-    remembered_fallbacks = { 
-        "timezone": timezone, 
-        "next_day": preferences.scheduling.rollover,
-        "revlog_start_date": revlog_start_date,
-        "preview": "n"
-    }
-    config_save = os.path.expanduser("~/.fsrs4anki_optimizer")
-    with open(config_save, "w+") as f:
-        json.dump(remembered_fallbacks, f)
+    class Worker(QObject):
+        finished = pyqtSignal(str)
+        stage = pyqtSignal(str)
 
-    optimized_out_path = f"{tmp_dir_path}/tempresult.json"
+        def optimize(self):
+            optimizer = Optimizer()
 
-    def on_complete():
-        with open(optimized_out_path, "r") as f:
-            result = f.read()
+            self.stage.emit("Exporting deck")
+            exporter.exportInto(export_file_path) # This is simply quicker than somehow making it so that anki doesn't zip the export
+            optimizer.anki_extract(export_file_path)
 
-        # Very dirty way of setting the decks name, todo: change this
-        result = result.split("\n")
-        result[3] = f'"deckName": "{name}",'
-        result = "\n".join(result)
+            self.stage.emit("Training model")
+            optimizer.create_time_series(timezone, revlog_start_date, rollover)
+            optimizer.define_model()
+            optimizer.train()
 
+            self.stage.emit("Finding optimal retention")
+            optimizer.predict_memory_states()
+            optimizer.find_optimal_retention(False)
+
+            result = \
+f"""{{
+    // Generated, Optimized anki deck settings
+    // Need to add <div id=deck deck_name="{{{{Deck}}}}"></div> to your card's front template's first line.
+    "deckName": "{name}",// PLEASE CHANGE THIS TO THE DECKS PROPER NAME
+    "w": {optimizer.w},
+    "requestRetention": {optimizer.optimal_retention},
+    "maximumInterval": 36500,
+    "easyBonus": 1.3,
+    "hardInterval": 1.2,
+}},
+"""
+
+            self.finished.emit(result)
+
+    def on_complete(result: str):
         saved_results_path = f"{dir_path}/saved.json"
 
         try:
@@ -120,12 +110,14 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
         shutil.rmtree(tmp_dir_path)
 
     # Cant just call the library functions directly without anki freezing
-    print(" ".join([sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", optimized_out_path]))
-    _worker.work(
-        [sys.executable, "-m", "fsrs4anki_optimizer", filepath, "-y", "-o", optimized_out_path],
-        on_complete,
-        f"Optimizing {name}"
-    )
+    worker = Worker()
+    worker.finished.connect(on_complete)
+    worker.stage.connect(tooltip)
+
+    worker.moveToThread(thread)
+    thread.started.connect(worker.optimize)
+    thread.finished.connect(worker.deleteLater)
+    thread.start()
 
 def install(_):
     global _worker
