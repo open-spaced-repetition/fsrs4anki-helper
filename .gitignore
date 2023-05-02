@@ -1,3 +1,13 @@
 .DS_Store
 .idea/
 __pycache__
+
+*.anki*
+*.apkg
+*.colpkg
+media
+meta
+
+*.csv
+*.tsv
+*.pth
