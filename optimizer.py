@@ -2,8 +2,8 @@ from .utils import *
 
 from anki.exporting import AnkiPackageExporter
 from anki.decks import DeckManager
-from aqt.qt import QProcess, QThread, QObject, pyqtSignal
-from aqt.utils import showInfo, showCritical, askUserDialog
+from aqt.qt import QProcess, QThread, QThreadPool, QRunnable, QObject, pyqtSignal
+from aqt.utils import showInfo, showCritical
 
 import os
 import shutil
@@ -18,14 +18,7 @@ from functools import partialmethod
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
 
 
-_thread = QThread() 
-
 def optimize(did: int):
-    global _thread
-
-    if _thread.isRunning(): # TODO: Fix cant move twice
-        tooltip("The optimizer is already busy.")
-        return
 
     try:
         from fsrs4anki_optimizer import Optimizer
@@ -66,24 +59,27 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
 
     get_optimal_retention = askUser("Find optional retention? (This takes a while)")
 
-    class Worker(QObject):
-        finished = pyqtSignal(str)
-        stage = pyqtSignal(str)
+    class OptimizeWorker(QRunnable):
+        class Events(QObject):
+            finished = pyqtSignal(str)
+            stage = pyqtSignal(str)
+        
+        events = Events()
 
-        def optimize(self):
+        def run(self):
             optimizer = Optimizer()
 
-            self.stage.emit("Exporting deck")
+            self.events.stage.emit("Exporting deck")
             exporter.exportInto(export_file_path) # This is simply quicker than somehow making it so that anki doesn't zip the export
             optimizer.anki_extract(export_file_path)
 
-            self.stage.emit("Training model")
+            self.events.stage.emit("Training model")
             optimizer.create_time_series(timezone, revlog_start_date, rollover)
             optimizer.define_model()
             optimizer.train()
 
             if get_optimal_retention:
-                self.stage.emit("Finding optimal retention")
+                self.events.stage.emit("Finding optimal retention")
                 optimizer.predict_memory_states()
                 optimizer.find_optimal_retention(False)
             else:
@@ -94,17 +90,15 @@ f"""{{
     // Generated, Optimized anki deck settings
     "deckName": "{name}",
     "w": {optimizer.w},
-    "requestRetention": {optimizer.optimal_retention}, {"//Un-optimized, Replace this with desired number" if get_optimal_retention else ""}
+    "requestRetention": {optimizer.optimal_retention}, {"//Un-optimized, Replace this with desired number." if get_optimal_retention else ""}
     "maximumInterval": 36500,
     "easyBonus": 1.3,
     "hardInterval": 1.2,
 }},"""
 
-            self.finished.emit(result)
+            self.events.finished.emit(result)
 
     def on_complete(result: str):
-        global _thread
-
         saved_results_path = f"{dir_path}/saved.json"
 
         try:
@@ -129,19 +123,14 @@ const deckParams = [
         with open(saved_results_path, "w+") as f:
             json.dump(saved_results, f)
 
-        shutil.rmtree(tmp_dir_path)
-        _thread.quit()
+        # shutil.rmtree(tmp_dir_path)
 
     # Cant just call the library functions directly without anki freezing
-    worker = Worker()
-    worker.finished.connect(on_complete)
-    worker.stage.connect(tooltip)
+    worker = OptimizeWorker()
+    worker.events.finished.connect(on_complete)
+    worker.events.stage.connect(tooltip)
 
-    worker.moveToThread(_thread)
-    _thread.started.connect(worker.optimize)
-    _thread.finished.connect(worker.deleteLater)
-    _thread.finished.connect(_thread.deleteLater)
-    _thread.start()
+    QThreadPool.globalInstance().start(worker)
 
 downloader = QProcess()
 
