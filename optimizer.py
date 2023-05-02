@@ -106,7 +106,12 @@ f"""{{
         saved_results[did] = result
 
         contents = '\n'.join(saved_results.values())
-        output = f"const deckParams = [\n{contents}]" 
+        output = \
+f"""// Copy this into your optimizer code
+
+const deckParams = [
+{contents}]
+"""
 
         showInfo(output)
 
