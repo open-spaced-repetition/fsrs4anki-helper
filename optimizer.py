@@ -17,10 +17,15 @@ from functools import partialmethod
 
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
 
-thread = QThread()
+
+_thread = QThread() 
 
 def optimize(did: int):
-    global thread
+    global _thread
+
+    if _thread.isRunning(): # TODO: Fix cant move twice
+        tooltip("The optimizer is already busy.")
+        return
 
     try:
         from fsrs4anki_optimizer import Optimizer
@@ -87,10 +92,9 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
             result = \
 f"""{{
     // Generated, Optimized anki deck settings
-    // Need to add <div id=deck deck_name="{{{{Deck}}}}"></div> to your card's front template's first line.
     "deckName": "{name}",
     "w": {optimizer.w},
-    "requestRetention": {optimizer.optimal_retention},
+    "requestRetention": {optimizer.optimal_retention}, {"//Un-optimized, Replace this with desired number" if get_optimal_retention else ""}
     "maximumInterval": 36500,
     "easyBonus": 1.3,
     "hardInterval": 1.2,
@@ -99,6 +103,8 @@ f"""{{
             self.finished.emit(result)
 
     def on_complete(result: str):
+        global _thread
+
         saved_results_path = f"{dir_path}/saved.json"
 
         try:
@@ -114,7 +120,8 @@ f"""{{
 f"""// Copy this into your optimizer code
 
 const deckParams = [
-{contents}]
+{contents}
+]
 """
 
         showInfo(output)
@@ -123,16 +130,18 @@ const deckParams = [
             json.dump(saved_results, f)
 
         shutil.rmtree(tmp_dir_path)
+        _thread.quit()
 
     # Cant just call the library functions directly without anki freezing
     worker = Worker()
     worker.finished.connect(on_complete)
     worker.stage.connect(tooltip)
 
-    worker.moveToThread(thread)
-    thread.started.connect(worker.optimize)
-    thread.finished.connect(worker.deleteLater)
-    thread.start()
+    worker.moveToThread(_thread)
+    _thread.started.connect(worker.optimize)
+    _thread.finished.connect(worker.deleteLater)
+    _thread.finished.connect(_thread.deleteLater)
+    _thread.start()
 
 downloader = QProcess()
 
