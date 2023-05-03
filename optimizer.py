@@ -6,7 +6,7 @@ from aqt.qt import QProcess, QThread, QThreadPool, QRunnable, QObject, pyqtSigna
 from aqt.utils import showInfo, showCritical
 
 import os
-import shutil
+import time
 import sys
 import json
 
@@ -53,7 +53,12 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
 
     preferences = mw.col.get_preferences()
 
-    timezone = "Europe/London" # todo: Automate this
+    # https://stackoverflow.com/questions/1111056/get-time-zone-information-of-the-system-in-python/10854983#10854983
+    offset = time.timezone if (time.localtime().tm_isdst == 0) else time.altzone
+    offset = offset / 60 / 60 * -1
+
+    timezone = f"Etc/GMT{'+' if offset >= 0 else ''}{int(offset)}" # Maybe make this overridable?
+    print(timezone)
     revlog_start_date = "2000-01-01" # todo: implement this
     rollover = preferences.scheduling.rollover
 
