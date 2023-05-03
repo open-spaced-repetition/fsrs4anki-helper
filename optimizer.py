@@ -2,8 +2,8 @@ from .utils import *
 
 from anki.exporting import AnkiPackageExporter
 from anki.decks import DeckManager
-from aqt.qt import QProcess, QThread, QThreadPool, QRunnable, QObject, pyqtSignal
-from aqt.utils import showInfo, showCritical
+from aqt.qt import QProcess, QThreadPool, QRunnable, QObject, pyqtSignal
+from aqt.utils import showInfo, showCritical, askUserDialog
 
 import os
 import time
@@ -61,7 +61,15 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
     revlog_start_date = "2000-01-01" # todo: implement this
     rollover = preferences.scheduling.rollover
 
-    get_optimal_retention = askUser("Find optional retention? (This takes a while)")
+    diag = askUserDialog("Find optimal retention? (This takes an extra long time)", ["Yes", "No", "Cancel"])
+    diag.setDefault(1)
+    resp = diag.run()
+
+    if resp == "Cancel": # If they hit cancel
+        tooltip("Optimization cancelled")
+        return
+    else:
+        get_optimal_retention = resp == "Yes" # If they didn't hit cancel convert answer to bool
 
     class OptimizeWorker(QRunnable):
         class Events(QObject):
