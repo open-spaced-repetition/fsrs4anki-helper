@@ -10,18 +10,17 @@ import time
 import sys
 import json
 
-# https://stackoverflow.com/a/67238486
-# Disable this for anki to report a massive amount of errors
-from tqdm import tqdm
-from functools import partialmethod
-
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
-
-
 def optimize(did: int):
 
     try:
         from fsrs4anki_optimizer import Optimizer
+
+        # https://stackoverflow.com/a/67238486
+        # Disable this for anki to report a massive amount of errors
+        from tqdm import tqdm
+        from functools import partialmethod
+
+        tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
     except ImportError:
         showCritical(
 """
