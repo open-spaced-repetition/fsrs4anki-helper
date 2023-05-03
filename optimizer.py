@@ -95,7 +95,7 @@ f"""{{
     // Generated, Optimized anki deck settings
     "deckName": "{name}",
     "w": {optimizer.w},
-    "requestRetention": {optimizer.optimal_retention}, {"//Un-optimized, Replace this with desired number." if get_optimal_retention else ""}
+    "requestRetention": {optimizer.optimal_retention}, {"//Un-optimized, Replace this with desired number." if not get_optimal_retention else ""}
     "maximumInterval": 36500,
     "easyBonus": 1.3,
     "hardInterval": 1.2,
