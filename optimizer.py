@@ -157,4 +157,10 @@ title="Install local optimizer?")
                 'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.1#subdirectory=package',
             ])
         tooltip("Installing optimizer")
-        downloader.finished.connect(lambda: showInfo("Optimizer installed successfully, restart for it to take effect"),)
+        def finished(exitCode,  exitStatus):
+            if exitCode == 0:
+                showInfo("Optimizer installed successfully, restart for it to take effect")
+            else:
+                showCritical(f"Optimizer wasnt installed, Error code: '{exitCode}', Error status '{exitStatus}'")
+
+        downloader.finished.connect(finished)
