@@ -13,14 +13,30 @@ import json
 def optimize(did: int):
 
     try:
-        from fsrs4anki_optimizer import Optimizer
-
         # https://stackoverflow.com/a/67238486
         # Disable this for anki to report a massive amount of errors
-        from tqdm import tqdm
-        from functools import partialmethod
 
-        tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
+        # Progress bar -> tooltip
+                
+        from tqdm import tqdm
+        #from functools import partialmethod
+
+        orig = tqdm.update
+        def update(self, n=1):
+            #orig(self,n)
+            self.n += n # Cant use positional or it doesn't work for some reason
+            if self.n % 10 == 0:
+                print(1)
+                tooltip(f"{self.n}/{self.total} {100 * self.n/self.total}%",period=10)
+
+        noop = lambda *args, **kwargs: noop
+
+        tqdm.update = update
+        tqdm.close = noop
+        tqdm.status_printer = noop
+
+        from fsrs4anki_optimizer import Optimizer
+        #tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
     except ImportError:
         showCritical(
 """
@@ -80,7 +96,7 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
 
         def run(self):
             optimizer = Optimizer()
-
+            
             self.events.stage.emit("Exporting deck")
             exporter.exportInto(export_file_path) # This is simply quicker than somehow making it so that anki doesn't zip the export
             optimizer.anki_extract(export_file_path)
