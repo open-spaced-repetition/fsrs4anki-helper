@@ -11,7 +11,7 @@ from .advance import advance
 from .reset import reset
 from .disperse_siblings import disperse_siblings
 from .stats import init_stats
-from .browser import init_browser
+from .browser.browser import init_browser
 from .configuration import (
     Config,
     run_on_configuration_change
