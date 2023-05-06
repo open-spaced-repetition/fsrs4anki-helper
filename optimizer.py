@@ -35,12 +35,13 @@ class Progress(QObject):
 
     @staticmethod
     def tooltip(n, total):
-        tooltip(f"{n}/{total} {100 * n/total}%")
+        tooltip(f"{_stage}: {n}/{total} {100 * n/total}%")
 
 
 update_period = 0.1 # how long the progress tooltips are refreshed in seconds
 _progress = Progress()
 _progress.progress.connect(Progress.tooltip)
+_stage = "Error"
 
 def optimize(did: int):
 
@@ -200,7 +201,12 @@ const deckParams = [
     # Cant just call the library functions directly without anki freezing
     worker = OptimizeWorker()
     worker.events.finished.connect(on_complete)
-    worker.events.stage.connect(tooltip)
+
+    def on_stage(stage):
+        global _stage
+        _stage = stage
+
+    worker.events.stage.connect(on_stage)
 
     QThreadPool.globalInstance().start(worker)
 
