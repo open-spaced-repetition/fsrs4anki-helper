@@ -9,9 +9,23 @@ from aqt.utils import showInfo, showCritical, askUserDialog
 import os
 import time
 import sys
-import json
 
 config = Config()
+
+RETENTION_IS_OPTIMIZED = "retention_is_optimized"
+REQUEST_RETENTION = "requested_retention"
+def displayResult(results: dict[str]):
+    return \
+f"""    {{
+        // Generated, Optimized anki deck settings
+        "deckName": "{results["name"]}",
+        "w": {results["w"]},
+        "requestRetention": {results[REQUEST_RETENTION]}, {"//Un-optimized, Replace this with desired number." if not results[RETENTION_IS_OPTIMIZED] else ""}
+        "maximumInterval": 36500,
+        "easyBonus": 1.3,
+        "hardInterval": 1.2,
+    }},"""
+
 
 def optimize(did: int):
 
@@ -99,7 +113,7 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
 
     class OptimizeWorker(QRunnable):
         class Events(QObject):
-            finished = pyqtSignal(str)
+            finished = pyqtSignal(dict)
             stage = pyqtSignal(str)
         
         events = Events()
@@ -116,27 +130,25 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
             optimizer.define_model()
             optimizer.train()
 
+            DEFAULT_RETENTION = 0.8
+
             if get_optimal_retention:
                 self.events.stage.emit("Finding optimal retention")
                 optimizer.predict_memory_states()
                 optimizer.find_optimal_retention(False)
             else:
-                optimizer.optimal_retention = 0.8
+                optimizer.optimal_retention = DEFAULT_RETENTION
 
-            result = \
-f"""{{
-    // Generated, Optimized anki deck settings
-    "deckName": "{name}",
-    "w": {optimizer.w},
-    "requestRetention": {optimizer.optimal_retention}, {"//Un-optimized, Replace this with desired number." if not get_optimal_retention else ""}
-    "maximumInterval": 36500,
-    "easyBonus": 1.3,
-    "hardInterval": 1.2,
-}},"""
+            result = {
+                "name": name,
+                "w": optimizer.w,
+                REQUEST_RETENTION: optimizer.optimal_retention,
+                RETENTION_IS_OPTIMIZED: get_optimal_retention
+                }
 
             self.events.finished.emit(result)
 
-    def on_complete(result: str):
+    def on_complete(result: dict[str]):
         
         config.load()
 
@@ -144,7 +156,7 @@ f"""{{
         saved_results[did] = result
         config.saved_optimized = saved_results
 
-        contents = '\n'.join(saved_results.values())
+        contents = '\n'.join(displayResult(a) for a in saved_results.values())
         output = \
 f"""// Copy this into your optimizer code.
 // You can edit this in the addon config.
