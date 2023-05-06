@@ -151,7 +151,7 @@ You have to do some reviews on the deck before you optimize it!""")
                 "name": name,
                 "w": optimizer.w,
                 REQUEST_RETENTION: optimizer.optimal_retention,
-                RETENTION_IS_OPTIMIZED: get_optimal_retention,
+                RETENTION_IS_NOT_OPTIMIZED: not get_optimal_retention,
                 
                 # Defaults
                 MAX_INTERVAL: 36500, 

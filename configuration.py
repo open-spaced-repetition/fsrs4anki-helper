@@ -11,7 +11,7 @@ AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 SAVED_OPTIMIZED_PARAMETERS = "saved_optimized"
 
 # Deck params
-RETENTION_IS_OPTIMIZED = "unoptimized_retention_warning"
+RETENTION_IS_NOT_OPTIMIZED = "unoptimized_retention_warning"
 REQUEST_RETENTION = "requested_retention"
 MAX_INTERVAL = "maximum_interval"
 EASY_BONUS = "easy_bonus"
@@ -94,7 +94,7 @@ f"""    {{
         // Generated, Optimized anki deck settings
         "deckName": "{result["name"]}",
         "w": {result["w"]},
-        "requestRetention": {result[REQUEST_RETENTION]}, {"//Un-optimized, Replace this with desired number." if not result[RETENTION_IS_OPTIMIZED] else ""}
+        "requestRetention": {result[REQUEST_RETENTION]}, {"//Un-optimized, Replace this with desired number." if result[RETENTION_IS_NOT_OPTIMIZED] else ""}
         "maximumInterval": {result[MAX_INTERVAL]},
         "easyBonus": {result[EASY_BONUS]},
         "hardInterval": {result[HARD_INTERVAL]},
