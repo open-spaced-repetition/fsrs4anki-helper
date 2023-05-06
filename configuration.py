@@ -7,7 +7,7 @@ LOAD_BALANCE = "load_balance"
 FREE_DAYS = "free_days"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
-
+SAVED_OPTIMIZED_PARAMETERS = "saved_optimized"
 
 def load_config():
     return mw.addonManager.getConfig(tag)
@@ -67,4 +67,13 @@ class Config:
     @auto_reschedule_after_sync.setter
     def auto_reschedule_after_sync(self, value):
         self.data[AUTO_RESCHEDULE_AFTER_SYNC] = value
+        self.save()
+
+    @property
+    def saved_optimized(self):
+        return self.data.get(SAVED_OPTIMIZED_PARAMETERS, {})
+
+    @saved_optimized.setter
+    def saved_optimized(self, value):
+        self.data[SAVED_OPTIMIZED_PARAMETERS] = value
         self.save()

@@ -1,4 +1,5 @@
 from .utils import *
+from .configuration import Config
 
 from anki.exporting import AnkiPackageExporter
 from anki.decks import DeckManager
@@ -10,6 +11,8 @@ import time
 import sys
 import json
 
+config = Config()
+
 def optimize(did: int):
 
     try:
@@ -18,7 +21,7 @@ def optimize(did: int):
         from tqdm import tqdm, notebook, cli
         #from functools import partialmethod
 
-        orig = tqdm.update
+        # orig = tqdm.update
         def update(self, n=1):
             #orig(self,n)
             self.n += n # Cant use positional or it doesn't work for some reason
@@ -134,19 +137,17 @@ f"""{{
             self.events.finished.emit(result)
 
     def on_complete(result: str):
-        saved_results_path = f"{dir_path}/saved.json"
+        
+        config.load()
 
-        try:
-            with open(saved_results_path, "r+") as f:
-                saved_results = json.load(f)
-        except FileNotFoundError:
-            saved_results = dict()
-
+        saved_results = config.saved_optimized
         saved_results[did] = result
+        config.saved_optimized = saved_results
 
         contents = '\n'.join(saved_results.values())
         output = \
-f"""// Copy this into your optimizer code
+f"""// Copy this into your optimizer code.
+// You can edit this in the addon config.
 
 const deckParams = [
 {contents}
@@ -154,9 +155,6 @@ const deckParams = [
 """
 
         showInfo(output)
-
-        with open(saved_results_path, "w+") as f:
-            json.dump(saved_results, f)
 
         # shutil.rmtree(tmp_dir_path)
 
