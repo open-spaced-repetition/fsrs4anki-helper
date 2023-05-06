@@ -39,11 +39,15 @@ def optimize(did: int):
         #from functools import partialmethod
 
         # orig = tqdm.update
+        update_period = 0.1 # seconds
+        last_print = time.time()
         def update(self, n=1):
+            nonlocal last_print
             #orig(self,n)
             self.n += n # Cant use positional or it doesn't work for some reason
-            if self.n % 100 == 0:
-                tooltip(f"{self.n}/{self.total} {100 * self.n/self.total}%",period=10)
+            if last_print + update_period < time.time():
+                tooltip(f"{self.n}/{self.total} {100 * self.n/self.total}%", int(update_period * 1000)) # Period argument doesn't work?!?
+                last_print = time.time()
 
         noop = lambda *args, **kwargs: noop
         orig_init = tqdm.__init__
