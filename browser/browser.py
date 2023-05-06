@@ -123,8 +123,10 @@ def _on_browser_did_search_handle_custom_search_parameters(ctx: SearchContext):
         return
 
     try:
+        original_ids = ctx.ids
         for node in custom_search_nodes:
             ctx.ids = node.filter_ids(ctx.ids)
+        ctx.ids = [id for id in original_ids if id in ctx.ids]
     except ValueError as e:
         showWarning(f"FSRS search error: {e}")
         return
