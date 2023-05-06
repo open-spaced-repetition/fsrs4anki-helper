@@ -28,21 +28,20 @@ _stage = "Error"
 
 def optimize(did: int):
 
-    try:
+    try: # This code is here so that when it fails the popup can show immediately rather than after the after the cancel prompt
         # Progress bar -> tooltip
                 
         from tqdm import tqdm, cli
         from tqdm.notebook import tqdm_notebook
-        #from functools import partialmethod
 
         # orig = tqdm.update
         last_print = time.time()
         def update(self, n=1):
             nonlocal last_print
             #orig(self,n)
-            self.n += n # Cant use positional or it doesn't work for some reason
+            self.n += n
             if last_print + update_period < time.time():
-                _progress.progress.emit(self.n, self.total) # Period argument doesn't work?!?
+                _progress.progress.emit(self.n, self.total)
                 last_print = time.time()
 
         noop = lambda *args, **kwargs: noop
@@ -61,11 +60,8 @@ def optimize(did: int):
 
         tqdm.update = update
         tqdm.close = noop
-        # tqdm.status_printer = noop
-        # tqdm_notebook.status_printer = noop
 
         from fsrs4anki_optimizer import Optimizer
-        #tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
     except ImportError:
         showCritical(
 """
@@ -103,7 +99,7 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
 
     timezone = f"Etc/GMT{'+' if offset >= 0 else ''}{int(offset)}" # Maybe make this overridable?
     print(timezone)
-    revlog_start_date = "2000-01-01" # todo: implement this
+    revlog_start_date = "2000-01-01" # TODO: implement this as a config option
     rollover = preferences.scheduling.rollover
 
     diag = askUserDialog("Find optimal retention? (This takes an extra long time)", ["Yes", "No", "Cancel"])
@@ -177,7 +173,7 @@ You have to do some reviews on the deck before you optimize it!""")
 
         # shutil.rmtree(tmp_dir_path)
 
-    # Cant just call the library functions directly without anki freezing
+    # Uses workers to avoid blocking main thread
     worker = OptimizeWorker()
     worker.events.finished.connect(on_complete)
 
@@ -200,12 +196,12 @@ def install(_):
 You will need to install python or at least pip for this to work.
 
 This will occupy about 1GB of space and can take some time.
-Please dont close anki until the popup arrives telling you its complete
+Please dont close anki until the popup arrives telling you its complete.
 
 I reccomend that you launch anki with command line (anki-console.bat on windows) as otherwise there is no progress bar.
 
 There are other options if you just need to optimize a few decks
-(consult https://github.com/open-spaced-repetition/fsrs4anki/releases)
+(consult https://github.com/open-spaced-repetition/fsrs4anki/releases).
 
 Proceed?""",
 title="Install local optimizer?")
