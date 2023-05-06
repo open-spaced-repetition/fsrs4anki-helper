@@ -216,14 +216,14 @@ title="Install local optimizer?")
         PACKAGE = 'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.1#subdirectory=package'
 
         if platform.system() == "Windows": # For windows
-            ankipath = sys.executable
-            ankilibpath = os.path.dirname(ankipath)
-            ankilibpath = os.path.join(ankilibpath, "lib")
+            anki_path = sys.executable
+            anki_lib_path = os.path.dirname(anki_path)
+            anki_lib_path = os.path.join(anki_lib_path, "lib")
 
-            print(ankilibpath)
+            print(anki_lib_path)
 
             # https://stackoverflow.com/a/2916320
-            downloader.start("pip", ["install", f'--target={ankilibpath}', PACKAGE])
+            downloader.start("pip", ["install", f'--target={anki_lib_path}', PACKAGE])
         else: # For linux (mac untested)
             downloader.start(sys.executable, ["-m", "pip", "install", PACKAGE])
 
