@@ -13,27 +13,34 @@ import json
 def optimize(did: int):
 
     try:
-        # https://stackoverflow.com/a/67238486
-        # Disable this for anki to report a massive amount of errors
-
         # Progress bar -> tooltip
                 
-        from tqdm import tqdm
+        from tqdm import tqdm, notebook, cli
         #from functools import partialmethod
 
         orig = tqdm.update
         def update(self, n=1):
             #orig(self,n)
             self.n += n # Cant use positional or it doesn't work for some reason
-            if self.n % 10 == 0:
-                print(1)
+            if self.n % 100 == 0:
                 tooltip(f"{self.n}/{self.total} {100 * self.n/self.total}%",period=10)
 
         noop = lambda *args, **kwargs: noop
+        orig_init = tqdm.__init__
+
+        def new_init(self, *args, **kwargs):
+            kwargs["file"] = sys.stdout
+            orig_init(self, *args, **kwargs)
+
+        tqdm.__init__ = new_init
 
         tqdm.update = update
         tqdm.close = noop
         tqdm.status_printer = noop
+        
+
+        notebook.status_printer = noop
+        cli.status_printer = noop
 
         from fsrs4anki_optimizer import Optimizer
         #tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
@@ -179,12 +186,11 @@ title="Install local optimizer?")
         downloader.start(
             sys.executable, ["-m", "pip", "install", 
                 'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.1#subdirectory=package',
-            ])
+            ], )
         tooltip("Installing optimizer")
         def finished(exitCode,  exitStatus):
             if exitCode == 0:
                 showInfo("Optimizer installed successfully, restart for it to take effect")
             else:
                 showCritical(f"Optimizer wasnt installed, Error code: '{exitCode}', Error status '{exitStatus}'")
-
         downloader.finished.connect(finished)
