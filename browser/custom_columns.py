@@ -67,7 +67,7 @@ class StabilityColumn(CustomColumn):
         return f"{custom_data['s']} days"
     
     def order_by_str(self) -> str:
-        return "json_extract(json_extract(data, '$.cd'), '$.s') DESC"
+        return "json_extract(json_extract(c.data, '$.cd'), '$.s') DESC"
 
 
 class DifficultyColumn(CustomColumn):
@@ -90,7 +90,7 @@ class DifficultyColumn(CustomColumn):
         return custom_data['d']
     
     def order_by_str(self) -> str:
-        return "json_extract(json_extract(data, '$.cd'), '$.d') DESC"
+        return "json_extract(json_extract(c.data, '$.cd'), '$.d') DESC"
 
 
 class RetentionColumn(CustomColumn):
@@ -122,6 +122,6 @@ class RetentionColumn(CustomColumn):
     
     def order_by_str(self) -> str:
         return f"""case when odid==0 
-        then ({mw.col.sched.today} - (due-ivl)) / json_extract(json_extract(data, '$.cd'), '$.s')
-        else ({mw.col.sched.today} - (odue-ivl)) / json_extract(json_extract(data, '$.cd'), '$.s')
+        then ({mw.col.sched.today} - (due-ivl)) / json_extract(json_extract(c.data, '$.cd'), '$.s')
+        else ({mw.col.sched.today} - (odue-ivl)) / json_extract(json_extract(c.data, '$.cd'), '$.s')
         end ASC"""
