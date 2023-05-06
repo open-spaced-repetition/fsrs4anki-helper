@@ -17,6 +17,8 @@ from .configuration import (
 )
 from .optimizer import optimize, install as install_optimizer
 
+from aqt.utils import showInfo
+
 """
 Acknowledgement to Arthur Milchior, Carlos Duarte and oakkitten.
 I learnt a lot from their add-ons.
@@ -104,6 +106,7 @@ add_action_to_gear(disperse_siblings, "Disperse Siblings")
 add_action_to_gear(optimize, "Optimize")
 
 menu_install_optimizer = build_action(install_optimizer, _("Install local optimizer"))
+menu_show_saved_optimized = build_action(lambda _: showInfo(config.results_string()), _("Show saved optimized deck settings"))
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
@@ -117,6 +120,7 @@ menu_for_helper.addAction(menu_advance)
 menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
 menu_for_helper.addAction(menu_install_optimizer)
+menu_for_helper.addAction(menu_show_saved_optimized)
 
 
 def set_free_days(day, checked):
