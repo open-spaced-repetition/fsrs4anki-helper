@@ -66,8 +66,8 @@ def optimize(did: int):
 
         tqdm.update = update
         tqdm.close = noop
-        tqdm.status_printer = noop
-        tqdm_notebook.status_printer = noop
+        # tqdm.status_printer = noop
+        # tqdm_notebook.status_printer = noop
 
         from fsrs4anki_optimizer import Optimizer
         #tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
