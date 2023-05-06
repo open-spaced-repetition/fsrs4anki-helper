@@ -35,7 +35,8 @@ def optimize(did: int):
     try:
         # Progress bar -> tooltip
                 
-        from tqdm import tqdm, notebook, cli
+        from tqdm import tqdm, cli
+        from tqdm.notebook import tqdm_notebook
         #from functools import partialmethod
 
         # orig = tqdm.update
@@ -50,21 +51,23 @@ def optimize(did: int):
                 last_print = time.time()
 
         noop = lambda *args, **kwargs: noop
+        
         orig_init = tqdm.__init__
-
         def new_init(self, *args, **kwargs):
             kwargs["file"] = sys.stdout
             orig_init(self, *args, **kwargs)
-
         tqdm.__init__ = new_init
+
+        orig_notebook_init = tqdm_notebook.__init__
+        def new_notebook_init(self, *args, **kwargs):
+            kwargs["display"] = False
+            orig_notebook_init(self, *args, **kwargs)
+        tqdm_notebook.__init__ = new_notebook_init
 
         tqdm.update = update
         tqdm.close = noop
         tqdm.status_printer = noop
-        
-
-        notebook.status_printer = noop
-        cli.status_printer = noop
+        tqdm_notebook.status_printer = noop
 
         from fsrs4anki_optimizer import Optimizer
         #tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)
