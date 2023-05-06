@@ -148,7 +148,13 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
             optimizer.anki_extract(export_file_path)
 
             self.events.stage.emit("Training model")
-            optimizer.create_time_series(timezone, revlog_start_date, rollover)
+            try:
+                optimizer.create_time_series(timezone, revlog_start_date, rollover)
+            except ValueError as e:
+                showCritical(
+"""You got a value error, This usually happens when the deck has no or very few reviews.
+You have to do some reviews on the deck before you optimize it!""")
+                raise e
             optimizer.define_model()
             optimizer.train()
 
