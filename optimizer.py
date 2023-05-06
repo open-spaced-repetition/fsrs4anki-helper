@@ -9,6 +9,7 @@ from aqt.utils import showInfo, showCritical, askUserDialog
 import os
 import time
 import sys
+import platform
 
 config = Config()
 
@@ -192,8 +193,13 @@ def install(_):
     global downloader
     confirmed = askUser(
 """This will install the optimizer onto your system.
-This will occupy 0.5-1GB of space and can take some time.
+
+You will need to install python or at least pip for this to work.
+
+This will occupy about 1GB of space and can take some time.
 Please dont close anki until the popup arrives telling you its complete
+
+I reccomend that you launch anki with command line (anki-console.bat on windows) as otherwise there is no progress bar.
 
 There are other options if you just need to optimize a few decks
 (consult https://github.com/open-spaced-repetition/fsrs4anki/releases)
@@ -203,10 +209,20 @@ title="Install local optimizer?")
 
     if confirmed: 
         # Not everyone is going to have git installed but works for testing.
-        downloader.start(
-            sys.executable, ["-m", "pip", "install", 
-                'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.1#subdirectory=package',
-            ], )
+        PACKAGE = 'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.1#subdirectory=package'
+
+        if platform.system() == "Windows": # For windows
+            ankipath = sys.executable
+            ankilibpath = os.path.dirname(ankipath)
+            ankilibpath = os.path.join(ankilibpath, "lib")
+
+            print(ankilibpath)
+
+            # https://stackoverflow.com/a/2916320
+            downloader.start("pip", ["install", f'--target={ankilibpath}', PACKAGE])
+        else: # For linux (mac untested)
+            downloader.start(sys.executable, ["-m", "pip", "install", PACKAGE])
+
         tooltip("Installing optimizer")
         def finished(exitCode,  exitStatus):
             if exitCode == 0:
