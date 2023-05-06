@@ -3,11 +3,19 @@ from aqt import mw
 
 tag = mw.addonManager.addonFromModule(__name__)
 
+# Config
 LOAD_BALANCE = "load_balance"
 FREE_DAYS = "free_days"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 SAVED_OPTIMIZED_PARAMETERS = "saved_optimized"
+
+# Deck params
+RETENTION_IS_OPTIMIZED = "retention_is_optimized"
+REQUEST_RETENTION = "requested_retention"
+MAX_INTERVAL = "maximum_interval"
+EASY_BONUS = "easy_bonus"
+HARD_INTERVAL = "hard_interval"
 
 def load_config():
     return mw.addonManager.getConfig(tag)
@@ -77,3 +85,30 @@ class Config:
     def saved_optimized(self, value):
         self.data[SAVED_OPTIMIZED_PARAMETERS] = value
         self.save()
+
+    @staticmethod
+    def result_string(result: dict[str]):
+        """Produce the pasteable config for a singular result"""
+        return \
+f"""    {{
+        // Generated, Optimized anki deck settings
+        "deckName": "{result["name"]}",
+        "w": {result["w"]},
+        "requestRetention": {result[REQUEST_RETENTION]}, {"//Un-optimized, Replace this with desired number." if not result[RETENTION_IS_OPTIMIZED] else ""}
+        "maximumInterval": {result[MAX_INTERVAL]},
+        "easyBonus": {result[EASY_BONUS]},
+        "hardInterval": {result[HARD_INTERVAL]},
+    }},"""
+
+    def results_string(self):
+        """Get the config for every result"""
+        results = '\n'.join(self.result_string(a) for a in self.saved_optimized.values())
+    
+        return \
+f"""// Copy this into your optimizer code.
+// You can edit this in the addon config.
+
+const deckParams = [
+{results}
+]
+"""

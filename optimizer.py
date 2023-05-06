@@ -1,5 +1,5 @@
 from .utils import *
-from .configuration import Config
+from .configuration import *
 
 from anki.exporting import AnkiPackageExporter
 from anki.decks import DeckManager
@@ -12,23 +12,6 @@ import sys
 import platform
 
 config = Config()
-
-RETENTION_IS_OPTIMIZED = "retention_is_optimized"
-REQUEST_RETENTION = "requested_retention"
-MAX_INTERVAL = "maximum_interval"
-EASY_BONUS = "easy_bonus"
-HARD_INTERVAL = "hard_interval"
-def displayResult(result: dict[str]):
-    return \
-f"""    {{
-        // Generated, Optimized anki deck settings
-        "deckName": "{result["name"]}",
-        "w": {result["w"]},
-        "requestRetention": {result[REQUEST_RETENTION]}, {"//Un-optimized, Replace this with desired number." if not result[RETENTION_IS_OPTIMIZED] else ""}
-        "maximumInterval": {result[MAX_INTERVAL]},
-        "easyBonus": {result[EASY_BONUS]},
-        "hardInterval": {result[HARD_INTERVAL]},
-    }},"""
 
 class Progress(QObject):
     progress = pyqtSignal(int, int)
@@ -190,17 +173,7 @@ You have to do some reviews on the deck before you optimize it!""")
         saved_results[did] = result
         config.saved_optimized = saved_results
 
-        contents = '\n'.join(displayResult(a) for a in saved_results.values())
-        output = \
-f"""// Copy this into your optimizer code.
-// You can edit this in the addon config.
-
-const deckParams = [
-{contents}
-]
-"""
-
-        showInfo(output)
+        showInfo(config.results_string())
 
         # shutil.rmtree(tmp_dir_path)
 
