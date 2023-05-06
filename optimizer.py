@@ -186,6 +186,7 @@ const deckParams = [
     QThreadPool.globalInstance().start(worker)
 
 downloader = QProcess()
+downloader.setProcessChannelMode(QProcess.ProcessChannelMode.ForwardedChannels)
 
 def install(_):
     global downloader
@@ -201,6 +202,7 @@ Proceed?""",
 title="Install local optimizer?")
 
     if confirmed: 
+        # Not everyone is going to have git installed but works for testing.
         downloader.start(
             sys.executable, ["-m", "pip", "install", 
                 'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.1#subdirectory=package',
@@ -210,5 +212,10 @@ title="Install local optimizer?")
             if exitCode == 0:
                 showInfo("Optimizer installed successfully, restart for it to take effect")
             else:
-                showCritical(f"Optimizer wasnt installed, Error code: '{exitCode}', Error status '{exitStatus}'")
+                showCritical(
+f"""Optimizer wasn't installed. For more information, run anki in console mode. (on windows anki-console.bat)
+
+Error code: '{exitCode}', Error status '{exitStatus}'
+"""
+)
         downloader.finished.connect(finished)
