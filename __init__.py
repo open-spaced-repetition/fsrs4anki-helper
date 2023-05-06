@@ -11,6 +11,7 @@ from .advance import advance
 from .reset import reset
 from .disperse_siblings import disperse_siblings
 from .stats import init_stats
+from .browser.browser import init_browser
 from .configuration import (
     Config,
     run_on_configuration_change
@@ -169,3 +170,4 @@ def configuration_changed():
 
 init_sync_hook()
 init_stats()
+init_browser()
