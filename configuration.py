@@ -11,7 +11,7 @@ AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 SAVED_OPTIMIZED_PARAMETERS = "saved_optimized"
 
 # Deck params
-RETENTION_IS_OPTIMIZED = "retention_is_optimized"
+RETENTION_IS_OPTIMIZED = "unoptimized_retention_warning"
 REQUEST_RETENTION = "requested_retention"
 MAX_INTERVAL = "maximum_interval"
 EASY_BONUS = "easy_bonus"
@@ -102,11 +102,14 @@ f"""    {{
 
     def results_string(self):
         """Get the config for every result"""
+        self.load()
         results = '\n'.join(self.result_string(a) for a in self.saved_optimized.values())
     
         return \
 f"""// Copy this into your optimizer code.
-// You can edit this in the addon config.
+// You can edit these values in the addon's config.
+// The full optimizer you need to paste this into can be found here
+// https://github.com/open-spaced-repetition/fsrs4anki/blob/main/fsrs4anki_scheduler.js
 
 const deckParams = [
 {results}
