@@ -14,18 +14,20 @@ config = Config()
 
 RETENTION_IS_OPTIMIZED = "retention_is_optimized"
 REQUEST_RETENTION = "requested_retention"
-def displayResult(results: dict[str]):
+MAX_INTERVAL = "maximum_interval"
+EASY_BONUS = "easy_bonus"
+HARD_INTERVAL = "hard_interval"
+def displayResult(result: dict[str]):
     return \
 f"""    {{
         // Generated, Optimized anki deck settings
-        "deckName": "{results["name"]}",
-        "w": {results["w"]},
-        "requestRetention": {results[REQUEST_RETENTION]}, {"//Un-optimized, Replace this with desired number." if not results[RETENTION_IS_OPTIMIZED] else ""}
-        "maximumInterval": 36500,
-        "easyBonus": 1.3,
-        "hardInterval": 1.2,
+        "deckName": "{result["name"]}",
+        "w": {result["w"]},
+        "requestRetention": {result[REQUEST_RETENTION]}, {"//Un-optimized, Replace this with desired number." if not result[RETENTION_IS_OPTIMIZED] else ""}
+        "maximumInterval": {result[MAX_INTERVAL]},
+        "easyBonus": {result[EASY_BONUS]},
+        "hardInterval": {result[HARD_INTERVAL]},
     }},"""
-
 
 def optimize(did: int):
 
@@ -140,10 +142,16 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
                 optimizer.optimal_retention = DEFAULT_RETENTION
 
             result = {
+                # Calculated
                 "name": name,
                 "w": optimizer.w,
                 REQUEST_RETENTION: optimizer.optimal_retention,
-                RETENTION_IS_OPTIMIZED: get_optimal_retention
+                RETENTION_IS_OPTIMIZED: get_optimal_retention,
+                
+                # Defaults
+                MAX_INTERVAL: 36500, 
+                EASY_BONUS: 1.3,
+                HARD_INTERVAL: 1.2
                 }
 
             self.events.finished.emit(result)
