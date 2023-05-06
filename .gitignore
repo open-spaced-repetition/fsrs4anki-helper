@@ -11,3 +11,5 @@ meta
 *.csv
 *.tsv
 *.pth
+
+meta.json
