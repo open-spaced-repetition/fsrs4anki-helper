@@ -194,6 +194,7 @@ def install(_):
 """This will install the optimizer onto your system.
 
 You will need to install python or at least pip for this to work.
+You may also need to install git.
 
 This will occupy about 1GB of space and can take some time.
 Please dont close anki until the popup arrives telling you its complete.
