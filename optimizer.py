@@ -30,6 +30,18 @@ f"""    {{
         "hardInterval": {result[HARD_INTERVAL]},
     }},"""
 
+class Progress(QObject):
+    progress = pyqtSignal(int, int)
+
+    @staticmethod
+    def tooltip(n, total):
+        tooltip(f"{n}/{total} {100 * n/total}%")
+
+
+update_period = 0.1 # how long the progress tooltips are refreshed in seconds
+_progress = Progress()
+_progress.progress.connect(Progress.tooltip)
+
 def optimize(did: int):
 
     try:
@@ -40,14 +52,13 @@ def optimize(did: int):
         #from functools import partialmethod
 
         # orig = tqdm.update
-        update_period = 0.1 # seconds
         last_print = time.time()
         def update(self, n=1):
             nonlocal last_print
             #orig(self,n)
             self.n += n # Cant use positional or it doesn't work for some reason
             if last_print + update_period < time.time():
-                tooltip(f"{self.n}/{self.total} {100 * self.n/self.total}%", int(update_period * 1000)) # Period argument doesn't work?!?
+                _progress.progress.emit(self.n, self.total) # Period argument doesn't work?!?
                 last_print = time.time()
 
         noop = lambda *args, **kwargs: noop
