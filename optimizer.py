@@ -15,6 +15,7 @@ config = Config()
 
 class Progress(QObject):
     progress = pyqtSignal(int, int)
+    critical = pyqtSignal(str)
 
     @staticmethod
     def tooltip(n, total):
@@ -24,6 +25,7 @@ class Progress(QObject):
 update_period = 0.1 # how long the progress tooltips are refreshed in seconds
 _progress = Progress()
 _progress.progress.connect(Progress.tooltip)
+_progress.critical.connect(showCritical)
 _stage = "Error"
 
 def optimize(did: int):
@@ -130,7 +132,7 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
             try:
                 optimizer.create_time_series(timezone, revlog_start_date, rollover)
             except ValueError as e:
-                showCritical(
+                _progress.critical.emit(
 """You got a value error, This usually happens when the deck has no or very few reviews.
 You have to do some reviews on the deck before you optimize it!""")
                 raise e
