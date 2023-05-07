@@ -17,6 +17,18 @@ MAX_INTERVAL = "maximum_interval"
 EASY_BONUS = "easy_bonus"
 HARD_INTERVAL = "hard_interval"
 
+DEFAULT_PARAMS = {
+    "DEFAULT": {
+        "name": "global config for FSRS4Anki",
+        "w": [1, 1, 5, -0.5, -0.5, 0.2, 1.4, -0.12, 0.8, 2, -0.2, 0.2, 1],
+        REQUEST_RETENTION: 0.9,
+        MAX_INTERVAL: 36500,
+        EASY_BONUS: 1.3,
+        HARD_INTERVAL: 1.2,
+        RETENTION_IS_NOT_OPTIMIZED: False,
+    }
+}
+
 def load_config():
     return mw.addonManager.getConfig(tag)
 
@@ -79,7 +91,7 @@ class Config:
 
     @property
     def saved_optimized(self):
-        return self.data.get(SAVED_OPTIMIZED_PARAMETERS, {})
+        return self.data.get(SAVED_OPTIMIZED_PARAMETERS, DEFAULT_PARAMS)
 
     @saved_optimized.setter
     def saved_optimized(self, value):
