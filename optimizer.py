@@ -179,6 +179,7 @@ You have to do some reviews on the deck before you optimize it!""")
 
     def on_stage(stage):
         global _stage
+        tooltip(stage)
         _stage = stage
 
     worker.events.stage.connect(on_stage)
