@@ -95,10 +95,10 @@ def _on_browser_will_search_handle_custom_search_parameters(ctx: SearchContext):
     global custom_search_nodes
     custom_search_nodes = []
 
-    for m in re.finditer(r"(d|s|r)(<=|>=|!=|=|<|>)(\d+\.{0,1}\d*)", ctx.search):
+    for m in re.finditer(r"( |^)(d|s|r)(<=|>=|!=|=|<|>)(\d+\.{0,1}\d*)", ctx.search):
         if m.group(0) == "":
             continue
-        parameter_name, parameter_operator, parameter_value = m.group(1), m.group(2), m.group(3)
+        parameter_name, parameter_operator, parameter_value = m.group(2), m.group(3), m.group(4)
         try:
             custom_search_nodes.append(
                 CustomSearchNode.from_parameter_type_opt_and_value(
