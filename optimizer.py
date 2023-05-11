@@ -223,8 +223,10 @@ title="Install local optimizer?")
 
             # https://stackoverflow.com/a/2916320
             downloader.start("pip", ["install", f'--target={anki_lib_path}', PACKAGE])
-        else: # For linux (mac untested)
+        elif platform.system() == "Linux": # For linux (mac untested)
             downloader.start(sys.executable, ["-m", "pip", "install", PACKAGE])
+        else:
+            showCritical(f"Not supported for operating system: '{platform.system()}'")
 
         tooltip("Installing optimizer")
         def finished(exitCode,  exitStatus):
