@@ -78,7 +78,7 @@ def get_due_range(cid, parameters, stability, siblings_cnt):
     new_ivl = int(round(stability * math.log(parameters['r']) * easy_bonus / math.log(0.9)))
     if new_ivl <= 2.5:
         return range(due, due + 1), last_due
-    elapsed_days = mw.col.sched.today - last_due
+    elapsed_days = int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     min_ivl, max_ivl = get_fuzz_range(new_ivl, elapsed_days)
     step = max(1, math.floor((max_ivl - min_ivl) / (4 if siblings_cnt <= 4 else 2)))
     due_range = range(last_due + min_ivl, last_due + max_ivl + 1, step)
