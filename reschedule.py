@@ -70,10 +70,7 @@ class FSRS:
         if not self.enable_fuzz or ivl < 2.5:
             return ivl
         ivl = int(round(ivl))
-        min_ivl = max(2, int(round(ivl * 0.95 - 1)))
-        max_ivl = int(round(ivl * 1.05 + 1))
-        if ivl > self.elapsed_days:
-            min_ivl = max(min_ivl, self.elapsed_days + 1)
+        min_ivl, max_ivl = get_fuzz_range(ivl, self.elapsed_days)
         self.elapsed_days = 0
         if self.enable_load_balance:
             min_num_cards = 18446744073709551616
