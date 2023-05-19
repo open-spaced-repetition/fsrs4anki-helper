@@ -18,12 +18,14 @@ class FSRS:
     due_cnt_perday_from_first_day: Dict[int, int]
     learned_cnt_perday_from_today: Dict[int, int]
     card: Card
+    elapsed_days: int
 
     def __init__(self) -> None:
         self.w = [1., 1., 5., -0.5, -0.5, 0.2, 1.4, -0.12, 0.8, 2., -0.2, 0.2, 1.]
         self.enable_fuzz = False
         self.enable_load_balance = False
         self.free_days = []
+        self.elapsed_days = 0
     
     def set_load_balance(self):
         self.enable_load_balance = True
@@ -68,8 +70,8 @@ class FSRS:
         if not self.enable_fuzz or ivl < 2.5:
             return ivl
         ivl = int(round(ivl))
-        min_ivl = max(2, int(round(ivl * 0.95 - 1)))
-        max_ivl = int(round(ivl * 1.05 + 1))
+        min_ivl, max_ivl = get_fuzz_range(ivl, self.elapsed_days)
+        self.elapsed_days = 0
         if self.enable_load_balance:
             min_num_cards = 18446744073709551616
             best_ivl = ivl
@@ -202,10 +204,11 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
                     last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
                     last_rating = rating
                 else:
-                    ivl = datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal() - last_date.toordinal()
-                    if ivl <= 0 and (revlog.review_kind == 0 or revlog.review_kind == 2):
+                    elapsed_days = datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal() - last_date.toordinal()
+                    if elapsed_days <= 0 and (revlog.review_kind == 0 or revlog.review_kind == 2):
                         continue
-                    r = math.pow(0.9, ivl / s)
+                    r = math.pow(0.9, elapsed_days / s)
+                    fsrs.elapsed_days = elapsed_days
                     again_s = fsrs.next_forget_stability(fsrs.next_difficulty(d, 1), s, r)
                     hard_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 2), s, r)
                     good_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 3), s, r)

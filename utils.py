@@ -206,3 +206,11 @@ def has_manual_reset(revlogs: List[RevlogEntry]):
             return True
         last_kind = r.review_kind
     return False
+
+
+def get_fuzz_range(interval, elapsed_days):
+    min_ivl = max(2, int(round(interval * 0.95 - 1)))
+    max_ivl = int(round(interval * 1.05 + 1))
+    if interval > elapsed_days:
+        min_ivl = max(min_ivl, elapsed_days + 1)
+    return min_ivl, max_ivl
