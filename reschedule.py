@@ -205,7 +205,7 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
                     last_rating = rating
                 else:
                     elapsed_days = datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal() - last_date.toordinal()
-                    if elapsed_days <= 0 and revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN):
+                    if elapsed_days <= 0 and revlog.review_kind in (REVLOG_LRN, REVLOG_RELRN):
                         continue
                     r = math.pow(0.9, elapsed_days / s)
                     fsrs.elapsed_days = elapsed_days
