@@ -29,18 +29,18 @@ class FSRS:
     
     def set_load_balance(self):
         self.enable_load_balance = True
-        true_due = "case when odid==0 then due else odue end"
+        true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
         self.due_cnt_perday_from_first_day = {day: cnt for day, cnt in mw.col.db.all(
-            f"""select {true_due}, count() 
-                from cards 
-                where type = 2  
-                and queue != -1
-                group by {true_due}""")}
+            f"""SELECT {true_due}, count() 
+                FROM cards 
+                WHERE type = 2  
+                AND queue != -1
+                GROUP BY {true_due}""")}
         self.learned_cnt_perday_from_today = {day: cnt for day, cnt in mw.col.db.all(
-            f"""select (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid)
-                from revlog
-                where ease > 0
-                group by (id/1000-{mw.col.sched.day_cutoff})/86400""")}
+            f"""SELECT (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid)
+                FROM revlog
+                WHERE ease > 0
+                GROUP BY (id/1000-{mw.col.sched.day_cutoff})/86400""")}
 
     def init_stability(self, rating: int) -> float:
         return max(0.1, self.w[0] + self.w[1] * (rating - 1))

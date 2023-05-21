@@ -121,7 +121,7 @@ class RetentionColumn(CustomColumn):
         return f"{retention * 100:.2f}%"
     
     def order_by_str(self) -> str:
-        return f"""case when odid==0 
-        then ({mw.col.sched.today} - (due-ivl)) / json_extract(json_extract(c.data, '$.cd'), '$.s')
-        else ({mw.col.sched.today} - (odue-ivl)) / json_extract(json_extract(c.data, '$.cd'), '$.s')
-        end ASC"""
+        return f"""CASE WHEN odid==0 
+        THEN ({mw.col.sched.today} - (due-ivl)) / json_extract(json_extract(c.data, '$.cd'), '$.s')
+        ELSE ({mw.col.sched.today} - (odue-ivl)) / json_extract(json_extract(c.data, '$.cd'), '$.s')
+        END ASC"""
