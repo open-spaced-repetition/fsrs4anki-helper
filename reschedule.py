@@ -149,7 +149,7 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
                 w, retention, max_ivl, easy_bonus, hard_factor = params.values()
                 break
         fsrs.w = w
-        query = f"\"deck:{deck['name']}\" \"is:review\" {DONT_RESCHEDULE}"
+        query = f"\"deck:{deck['name']}\" \"is:review\" -\"is:suspended\""
         if recent:
             query += f" \"rated:{config.days_to_reschedule}\""
         for cid in mw.col.find_cards(query):
@@ -169,7 +169,7 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
             revlogs = mw.col.card_stats_data(cid).revlog
             reps = len(revlogs)
             for i, revlog in enumerate(reversed(revlogs)):
-                if i == 0 and (revlog.review_kind not in (0, 2)) and not (has_again(revlogs) or has_manual_reset(revlogs)):
+                if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)) and not (has_again(revlogs) or has_manual_reset(revlogs)):
                     reset_ivl_and_due(cid, revlogs)
                     break
                 last_s = s
@@ -183,7 +183,7 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
                     d = None
                 last_kind = revlog.review_kind
 
-                if rating == 0:
+                if last_kind == REVLOG_RESCHED:
                     if revlog.ease != 0:
                         # set due date
                         continue
@@ -205,7 +205,7 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
                     last_rating = rating
                 else:
                     elapsed_days = datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal() - last_date.toordinal()
-                    if elapsed_days <= 0 and (revlog.review_kind == 0 or revlog.review_kind == 2):
+                    if elapsed_days <= 0 and revlog.review_kind in (REVLOG_LRN, REVLOG_RELRN):
                         continue
                     r = math.pow(0.9, elapsed_days / s)
                     fsrs.elapsed_days = elapsed_days
@@ -229,37 +229,35 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
             if "seed" not in new_custom_data:
                 new_custom_data["seed"] = seed
             card.custom_data = json.dumps(new_custom_data)
-            fsrs.set_card(card)
-            if last_s is None:
-                again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
-                hard_ivl = fsrs.next_interval(hard_s, retention, max_ivl)
-                good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
-                easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl)
-                easy_ivl = max(good_ivl + 1, easy_ivl)
-            else:
-                again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
-                hard_ivl = fsrs.next_interval(last_s * hard_factor, retention, max_ivl)
-                good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
-                easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl)
-                hard_ivl = min(hard_ivl, good_ivl)
-                good_ivl = max(hard_ivl + 1, good_ivl)
-                easy_ivl = max(good_ivl + 1, easy_ivl)
-            if rating == 0:
-                new_ivl = card.ivl
-            else:
+            if card.type == CARD_TYPE_REV and last_kind != REVLOG_RESCHED:
+                fsrs.set_card(card)
+                if last_s is None:
+                    again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
+                    hard_ivl = fsrs.next_interval(hard_s, retention, max_ivl)
+                    good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
+                    easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl)
+                    easy_ivl = max(good_ivl + 1, easy_ivl)
+                else:
+                    again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
+                    hard_ivl = fsrs.next_interval(last_s * hard_factor, retention, max_ivl)
+                    good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
+                    easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl)
+                    hard_ivl = min(hard_ivl, good_ivl)
+                    good_ivl = max(hard_ivl + 1, good_ivl)
+                    easy_ivl = max(good_ivl + 1, easy_ivl)
                 new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
-            offset = new_ivl - card.ivl
-            card.ivl = new_ivl
-            due_before = card.odue if card.odid else card.due
-            if card.odid:  # Also update cards in filtered decks
-                card.odue += offset
-            else:
-                card.due += offset
-            due_after = card.odue if card.odid else card.due
-            if fsrs.enable_load_balance:
-                fsrs.due_cnt_perday_from_first_day[due_before] -= 1
-                fsrs.due_cnt_perday_from_first_day.setdefault(due_after, 0)
-                fsrs.due_cnt_perday_from_first_day[due_after] += 1
+                offset = new_ivl - card.ivl
+                card.ivl = new_ivl
+                due_before = card.odue if card.odid else card.due
+                if card.odid:  # Also update cards in filtered decks
+                    card.odue += offset
+                else:
+                    card.due += offset
+                due_after = card.odue if card.odid else card.due
+                if fsrs.enable_load_balance:
+                    fsrs.due_cnt_perday_from_first_day[due_before] -= 1
+                    fsrs.due_cnt_perday_from_first_day.setdefault(due_after, 0)
+                    fsrs.due_cnt_perday_from_first_day[due_after] += 1
             card.flush()
             cnt += 1
 

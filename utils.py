@@ -3,7 +3,13 @@ from aqt.utils import getText, showWarning, tooltip, askUser
 from collections import OrderedDict
 from typing import List, Dict
 from anki.stats_pb2 import RevlogEntry
-from anki.stats import REVLOG_LRN, REVLOG_REV, REVLOG_RELRN
+from anki.stats import (
+    REVLOG_LRN, 
+    REVLOG_REV, 
+    REVLOG_RELRN,
+    REVLOG_RESCHED,
+    CARD_TYPE_REV
+)
 from aqt import mw
 import json
 
@@ -11,7 +17,6 @@ import json
 DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)
 GLOBAL_DECK_CONFIG_NAME = "global config for FSRS4Anki"
 VERSION_NUMBER_LEN = 3
-DONT_RESCHEDULE = "-\"is:learn\" -\"is:suspended\""
 
 def check_fsrs4anki(all_config):
     if "cardStateCustomizer" not in all_config:

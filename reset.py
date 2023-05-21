@@ -35,7 +35,7 @@ def reset(did):
             deck_name = mw.col.decks.get(did)['name']
             if not deck['name'].startswith(deck_name):
                 continue
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" {DONT_RESCHEDULE}"):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\""):
             if cid not in reseted_cards:
                 reseted_cards.add(cid)
             else:
