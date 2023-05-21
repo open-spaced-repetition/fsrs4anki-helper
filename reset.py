@@ -29,13 +29,13 @@ def reset(did):
     decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
     for deck in decks:
         if any([deck['name'].startswith(i) for i in skip_decks]):
-            reseted_cards = reseted_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""))
+            reseted_cards = reseted_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\"".replace('\\', '\\\\')))
             continue
         if did is not None:
             deck_name = mw.col.decks.get(did)['name']
             if not deck['name'].startswith(deck_name):
                 continue
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\""):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\"".replace('\\', '\\\\')):
             if cid not in reseted_cards:
                 reseted_cards.add(cid)
             else:
