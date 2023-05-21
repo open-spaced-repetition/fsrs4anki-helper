@@ -48,7 +48,7 @@ def postpone(did):
     decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
     for deck in decks:
         if any([deck['name'].startswith(i) for i in skip_decks]):
-            postponed_cards = postponed_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""))
+            postponed_cards = postponed_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\"".replace('\\', '\\\\')))
             continue
         if did is not None:
             deck_name = mw.col.decks.get(did)['name']
@@ -59,7 +59,7 @@ def postpone(did):
             if deck['name'].startswith(key):
                 max_ivl = value['m']
                 break
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:due\" \"is:review\" -\"is:learn\" -\"is:suspended\""):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:due\" \"is:review\" -\"is:learn\" -\"is:suspended\"".replace('\\', '\\\\')):
             if cid not in postponed_cards:
                 postponed_cards.add(cid)
             else:

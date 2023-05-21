@@ -131,7 +131,7 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
 
     for deck in decks:
         if any([deck['name'].startswith(i) for i in skip_decks if i != ""]):
-            rescheduled_cards = rescheduled_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""))
+            rescheduled_cards = rescheduled_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\"".replace('\\', '\\\\')))
             continue
         if did is not None:
             deck_name = mw.col.decks.get(did)['name']
@@ -152,7 +152,7 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
         query = f"\"deck:{deck['name']}\" \"is:review\" -\"is:suspended\""
         if recent:
             query += f" \"rated:{config.days_to_reschedule}\""
-        for cid in mw.col.find_cards(query):
+        for cid in mw.col.find_cards(query.replace('\\', '\\\\')):
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
             else:
