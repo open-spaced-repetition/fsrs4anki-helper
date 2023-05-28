@@ -81,12 +81,7 @@ def postpone(did):
             r = math.pow(0.9, ivl / s)
             if r > target_retention:
                 new_ivl = min(max(int(round(math.log(target_retention) / math.log(0.9) * s)), 1), max_ivl)
-                offset = new_ivl - card.ivl
-                card.ivl = new_ivl
-                if card.odid:  # Also update cards in filtered decks
-                    card.odue += offset
-                else:
-                    card.due += offset
+                card = update_card_due_ivl(card, revlog, new_ivl)
                 card.flush()
                 cnt += 1
 

@@ -246,13 +246,8 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
                     good_ivl = max(hard_ivl + 1, good_ivl)
                     easy_ivl = max(good_ivl + 1, easy_ivl)
                 new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
-                last_review_date = round((revlogs[0].time - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today + 1
-                card.ivl = new_ivl
                 due_before = card.odue if card.odid else card.due
-                if card.odid:  # Also update cards in filtered decks
-                    card.odue = last_review_date + new_ivl
-                else:
-                    card.due = last_review_date + new_ivl
+                card = update_card_due_ivl(card, revlogs[0], new_ivl)
                 due_after = card.odue if card.odid else card.due
                 if fsrs.enable_load_balance:
                     fsrs.due_cnt_perday_from_first_day[due_before] -= 1
