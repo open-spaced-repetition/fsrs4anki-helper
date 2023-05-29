@@ -62,20 +62,15 @@ def get_siblings(did=None, filter=False, filtered_nid_string=""):
     return siblings_dict
 
 def get_due_range(cid, parameters, stability, siblings_cnt):
-    card = mw.col.get_card(cid)
-    ivl = card.ivl
-    if card.odid:
-        due = card.odue
-    else:
-        due = card.due
-    last_due = due - ivl
     revlogs = mw.col.card_stats_data(cid).revlog
+    last_due = get_last_review_date(revlogs[0])
     last_rating = revlogs[0].button_chosen
     if last_rating == 4:
         easy_bonus = parameters['e']
     else:
         easy_bonus = 1
     new_ivl = int(round(stability * math.log(parameters['r']) * easy_bonus / math.log(0.9)))
+    due = last_due + new_ivl
     if new_ivl <= 2.5:
         return range(due, due + 1), last_due
     elapsed_days = int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
@@ -140,13 +135,9 @@ def disperse_siblings(did, filter=False, filtered_nid_string=""):
         best_due_dates = disperse(cards)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
-            if card.odid:
-                offset = card.odue - due
-                card.odue = due
-            else:
-                offset = card.due - due
-                card.due = due
-            card.ivl = card.ivl - offset
+            last_revlog = mw.col.card_stats_data(cid).revlog[0]
+            last_due = get_last_review_date(last_revlog)
+            card = update_card_due_ivl(card, last_revlog, due - last_due)
             card.flush()
             cnt += 1
 
