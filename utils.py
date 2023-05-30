@@ -3,6 +3,7 @@ from aqt.utils import getText, showWarning, tooltip, askUser
 from collections import OrderedDict
 from typing import List, Dict
 from anki.stats_pb2 import RevlogEntry
+from anki.cards import Card
 from anki.stats import (
     REVLOG_LRN, 
     REVLOG_REV, 
@@ -187,13 +188,24 @@ def RepresentsInt(s):
 def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
     card = mw.col.get_card(cid)
     card.ivl = int(revlogs[0].interval / 86400)
-    due = int(round((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today)
+    due = int(round((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today + 1)
     if card.odid:
         card.odue = due
     else:
         card.due = due
     card.flush()
 
+def get_last_review_date(last_revlog: RevlogEntry):
+    return round((last_revlog.time - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today + 1
+
+def update_card_due_ivl(card: Card, last_revlog: RevlogEntry, new_ivl: int):
+    card.ivl = new_ivl
+    last_review_date = get_last_review_date(last_revlog)
+    if card.odid:
+        card.odue = last_review_date + new_ivl
+    else:
+        card.due = last_review_date + new_ivl
+    return card
 
 def has_again(revlogs: List[RevlogEntry]):
     for r in revlogs:
