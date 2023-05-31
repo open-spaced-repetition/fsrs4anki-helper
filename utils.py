@@ -197,7 +197,7 @@ def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
     card.flush()
 
 def get_last_review_date(last_revlog: RevlogEntry):
-    return round((last_revlog.time - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today + 1
+    return math.floor((last_revlog.time - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today + 1
 
 def update_card_due_ivl(card: Card, last_revlog: RevlogEntry, new_ivl: int):
     card.ivl = new_ivl
