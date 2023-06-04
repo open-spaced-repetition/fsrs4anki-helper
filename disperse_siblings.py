@@ -129,9 +129,12 @@ def disperse_siblings(did, filter=False, filtered_nid_string=""):
     mw.checkpoint("Siblings Dispersing")
     mw.progress.start()
 
-    cnt = 0
+    card_cnt = 0
+    note_cnt = 0
     siblings = get_siblings(did, filter, filtered_nid_string)
     for nid, cards in siblings.items():
+        if len(cards) > 10:
+            continue
         best_due_dates = disperse(cards)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
@@ -139,10 +142,11 @@ def disperse_siblings(did, filter=False, filtered_nid_string=""):
             last_due = get_last_review_date(last_revlog)
             card = update_card_due_ivl(card, last_revlog, due - last_due)
             card.flush()
-            cnt += 1
+            card_cnt += 1
+        note_cnt += 1
 
     mw.progress.finish()
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} cards in {len(siblings)} notes dispersed."""))
+    tooltip(_(f"""{card_cnt} cards in {note_cnt} notes dispersed."""))
