@@ -84,12 +84,11 @@ def reschedule_recent(did):
     reschedule(did, recent=True)
 
 
-menu_reschedule = build_action(reschedule, _(
-    "Reschedule all cards"), "CTRL+SHIFT+R")
+menu_reschedule = build_action(reschedule, _("Reschedule all cards"))
 add_action_to_gear(reschedule, "Reschedule cards")
 
 menu_reschedule_recent = build_action(
-    reschedule_recent, _(f"Reschedule cards reviewed in the last {config.days_to_reschedule} days"), "CTRL+R")
+    reschedule_recent, _(f"Reschedule cards reviewed in the last {config.days_to_reschedule} days"))
 add_action_to_gear(reschedule_recent, "Reschedule cards (recently reviewed)")
 
 menu_postpone = build_action(postpone, _("Postpone cards in all decks"))
