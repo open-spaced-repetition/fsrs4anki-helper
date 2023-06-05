@@ -1,6 +1,6 @@
 # FSRS4Anki Helper
 
-FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) scheduler. It has five features:
+FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) scheduler. It has six features:
 - **Reschedule** cards based on their entire review histories.
 - **Postpone** due cards whose retention is higher than your target.
 - **Advance** undue cards whose retention is lower than your target.
@@ -22,7 +22,7 @@ The easiest way to install FSRS4Anki Helper is through AnkiWeb: https://ankiweb.
 
 ### Reschedule
 
-Set parameters for your FSRS4Anki scheduler. Then click `Tools -> FSRS4Anki Helper -> Reschedule all cards (Ctrl+R)`:
+Set parameters for your FSRS4Anki scheduler. Then click `Tools -> FSRS4Anki Helper -> Reschedule all cards`:
 
 ![image](https://user-images.githubusercontent.com/32575846/234739908-336eda6f-11db-4db7-96c5-7e1fdb280119.png)
 
