@@ -3,10 +3,10 @@ from datetime import datetime
 from .utils import *
 
 
-def get_target_retention_with_response():
-    inquire_text = "Postpone due cards whose retention is higher than your input retention (suggest 70~95).\n"
+def get_desired_postpone_cnt_with_response():
+    inquire_text = "Postpone {n} due cards.\n"
     info_text = "Only affect cards scheduled by FSRS4Anki Scheduler or rescheduled by FSRS4Anki Helper.\n"
-    ivl_text = "The new intervals are scheduled corresponding to your input retention.\n"
+    ivl_text = "The new interval is the current interval * 1.05. And it skips those cards whose retention < requested retention - 1%\n"
     (s, r) = getText(inquire_text + info_text + ivl_text)
     if r:
         return (RepresentsInt(s), r)
@@ -22,16 +22,15 @@ def postpone(did):
         showWarning("Require FSRS4Anki version >= 3.0.0")
         return
 
-    (target_retention, resp) = get_target_retention_with_response()
-    if target_retention is None:
+    (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response()
+    if desired_postpone_cnt is None:
         if resp:
-            showWarning("Please enter an integral number of retention percentage.")
+            showWarning("Please enter the number of cards you want to postpone.")
         return
     else:
-        if target_retention >= 100 or target_retention <= 0:
-            showWarning("Please enter an integral number in range (1, 99).")
+        if desired_postpone_cnt <= 0:
+            showWarning("Please enter an postive integral number.")
             return
-        target_retention = target_retention / 100
 
     deck_parameters = get_deck_parameters(custom_scheduler)
     if deck_parameters is None:
@@ -54,12 +53,20 @@ def postpone(did):
             deck_name = mw.col.decks.get(did)['name']
             if not deck['name'].startswith(deck_name):
                 continue
-        max_ivl = deck_parameters[global_deck_name]['m']
-        for key, value in deck_parameters.items():
-            if deck['name'].startswith(key):
-                max_ivl = value['m']
+        (
+            _,
+            retention,
+            max_ivl,
+            _,
+            _,
+        ) = deck_parameters[global_deck_name].values()
+        for name, params in deck_parameters.items():
+            if deck['name'].startswith(name):
+                _, retention, max_ivl, _, _ = params.values()
                 break
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:due\" \"is:review\" -\"is:learn\" -\"is:suspended\"".replace('\\', '\\\\')):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:due\" \"is:review\" -\"is:learn\" -\"is:suspended\"".replace('\\', '\\\\'), order="c.ivl desc"):
+            if cnt >= desired_postpone_cnt:
+                break
             if cid not in postponed_cards:
                 postponed_cards.add(cid)
             else:
@@ -77,16 +84,19 @@ def postpone(did):
             except IndexError:
                 continue
 
-            ivl = datetime.today().toordinal() - datetime.fromtimestamp(revlog.time).toordinal()
-            r = math.pow(0.9, ivl / s)
-            if r > target_retention:
-                new_ivl = min(max(int(round(math.log(target_retention) / math.log(0.9) * s)), 1), max_ivl)
-                card = update_card_due_ivl(card, revlog, new_ivl)
-                card.flush()
-                cnt += 1
+            elapsed_days = datetime.today().toordinal() - datetime.fromtimestamp(revlog.time).toordinal()
+            r = math.pow(0.9, elapsed_days / s)
+
+            if r < retention - 0.01:
+                continue
+            
+            new_ivl = min(max(1, round(elapsed_days * 1.05)), max_ivl)
+            card = update_card_due_ivl(card, revlog, new_ivl)
+            card.flush()
+            cnt += 1
 
     mw.progress.finish()
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} cards postponed"""))
+    tooltip(f"""{cnt} cards postponed""")
