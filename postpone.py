@@ -8,7 +8,7 @@ from anki.utils import ids2str
 def get_desired_postpone_cnt_with_response():
     inquire_text = "Postpone {n} due cards.\n"
     info_text = "This feature only affects cards scheduled by FSRS4Anki Helper.\n"
-    warning_text = "Warning! Each time you use Postpone or Advance, you depart from optimal scheduling!\nUsing this feature often is not recommended."
+    warning_text = "*Warning!* Each time you use Postpone or Advance, you depart from optimal scheduling!\nUsing this feature often is not recommended."
     (s, r) = getText(inquire_text + info_text + warning_text)
     if r:
         return (RepresentsInt(s), r)
