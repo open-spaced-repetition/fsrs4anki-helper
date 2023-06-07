@@ -4,10 +4,10 @@ from anki.utils import ids2str
 
 
 def get_desired_advance_cnt_with_response():
-    inquire_text = "Advance {n} undue cards.\n"
-    info_text = "This feature only affects cards scheduled by FSRS4Anki Helper.\n\n"
+    inquire_text = "Enter the number of cards to be advanced.\n"
+    info_text = "This feature only affects the cards that have been scheduled by the FSRS4Anki.\n\n"
     warning_text = "Warning! Each time you use Advance or Postpone, you depart from optimal scheduling!\nUsing this feature often is not recommended."
-    (s, r) = getText(inquire_text + info_text + warning_text)
+    (s, r) = getText(inquire_text + info_text + warning_text, default="10")
     if r:
         return (RepresentsInt(s), r)
     return (None, r)

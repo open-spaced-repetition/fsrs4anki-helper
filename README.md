@@ -2,8 +2,8 @@
 
 FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) scheduler. It has six features:
 - **Reschedule** cards based on their entire review histories.
-- **Postpone** due cards whose retention is higher than your target.
-- **Advance** undue cards whose retention is lower than your target.
+- **Postpone** a selected number of due cards.
+- **Advance** a selected number of undue cards.
 - **Balance** the load during rescheduling (based on fuzz).
 - **No Anki** on Free Days (such as weekends) during rescheduling (based on load balance).
 - **Disperse** Siblings (cards with the same note) to avoid interference & reminder.
@@ -54,7 +54,7 @@ Many people use AnkiDroid which haven't supported FSRS. This feature can filter 
 
 ### Postpone & Advance
 
-These features can apply a temporary `requestedRetention` to cards which have been scheduled or rescheduled by FSRS. It doesn't modify the `requestedRetention` in the custom scheduling code.
+These features can be used to postpone or advance a selected number of cards. Postpone is useful to deal with a backlog. Advance is useful to review your cards before a large exam or before going on a vacation. Remember that every time you use Postpone or Advance, you depart from the optimal scheduling. So, using this feature often is not recommended.
 
 ![image](https://user-images.githubusercontent.com/32575846/234742970-4733a244-aaad-4fab-9434-726ffac8b280.png)
 
