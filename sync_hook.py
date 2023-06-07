@@ -29,6 +29,9 @@ def auto_reschedule(local_rids: List[int]):
         )
     ]
 
+    if len(remote_reviewed_cids) == 0:
+        return
+
     text = reschedule(None, recent=False, filter=True, filtered_cids=set(remote_reviewed_cids))
 
     remote_reviewed_cid_string = ",".join([str(cid) for cid in remote_reviewed_cids])
