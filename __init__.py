@@ -99,9 +99,6 @@ add_action_to_gear(advance, "Advance cards")
 
 menu_reset = build_action(reset, _("Undo reschedulings in all cards"))
 
-menu_disperse_siblings = build_action(disperse_siblings, _("Disperse Siblings in all decks"))
-add_action_to_gear(disperse_siblings, "Disperse Siblings")
-
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
 menu_for_helper.addAction(menu_load_balance)
@@ -112,7 +109,6 @@ menu_for_helper.addAction(menu_reschedule_recent)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
 menu_for_helper.addAction(menu_reset)
-menu_for_helper.addAction(menu_disperse_siblings)
 
 
 def set_free_days(day, checked):
