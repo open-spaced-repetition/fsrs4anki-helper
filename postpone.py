@@ -1,13 +1,15 @@
 import math
 from datetime import datetime
 from .utils import *
+from anki.decks import DeckManager
+from anki.utils import ids2str
 
 
 def get_desired_postpone_cnt_with_response():
     inquire_text = "Postpone {n} due cards.\n"
     info_text = "Only affect cards scheduled by FSRS4Anki Scheduler or rescheduled by FSRS4Anki Helper.\n"
-    ivl_text = "The new interval is the current interval * 1.05. And it skips those cards whose retention < requested retention - 1%\n"
-    (s, r) = getText(inquire_text + info_text + ivl_text)
+    warning_text = "Warning! Each time you use Postpone or Advance, you depart from optimal scheduling! Using this feature often is not recommended."
+    (s, r) = getText(inquire_text + info_text + warning_text)
     if r:
         return (RepresentsInt(s), r)
     return (None, r)
@@ -38,63 +40,70 @@ def postpone(did):
     
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
     global_deck_name = get_global_config_deck_name(version)
+    did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
 
     mw.checkpoint("Postponing")
     mw.progress.start()
 
+    DM = DeckManager(mw.col)
+    if did is not None:
+        did_list = ids2str(DM.deck_and_child_ids(did))
+
+    cards = mw.col.db.all(f"""
+        SELECT 
+            id, 
+            did,
+            ivl,
+            json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s'),
+            CASE WHEN odid==0
+            THEN {mw.col.sched.today} - (due - ivl)
+            ELSE {mw.col.sched.today} - (odue - ivl)
+            END
+        FROM cards
+        WHERE data like '%"cd"%'
+        AND due < {mw.col.sched.today}
+        AND queue = {QUEUE_TYPE_REV}
+        {"AND did IN %s" % did_list if did is not None else ""}
+    """)
+    # x[0]: cid
+    # x[1]: did
+    # x[2]: interval
+    # x[3]: stability
+    # x[4]: elapsed days
+    # x[5]: requested retention
+    # x[6]: current retention
+    cards = map(lambda x: (x + [did_to_deck_parameters[x[1]]["r"], math.pow(0.9, x[4]/x[3])]), cards)
+    cards = filter(lambda x: x[3] is not None, cards)
+    # sort by requested retention - current retention, -interval (ascending)
+    cards = sorted(cards, key=lambda x: (x[5] - x[6], -x[2]))
+
     cnt = 0
     postponed_cards = set()
-    decks = sorted(mw.col.decks.all(), key=lambda item: item['name'])
     min_retention = 1
-    for deck in decks:
-        if any([deck['name'].startswith(i) for i in skip_decks]):
-            postponed_cards = postponed_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\"".replace('\\', '\\\\')))
+    for cid, did, ivl, stability, elapsed_days, _, _ in cards:
+        if cnt >= desired_postpone_cnt:
+            break
+
+        if cid not in postponed_cards:
+            postponed_cards.add(cid)
+        else:
             continue
-        if did is not None:
-            deck_name = mw.col.decks.get(did)['name']
-            if not deck['name'].startswith(deck_name):
-                continue
-        (
-            _,
-            _,
-            max_ivl,
-            _,
-            _,
-        ) = deck_parameters[global_deck_name].values()
-        for name, params in deck_parameters.items():
-            if deck['name'].startswith(name):
-                _, _, max_ivl, _, _ = params.values()
-                break
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:due\" \"is:review\" -\"is:learn\" -\"is:suspended\"".replace('\\', '\\\\'), order=f"cast({mw.col.sched.today}-c.due+0.001 as real) / c.ivl asc, c.ivl desc"):
-            if cnt >= desired_postpone_cnt:
-                break
-            if cid not in postponed_cards:
-                postponed_cards.add(cid)
-            else:
-                continue
-            card = mw.col.get_card(cid)
-            if card.custom_data == '':
-                continue
-            custom_data = json.loads(card.custom_data)
-            if 's' not in custom_data:
-                continue
-            s = custom_data['s']
+        
+        card = mw.col.get_card(cid)
+        max_ivl = did_to_deck_parameters[did]["m"]
 
-            try:
-                revlog = mw.col.card_stats_data(cid).revlog[0]
-            except IndexError:
-                continue
+        try:
+            revlog = mw.col.card_stats_data(cid).revlog[0]
+        except IndexError:
+            continue
 
-            elapsed_days = datetime.today().toordinal() - datetime.fromtimestamp(revlog.time).toordinal()
-            new_ivl = min(max(1, round(elapsed_days * 1.05)), max_ivl)
-            old_ivl = card.ivl
-            card = update_card_due_ivl(card, revlog, new_ivl)
-            card.ivl = old_ivl
-            card.flush()
-            cnt += 1
+        new_ivl = min(max(1, max(round(ivl * 1.05), elapsed_days + 1)), max_ivl)
+        card = update_card_due_ivl(card, revlog, new_ivl)
+        card.flush()
+        cnt += 1
 
-            new_retention = math.pow(0.9, new_ivl / s)
-            min_retention = min(min_retention, new_retention)
+        new_retention = math.pow(0.9, new_ivl / stability)
+        min_retention = min(min_retention, new_retention)
 
     mw.progress.finish()
     mw.col.reset()
