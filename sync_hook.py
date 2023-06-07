@@ -50,7 +50,7 @@ def auto_reschedule(local_rids: List[int]):
         )
     ]
     affected_notes = len(rescheduled_nids_have_siblings)
-    if affected_notes > 0:
+    if affected_notes > 0 and config.auto_disperse:
         disperse_siblings(None, filter=True, filtered_nid_string=",".join([str(nid) for nid in rescheduled_nids_have_siblings]), text_from_reschedule=text)
 
 

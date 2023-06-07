@@ -135,4 +135,4 @@ def disperse_siblings(did, filter=False, filtered_nid_string="", text_from_resch
     mw.col.reset()
     mw.reset()
 
-    tooltip(f"{text_from_reschedule}, {card_cnt} cards in {note_cnt} notes dispersed.")
+    tooltip(f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed.")

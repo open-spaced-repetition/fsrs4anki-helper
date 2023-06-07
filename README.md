@@ -20,6 +20,16 @@ The easiest way to install FSRS4Anki Helper is through AnkiWeb: https://ankiweb.
 
 ## Usage
 
+### Overview
+
+| Feature name      | How does it work?                                            | When should I use it?                                        |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Postpone          | Increases the intervals of cards that are due today based on deck priority, current and requested R, relative overdue-ness, and interval length in a way that minimizes damage to long-term learning. | When you are dealing with a large number of reviews after taking a break from Anki. |
+| Advance           | Decreases the intervals of undue cards based on deck priority, current and requested R, relative overdue-ness, and interval length to minimize damage to long-term learning. | When you want to review your material ahead of time, for example, before a test. |
+| Free Days         | After the optimal interval is calculated, it is slightly adjusted to change the due date. | If you don't want to study on some days of the week, for example, Sundays. |
+| Disperse Siblings | Siblings are cards generated from the same note. Their intervals are adjusted to spread them further apart from each other. | Always. This feature increases the spacing effect; disabling it will only decrease the efficiency of spaced repetition. |
+| Load Balancing    | After the optimal interval is calculated, it is adjusted by a random amount to make the distribution of reviews over time more uniform. | Always. This feature makes your workload (reviews/day) more consistent. |
+
 ### Reschedule
 
 Set parameters for your FSRS4Anki scheduler. Then click `Tools -> FSRS4Anki Helper -> Reschedule all cards`:
