@@ -15,6 +15,7 @@ from anki.stats import (
 from aqt import mw
 import json
 import math
+import random
 
 
 DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)

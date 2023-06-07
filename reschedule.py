@@ -1,5 +1,3 @@
-import math
-import random
 from datetime import datetime, timedelta
 from .utils import *
 from .configuration import Config

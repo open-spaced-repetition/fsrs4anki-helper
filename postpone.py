@@ -90,7 +90,9 @@ def postpone(did):
         except IndexError:
             continue
 
-        new_ivl = min(max(1, math.ceil(ivl * 1.05) + elapsed_days - ivl), max_ivl)
+        random.seed(cid + ivl)
+        delay = elapsed_days - ivl
+        new_ivl = min(max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay), max_ivl)
         card = update_card_due_ivl(card, revlog, new_ivl)
         card.flush()
         cnt += 1
@@ -102,4 +104,4 @@ def postpone(did):
     mw.col.reset()
     mw.reset()
 
-    tooltip(f"""{cnt} cards postponed, min retention: {min_retention:.2%}""")
+    tooltip(f"""{cnt} cards postponed, min retention: {min_retention * 100:.2%}%""")
