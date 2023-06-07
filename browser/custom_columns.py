@@ -64,7 +64,7 @@ class StabilityColumn(CustomColumn):
         if 's' not in custom_data:
             return "N/A"
 
-        return f"{custom_data['s']:2f} days"
+        return f"{custom_data['s']:.2f} days"
     
     def order_by_str(self) -> str:
         return "json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s') DESC"
