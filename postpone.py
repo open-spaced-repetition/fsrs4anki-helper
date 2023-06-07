@@ -44,7 +44,8 @@ def postpone(did):
 
     cnt = 0
     postponed_cards = set()
-    decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
+    decks = sorted(mw.col.decks.all(), key=lambda item: item['name'])
+    min_retention = 1
     for deck in decks:
         if any([deck['name'].startswith(i) for i in skip_decks]):
             postponed_cards = postponed_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\"".replace('\\', '\\\\')))
@@ -55,16 +56,16 @@ def postpone(did):
                 continue
         (
             _,
-            retention,
+            _,
             max_ivl,
             _,
             _,
         ) = deck_parameters[global_deck_name].values()
         for name, params in deck_parameters.items():
             if deck['name'].startswith(name):
-                _, retention, max_ivl, _, _ = params.values()
+                _, _, max_ivl, _, _ = params.values()
                 break
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:due\" \"is:review\" -\"is:learn\" -\"is:suspended\"".replace('\\', '\\\\'), order="c.ivl desc"):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:due\" \"is:review\" -\"is:learn\" -\"is:suspended\"".replace('\\', '\\\\'), order=f"cast({mw.col.sched.today}-c.due+0.001 as real) / c.ivl asc, c.ivl desc"):
             if cnt >= desired_postpone_cnt:
                 break
             if cid not in postponed_cards:
@@ -85,18 +86,16 @@ def postpone(did):
                 continue
 
             elapsed_days = datetime.today().toordinal() - datetime.fromtimestamp(revlog.time).toordinal()
-            r = math.pow(0.9, elapsed_days / s)
-
-            if r < retention - 0.01:
-                continue
-            
             new_ivl = min(max(1, round(elapsed_days * 1.05)), max_ivl)
             card = update_card_due_ivl(card, revlog, new_ivl)
             card.flush()
             cnt += 1
 
+            new_retention = math.pow(0.9, new_ivl / s)
+            min_retention = min(min_retention, new_retention)
+
     mw.progress.finish()
     mw.col.reset()
     mw.reset()
 
-    tooltip(f"""{cnt} cards postponed""")
+    tooltip(f"""{cnt} cards postponed, min retention: {min_retention:.2%}""")
