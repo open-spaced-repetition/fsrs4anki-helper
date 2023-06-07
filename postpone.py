@@ -7,7 +7,7 @@ from anki.utils import ids2str
 
 def get_desired_postpone_cnt_with_response():
     inquire_text = "Postpone {n} due cards.\n"
-    info_text = "Only affect cards scheduled by FSRS4Anki Scheduler or rescheduled by FSRS4Anki Helper.\n"
+    info_text = "This feature only affects cards scheduled by FSRS4Anki Helper.\n"
     warning_text = "Warning! Each time you use Postpone or Advance, you depart from optimal scheduling!\nUsing this feature often is not recommended."
     (s, r) = getText(inquire_text + info_text + warning_text)
     if r:
@@ -31,7 +31,7 @@ def postpone(did):
         return
     else:
         if desired_postpone_cnt <= 0:
-            showWarning("Please enter an postive integral number.")
+            showWarning("Please enter a positive integer.")
             return
 
     deck_parameters = get_deck_parameters(custom_scheduler)
@@ -61,7 +61,7 @@ def postpone(did):
             END
         FROM cards
         WHERE data like '%"cd"%'
-        AND due < {mw.col.sched.today}
+        AND due <= {mw.col.sched.today}
         AND queue = {QUEUE_TYPE_REV}
         {"AND did IN %s" % did_list if did is not None else ""}
     """)
@@ -76,18 +76,11 @@ def postpone(did):
     cards = filter(lambda x: x[3] is not None, cards)
     # sort by requested retention - current retention, -interval (ascending)
     cards = sorted(cards, key=lambda x: (x[5] - x[6], -x[2]))
-
     cnt = 0
-    postponed_cards = set()
     min_retention = 1
     for cid, did, ivl, stability, elapsed_days, _, _ in cards:
         if cnt >= desired_postpone_cnt:
             break
-
-        if cid not in postponed_cards:
-            postponed_cards.add(cid)
-        else:
-            continue
         
         card = mw.col.get_card(cid)
         max_ivl = did_to_deck_parameters[did]["m"]
