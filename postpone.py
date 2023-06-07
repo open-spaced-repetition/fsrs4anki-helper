@@ -87,7 +87,9 @@ def postpone(did):
 
             elapsed_days = datetime.today().toordinal() - datetime.fromtimestamp(revlog.time).toordinal()
             new_ivl = min(max(1, round(elapsed_days * 1.05)), max_ivl)
+            old_ivl = card.ivl
             card = update_card_due_ivl(card, revlog, new_ivl)
+            card.ivl = old_ivl
             card.flush()
             cnt += 1
 
