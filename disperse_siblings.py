@@ -94,7 +94,7 @@ def disperse(siblings):
     return best_due_dates
 
 
-def disperse_siblings(did, filter=False, filtered_nid_string=""):
+def disperse_siblings(did, filter=False, filtered_nid_string="", text_from_reschedule=""):
     global DM
     DM = DeckManager(mw.col)
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -135,4 +135,4 @@ def disperse_siblings(did, filter=False, filtered_nid_string=""):
     mw.col.reset()
     mw.reset()
 
-    tooltip(f"""{card_cnt} cards in {note_cnt} notes dispersed.""")
+    tooltip(f"{text_from_reschedule}, {card_cnt} cards in {note_cnt} notes dispersed.")
