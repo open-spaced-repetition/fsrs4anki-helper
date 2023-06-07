@@ -104,4 +104,4 @@ def postpone(did):
     mw.col.reset()
     mw.reset()
 
-    tooltip(f"""{cnt} cards postponed, min retention: {min_retention * 100:.2%}%""")
+    tooltip(f"""{cnt} cards postponed, min retention: {min_retention:.2%}""")
