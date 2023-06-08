@@ -72,8 +72,9 @@ def advance(did):
     # x[6]: current retention
     cards = filter(lambda x: x[3] is not None, cards)
     cards = map(lambda x: (x + [did_to_deck_parameters[x[1]]["r"], math.pow(0.9, x[4]/x[3])]), cards)
-    # sort by current retention - requested retention, -interval (ascending)
-    cards = sorted(cards, key=lambda x: (x[6] - x[5], -x[2]))
+    # sort by (1 - elapsed_day / scheduled_day)
+    # = 1-ln(current retention)/ln(requested retention), -interval (ascending)
+    cards = sorted(cards, key=lambda x: (1-math.log(x[6])/math.log(x[5]), -x[2]))
     cnt = 0
     max_retention = 0
     for cid, did, _, stability, _, _, _ in cards:
