@@ -7,6 +7,7 @@ LOAD_BALANCE = "load_balance"
 FREE_DAYS = "free_days"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
+AUTO_DISPERSE = "auto_disperse"
 
 
 def load_config():
@@ -67,4 +68,13 @@ class Config:
     @auto_reschedule_after_sync.setter
     def auto_reschedule_after_sync(self, value):
         self.data[AUTO_RESCHEDULE_AFTER_SYNC] = value
+        self.save()
+
+    @property
+    def auto_disperse(self):
+        return self.data[AUTO_DISPERSE]
+
+    @auto_disperse.setter
+    def auto_disperse(self, value):
+        self.data[AUTO_DISPERSE] = value
         self.save()

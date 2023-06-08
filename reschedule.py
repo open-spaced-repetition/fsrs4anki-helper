@@ -1,5 +1,3 @@
-import math
-import random
 from datetime import datetime, timedelta
 from .utils import *
 from .configuration import Config
@@ -260,4 +258,6 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} cards rescheduled"""))
+    finished_text = f"{cnt} cards rescheduled"
+    tooltip(finished_text)
+    return finished_text

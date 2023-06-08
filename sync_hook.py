@@ -29,7 +29,10 @@ def auto_reschedule(local_rids: List[int]):
         )
     ]
 
-    reschedule(None, recent=False, filter=True, filtered_cids=set(remote_reviewed_cids))
+    if len(remote_reviewed_cids) == 0:
+        return
+
+    text = reschedule(None, recent=False, filter=True, filtered_cids=set(remote_reviewed_cids))
 
     remote_reviewed_cid_string = ",".join([str(cid) for cid in remote_reviewed_cids])
     rescheduled_nids_have_siblings = [nid for nid in mw.col.db.list(
@@ -50,8 +53,8 @@ def auto_reschedule(local_rids: List[int]):
         )
     ]
     affected_notes = len(rescheduled_nids_have_siblings)
-    if affected_notes > 0 and askUser(f"Rescheduling done. {affected_notes} notes with siblings affected. Disperse siblings?"):
-        disperse_siblings(None, filter=True, filtered_nid_string=",".join([str(nid) for nid in rescheduled_nids_have_siblings]))
+    if affected_notes > 0 and config.auto_disperse:
+        disperse_siblings(None, filter=True, filtered_nid_string=",".join([str(nid) for nid in rescheduled_nids_have_siblings]), text_from_reschedule=text)
 
 
 def init_sync_hook():

@@ -94,7 +94,7 @@ def disperse(siblings):
     return best_due_dates
 
 
-def disperse_siblings(did, filter=False, filtered_nid_string=""):
+def disperse_siblings(did, filter=False, filtered_nid_string="", text_from_reschedule=""):
     global DM
     DM = DeckManager(mw.col)
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -109,22 +109,8 @@ def disperse_siblings(did, filter=False, filtered_nid_string=""):
     skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
     global_deck_name = get_global_config_deck_name(version)
 
-
-    def get_parameters(deckname, mapping):
-        parts = deckname.split("::")
-        for i in range(len(parts), 0, -1):
-            prefix = "::".join(parts[:i])
-            if prefix in mapping:
-                return mapping[prefix]
-        return mapping[global_deck_name]
-
-
-    deck_list = mw.col.decks.all()
-
     global did_to_deck_parameters
-    for d in deck_list:
-        parameters = get_parameters(d["name"], deck_parameters)
-        did_to_deck_parameters[d["id"]] = parameters
+    did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
 
     mw.checkpoint("Siblings Dispersing")
     mw.progress.start()
@@ -149,4 +135,4 @@ def disperse_siblings(did, filter=False, filtered_nid_string=""):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{card_cnt} cards in {note_cnt} notes dispersed."""))
+    tooltip(f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed.")

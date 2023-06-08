@@ -2,8 +2,8 @@
 
 FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) scheduler. It has six features:
 - **Reschedule** cards based on their entire review histories.
-- **Postpone** due cards whose retention is higher than your target.
-- **Advance** undue cards whose retention is lower than your target.
+- **Postpone** a selected number of due cards.
+- **Advance** a selected number of undue cards.
 - **Balance** the load during rescheduling (based on fuzz).
 - **No Anki** on Free Days (such as weekends) during rescheduling (based on load balance).
 - **Disperse** Siblings (cards with the same note) to avoid interference & reminder.
@@ -19,6 +19,17 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 The easiest way to install FSRS4Anki Helper is through AnkiWeb: https://ankiweb.net/shared/info/759844606
 
 ## Usage
+
+### Overview
+
+| Feature name      | How does it work?                                            | When should I use it?                                        |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Reschedule        | Calculate the stability, difficulty, and the optimum interval from the entire review logs for each card with the weights stored in your FSRS4Anki Scheduler code. | When you update the weights or other parameters in your FSRS4Anki Scheduler code. |
+| Postpone          | Increases the intervals of cards that are due today based on current and requested R, relative overdue-ness, and interval length in a way that minimizes damage to long-term learning. | When you are dealing with a large number of reviews after taking a break from Anki. |
+| Advance           | Decreases the intervals of undue cards based on current and requested R, relative overdue-ness, and interval length to minimize damage to long-term learning. | When you want to review your material ahead of time, for example, before a test. |
+| Free Days         | After the optimal interval is calculated, it is slightly adjusted to change the due date. | If you don't want to study on some days of the week, for example, Sundays. |
+| Disperse Siblings | Siblings are cards generated from the same note. Their intervals are adjusted to spread them further apart from each other. | Always. This feature alleviate the interference; disabling it will only decrease the efficiency of spaced repetition. |
+| Load Balancing    | After the optimal interval is calculated, it is adjusted by a random amount to make the distribution of reviews over time more uniform. | Always. This feature makes your workload (reviews/day) more consistent. |
 
 ### Reschedule
 
@@ -54,7 +65,7 @@ Many people use AnkiDroid which haven't supported FSRS. This feature can filter 
 
 ### Postpone & Advance
 
-These features can apply a temporary `requestedRetention` to cards which have been scheduled or rescheduled by FSRS. It doesn't modify the `requestedRetention` in the custom scheduling code.
+These features can be used to postpone or advance a selected number of cards. Postpone is useful to deal with a backlog. Advance is useful to review your cards before a large exam or before going on a vacation. Remember that every time you use Postpone or Advance, you depart from the optimal scheduling. So, using this feature often is not recommended.
 
 ![image](https://user-images.githubusercontent.com/32575846/234742970-4733a244-aaad-4fab-9434-726ffac8b280.png)
 

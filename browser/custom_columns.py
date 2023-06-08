@@ -64,10 +64,10 @@ class StabilityColumn(CustomColumn):
         if 's' not in custom_data:
             return "N/A"
 
-        return f"{custom_data['s']} days"
+        return f"{custom_data['s']:.2f} days"
     
     def order_by_str(self) -> str:
-        return "json_extract(json_extract(c.data, '$.cd'), '$.s') DESC"
+        return "json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s') DESC"
 
 
 class DifficultyColumn(CustomColumn):
@@ -90,7 +90,7 @@ class DifficultyColumn(CustomColumn):
         return custom_data['d']
     
     def order_by_str(self) -> str:
-        return "json_extract(json_extract(c.data, '$.cd'), '$.d') DESC"
+        return "json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.d') DESC"
 
 
 class RetentionColumn(CustomColumn):
@@ -122,6 +122,6 @@ class RetentionColumn(CustomColumn):
     
     def order_by_str(self) -> str:
         return f"""CASE WHEN odid==0 
-        THEN ({mw.col.sched.today} - (due-ivl)) / json_extract(json_extract(c.data, '$.cd'), '$.s')
-        ELSE ({mw.col.sched.today} - (odue-ivl)) / json_extract(json_extract(c.data, '$.cd'), '$.s')
+        THEN ({mw.col.sched.today} - (due-ivl)) / json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s')
+        ELSE ({mw.col.sched.today} - (odue-ivl)) / json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s')
         END ASC"""
