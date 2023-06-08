@@ -70,8 +70,8 @@ def advance(did):
     # x[4]: elapsed days
     # x[5]: requested retention
     # x[6]: current retention
-    cards = map(lambda x: (x + [did_to_deck_parameters[x[1]]["r"], math.pow(0.9, x[4]/x[3])]), cards)
     cards = filter(lambda x: x[3] is not None, cards)
+    cards = map(lambda x: (x + [did_to_deck_parameters[x[1]]["r"], math.pow(0.9, x[4]/x[3])]), cards)
     # sort by current retention - requested retention, -interval (ascending)
     cards = sorted(cards, key=lambda x: (x[6] - x[5], -x[2]))
     cnt = 0
