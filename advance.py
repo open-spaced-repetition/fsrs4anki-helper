@@ -5,7 +5,7 @@ from anki.utils import ids2str
 
 def get_desired_advance_cnt_with_response(safe_cnt):
     inquire_text = "Enter the number of cards to be advanced.\n"
-    notification_text = f"There are {safe_cnt} cards that with a relative advancement degree less than 0.15.\n"
+    notification_text = f"It is relatively safe to advance up to {safe_cnt} cards\n"
     info_text = "This feature only affects the cards that have been scheduled by the FSRS4Anki.\n\n"
     warning_text = "Warning! Each time you use Advance or Postpone, you depart from optimal scheduling!\nUsing this feature often is not recommended."
     (s, r) = getText(inquire_text + notification_text + info_text + warning_text, default="10")
@@ -63,7 +63,7 @@ def advance(did):
     # sort by (1 - elapsed_day / scheduled_day)
     # = 1-ln(current retention)/ln(requested retention), -interval (ascending)
     cards = sorted(cards, key=lambda x: (1-math.log(x[6])/math.log(x[5]), -x[2]))
-    safe_cnt = len(list(filter(lambda x: 1-math.log(x[6])/math.log(x[5]) < 0.15, cards)))
+    safe_cnt = len(list(filter(lambda x: 1-math.log(x[6])/math.log(x[5]) < 0.13, cards)))
 
     (desired_advance_cnt, resp) = get_desired_advance_cnt_with_response(safe_cnt)
     if desired_advance_cnt is None:

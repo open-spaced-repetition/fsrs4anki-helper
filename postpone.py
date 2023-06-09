@@ -5,7 +5,7 @@ from anki.utils import ids2str
 
 def get_desired_postpone_cnt_with_response(safe_cnt):
     inquire_text = "Enter the number of cards to be postponed.\n"
-    notification_text = f"There are {safe_cnt} cards that with a relative postponement degree less than 0.15.\n"
+    notification_text = f"It is relatively safe to postpone up to {safe_cnt} cards\n"
     info_text = "This feature only affects the cards that have been scheduled by the FSRS4Anki.\n\n"
     warning_text = "Warning! Each time you use Postpone or Advance, you depart from optimal scheduling!\nUsing this feature often is not recommended."
     (s, r) = getText(inquire_text + notification_text + info_text + warning_text, default="10")
