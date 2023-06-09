@@ -3,12 +3,12 @@ from anki.decks import DeckManager
 from anki.utils import ids2str
 
 
-def get_desired_postpone_cnt_with_response(safe_cnt):
+def get_desired_postpone_cnt_with_response(safe_cnt, did):
     inquire_text = "Enter the number of cards to be postponed.\n"
-    notification_text = f"It is relatively safe to postpone up to {safe_cnt} cards\n"
-    info_text = "This feature only affects the cards that have been scheduled by the FSRS4Anki.\n\n"
-    warning_text = "Warning! Each time you use Postpone or Advance, you depart from optimal scheduling!\nUsing this feature often is not recommended."
-    (s, r) = getText(inquire_text + notification_text + info_text + warning_text, default="10")
+    notification_text = f"{'For this deck' if did else 'For this collection'}, it is relatively safe to postpone up to {safe_cnt} cards.\n"
+    warning_text = "You can postpone more cards if you wish, but it is not recommended.\nKeep in mind that whenever you use Postpone or Advance, you depart from the optimal scheduling.\n"
+    info_text = "This feature only affects the cards that have been scheduled by FSRS4Anki."
+    (s, r) = getText(inquire_text + notification_text + warning_text + info_text, default="10")
     if r:
         return (RepresentsInt(s), r)
     return (None, r)
@@ -65,7 +65,7 @@ def postpone(did):
     cards = sorted(cards, key=lambda x: (math.log(x[6])/math.log(x[5])-1, -x[2]))
     safe_cnt = len(list(filter(lambda x: math.log(x[6])/math.log(x[5])-1 < 0.15, cards)))
 
-    (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response(safe_cnt)
+    (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response(safe_cnt, did)
     if desired_postpone_cnt is None:
         if resp:
             showWarning("Please enter the number of cards you want to postpone.")
