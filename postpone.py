@@ -3,11 +3,12 @@ from anki.decks import DeckManager
 from anki.utils import ids2str
 
 
-def get_desired_postpone_cnt_with_response():
+def get_desired_postpone_cnt_with_response(safe_cnt, did):
     inquire_text = "Enter the number of cards to be postponed.\n"
-    info_text = "This feature only affects the cards that have been scheduled by the FSRS4Anki.\n\n"
-    warning_text = "Warning! Each time you use Postpone or Advance, you depart from optimal scheduling!\nUsing this feature often is not recommended."
-    (s, r) = getText(inquire_text + info_text + warning_text, default="10")
+    notification_text = f"{'For this deck' if did else 'For this collection'}, it is relatively safe to postpone up to {safe_cnt} cards.\n"
+    warning_text = "You can postpone more cards if you wish, but it is not recommended.\nKeep in mind that whenever you use Postpone or Advance, you depart from the optimal scheduling.\n"
+    info_text = "This feature only affects the cards that have been scheduled by FSRS4Anki."
+    (s, r) = getText(inquire_text + notification_text + warning_text + info_text, default="10")
     if r:
         return (RepresentsInt(s), r)
     return (None, r)
@@ -22,16 +23,6 @@ def postpone(did):
         showWarning("Require FSRS4Anki version >= 3.0.0")
         return
 
-    (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response()
-    if desired_postpone_cnt is None:
-        if resp:
-            showWarning("Please enter the number of cards you want to postpone.")
-        return
-    else:
-        if desired_postpone_cnt <= 0:
-            showWarning("Please enter a positive integer.")
-            return
-
     deck_parameters = get_deck_parameters(custom_scheduler)
     if deck_parameters is None:
         return
@@ -39,9 +30,6 @@ def postpone(did):
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
     global_deck_name = get_global_config_deck_name(version)
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
-
-    mw.checkpoint("Postponing")
-    mw.progress.start()
 
     DM = DeckManager(mw.col)
     if did is not None:
@@ -75,6 +63,21 @@ def postpone(did):
     # sort by (elapsed_days / scheduled_days - 1)
     # = ln(current retention)/ln(requested retention)-1, -interval (ascending)
     cards = sorted(cards, key=lambda x: (math.log(x[6])/math.log(x[5])-1, -x[2]))
+    safe_cnt = len(list(filter(lambda x: math.log(x[6])/math.log(x[5])-1 < 0.15, cards)))
+
+    (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response(safe_cnt, did)
+    if desired_postpone_cnt is None:
+        if resp:
+            showWarning("Please enter the number of cards you want to postpone.")
+        return
+    else:
+        if desired_postpone_cnt <= 0:
+            showWarning("Please enter a positive integer.")
+            return
+
+    mw.checkpoint("Postponing")
+    mw.progress.start()
+
     cnt = 0
     min_retention = 1
     for cid, did, ivl, stability, elapsed_days, _, _ in cards:
