@@ -48,12 +48,12 @@ def get_due_range(cid, parameters, stability):
     new_ivl = int(round(stability * math.log(parameters['r']) * easy_bonus / math.log(0.9)))
     due = last_due + new_ivl
     if new_ivl <= 2.5:
-        return (due, due + 1), last_due
+        return (due, due), last_due
     elapsed_days = int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     min_ivl, max_ivl = get_fuzz_range(new_ivl, elapsed_days)
-    due_range = (last_due + min_ivl, last_due + max_ivl + 1)
+    due_range = (last_due + min_ivl, last_due + max_ivl)
     if due_range[1] < mw.col.sched.today:
-        due_range = (due, due + 1)
+        due_range = (due, due)
     return due_range, last_due
 
 def disperse(siblings):
@@ -61,7 +61,7 @@ def disperse(siblings):
     due_ranges = {cid: due_range for cid, (due_range, last_due) in due_ranges_last_due.items()}
     last_due = {cid: last_due for cid, (due_range, last_due) in due_ranges_last_due.items()}
     latest_due = max(last_due.values())
-    due_ranges[-1] = (latest_due, latest_due + 1)
+    due_ranges[-1] = (latest_due, latest_due)
     best_due_dates = maximize_siblings_due_gap(due_ranges)
     best_due_dates.pop(-1)
     return best_due_dates
