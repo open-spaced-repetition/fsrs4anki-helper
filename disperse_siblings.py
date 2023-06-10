@@ -47,8 +47,8 @@ def get_due_range(cid, parameters, stability):
     due = last_due + new_ivl
     if new_ivl <= 2.5:
         return (due, due), last_due
-    elapsed_days = int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
-    min_ivl, max_ivl = get_fuzz_range(new_ivl, elapsed_days)
+    last_elapsed_days = int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
+    min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days)
     due_range = (last_due + min_ivl, last_due + max_ivl)
     if due_range[1] < mw.col.sched.today:
         due_range = (due, due)
@@ -103,7 +103,7 @@ def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_
             card_cnt += 1
         note_cnt += 1
 
-        if note_cnt % 500 == 0:
+        if note_cnt % 500 == 499:
             mw.taskman.run_on_main(lambda: mw.progress.update(value=note_cnt, label=f"{note_cnt}/{len(siblings)} notes dispersed"))
             
     finished_text = f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed."

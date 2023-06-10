@@ -271,7 +271,7 @@ def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
             card.flush()
             cnt += 1
 
-            if cnt % 500 == 0:
+            if cnt % 500 == 499:
                 mw.taskman.run_on_main(lambda: mw.progress.update(value=cnt, label=f"{cnt} cards rescheduled"))
         
     finished_text = f"{cnt} cards rescheduled"
