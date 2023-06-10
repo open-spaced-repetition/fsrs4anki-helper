@@ -69,26 +69,6 @@ def geq_version(version_1, version_2):
     return True
 
 
-if __name__ == '__main__':
-    """Small test for 'uses_new_code'. Will check numbers of versions below, at
-    and above the version number defined in the global configuration.
-    Base 3 is used because all we need to check are the numbers one unit above 
-    or below the version.
-    """
-    initial_version = DECOUPLE_PARAMS_CODE_INITIAL_VERSION
-    print('does each version use the new code?:')
-    for i in range(27):  # 222 in base 3
-        modifier = (i // 9 - 1, i % 9 // 3 - 1, i % 3-1)  # produces numbers in base 3
-        modified = tuple(sum(tup) for tup in zip(initial_version, modifier))
-        print(modified, end=' is ')
-        if i >= 13:  # 111 in base 3
-            print(' True', end='. ')
-        else:
-            print(False, end='. ')
-        print(uses_new_params_config(modified), end=' ')
-        print('<-- Func returns ')
-
-
 def get_global_config_deck_name(version):
     if uses_new_params_config(version):
         return GLOBAL_DECK_CONFIG_NAME
@@ -190,6 +170,7 @@ def get_did_parameters(deck_list, deck_parameters, global_deck_name):
         did_to_deck_parameters[d["id"]] = parameters
     return did_to_deck_parameters
 
+
 def get_skip_decks(custom_scheduler):
     pattern = r'[const ]?skip_decks ?= ?(.*);'
     str_matches = re.findall(pattern, custom_scheduler)
@@ -214,8 +195,10 @@ def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
         card.due = due
     card.flush()
 
+
 def get_last_review_date(last_revlog: RevlogEntry):
     return math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today
+
 
 def update_card_due_ivl(card: Card, last_revlog: RevlogEntry, new_ivl: int):
     card.ivl = new_ivl
@@ -225,6 +208,7 @@ def update_card_due_ivl(card: Card, last_revlog: RevlogEntry, new_ivl: int):
     else:
         card.due = last_review_date + new_ivl
     return card
+
 
 def has_again(revlogs: List[RevlogEntry]):
     for r in revlogs:
@@ -250,3 +234,23 @@ def get_fuzz_range(interval, elapsed_days):
     if interval > elapsed_days:
         min_ivl = max(min_ivl, elapsed_days + 1)
     return min_ivl, max_ivl
+
+
+if __name__ == '__main__':
+    """Small test for 'uses_new_code'. Will check numbers of versions below, at
+    and above the version number defined in the global configuration.
+    Base 3 is used because all we need to check are the numbers one unit above 
+    or below the version.
+    """
+    initial_version = DECOUPLE_PARAMS_CODE_INITIAL_VERSION
+    print('does each version use the new code?:')
+    for i in range(27):  # 222 in base 3
+        modifier = (i // 9 - 1, i % 9 // 3 - 1, i % 3-1)  # produces numbers in base 3
+        modified = tuple(sum(tup) for tup in zip(initial_version, modifier))
+        print(modified, end=' is ')
+        if i >= 13:  # 111 in base 3
+            print(' True', end='. ')
+        else:
+            print(False, end='. ')
+        print(uses_new_params_config(modified), end=' ')
+        print('<-- Func returns ')

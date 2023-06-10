@@ -90,6 +90,8 @@ def postpone(did):
             continue
 
         random.seed(cid + ivl)
+        last_due = get_last_review_date(revlog)
+        elapsed_days = mw.col.sched.today - last_due
         delay = elapsed_days - ivl
         new_ivl = min(max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay), max_ivl)
         card = update_card_due_ivl(card, revlog, new_ivl)
