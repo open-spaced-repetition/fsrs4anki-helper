@@ -19,7 +19,6 @@ def auto_reschedule(local_rids: List[int]):
     config.load()
     if not config.auto_reschedule_after_sync:
         return
-    
 
     local_rid_string = ",".join([str(local_rid) for local_rid in local_rids])
 
@@ -28,11 +27,6 @@ def auto_reschedule(local_rids: List[int]):
             f"SELECT DISTINCT cid FROM revlog WHERE id NOT IN ({local_rid_string}) and ivl != lastIvl"
         )
     ]
-
-    if len(remote_reviewed_cids) == 0:
-        return
-
-    text = reschedule(None, recent=False, filter=True, filtered_cids=set(remote_reviewed_cids))
 
     remote_reviewed_cid_string = ",".join([str(cid) for cid in remote_reviewed_cids])
     rescheduled_nids_have_siblings = [nid for nid in mw.col.db.list(
@@ -52,9 +46,9 @@ def auto_reschedule(local_rids: List[int]):
             )"""
         )
     ]
-    affected_notes = len(rescheduled_nids_have_siblings)
-    if affected_notes > 0 and config.auto_disperse:
-        disperse_siblings(None, filter=True, filtered_nid_string=",".join([str(nid) for nid in rescheduled_nids_have_siblings]), text_from_reschedule=text)
+
+    filtered_nid_string = ",".join([str(nid) for nid in rescheduled_nids_have_siblings])
+    reschedule(None, recent=False, filter=True, filtered_cids=set(remote_reviewed_cids), filtered_nid_string=filtered_nid_string)
 
 
 def init_sync_hook():

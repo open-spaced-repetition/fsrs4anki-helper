@@ -1,10 +1,8 @@
-
 from .utils import *
 from anki.decks import DeckManager
 from anki.utils import ids2str
 import copy
 from collections import defaultdict
-import time
 
 DM = None
 did_to_deck_parameters = {}
@@ -67,7 +65,9 @@ def disperse(siblings):
     return best_due_dates
 
 def disperse_siblings(did, filter=False, filtered_nid_string="", text_from_reschedule=""):
-    start = time.time()
+    mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter, filtered_nid_string, text_from_reschedule))
+
+def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_from_reschedule=""):
     global DM
     DM = DeckManager(mw.col)
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -85,12 +85,13 @@ def disperse_siblings(did, filter=False, filtered_nid_string="", text_from_resch
     global did_to_deck_parameters
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
 
-    mw.checkpoint("Siblings Dispersing")
-    mw.progress.start()
-
     card_cnt = 0
     note_cnt = 0
     siblings = get_siblings(did, filter, filtered_nid_string)
+
+    mw.checkpoint("Siblings Dispersing")
+    mw.taskman.run_on_main(lambda: mw.progress.start(label="Siblings Dispersing", max=len(siblings), immediate=True))
+
     for nid, cards in siblings.items():
         best_due_dates = disperse(cards)
         for cid, due in best_due_dates.items():
@@ -102,11 +103,19 @@ def disperse_siblings(did, filter=False, filtered_nid_string="", text_from_resch
             card_cnt += 1
         note_cnt += 1
 
-    mw.progress.finish()
-    mw.col.reset()
-    mw.reset()
-    end = time.time()
-    tooltip(f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed. Time elapsed: {round(end - start, 2)}s")
+        if note_cnt % 500 == 0:
+            mw.taskman.run_on_main(lambda: mw.progress.update(value=note_cnt, label=f"{note_cnt}/{len(siblings)} notes dispersed"))
+            
+    finished_text = f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed."
+
+    def on_finish():
+        mw.progress.finish()
+        mw.col.reset()
+        mw.reset()
+        tooltip(finished_text)
+
+    mw.taskman.run_on_main(on_finish)
+    return finished_text
 
 # https://stackoverflow.com/questions/68180974/given-n-points-where-each-point-has-its-own-range-adjust-all-points-to-maximize
 def maximize_siblings_due_gap(cid_to_due_ranges: Dict[int, tuple]):

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from .utils import *
 from .configuration import Config
 from anki.cards import Card
+from .disperse_siblings import disperse_siblings_backgroud
 
 
 def constrain_difficulty(difficulty: float) -> float:
@@ -95,8 +96,24 @@ class FSRS:
     def set_card(self, card: Card):
         self.card = card
 
+def reschedule(did, recent=False, filter=False, filtered_cids={}, filtered_nid_string=""):
+    def on_done(future):
+        config = Config()
+        config.load()
 
-def reschedule(did, recent=False, filter=False, filtered_cids={}):
+        def on_done(future):
+            tooltip(future.result())
+
+        if config.auto_disperse:
+            text = future.result()
+            mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter, filtered_nid_string, text_from_reschedule=text), on_done)
+    if filter and len(filtered_cids) > 0:
+        mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter, filtered_cids), on_done)
+    else:
+        mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter, filtered_cids))
+
+
+def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
     config = Config()
     config.load()
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -116,7 +133,7 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
     rollover = mw.col.all_config()['rollover']
 
     mw.checkpoint("Rescheduling")
-    mw.progress.start()
+    mw.taskman.run_on_main(lambda: mw.progress.start(label="Rescheduling", immediate=True))
 
     cnt = 0
     rescheduled_cards = set()
@@ -254,10 +271,16 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
             card.flush()
             cnt += 1
 
-    mw.progress.finish()
-    mw.col.reset()
-    mw.reset()
-
+            if cnt % 500 == 0:
+                mw.taskman.run_on_main(lambda: mw.progress.update(value=cnt, label=f"{cnt} cards rescheduled"))
+        
     finished_text = f"{cnt} cards rescheduled"
-    tooltip(finished_text)
+
+    def on_finish():
+        mw.progress.finish()
+        mw.col.reset()
+        mw.reset()
+        tooltip(finished_text)
+    
+    mw.taskman.run_on_main(on_finish)
     return finished_text
