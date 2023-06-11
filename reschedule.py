@@ -108,9 +108,11 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}, filtered_nid_s
             text = future.result()
             mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter, filtered_nid_string, text_from_reschedule=text), on_done)
     if filter and len(filtered_cids) > 0:
-        mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter, filtered_cids), on_done)
+        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter, filtered_cids), on_done)
     else:
-        mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter, filtered_cids))
+        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter, filtered_cids))
+    
+    return fut
 
 
 def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
