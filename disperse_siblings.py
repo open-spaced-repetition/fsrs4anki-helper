@@ -90,7 +90,7 @@ def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_
     siblings = get_siblings(did, filter, filtered_nid_string)
 
     mw.checkpoint("Siblings Dispersing")
-    mw.taskman.run_on_main(lambda: mw.progress.start(label="Siblings Dispersing", max=len(siblings), immediate=True))
+    mw.taskman.run_on_main(lambda: mw.progress.start(label="Siblings Dispersing", max=len(siblings), immediate=False))
 
     for nid, cards in siblings.items():
         best_due_dates = disperse(cards)
@@ -105,9 +105,7 @@ def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_
 
         if note_cnt % 500 == 499:
             mw.taskman.run_on_main(lambda: mw.progress.update(value=note_cnt, label=f"{note_cnt}/{len(siblings)} notes dispersed"))
-        
-        if mw.progress.want_cancel():
-            break
+            if mw.progress.want_cancel(): break
             
     finished_text = f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed."
 
