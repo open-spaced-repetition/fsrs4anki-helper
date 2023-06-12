@@ -116,12 +116,6 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}, filtered_nid_s
 
 
 def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
-    cancel_flag = False
-    
-    def set_cancel_flag():
-        nonlocal cancel_flag
-        cancel_flag = True
-
     config = Config()
     config.load()
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -153,8 +147,6 @@ def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
     fsrs.free_days = config.free_days
 
     for deck in decks:
-        if cancel_flag:
-            break
         if any([deck['name'].startswith(i) for i in skip_decks if i != ""]):
             rescheduled_cards = rescheduled_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\"".replace('\\', '\\\\')))
             continue
@@ -178,8 +170,6 @@ def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
         if recent:
             query += f" \"rated:{config.days_to_reschedule}\""
         for cid in mw.col.find_cards(query.replace('\\', '\\\\')):
-            if cancel_flag:
-                break
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
             else:
@@ -285,7 +275,9 @@ def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
 
             if cnt % 500 == 499:
                 mw.taskman.run_on_main(lambda: mw.progress.update(value=cnt, label=f"{cnt} cards rescheduled"))
-                mw.taskman.run_on_main(lambda: set_cancel_flag() if mw.progress.want_cancel() else None)
+
+            if mw.progress.want_cancel():
+                break
         
     finished_text = f"{cnt} cards rescheduled"
 

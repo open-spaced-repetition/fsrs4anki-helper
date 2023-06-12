@@ -68,12 +68,6 @@ def disperse_siblings(did, filter=False, filtered_nid_string="", text_from_resch
     mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter, filtered_nid_string, text_from_reschedule))
 
 def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_from_reschedule=""):
-    cancel_flag = False
-    
-    def set_cancel_flag():
-        nonlocal cancel_flag
-        cancel_flag = True
-
     global DM
     DM = DeckManager(mw.col)
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -99,8 +93,6 @@ def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_
     mw.taskman.run_on_main(lambda: mw.progress.start(label="Siblings Dispersing", max=len(siblings), immediate=True))
 
     for nid, cards in siblings.items():
-        if cancel_flag:
-            break
         best_due_dates = disperse(cards)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
@@ -113,7 +105,9 @@ def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_
 
         if note_cnt % 500 == 499:
             mw.taskman.run_on_main(lambda: mw.progress.update(value=note_cnt, label=f"{note_cnt}/{len(siblings)} notes dispersed"))
-            mw.taskman.run_on_main(lambda: set_cancel_flag() if mw.progress.want_cancel() else None)
+        
+        if mw.progress.want_cancel():
+            break
             
     finished_text = f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed."
 
