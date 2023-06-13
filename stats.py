@@ -32,10 +32,12 @@ def retention_stability_burden(lim) -> float:
     """ + lim)
     delay_stability_ivl_list = map(lambda x: (today - min(today, x[0]), json.loads(json.loads(x[1])['cd'])['s'], x[2]), last_due_and_custom_data_and_ivl_rows)
     retention_stability_burden_list = list(map(lambda x: (math.pow(0.9, x[0] / x[1]), x[1], 1/max(1, x[2])), delay_stability_ivl_list))
+    cnt = len(retention_stability_burden_list)
+    if cnt == 0:
+        return 0, 0, 0, 0
     recall_sum = sum(item[0] for item in retention_stability_burden_list)
     stability_sum = sum(item[1] for item in retention_stability_burden_list)
     burden_sum = sum(item[2] for item in retention_stability_burden_list)
-    cnt = len(retention_stability_burden_list)
     return recall_sum / cnt, stability_sum / cnt, burden_sum, cnt
 
 
