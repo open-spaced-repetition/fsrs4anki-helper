@@ -8,83 +8,99 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 - **No Anki** on Free Days (such as weekends) during rescheduling (based on load balance).
 - **Disperse** Siblings (cards with the same note) to avoid interference & reminder.
 
-## Requirement
+# Requirement
 
 - Anki version >= 2.1.55
 - Enable V3 Scheduler
 - FSRS4Anki scheduler version >= 3.0.0
 
-## Installation
+# Installation
 
-The easiest way to install FSRS4Anki Helper is through AnkiWeb: https://ankiweb.net/shared/info/759844606
+The FSRS4Anki Helper add-on is purely an added bonus and is not recommended for extensive use. 
 
-## Usage
+Installation link: https://ankiweb.net/shared/info/759844606
 
-### Overview
+# Usage
+
+## Overview
 
 | Feature name      | How does it work?                                            | When should I use it?                                        |
 | ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | Reschedule        | Calculate the stability, difficulty, and the optimum interval from the entire review logs for each card with the weights stored in your FSRS4Anki Scheduler code. | When you update the weights or other parameters in your FSRS4Anki Scheduler code. |
-| Postpone          | Increases the intervals of cards that are due today based on current and requested R, relative overdue-ness, and interval length in a way that minimizes damage to long-term learning. | When you are dealing with a large number of reviews after taking a break from Anki. |
-| Advance           | Decreases the intervals of undue cards based on current and requested R, relative overdue-ness, and interval length to minimize damage to long-term learning. | When you want to review your material ahead of time, for example, before a test. |
+| Advance           | Decreases the intervals of undue cards based on current and requested R, and interval length to minimize damage to long-term learning. | When you want to review your material ahead of time, for example, before a test. |
+| Postpone          | Increases the intervals of cards that are due today based on current and requested R, and interval length in a way that minimizes damage to long-term learning. | When you are dealing with a large number of reviews after taking a break from Anki. |
+| Load Balancing    | After the optimal interval is calculated, it is adjusted by a random amount to make the distribution of reviews over time more uniform. | Always. This feature makes your workload (reviews/day) more consistent. |
 | Free Days         | After the optimal interval is calculated, it is slightly adjusted to change the due date. | If you don't want to study on some days of the week, for example, Sundays. |
 | Disperse Siblings | Siblings are cards generated from the same note. Their intervals are adjusted to spread them further apart from each other. | Always. This feature alleviate the interference; disabling it will only decrease the efficiency of spaced repetition. |
-| Load Balancing    | After the optimal interval is calculated, it is adjusted by a random amount to make the distribution of reviews over time more uniform. | Always. This feature makes your workload (reviews/day) more consistent. |
 
-### Reschedule
+## Reschedule
 
-Set parameters for your FSRS4Anki scheduler. Then click `Tools -> FSRS4Anki Helper -> Reschedule all cards`:
+Rescheduling all cards can predict the memory status based on each card's review history and arrange intervals, using the personalized parameters we filled in earlier.
 
-![image](https://user-images.githubusercontent.com/32575846/234739908-336eda6f-11db-4db7-96c5-7e1fdb280119.png)
+Note: For cards that have been reviewed multiple times using Anki's default algorithm, rescheduling may give different intervals than the Scheduler because the Scheduler can't access the full review history when running. In this case, the intervals given by rescheduling will be more accurate. But afterward, there will be no difference between the two.
 
-It will calculate the memory state by considering each card's full review history and then reschedules the review interval and due.
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/d59f5fef-ebe0-4741-bce6-941e9d6db7cf)
 
-If the number of your revlogs exceeds 10k, the process may be time-consuming. So I don't recommend rescheduling all cards too much. Just use it after you modified the parameters.
+## Advance/Postpone
 
-It may induce backlog when your first rescheduling. If you feel uncomfortable, please use `Postpone` or set a lower `requestedRetention`.
+These two functions are very similar, so I'll talk about them together. You can set the number of cards to advance/postpone, and the Helper add-on will sort them in the order of relative advance/postpone, then perform the advance/postpone, ensuring that the deviation from the original review schedule is minimized while meeting the number of cards you set.
 
-If you only want to reschedule a specific deck, you can click `Reschedule cards` in the options menu (gear icon in the right side of each deck).
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/7dec9dc6-d6f7-44b0-a845-ae4b9605073d)
 
-![image](https://user-images.githubusercontent.com/32575846/234741376-ac88bb39-c7be-40ea-b7cb-dbd7d1ac148e.png)
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/f9838010-cb00-44ce-aefc-10300f2a586e)
 
-#### Reschedule cards reviewed in the last X days
+## Load Balance
 
-Due to the poor performance of rescheduling, I develop this feature. It filters the cards reviewed recently, so it is pretty fast.
+Once the load balance option is enabled, rescheduling will make the daily review load as consistent and smooth as possible.
 
-![image](https://user-images.githubusercontent.com/32575846/234741784-58510653-7c19-4f8c-a9e5-a8a466503e50.png)
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/96f8bd20-0421-4138-8b58-00abbcb3e6d0)
 
-You can configure the X in the config of FSRS4Anki Helper add-on.
+Here's a comparison, the first graph is rescheduling before enabling it, and the second graph is after enabling:
 
-![image](https://user-images.githubusercontent.com/32575846/234742188-9ee70dd8-009f-4371-a47d-d23282a7b2f2.png)
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/1f31491c-7ee6-4eed-ab4a-7bc0dba5dff8)
 
-#### Auto reschedule recent reviews after sync
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/1c4f430d-824b-4145-801e-68fc0329fbbd)
 
-Many people use AnkiDroid which haven't supported FSRS. This feature can filter the cards reviewed in other devices after sync and auto apply rescheduling to them.
+## Free days
 
-![image](https://user-images.githubusercontent.com/32575846/234742500-c5bc748d-5f5e-4307-a27b-346edb0ae1d2.png)
+In fact, you can choose any days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid the dates you set for review when rescheduling.
 
-### Postpone & Advance
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/798dc25c-f06c-40fe-8866-ac28c8392273)
 
-These features can be used to postpone or advance a selected number of cards. Postpone is useful to deal with a backlog. Advance is useful to review your cards before a large exam or before going on a vacation. Remember that every time you use Postpone or Advance, you depart from the optimal scheduling. So, using this feature often is not recommended.
+Effect:
 
-![image](https://user-images.githubusercontent.com/32575846/234742970-4733a244-aaad-4fab-9434-726ffac8b280.png)
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/7fe6b4d0-ae99-40f8-8bd9-0f7c3ff1c638)
 
-![image](https://user-images.githubusercontent.com/32575846/234743037-53a0d0bb-0ee5-4da4-984b-68a99b949c04.png)
+## Disperse Siblings
 
-### Load Balance & No Anki
+In Anki, some templates will generate multiple cards related in content from the same note, such as reversed cards (Front->Back, Back->Front) and cloze cards (when you make many cloze on the same note). If the review dates of these cards are too close, they may interfere or remind each other. Dispersing siblings can stagger the review dates of these cards as much as possible.
 
-Load Balance can smooth the number of reviews per day during rescheduling. But it doesn't guarantee perfect balance within a single rescheduling. It would have a smoother load after each rescheduling. This feature does render the rescheduling process more time-intensive.
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/2e87b9c7-136d-4dc8-8677-c81bc28a0f6b)
 
-No Anki can avoid configured days of week when rescheduling. But it doesn't guarantee perfect avoidance because it should consider the fuzz range of cards.
+## Advanced Search
 
-![image](https://user-images.githubusercontent.com/32575846/234743512-8a0761e1-cc2a-49d4-9f8e-1b37d23291be.png)
+In the card browser, you can right-click on the header and click on Difficulty, Stability, Retention to display the current memory states of cards.
 
-### Disperse Siblings
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/7fb2b357-19d0-45fb-9cc0-f925258a6280)
 
-Disperse Siblings can reschedule the date of siblings (cards from same note) to avoid showing them too closely.
+It also supports filtering syntax for three attributes, here are some examples:
 
-![image](https://user-images.githubusercontent.com/32575846/234745480-78d43334-0822-475a-a9ed-f3966cebc448.png)
+- s<10: Cards with memory stability less than 10 days
+- d=5: Cards with difficulty equal to 5
+- r<0.6: Cards with memory retrievability (recall probability) less than 60%
 
-## Mechanism
+## Advanced Statistics
+
+Hold down the Shift key and click "Stats" to enter the old version of Anki's statistics interface.
+
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/db368bcb-54a5-4ca2-bc14-acad382f643f)
+
+Average retention, i.e., average retention rate, reflects the percentage of all cards you have reviewed that you still remember.
+
+Average stability, i.e., average memory stability, reflects the forgetting rate of all cards you have reviewed. The greater the stability, the slower the forgetting rate.
+
+Total burden, defined by woz in here: https://supermemo.guru/wiki/Burden
+
+# Mechanism
 
 Please see this wiki page: [FSRS4Anki Helper WIKI](https://github.com/open-spaced-repetition/fsrs4anki-helper/wiki)
