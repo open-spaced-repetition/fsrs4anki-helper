@@ -39,7 +39,7 @@ def auto_reschedule(local_rids: List[int]):
     fut = reschedule(None, recent=False, filter=True, filtered_cids=set(remote_reviewed_cids), filtered_nid_string=filtered_nid_string)
 
     # wait for reschedule to finish
-    showInfo(fut.result())
+    fut.result()
 
 
 def init_sync_hook():
