@@ -1,7 +1,5 @@
 from aqt.gui_hooks import sync_will_start, sync_did_finish
-import time
 from .reschedule import reschedule
-from .disperse_siblings import disperse_siblings
 from .configuration import Config
 from .utils import *
 
@@ -41,7 +39,7 @@ def auto_reschedule(local_rids: List[int]):
     fut = reschedule(None, recent=False, filter=True, filtered_cids=set(remote_reviewed_cids), filtered_nid_string=filtered_nid_string)
 
     # wait for reschedule to finish
-    fut.result()
+    showInfo(fut.result())
 
 
 def init_sync_hook():

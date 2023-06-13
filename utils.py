@@ -1,5 +1,5 @@
 import re
-from aqt.utils import getText, showWarning, tooltip, askUser
+from aqt.utils import tooltip, getText, showWarning, showInfo
 from collections import OrderedDict
 from typing import List, Dict
 from anki.stats_pb2 import RevlogEntry
