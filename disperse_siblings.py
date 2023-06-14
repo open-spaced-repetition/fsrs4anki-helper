@@ -1,11 +1,14 @@
 from .utils import *
+from .configuration import Config
 from anki.decks import DeckManager
 from anki.utils import ids2str
-import copy
 from collections import defaultdict
+from datetime import datetime, timedelta
+import copy
 
 DM = None
 did_to_deck_parameters = {}
+free_days = []
 
 def get_siblings(did=None, filter=False, filtered_nid_string=""):
     if did is not None:
@@ -43,7 +46,7 @@ def get_due_range(cid, parameters, stability):
         easy_bonus = parameters['e']
     else:
         easy_bonus = 1
-    new_ivl = int(round(stability * math.log(parameters['r']) * easy_bonus / math.log(0.9)))
+    new_ivl = int(round(stability * easy_bonus * math.log(parameters['r']) / math.log(0.9)))
     due = last_due + new_ivl
     if new_ivl <= 2.5:
         return (due, due), last_due
@@ -92,6 +95,11 @@ def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_
     mw.checkpoint("Siblings Dispersing")
     mw.taskman.run_on_main(lambda: mw.progress.start(label="Siblings Dispersing", max=len(siblings), immediate=False))
 
+    config = Config()
+    config.load()
+    global free_days
+    free_days = config.free_days
+
     for nid, cards in siblings.items():
         best_due_dates = disperse(cards)
         for cid, due in best_due_dates.items():
@@ -126,100 +134,103 @@ def maximize_siblings_due_gap(cid_to_due_ranges: Dict[int, tuple]):
     cid_to_due_ranges = dict(sorted(cid_to_due_ranges.items(), key=lambda item: item[1]))
     return {card_id: due_date for card_id, due_date in sorted(zip(cid_to_due_ranges.keys(), due_dates_to_due_ranges.keys()))}
 
-def get_points_with_optimal_min_gap(n, range_):
-    points = []
-    for num in range(1, n + 1):
-        points.append([max(0, round(num * range_/n) - random.randint(0, 5*range_/n)), round(num * range_/n) + random.randint(0, 5*range_/n)])
-    random.shuffle(points)
-    return points
-
-def get_vals_bordering_min_gap(val_to_points, min_gap):
-    vals_bordering_min_gap = set()
+def get_dues_bordering_min_gap(due_to_points, min_gap):
+    dues_bordering_min_gap = set()
     if min_gap == 0:
-        for val, points in val_to_points.items():
+        for due, points in due_to_points.items():
             if len(points) > 1:
-                vals_bordering_min_gap.add(val)
+                dues_bordering_min_gap.add(due)
     else:
-        sorted_vals = sorted(val_to_points.keys())
-        prior_val = sorted_vals[0]
-        for cur_val in sorted_vals[1:]:
-            cur_gap = cur_val - prior_val
+        sorted_dues = sorted(due_to_points.keys())
+        prior_due = sorted_dues[0]
+        for cur_due in sorted_dues[1:]:
+            cur_gap = cur_due - prior_due
             if cur_gap == min_gap:
-                vals_bordering_min_gap.add(cur_val)
-                vals_bordering_min_gap.add(prior_val)
-            prior_val = cur_val
-    return list(vals_bordering_min_gap)
+                dues_bordering_min_gap.add(cur_due)
+                dues_bordering_min_gap.add(prior_due)
+            prior_due = cur_due
+    return list(dues_bordering_min_gap)
 
-def get_min_gap(val_to_points, input_points):
-    if len(val_to_points) < len(input_points):
+def get_min_gap(due_to_points, input_points):
+    if len(due_to_points) < len(input_points):
         return 0
     
-    sorted_vals = sorted(val_to_points.keys())
-    prior_val = sorted_vals[0]
+    sorted_dues = sorted(due_to_points.keys())
+    prior_due = sorted_dues[0]
     min_gap = None
-    for cur_val in sorted_vals[1:]:
-        if min_gap is None or cur_val - prior_val < min_gap:
-            min_gap = cur_val - prior_val
-        prior_val = cur_val
+    for cur_due in sorted_dues[1:]:
+        if min_gap is None or cur_due - prior_due < min_gap:
+            min_gap = cur_due - prior_due
+        prior_due = cur_due
         if min_gap == 1:
             return min_gap
     return min_gap
 
-def attempt_to_achieve_min_gap(val_to_points, target_min_gap):
-    new_val_to_points = defaultdict(list)
+def attempt_to_achieve_min_gap(due_to_points, target_min_gap):
+    new_due_to_points = defaultdict(list)
 
-    leftmost_val = min(val_to_points.keys())
-    leftmost_point = val_to_points[leftmost_val][0]
-    new_val_to_points[leftmost_point[0]].append(leftmost_point)
+    leftmost_due = min(due_to_points.keys())
+    leftmost_point = due_to_points[leftmost_due][0]
+    new_due_to_points[leftmost_point[0]].append(leftmost_point)
 
-    sorted_vals = sorted(val_to_points.keys())
-    prior_val = leftmost_val
-    for cur_val in sorted_vals[1:]:
-        cur_point = val_to_points[cur_val][0]
-        target_val = prior_val + target_min_gap
-        if target_val <= cur_point[0]:
-            new_val_to_points[cur_point[0]].append(cur_point)
-            prior_val = cur_point[0]
-        elif target_val <= cur_point[1]:
-            new_val_to_points[target_val].append(cur_point)
-            prior_val = target_val
+    sorted_dues = sorted(due_to_points.keys())
+    prior_due = leftmost_due
+    for cur_due in sorted_dues[1:]:
+        cur_point = due_to_points[cur_due][0]
+        target_due = prior_due + target_min_gap
+        if target_due <= cur_point[0]:
+            new_due_to_points[cur_point[0]].append(cur_point)
+            prior_due = cur_point[0]
+        elif target_due <= cur_point[1]:
+            new_due_to_points[target_due].append(cur_point)
+            prior_due = target_due
         else:
             return False
-    return new_val_to_points
+    return new_due_to_points
 
 def allocate_points(input_points, max_attempts):
-    val_to_points = defaultdict(list)
+    due_to_points = defaultdict(list)
     for point in input_points:
-        val = random.randint(point[0], point[1])
-        val_to_points[val].append(point)
+        due = due_sampler(point[0], point[1])
+        due_to_points[due].append(point)
     
     best_min_gap = -1
     best_allocation = None
     attempts = 0
     while attempts < max_attempts:
         attempts += 1
-        min_gap = get_min_gap(val_to_points, input_points)
+        min_gap = get_min_gap(due_to_points, input_points)
         if min_gap > 0:
             found_improvement = True
             while found_improvement:
                 found_improvement = False
                 trial_min_gap = max(min_gap, best_min_gap) + 1
-                improved_results = attempt_to_achieve_min_gap(val_to_points, trial_min_gap)
+                improved_results = attempt_to_achieve_min_gap(due_to_points, trial_min_gap)
                 if improved_results:
                     found_improvement = True
                     min_gap = trial_min_gap
                     print(f"found improvement!: {min_gap}")
-                    val_to_points = improved_results
+                    due_to_points = improved_results
         if min_gap > best_min_gap:
             best_min_gap = min_gap
-            best_allocation = copy.deepcopy(val_to_points)
+            best_allocation = copy.deepcopy(due_to_points)
             print(f"found new gap after {attempts} tries: {best_min_gap}")
             attempts = 0
-        vals_to_adjust = get_vals_bordering_min_gap(val_to_points, min_gap)
+        dues_to_adjust = get_dues_bordering_min_gap(due_to_points, min_gap)
         points_to_reallocate = []
-        for val in vals_to_adjust:
-            points_to_reallocate += val_to_points.pop(val, [])
+        for due in dues_to_adjust:
+            points_to_reallocate += due_to_points.pop(due, [])
         for point in points_to_reallocate:
-            new_val = random.randint(point[0], point[1])
-            val_to_points[new_val].append(point)
+            new_due = due_sampler(point[0], point[1])
+            due_to_points[new_due].append(point)
     return best_allocation
+
+def due_sampler(min_due, max_due):
+    due_list = list(range(min_due, max_due + 1))
+    if len(free_days) > 0:
+        for due in range(min_due, max_due + 1):
+            day_offset = due - mw.col.sched.today
+            due_date = datetime.now() + timedelta(days=day_offset)
+            if due_date.weekday() in free_days and len(due_list) > 1:
+                due_list.remove(due)
+    return random.choice(due_list)
