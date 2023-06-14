@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from .utils import *
 from .configuration import Config
 from anki.cards import Card
+from .disperse_siblings import disperse_siblings_backgroud
 
 
 def constrain_difficulty(difficulty: float) -> float:
@@ -95,8 +96,25 @@ class FSRS:
     def set_card(self, card: Card):
         self.card = card
 
+def reschedule(did, recent=False, filter=False, filtered_cids={}, filtered_nid_string=""):
 
-def reschedule(did, recent=False, filter=False, filtered_cids={}):
+    def on_done(future):
+        tooltip(future.result())
+
+    if filter and len(filtered_cids) > 0:
+        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter, filtered_cids))
+        config = Config()
+        config.load()
+        if config.auto_disperse:
+            text = fut.result()
+            fut = mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter, filtered_nid_string, text_from_reschedule=text), on_done)
+    else:
+        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter, filtered_cids))
+    
+    return fut
+
+
+def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
     config = Config()
     config.load()
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -116,7 +134,7 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
     rollover = mw.col.all_config()['rollover']
 
     mw.checkpoint("Rescheduling")
-    mw.progress.start()
+    mw.taskman.run_on_main(lambda: mw.progress.start(label="Rescheduling", immediate=False))
 
     cnt = 0
     rescheduled_cards = set()
@@ -126,8 +144,9 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
     if fsrs.enable_fuzz and config.load_balance:
         fsrs.set_load_balance()
     fsrs.free_days = config.free_days
-
+    cancelled = False
     for deck in decks:
+        if cancelled: break
         if any([deck['name'].startswith(i) for i in skip_decks if i != ""]):
             rescheduled_cards = rescheduled_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\"".replace('\\', '\\\\')))
             continue
@@ -151,6 +170,7 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
         if recent:
             query += f" \"rated:{config.days_to_reschedule}\""
         for cid in mw.col.find_cards(query.replace('\\', '\\\\')):
+            if cancelled: break
             if cid not in rescheduled_cards:
                 rescheduled_cards.add(cid)
             else:
@@ -254,10 +274,17 @@ def reschedule(did, recent=False, filter=False, filtered_cids={}):
             card.flush()
             cnt += 1
 
-    mw.progress.finish()
-    mw.col.reset()
-    mw.reset()
-
+            if cnt % 500 == 499:
+                mw.taskman.run_on_main(lambda: mw.progress.update(value=cnt, label=f"{cnt} cards rescheduled"))
+                if mw.progress.want_cancel(): cancelled = True
+        
     finished_text = f"{cnt} cards rescheduled"
-    tooltip(finished_text)
+
+    def on_finish():
+        mw.progress.finish()
+        mw.col.reset()
+        mw.reset()
+        tooltip(finished_text)
+    
+    mw.taskman.run_on_main(on_finish)
     return finished_text
