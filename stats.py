@@ -18,20 +18,23 @@ def _lineTbl_now(i):
 
 
 def retention_stability_burden(lim) -> float:
-    today = mw.col.sched.today
-    last_due_and_custom_data_and_ivl_rows = mw.col.db.all("""
-    SELECT CASE WHEN odid==0 
-        THEN due - ivl
-        ELSE odue - ivl
-        END
-        ,data
+    elapse_stability_ivl_list = mw.col.db.all(f"""
+    SELECT 
+        CASE WHEN odid==0
+            THEN {mw.col.sched.today} - (due - ivl)
+            ELSE {mw.col.sched.today} - (odue - ivl)
+            END
+        ,json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s')
         ,ivl 
     FROM cards 
     WHERE queue >= 1 
     AND data like '%\"cd\"%'
     """ + lim)
-    delay_stability_ivl_list = map(lambda x: (today - min(today, x[0]), json.loads(json.loads(x[1])['cd'])['s'], x[2]), last_due_and_custom_data_and_ivl_rows)
-    retention_stability_burden_list = list(map(lambda x: (math.pow(0.9, x[0] / x[1]), x[1], 1/max(1, x[2])), delay_stability_ivl_list))
+    # x[0]: elapsed days
+    # x[1]: stability
+    # x[2]: interval
+    elapse_stability_ivl_list = filter(lambda x: x[1] is not None, elapse_stability_ivl_list)
+    retention_stability_burden_list = list(map(lambda x: (math.pow(0.9, max(x[0], 0) / x[1]), x[1], 1/max(1, x[2])), elapse_stability_ivl_list))
     cnt = len(retention_stability_burden_list)
     if cnt == 0:
         return 0, 0, 0, 0
