@@ -54,7 +54,7 @@ def todayStats_new(self):
     i = []
     _line_now(i, "Average retention", f"{retention * 100: .2f}%")
     _line_now(i, "Average stability", f"{int(stability)} days")
-    _line_now(i, "Total burden", f"{burden: .2f} reviews/day")
+    _line_now(i, "Burden", f"{burden: .2f} reviews/day")
     _line_now(i, "Count", f"{count} cards")
     _line_now(i, "Estimated total knowledge", f"{estimated_total_knowledge} cards")
     stats_data = _lineTbl_now(i)
@@ -62,7 +62,7 @@ def todayStats_new(self):
         + "<ul>" \
         + "<li>Average retention: the average probability of recalling a card today. In most cases, it is higher than requested retention because requested retention refers to retention at the time of a review, whereas average retention is calculated based on all cards, including undue cards.</li>" \
         + "<li>Stability: the number of days it takes for the retention to decay from 100% to 90%.</li>" \
-        + "<li>Burden: the number of reviews needed to maintain retention perday. Total burden is the sum of reciprocals of all intervals, in days (aka the sum of 1/interval, like 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub>).</li>" \
+        + "<li>Burden: an estimate of the average number of cards that have to be reviewed daily (assuming review at the scheduled time without advancing or postponing). Burden = 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub> where I<sub>n</sub> - current interval of the n-th card.</li>" \
         + "<li>Count: the number of cards with custom data, in other words, cards that are affected by FSRS (this does not include cards in the (re)learning stage).</li> " \
         + "<li>Estimated total knowledge: the number of cards that the user is expected to know today, calculated as the product of average retention and count.</li>" \
         + "</ul>"
