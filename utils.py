@@ -197,6 +197,10 @@ def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
     card.flush()
 
 
+def filter_revlogs(revlogs: List[RevlogEntry]) -> List[RevlogEntry]:
+    return list(filter(lambda x: x.review_kind != REVLOG_CRAM, revlogs))
+
+
 def get_last_review_date(last_revlog: RevlogEntry):
     return math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today
 
