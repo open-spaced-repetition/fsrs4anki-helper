@@ -7,7 +7,7 @@ from collections import defaultdict
 DM = None
 did_to_deck_parameters = {}
 
-def get_siblings(did=None, filter=False, filtered_nid_string=""):
+def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if did is not None:
         did_list = ids2str(DM.deck_and_child_ids(did))
     siblings = mw.col.db.all(f"""SELECT id, nid, did, data
@@ -18,7 +18,7 @@ def get_siblings(did=None, filter=False, filtered_nid_string=""):
         WHERE type = 2
         AND queue != -1
         AND data like '%"cd"%'
-        {"AND nid IN (" + filtered_nid_string + ")" if filter else ""}
+        {"AND nid IN (" + filtered_nid_string + ")" if filter_flag else ""}
         GROUP BY nid
         HAVING count(*) > 1
     )
@@ -36,7 +36,7 @@ def get_siblings(did=None, filter=False, filtered_nid_string=""):
     return siblings_dict
 
 def get_due_range(cid, parameters, stability):
-    revlogs = mw.col.card_stats_data(cid).revlog
+    revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_due = get_last_review_date(revlogs[0])
     last_rating = revlogs[0].button_chosen
     if last_rating == 4:
@@ -64,10 +64,10 @@ def disperse(siblings):
     best_due_dates.pop(-1)
     return best_due_dates
 
-def disperse_siblings(did, filter=False, filtered_nid_string="", text_from_reschedule=""):
-    mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter, filtered_nid_string, text_from_reschedule))
+def disperse_siblings(did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""):
+    mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter_flag, filtered_nid_string, text_from_reschedule))
 
-def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_from_reschedule=""):
+def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""):
     global DM
     DM = DeckManager(mw.col)
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -87,7 +87,7 @@ def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_
 
     card_cnt = 0
     note_cnt = 0
-    siblings = get_siblings(did, filter, filtered_nid_string)
+    siblings = get_siblings(did, filter_flag, filtered_nid_string)
 
     mw.checkpoint("Siblings Dispersing")
     mw.taskman.run_on_main(lambda: mw.progress.start(label="Siblings Dispersing", max=len(siblings), immediate=False))
@@ -103,7 +103,7 @@ def disperse_siblings_backgroud(did, filter=False, filtered_nid_string="", text_
             card_cnt += 1
         note_cnt += 1
 
-        if note_cnt % 500 == 499:
+        if note_cnt % 500 == 0:
             mw.taskman.run_on_main(lambda: mw.progress.update(value=note_cnt, label=f"{note_cnt}/{len(siblings)} notes dispersed"))
             if mw.progress.want_cancel(): break
             

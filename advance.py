@@ -87,7 +87,7 @@ def advance(did):
         card = mw.col.get_card(cid)
 
         try:
-            revlog = mw.col.card_stats_data(cid).revlog[0]
+            revlog = filter_revlogs(mw.col.card_stats_data(cid).revlog)[0]
         except IndexError:
             continue
 

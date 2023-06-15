@@ -96,25 +96,25 @@ class FSRS:
     def set_card(self, card: Card):
         self.card = card
 
-def reschedule(did, recent=False, filter=False, filtered_cids={}, filtered_nid_string=""):
+def reschedule(did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""):
 
     def on_done(future):
         tooltip(future.result())
 
-    if filter and len(filtered_cids) > 0:
-        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter, filtered_cids))
+    if filter_flag and len(filtered_cids) > 0:
+        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids))
         config = Config()
         config.load()
         if config.auto_disperse:
             text = fut.result()
-            fut = mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter, filtered_nid_string, text_from_reschedule=text), on_done)
+            fut = mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter_flag, filtered_nid_string, text_from_reschedule=text), on_done)
     else:
-        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter, filtered_cids))
+        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids))
     
     return fut
 
 
-def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
+def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}):
     config = Config()
     config.load()
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -175,7 +175,7 @@ def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
                 rescheduled_cards.add(cid)
             else:
                 continue
-            if filter and cid not in filtered_cids:
+            if filter_flag and cid not in filtered_cids:
                 continue
             last_date = None
             last_s = None
@@ -184,7 +184,7 @@ def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
             s = None
             d = None
             rating = None
-            revlogs = mw.col.card_stats_data(cid).revlog
+            revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
             reps = len(revlogs)
             for i, revlog in enumerate(reversed(revlogs)):
                 if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)) and not (has_again(revlogs) or has_manual_reset(revlogs)):
@@ -212,9 +212,6 @@ def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
                         s = None
                         d = None
                         continue
-                elif last_kind == REVLOG_CRAM:
-                    # disable reschedule cards based on my answers in this deck
-                    continue
                 
                 if last_date is None:
                     again_s = fsrs.init_stability(1)
@@ -278,7 +275,7 @@ def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
             card.flush()
             cnt += 1
 
-            if cnt % 500 == 499:
+            if cnt % 500 == 0:
                 mw.taskman.run_on_main(lambda: mw.progress.update(value=cnt, label=f"{cnt} cards rescheduled"))
                 if mw.progress.want_cancel(): cancelled = True
         
