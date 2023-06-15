@@ -1,5 +1,5 @@
 import re
-from aqt.utils import tooltip, getText, showWarning
+from aqt.utils import tooltip, getText, showWarning, showInfo
 from collections import OrderedDict
 from typing import List, Dict
 from anki.stats_pb2 import RevlogEntry
@@ -8,6 +8,7 @@ from anki.stats import (
     REVLOG_LRN, 
     REVLOG_REV, 
     REVLOG_RELRN,
+    REVLOG_CRAM,
     REVLOG_RESCHED,
     CARD_TYPE_REV,
     QUEUE_TYPE_REV

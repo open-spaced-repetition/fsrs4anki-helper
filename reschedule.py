@@ -212,6 +212,10 @@ def reschedule_background(did, recent=False, filter=False, filtered_cids={}):
                         s = None
                         d = None
                         continue
+                elif last_kind == REVLOG_CRAM:
+                    # disable reschedule cards based on my answers in this deck
+                    continue
+                
                 if last_date is None:
                     again_s = fsrs.init_stability(1)
                     hard_s = fsrs.init_stability(2)
