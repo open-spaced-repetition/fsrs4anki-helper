@@ -88,7 +88,7 @@ def postpone(did):
         max_ivl = did_to_deck_parameters[did]["m"]
 
         try:
-            revlog = mw.col.card_stats_data(cid).revlog[0]
+            revlog = filter_revlogs(mw.col.card_stats_data(cid).revlog)[0]
         except IndexError:
             continue
 

@@ -1,5 +1,5 @@
 import re
-from aqt.utils import tooltip, getText, showWarning
+from aqt.utils import tooltip, getText, showWarning, askUser
 from collections import OrderedDict
 from typing import List, Dict
 from anki.stats_pb2 import RevlogEntry
@@ -8,6 +8,7 @@ from anki.stats import (
     REVLOG_LRN, 
     REVLOG_REV, 
     REVLOG_RELRN,
+    REVLOG_CRAM,
     REVLOG_RESCHED,
     CARD_TYPE_REV,
     QUEUE_TYPE_REV
@@ -194,6 +195,10 @@ def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
     else:
         card.due = due
     card.flush()
+
+
+def filter_revlogs(revlogs: List[RevlogEntry]) -> List[RevlogEntry]:
+    return list(filter(lambda x: x.review_kind != REVLOG_CRAM, revlogs))
 
 
 def get_last_review_date(last_revlog: RevlogEntry):

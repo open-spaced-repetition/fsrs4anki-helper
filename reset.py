@@ -43,7 +43,7 @@ def reset(did):
             card = mw.col.get_card(cid)
             if card.custom_data == '':
                 continue
-            revlogs = mw.col.card_stats_data(cid).revlog
+            revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
             if len(revlogs) == 0:
                 continue
             reset_ivl_and_due(cid, revlogs)
@@ -56,4 +56,4 @@ def reset(did):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} cards reseted."""))
+    tooltip(f"""{cnt} cards reseted.""")
