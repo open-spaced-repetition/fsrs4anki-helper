@@ -188,7 +188,6 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
             reps = len(revlogs)
             for i, revlog in enumerate(reversed(revlogs)):
                 if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)) and not (has_again(revlogs) or has_manual_reset(revlogs)):
-                    reset_ivl_and_due(cid, revlogs)
                     break
                 last_s = s
                 rating = revlog.button_chosen
