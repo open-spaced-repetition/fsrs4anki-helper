@@ -189,9 +189,9 @@ def RepresentsInt(s):
 def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
     card = mw.col.get_card(cid)
     card.ivl = int(revlogs[0].interval / 86400)
-    due = int(math.ceil((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today)
+    due = math.ceil((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today
     if card.odid:
-        card.odue = due
+        card.odue = max(due, 1)
     else:
         card.due = due
     card.flush()
@@ -209,7 +209,7 @@ def update_card_due_ivl(card: Card, last_revlog: RevlogEntry, new_ivl: int):
     card.ivl = new_ivl
     last_review_date = get_last_review_date(last_revlog)
     if card.odid:
-        card.odue = last_review_date + new_ivl
+        card.odue = max(last_review_date + new_ivl, 1)
     else:
         card.due = last_review_date + new_ivl
     return card
