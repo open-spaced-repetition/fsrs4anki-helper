@@ -8,9 +8,9 @@ todayStats_old = anki.stats.CollectionStats.todayStats
 def _line_now(i, a, b, bold=True):
     colon = ":"
     if bold:
-        i.append(("<tr><td align=right>%s%s</td><td><b>%s</b></td></tr>") % (a,colon,b))
+        i.append(("<tr><td align=left>%s%s</td><td align=left><b>%s</b></td></tr>") % (a,colon,b))
     else:
-        i.append(("<tr><td align=right>%s%s</td><td>%s</td></tr>") % (a,colon,b))
+        i.append(("<tr><td align=left>%s%s</td><td align=left>%s</td></tr>") % (a,colon,b))
 
 
 def _lineTbl_now(i):
@@ -60,11 +60,11 @@ def todayStats_new(self):
     stats_data = _lineTbl_now(i)
     interpretation = "<h3>Interpretation</h3>" \
         + "<ul>" \
-        + "<li>Average retention: the average probability of recalling a card today. In most cases, it is higher than requested retention because requested retention refers to retention at the time of a review, whereas average retention is calculated based on all cards, including undue cards.</li>" \
-        + "<li>Stability: the number of days it takes for the retention to decay from 100% to 90%.</li>" \
-        + "<li>Burden: an estimate of the average number of cards that have to be reviewed daily (assuming review at the scheduled time without advancing or postponing). Burden = 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub> where I<sub>n</sub> - current interval of the n-th card.</li>" \
-        + "<li>Count: the number of cards with custom data, in other words, cards that are affected by FSRS (this does not include cards in the (re)learning stage).</li> " \
-        + "<li>Estimated total knowledge: the number of cards that the user is expected to know today, calculated as the product of average retention and count.</li>" \
+        + "<li><b>Average retention</b>: the average probability of recalling a card today. In most cases, it is higher than requested retention because requested retention refers to retention at the time of a review, whereas average retention is calculated based on all cards, including undue cards.</li>" \
+        + "<li><b>Stability</b>: the number of days it takes for the retention to decay from 100% to 90%.</li>" \
+        + "<li><b>Burden</b>: an estimate of the average number of cards that have to be reviewed daily (assuming review at the scheduled time without advancing or postponing). Burden = 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub> where I<sub>n</sub> - current interval of the n-th card.</li>" \
+        + "<li><b>Count</b>: the number of cards with custom data, in other words, cards that are affected by FSRS (this does not include cards in the (re)learning stage).</li> " \
+        + "<li><b>Estimated total knowledge</b>: the number of cards that the user is expected to know today, calculated as the product of average retention and count.</li>" \
         + "</ul>"
     return todayStats_old(self) + "<br><br><table style='text-align: center'><tr><td style='padding: 5px'>" \
         + "<h2>FSRS Stats</h2>" + stats_data + "</td></tr></table>" \
