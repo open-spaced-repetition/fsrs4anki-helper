@@ -9,6 +9,7 @@ import copy
 DM = None
 did_to_deck_parameters = {}
 free_days = []
+enable_load_balance = False
 
 def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if did is not None:
@@ -97,7 +98,8 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
 
     config = Config()
     config.load()
-    global free_days
+    global enable_load_balance, free_days
+    enable_load_balance = config.load_balance
     free_days = config.free_days
 
     for nid, cards in siblings.items():
@@ -129,19 +131,19 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
 # https://stackoverflow.com/questions/68180974/given-n-points-where-each-point-has-its-own-range-adjust-all-points-to-maximize
 def maximize_siblings_due_gap(cid_to_due_ranges: Dict[int, tuple]):
     max_attempts = 10
-    allocation = allocate_points(list(cid_to_due_ranges.values()), max_attempts)
+    allocation = allocate_ranges(list(cid_to_due_ranges.values()), max_attempts)
     due_dates_to_due_ranges = dict(sorted(allocation.items(), key=lambda item: item[1]))
     cid_to_due_ranges = dict(sorted(cid_to_due_ranges.items(), key=lambda item: item[1]))
     return {card_id: due_date for card_id, due_date in sorted(zip(cid_to_due_ranges.keys(), due_dates_to_due_ranges.keys()))}
 
-def get_dues_bordering_min_gap(due_to_points, min_gap):
+def get_dues_bordering_min_gap(due_to_ranges, min_gap):
     dues_bordering_min_gap = set()
     if min_gap == 0:
-        for due, points in due_to_points.items():
-            if len(points) > 1:
+        for due, ranges in due_to_ranges.items():
+            if len(ranges) > 1:
                 dues_bordering_min_gap.add(due)
     else:
-        sorted_dues = sorted(due_to_points.keys())
+        sorted_dues = sorted(due_to_ranges.keys())
         prior_due = sorted_dues[0]
         for cur_due in sorted_dues[1:]:
             cur_gap = cur_due - prior_due
@@ -151,11 +153,11 @@ def get_dues_bordering_min_gap(due_to_points, min_gap):
             prior_due = cur_due
     return list(dues_bordering_min_gap)
 
-def get_min_gap(due_to_points, input_points):
-    if len(due_to_points) < len(input_points):
+def get_min_gap(due_to_ranges, input_ranges):
+    if len(due_to_ranges) < len(input_ranges):
         return 0
     
-    sorted_dues = sorted(due_to_points.keys())
+    sorted_dues = sorted(due_to_ranges.keys())
     prior_due = sorted_dues[0]
     min_gap = None
     for cur_due in sorted_dues[1:]:
@@ -166,71 +168,73 @@ def get_min_gap(due_to_points, input_points):
             return min_gap
     return min_gap
 
-def attempt_to_achieve_min_gap(due_to_points, target_min_gap):
-    new_due_to_points = defaultdict(list)
+def attempt_to_achieve_min_gap(due_to_ranges, target_min_gap):
+    new_due_to_ranges = defaultdict(list)
 
-    leftmost_due = min(due_to_points.keys())
-    leftmost_point = due_to_points[leftmost_due][0]
-    new_due_to_points[leftmost_point[0]].append(leftmost_point)
+    leftmost_due = min(due_to_ranges.keys())
+    leftmost_range = due_to_ranges[leftmost_due][0]
+    new_due_to_ranges[leftmost_range[0]].append(leftmost_range)
 
-    sorted_dues = sorted(due_to_points.keys())
+    sorted_dues = sorted(due_to_ranges.keys())
     prior_due = leftmost_due
     for cur_due in sorted_dues[1:]:
-        cur_point = due_to_points[cur_due][0]
+        cur_range = due_to_ranges[cur_due][0]
         target_due = prior_due + target_min_gap
-        if target_due <= cur_point[0]:
-            new_due_to_points[cur_point[0]].append(cur_point)
-            prior_due = cur_point[0]
-        elif target_due <= cur_point[1]:
-            new_due_to_points[target_due].append(cur_point)
+        if target_due <= cur_range[0]:
+            new_due_to_ranges[cur_range[0]].append(cur_range)
+            prior_due = cur_range[0]
+        elif target_due <= cur_range[1]:
+            new_due_to_ranges[target_due].append(cur_range)
             prior_due = target_due
         else:
             return False
-    return new_due_to_points
+    return new_due_to_ranges
 
-def allocate_points(input_points, max_attempts):
-    due_to_points = defaultdict(list)
-    for point in input_points:
-        due = due_sampler(point[0], point[1])
-        due_to_points[due].append(point)
+def allocate_ranges(input_ranges, max_attempts):
+    due_to_ranges = defaultdict(list)
+    for due_range in input_ranges:
+        due = due_sampler(due_range[0], due_range[1])
+        due_to_ranges[due].append(due_range)
     
     best_min_gap = -1
     best_allocation = None
     attempts = 0
     while attempts < max_attempts:
         attempts += 1
-        min_gap = get_min_gap(due_to_points, input_points)
+        min_gap = get_min_gap(due_to_ranges, input_ranges)
         if min_gap > 0:
             found_improvement = True
             while found_improvement:
                 found_improvement = False
                 trial_min_gap = max(min_gap, best_min_gap) + 1
-                improved_results = attempt_to_achieve_min_gap(due_to_points, trial_min_gap)
+                improved_results = attempt_to_achieve_min_gap(due_to_ranges, trial_min_gap)
                 if improved_results:
                     found_improvement = True
                     min_gap = trial_min_gap
                     print(f"found improvement!: {min_gap}")
-                    due_to_points = improved_results
+                    due_to_ranges = improved_results
         if min_gap > best_min_gap:
             best_min_gap = min_gap
-            best_allocation = copy.deepcopy(due_to_points)
+            best_allocation = copy.deepcopy(due_to_ranges)
             print(f"found new gap after {attempts} tries: {best_min_gap}")
             attempts = 0
-        dues_to_adjust = get_dues_bordering_min_gap(due_to_points, min_gap)
-        points_to_reallocate = []
+        dues_to_adjust = get_dues_bordering_min_gap(due_to_ranges, min_gap)
+        ranges_to_reallocate = []
         for due in dues_to_adjust:
-            points_to_reallocate += due_to_points.pop(due, [])
-        for point in points_to_reallocate:
-            new_due = due_sampler(point[0], point[1])
-            due_to_points[new_due].append(point)
+            ranges_to_reallocate += due_to_ranges.pop(due, [])
+        for due_range in ranges_to_reallocate:
+            new_due = due_sampler(due_range[0], due_range[1])
+            due_to_ranges[new_due].append(due_range)
     return best_allocation
 
 def due_sampler(min_due, max_due):
-    due_list = list(range(min_due, max_due + 1))
-    if len(free_days) > 0:
+    if enable_load_balance and len(free_days) > 0:
+        due_list = list(range(min_due, max_due + 1))
         for due in range(min_due, max_due + 1):
             day_offset = due - mw.col.sched.today
             due_date = datetime.now() + timedelta(days=day_offset)
             if due_date.weekday() in free_days and len(due_list) > 1:
                 due_list.remove(due)
-    return random.choice(due_list)
+        return random.choice(due_list)
+    else:
+        return random.randint(min_due, max_due)
