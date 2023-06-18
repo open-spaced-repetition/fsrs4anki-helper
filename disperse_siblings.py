@@ -75,7 +75,7 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
         return
     version = get_version(custom_scheduler)
     if version[0] < 3:
-        showWarning("Require FSRS4Anki version >= 3.0.0")
+        mw.taskman.run_on_main(lambda: showWarning("Require FSRS4Anki version >= 3.0.0"))
         return
 
     deck_parameters = get_deck_parameters(custom_scheduler)

@@ -25,13 +25,13 @@ VERSION_NUMBER_LEN = 3
 
 def check_fsrs4anki(all_config):
     if "cardStateCustomizer" not in all_config:
-        showWarning(
-            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
+        mw.taskman.run_on_main(lambda: showWarning(
+            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen."))
         return
     custom_scheduler = all_config['cardStateCustomizer']
     if "// FSRS4Anki" not in custom_scheduler:
-        showWarning(
-            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
+        mw.taskman.run_on_main(lambda: showWarning(
+            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen."))
         return
     return custom_scheduler
 
@@ -40,8 +40,8 @@ def get_version(custom_scheduler):
     str_matches = re.findall(r'// FSRS4Anki v(\d+).(\d+).(\d+) Scheduler', custom_scheduler)
     version = tuple(map(int, str_matches[0]))
     if len(version) != VERSION_NUMBER_LEN:
-        showWarning(
-            "Please check whether the version of FSRS4Anki scheduler matches X.Y.Z.")
+        mw.taskman.run_on_main(lambda: showWarning(
+            "Please check whether the version of FSRS4Anki scheduler matches X.Y.Z."))
         return
     return version
 
@@ -52,7 +52,7 @@ def get_fuzz_bool(custom_scheduler):
     )[0]
     if enable_fuzz:
         return True if enable_fuzz == "true" else False
-    showWarning("Unable to get the value of enable_fuzz.")
+    mw.taskman.run_on_main(lambda: showWarning("Unable to get the value of enable_fuzz."))
     return
 
 
@@ -129,10 +129,10 @@ def get_deck_parameters(custom_scheduler):
     if not all([len(x) == len(decks) for x in [
         decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
     ]]):
-        showWarning(
+        mw.taskman.run_on_main(lambda: showWarning(
             "The number of deckName, w, requestRetention, maximumInterval, easyBonus, or hardInterval unmatch.\n" +
             "Please confirm each item of deckParams have deckName, w, requestRetention, maximumInterval, easyBonus, and hardInterval."
-        )
+        ))
         return
     deck_parameters = {
         d: {

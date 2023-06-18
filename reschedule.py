@@ -122,7 +122,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
         return
     version = get_version(custom_scheduler)
     if version[0] < 3:
-        showWarning("Require FSRS4Anki version >= 3.0.0")
+        mw.taskman.run_on_main(lambda: showWarning("Require FSRS4Anki version >= 3.0.0"))
         return
 
     deck_parameters = get_deck_parameters(custom_scheduler)
