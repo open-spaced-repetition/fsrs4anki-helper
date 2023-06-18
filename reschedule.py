@@ -55,10 +55,10 @@ class FSRS:
         return self.w[5] * init + (1 - self.w[5]) * current
 
     def next_recall_stability(self, d: float, s: float, r: float) -> float:
-        return s * (1 + math.exp(self.w[6]) * (11 - d) * math.pow(s, self.w[7]) * (math.exp((1 - r) * self.w[8]) - 1))
+        return min(max(0.1, s * (1 + math.exp(self.w[6]) * (11 - d) * math.pow(s, self.w[7]) * (math.exp((1 - r) * self.w[8]) - 1))), 36500)
 
     def next_forget_stability(self, d: float, s: float, r: float) -> float:
-        return self.w[9] * math.pow(d, self.w[10]) * math.pow(s, self.w[11]) * math.exp((1 - r) * self.w[12])
+        return min(max(0.1, self.w[9] * math.pow(d, self.w[10]) * math.pow(s, self.w[11]) * math.exp((1 - r) * self.w[12])), 36500)
 
     def set_fuzz_factor(self, cid: int, reps: int):
         random.seed(cid + reps)
@@ -74,7 +74,8 @@ class FSRS:
         if self.enable_load_balance:
             min_num_cards = 18446744073709551616
             best_ivl = ivl
-            for check_ivl in reversed(range(min_ivl, max_ivl + 1)):
+            step = (max_ivl - min_ivl) // 1000 + 1
+            for check_ivl in reversed(range(min_ivl, max_ivl + 1, step)):
                 check_due = self.card.due + check_ivl - self.card.ivl
                 day_offset = check_due - mw.col.sched.today
                 due_date = datetime.now() + timedelta(days=day_offset)
