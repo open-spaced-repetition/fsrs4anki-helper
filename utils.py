@@ -198,7 +198,7 @@ def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
 
 
 def filter_revlogs(revlogs: List[RevlogEntry]) -> List[RevlogEntry]:
-    return list(filter(lambda x: x.review_kind != REVLOG_CRAM, revlogs))
+    return list(filter(lambda x: x.review_kind != REVLOG_CRAM or x.ease_factor != 0, revlogs))
 
 
 def get_last_review_date(last_revlog: RevlogEntry):
