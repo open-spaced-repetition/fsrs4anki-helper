@@ -75,8 +75,9 @@ class FSRS:
             min_num_cards = 18446744073709551616
             best_ivl = ivl
             step = (max_ivl - min_ivl) // 1000 + 1
+            due = self.card.due if self.card.odid == 0 else self.card.odue
             for check_ivl in reversed(range(min_ivl, max_ivl + 1, step)):
-                check_due = self.card.due + check_ivl - self.card.ivl
+                check_due = due + check_ivl - self.card.ivl
                 day_offset = check_due - mw.col.sched.today
                 due_date = datetime.now() + timedelta(days=day_offset)
                 due_cards = self.due_cnt_perday_from_first_day.setdefault(check_due, 0)

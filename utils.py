@@ -2,7 +2,7 @@ import re
 from aqt.utils import tooltip, getText, showWarning, askUser
 from collections import OrderedDict
 from typing import List, Dict
-from anki.stats_pb2 import RevlogEntry
+from anki.stats_pb2 import CardStatsResponse
 from anki.cards import Card
 from anki.stats import (
     REVLOG_LRN, 
@@ -186,7 +186,7 @@ def RepresentsInt(s):
         return None
 
 
-def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
+def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     card = mw.col.get_card(cid)
     card.ivl = int(revlogs[0].interval / 86400)
     due = math.ceil((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today
@@ -197,15 +197,15 @@ def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
     card.flush()
 
 
-def filter_revlogs(revlogs: List[RevlogEntry]) -> List[RevlogEntry]:
-    return list(filter(lambda x: x.review_kind != REVLOG_CRAM or x.ease_factor != 0, revlogs))
+def filter_revlogs(revlogs: List[CardStatsResponse.StatsRevlogEntry]) -> List[CardStatsResponse.StatsRevlogEntry]:
+    return list(filter(lambda x: x.review_kind != REVLOG_CRAM or x.ease != 0, revlogs))
 
 
-def get_last_review_date(last_revlog: RevlogEntry):
+def get_last_review_date(last_revlog: CardStatsResponse.StatsRevlogEntry):
     return math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today
 
 
-def update_card_due_ivl(card: Card, last_revlog: RevlogEntry, new_ivl: int):
+def update_card_due_ivl(card: Card, last_revlog: CardStatsResponse.StatsRevlogEntry, new_ivl: int):
     card.ivl = new_ivl
     last_review_date = get_last_review_date(last_revlog)
     if card.odid:
@@ -215,14 +215,14 @@ def update_card_due_ivl(card: Card, last_revlog: RevlogEntry, new_ivl: int):
     return card
 
 
-def has_again(revlogs: List[RevlogEntry]):
+def has_again(revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     for r in revlogs:
         if r.button_chosen == 1:
             return True
     return False
 
 
-def has_manual_reset(revlogs: List[RevlogEntry]):
+def has_manual_reset(revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     last_kind = None
     for r in revlogs:
         if r.button_chosen == 0:
