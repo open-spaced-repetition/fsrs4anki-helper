@@ -1,7 +1,6 @@
 import anki.stats
 import math
 from .utils import *
-from anki.hooks import wrap
 
 def _line_now(i, a, b, bold=True):
     colon = ":"
@@ -85,7 +84,7 @@ def _plot(self, data, title, subtitle, color):
         data=graph_data,
         type="bars",
         conf=dict(
-            xaxis=dict(min=1, max=10, ticks=[[i, i] for i in range(1, 11)]),
+            xaxis=dict(min=0.5, max=10.5, ticks=[[i, i] for i in range(1, 11)]),
             yaxes=yaxes
         ),
         ylabel="Cards",
@@ -99,18 +98,18 @@ def difficulty_distribution_graph(self):
         lim = " AND did IN %s" % lim
     difficulty_count = mw.col.db.all(f"""
     SELECT 
-        CAST(json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.d') AS INT)
+        CAST(ROUND(json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.d')) AS INT)
         ,count(*)
     FROM cards 
     WHERE queue >= 1 
     AND data like '%\"cd\"%'
     {lim}
-    GROUP BY CAST(json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.d') AS INT)
+    GROUP BY CAST(ROUND(json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.d')) AS INT)
     """)
     # x[0]: difficulty
     # x[1]: cnt
     difficulty_count = tuple(filter(lambda x: x[0] is not None, difficulty_count))
-    distribution_graph = _plot(self, difficulty_count, "Difficulty Distribution", "", "#00F")
+    distribution_graph = _plot(self, difficulty_count, "Difficulty Distribution", "Lower number = less difficult (easier), higher number = more difficult (harder)", "#add8e6")
     return cardGraph_old(self) + distribution_graph
 
 
