@@ -2,9 +2,6 @@ import anki.stats
 import math
 from .utils import *
 
-todayStats_old = anki.stats.CollectionStats.todayStats
-
-
 def _line_now(i, a, b, bold=True):
     colon = ":"
     if bold:
@@ -71,5 +68,56 @@ def todayStats_new(self):
         + "<table style='text-align: left'><tr><td style='padding: 5px'>" + interpretation + "</td></tr></table>"
 
 
+def _plot(self, data, title, subtitle, color):
+    if not data:
+        return ""
+
+    txt = self._title(title, subtitle)
+
+    graph_data = [dict(data=data, color=color)]
+
+    yaxes = [dict(min=min(y for x, y in data),
+                  max=max(y for x, y in data))]
+
+    txt += self._graph(
+        id="difficulty",
+        data=graph_data,
+        type="bars",
+        conf=dict(
+            xaxis=dict(min=0.5, max=10.5, ticks=[[i, i] for i in range(1, 11)]),
+            yaxes=yaxes
+        ),
+        ylabel="Cards",
+    )
+
+    return txt
+
+def difficulty_distribution_graph(self):
+    lim = self._limit()
+    if lim:
+        lim = " AND did IN %s" % lim
+    difficulty_count = mw.col.db.all(f"""
+    SELECT 
+        CAST(ROUND(json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.d')) AS INT)
+        ,count(*)
+    FROM cards 
+    WHERE queue >= 1 
+    AND data like '%\"cd\"%'
+    {lim}
+    GROUP BY CAST(ROUND(json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.d')) AS INT)
+    """)
+    # x[0]: difficulty
+    # x[1]: cnt
+    difficulty_count = tuple(filter(lambda x: x[0] is not None, difficulty_count))
+    distribution_graph = _plot(self, difficulty_count, "Difficulty Distribution", "Lower number = less difficult (easier), higher number = more difficult (harder)", "#add8e6")
+    return cardGraph_old(self) + distribution_graph
+
+
+
+
 def init_stats():
+    global todayStats_old, cardGraph_old
+    todayStats_old = anki.stats.CollectionStats.todayStats
+    cardGraph_old = anki.stats.CollectionStats.cardGraph 
     anki.stats.CollectionStats.todayStats = todayStats_new
+    anki.stats.CollectionStats.cardGraph = difficulty_distribution_graph
