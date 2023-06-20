@@ -156,13 +156,17 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
             deck_name = mw.col.decks.get(did)['name']
             if not deck['name'].startswith(deck_name):
                 continue
-        (
-            w,
-            retention,
-            max_ivl,
-            easy_bonus,
-            hard_factor,
-        ) = deck_parameters[global_deck_name].values()
+        try:
+            (
+                w,
+                retention,
+                max_ivl,
+                easy_bonus,
+                hard_factor,
+            ) = deck_parameters[global_deck_name].values()
+        except KeyError:
+            mw.taskman.run_on_main(lambda: showWarning("Global config is not found."))
+            break
         for name, params in deck_parameters.items():
             if deck['name'].startswith(name):
                 w, retention, max_ivl, easy_bonus, hard_factor = params.values()
