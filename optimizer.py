@@ -1,15 +1,33 @@
+import typing
+from PyQt6 import QtCore
+from PyQt6.QtWidgets import QWidget
 from .utils import *
 from .configuration import *
 
 from anki.exporting import AnkiPackageExporter
 from anki.decks import DeckManager
-from aqt.qt import QProcess, QThreadPool, QRunnable, QObject, pyqtSignal
+from aqt.qt import QProcess, QThreadPool, QRunnable, QObject, pyqtSignal, QDialog
 from aqt.utils import showInfo, showCritical, askUserDialog
+import aqt
 
 import os
 import time
 import sys
 import platform
+
+
+class InstallerQDialog(QDialog):
+    def __init__(self, mw):
+        super().__init__(mw)
+        self.mw = mw
+        self.form = aqt.forms.synclog.Ui_Dialog()
+        self.form.setupUi(self)
+        self.form.plainTextEdit.setPlainText("Installing optimizer...")
+        self.show()
+
+    def _on_log_entry(self, entry) -> None:
+        self.form.plainTextEdit.appendPlainText(entry)
+
 
 config = Config()
 
@@ -64,9 +82,10 @@ def optimize(did: int):
         tqdm.close = noop
 
         from fsrs4anki_optimizer import Optimizer
-    except ImportError:
+    except ImportError as e:
         showCritical(
-"""
+f"""
+Error: {e}
 You need to have the optimizer installed in order to optimize your decks using this option.
 Please run Tools>FSRS4Anki helper>Install local optimizer.
 Alternatively, use a different method of optimizing (https://github.com/open-spaced-repetition/fsrs4anki/releases)
@@ -189,7 +208,13 @@ You have to do some reviews on the deck before you optimize it!""")
     QThreadPool.globalInstance().start(worker)
 
 downloader = QProcess()
-downloader.setProcessChannelMode(QProcess.ProcessChannelMode.ForwardedChannels)
+# downloader.setProcessChannelMode(QProcess.ProcessChannelMode.ForwardedChannels)
+    
+
+def onReadyReadStandardOutput(diag):
+    diag._on_log_entry(downloader.readAllStandardOutput().data().decode("utf-8"))
+    diag._on_log_entry(downloader.readAllStandardError().data().decode("utf-8"))
+    # print(downloader.readAllStandardError().data().decode("utf-8"))
 
 def install(_):
     global downloader
@@ -210,11 +235,17 @@ There are other options if you just need to optimize a few decks
 Proceed?""",
 title="Install local optimizer?")
 
+        
+    diag = InstallerQDialog(mw)
+    diag.show()
+    downloader.readyReadStandardOutput.connect(lambda: onReadyReadStandardOutput(diag))
+    downloader.readyReadStandardError.connect(lambda: onReadyReadStandardOutput(diag))
+
     if confirmed: 
         # Not everyone is going to have git installed but works for testing.
-        PACKAGE = 'fsrs4anki_optimizer @ git+https://github.com/open-spaced-repetition/fsrs4anki@v3.18.1#subdirectory=package'
+        PACKAGE = 'fsrs4anki_optimizer==3.25.3'
 
-        if platform.system() == "Windows": # For windows
+        if platform.system() in ("Windows", "Darwin"): # For windows
             anki_path = sys.executable
             anki_lib_path = os.path.dirname(anki_path)
             anki_lib_path = os.path.join(anki_lib_path, "lib")
@@ -229,6 +260,7 @@ title="Install local optimizer?")
             showCritical(f"Not supported for operating system: '{platform.system()}'")
 
         tooltip("Installing optimizer")
+
         def finished(exitCode,  exitStatus):
             if exitCode == 0:
                 showInfo("Optimizer installed successfully, restart for it to take effect")
@@ -240,3 +272,6 @@ Error code: '{exitCode}', Error status '{exitStatus}'
 """
 )
         downloader.finished.connect(finished)
+
+        # timer = mw.progress.timer(100, lambda: onReadyReadStandardOutput(diag), True, False, parent=mw)
+

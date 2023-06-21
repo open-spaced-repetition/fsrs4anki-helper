@@ -115,6 +115,7 @@ menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings"
 
 menu_install_optimizer = build_action(install_optimizer, "Install local optimizer")
 menu_show_saved_optimized = build_action(lambda _: showInfo(config.results_string()), "Show saved optimized deck settings")
+add_action_to_gear(optimize, "Optimize")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
