@@ -1,27 +1,37 @@
 import re
-from aqt.utils import getText, showWarning, tooltip, askUser
+from aqt.utils import tooltip, getText, showWarning, askUser
 from collections import OrderedDict
 from typing import List, Dict
-from anki.stats_pb2 import RevlogEntry
-from anki.stats import REVLOG_LRN, REVLOG_REV, REVLOG_RELRN
+from anki.stats_pb2 import CardStatsResponse
+from anki.cards import Card
+from anki.stats import (
+    REVLOG_LRN, 
+    REVLOG_REV, 
+    REVLOG_RELRN,
+    REVLOG_CRAM,
+    REVLOG_RESCHED,
+    CARD_TYPE_REV,
+    QUEUE_TYPE_REV
+)
 from aqt import mw
 import json
+import math
+import random
 
 
 DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)
 GLOBAL_DECK_CONFIG_NAME = "global config for FSRS4Anki"
 VERSION_NUMBER_LEN = 3
-DONT_RESCHEDULE = "-\"is:learn\" -\"is:suspended\""
 
 def check_fsrs4anki(all_config):
     if "cardStateCustomizer" not in all_config:
-        showWarning(
-            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
+        mw.taskman.run_on_main(lambda: showWarning(
+            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen."))
         return
     custom_scheduler = all_config['cardStateCustomizer']
     if "// FSRS4Anki" not in custom_scheduler:
-        showWarning(
-            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen.")
+        mw.taskman.run_on_main(lambda: showWarning(
+            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen."))
         return
     return custom_scheduler
 
@@ -30,8 +40,8 @@ def get_version(custom_scheduler):
     str_matches = re.findall(r'// FSRS4Anki v(\d+).(\d+).(\d+) Scheduler', custom_scheduler)
     version = tuple(map(int, str_matches[0]))
     if len(version) != VERSION_NUMBER_LEN:
-        showWarning(
-            "Please check whether the version of FSRS4Anki scheduler matches X.Y.Z.")
+        mw.taskman.run_on_main(lambda: showWarning(
+            "Please check whether the version of FSRS4Anki scheduler matches X.Y.Z."))
         return
     return version
 
@@ -42,7 +52,7 @@ def get_fuzz_bool(custom_scheduler):
     )[0]
     if enable_fuzz:
         return True if enable_fuzz == "true" else False
-    showWarning("Unable to get the value of enable_fuzz.")
+    mw.taskman.run_on_main(lambda: showWarning("Unable to get the value of enable_fuzz."))
     return
 
 
@@ -58,26 +68,6 @@ def geq_version(version_1, version_2):
         if version_1[ii] != version_2[ii]:
             return True if version_1[ii] > version_2[ii] else False
     return True
-
-
-if __name__ == '__main__':
-    """Small test for 'uses_new_code'. Will check numbers of versions below, at
-    and above the version number defined in the global configuration.
-    Base 3 is used because all we need to check are the numbers one unit above 
-    or below the version.
-    """
-    initial_version = DECOUPLE_PARAMS_CODE_INITIAL_VERSION
-    print('does each version use the new code?:')
-    for i in range(27):  # 222 in base 3
-        modifier = (i // 9 - 1, i % 9 // 3 - 1, i % 3-1)  # produces numbers in base 3
-        modified = tuple(sum(tup) for tup in zip(initial_version, modifier))
-        print(modified, end=' is ')
-        if i >= 13:  # 111 in base 3
-            print(' True', end='. ')
-        else:
-            print(False, end='. ')
-        print(uses_new_params_config(modified), end=' ')
-        print('<-- Func returns ')
 
 
 def get_global_config_deck_name(version):
@@ -139,10 +129,10 @@ def get_deck_parameters(custom_scheduler):
     if not all([len(x) == len(decks) for x in [
         decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
     ]]):
-        showWarning(
+        mw.taskman.run_on_main(lambda: showWarning(
             "The number of deckName, w, requestRetention, maximumInterval, easyBonus, or hardInterval unmatch.\n" +
             "Please confirm each item of deckParams have deckName, w, requestRetention, maximumInterval, easyBonus, and hardInterval."
-        )
+        ))
         return
     deck_parameters = {
         d: {
@@ -165,6 +155,23 @@ def get_deck_parameters(custom_scheduler):
     return deck_parameters
 
 
+def get_did_parameters(deck_list, deck_parameters, global_deck_name):
+    did_to_deck_parameters = {}
+
+    def get_parameters(deckname, mapping):
+        parts = deckname.split("::")
+        for i in range(len(parts), 0, -1):
+            prefix = "::".join(parts[:i])
+            if prefix in mapping:
+                return mapping[prefix]
+        return mapping[global_deck_name]
+    
+    for d in deck_list:
+        parameters = get_parameters(d["name"], deck_parameters)
+        did_to_deck_parameters[d["id"]] = parameters
+    return did_to_deck_parameters
+
+
 def get_skip_decks(custom_scheduler):
     pattern = r'[const ]?skip_decks ?= ?(.*);'
     str_matches = re.findall(pattern, custom_scheduler)
@@ -179,25 +186,43 @@ def RepresentsInt(s):
         return None
 
 
-def reset_ivl_and_due(cid: int, revlogs: List[RevlogEntry]):
+def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     card = mw.col.get_card(cid)
     card.ivl = int(revlogs[0].interval / 86400)
-    due = int(round((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today)
+    due = math.ceil((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today
     if card.odid:
-        card.odue = due
+        card.odue = max(due, 1)
     else:
         card.due = due
     card.flush()
 
 
-def has_again(revlogs: List[RevlogEntry]):
+def filter_revlogs(revlogs: List[CardStatsResponse.StatsRevlogEntry]) -> List[CardStatsResponse.StatsRevlogEntry]:
+    return list(filter(lambda x: x.review_kind != REVLOG_CRAM or x.ease != 0, revlogs))
+
+
+def get_last_review_date(last_revlog: CardStatsResponse.StatsRevlogEntry):
+    return math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today
+
+
+def update_card_due_ivl(card: Card, last_revlog: CardStatsResponse.StatsRevlogEntry, new_ivl: int):
+    card.ivl = new_ivl
+    last_review_date = get_last_review_date(last_revlog)
+    if card.odid:
+        card.odue = max(last_review_date + new_ivl, 1)
+    else:
+        card.due = last_review_date + new_ivl
+    return card
+
+
+def has_again(revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     for r in revlogs:
         if r.button_chosen == 1:
             return True
     return False
 
 
-def has_manual_reset(revlogs: List[RevlogEntry]):
+def has_manual_reset(revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     last_kind = None
     for r in revlogs:
         if r.button_chosen == 0:
@@ -214,3 +239,23 @@ def get_fuzz_range(interval, elapsed_days):
     if interval > elapsed_days:
         min_ivl = max(min_ivl, elapsed_days + 1)
     return min_ivl, max_ivl
+
+
+if __name__ == '__main__':
+    """Small test for 'uses_new_code'. Will check numbers of versions below, at
+    and above the version number defined in the global configuration.
+    Base 3 is used because all we need to check are the numbers one unit above 
+    or below the version.
+    """
+    initial_version = DECOUPLE_PARAMS_CODE_INITIAL_VERSION
+    print('does each version use the new code?:')
+    for i in range(27):  # 222 in base 3
+        modifier = (i // 9 - 1, i % 9 // 3 - 1, i % 3-1)  # produces numbers in base 3
+        modified = tuple(sum(tup) for tup in zip(initial_version, modifier))
+        print(modified, end=' is ')
+        if i >= 13:  # 111 in base 3
+            print(' True', end='. ')
+        else:
+            print(False, end='. ')
+        print(uses_new_params_config(modified), end=' ')
+        print('<-- Func returns ')

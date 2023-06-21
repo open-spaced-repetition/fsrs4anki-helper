@@ -2,5 +2,6 @@
     "load_balance": false,
     "free_days": [],
     "days_to_reschedule": 7,
-    "auto_reschedule_after_sync": false
+    "auto_reschedule_after_sync": false,
+    "auto_disperse": false
 }

@@ -29,13 +29,13 @@ def reset(did):
     decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
     for deck in decks:
         if any([deck['name'].startswith(i) for i in skip_decks]):
-            reseted_cards = reseted_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""))
+            reseted_cards = reseted_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\"".replace('\\', '\\\\')))
             continue
         if did is not None:
             deck_name = mw.col.decks.get(did)['name']
             if not deck['name'].startswith(deck_name):
                 continue
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" {DONT_RESCHEDULE}"):
+        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\"".replace('\\', '\\\\')):
             if cid not in reseted_cards:
                 reseted_cards.add(cid)
             else:
@@ -43,7 +43,7 @@ def reset(did):
             card = mw.col.get_card(cid)
             if card.custom_data == '':
                 continue
-            revlogs = mw.col.card_stats_data(cid).revlog
+            revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
             if len(revlogs) == 0:
                 continue
             reset_ivl_and_due(cid, revlogs)
@@ -56,4 +56,4 @@ def reset(did):
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} cards reseted."""))
+    tooltip(f"""{cnt} cards reseted.""")

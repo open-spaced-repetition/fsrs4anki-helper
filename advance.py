@@ -1,13 +1,14 @@
-import math
-from datetime import datetime
 from .utils import *
+from anki.decks import DeckManager
+from anki.utils import ids2str
 
 
-def get_target_retention_with_response():
-    inquire_text = "Advance undue cards whose retention is lower than your input retention (1, 99).\n"
-    info_text = "Only affect cards scheduled by FSRS4Anki Scheduler or rescheduled by FSRS4Anki Helper.\n"
-    ivl_text = "The new intervals are scheduled corresponding to your input retention.\n"
-    (s, r) = getText(inquire_text + info_text + ivl_text)
+def get_desired_advance_cnt_with_response(safe_cnt, did):
+    inquire_text = "Enter the number of cards to be advanced.\n"
+    notification_text = f"{'For this deck' if did else 'For this collection'}, it is relatively safe to advance up to {safe_cnt} cards.\n"
+    warning_text = "You can advance more cards if you wish, but it is not recommended.\nKeep in mind that whenever you use Postpone or Advance, you depart from the optimal scheduling.\n"
+    info_text = "This feature only affects the cards that have been scheduled by FSRS4Anki."
+    (s, r) = getText(inquire_text + notification_text + warning_text + info_text, default="10")
     if r:
         return (RepresentsInt(s), r)
     return (None, r)
@@ -22,76 +23,85 @@ def advance(did):
         showWarning("Require FSRS4Anki version >= 3.0.0")
         return
 
-    (target_retention, resp) = get_target_retention_with_response()
-    if target_retention is None:
-        if resp:
-            showWarning("Please enter an integral number of retention percentage.")
-        return
-    else:
-        if target_retention >= 100 or target_retention <= 0:
-            showWarning("Please enter an integral number in range (1, 99).")
-            return
-        target_retention = target_retention / 100
-
     deck_parameters = get_deck_parameters(custom_scheduler)
     if deck_parameters is None:
         return
     
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
     global_deck_name = get_global_config_deck_name(version)
+    did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
+
+    DM = DeckManager(mw.col)
+    if did is not None:
+        did_list = ids2str(DM.deck_and_child_ids(did))
+
+    cards = mw.col.db.all(f"""
+        SELECT 
+            id, 
+            did,
+            ivl,
+            json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s'),
+            CASE WHEN odid==0
+            THEN {mw.col.sched.today} - (due - ivl)
+            ELSE {mw.col.sched.today} - (odue - ivl)
+            END
+        FROM cards
+        WHERE data like '%"cd"%'
+        AND due > {mw.col.sched.today}
+        AND queue = {QUEUE_TYPE_REV}
+        {"AND did IN %s" % did_list if did is not None else ""}
+    """)
+    # x[0]: cid
+    # x[1]: did
+    # x[2]: interval
+    # x[3]: stability
+    # x[4]: elapsed days
+    # x[5]: requested retention
+    # x[6]: current retention
+    cards = filter(lambda x: x[3] is not None, cards)
+    cards = map(lambda x: (x + [did_to_deck_parameters[x[1]]["r"], math.pow(0.9, x[4]/x[3])]), cards)
+    # sort by (1 - elapsed_day / scheduled_day)
+    # = 1-ln(current retention)/ln(requested retention), -interval (ascending)
+    cards = sorted(cards, key=lambda x: (1-math.log(x[6])/math.log(x[5]), -x[2]))
+    safe_cnt = len(list(filter(lambda x: 1-math.log(x[6])/math.log(x[5]) < 0.13, cards)))
+
+    (desired_advance_cnt, resp) = get_desired_advance_cnt_with_response(safe_cnt, did)
+    if desired_advance_cnt is None:
+        if resp:
+            showWarning("Please enter the number of cards you want to advance.")
+        return
+    else:
+        if desired_advance_cnt <= 0:
+            showWarning("Please enter a positive integer.")
+            return
 
     mw.checkpoint("Advancing")
     mw.progress.start()
 
     cnt = 0
-    advanced_cards = set()
-    decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
-    for deck in decks:
-        if any([deck['name'].startswith(i) for i in skip_decks]):
-            advanced_cards = advanced_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\""))
+    max_retention = 0
+    for cid, did, _, stability, _, _, _ in cards:
+        if cnt >= desired_advance_cnt:
+            break
+        
+        card = mw.col.get_card(cid)
+
+        try:
+            revlog = filter_revlogs(mw.col.card_stats_data(cid).revlog)[0]
+        except IndexError:
             continue
-        if did is not None:
-            deck_name = mw.col.decks.get(did)['name']
-            if not deck['name'].startswith(deck_name):
-                continue
-        max_ivl = deck_parameters[global_deck_name]['m']
-        for key, value in deck_parameters.items():
-            if deck['name'].startswith(key):
-                max_ivl = value['m']
-                break
-        for cid in mw.col.find_cards(f"\"deck:{deck['name']}\" -\"is:due\" \"is:review\" {DONT_RESCHEDULE}"):
-            if cid not in advanced_cards:
-                advanced_cards.add(cid)
-            else:
-                continue
-            card = mw.col.get_card(cid)
-            if card.custom_data == '':
-                continue
-            custom_data = json.loads(card.custom_data)
-            if 's' not in custom_data:
-                continue
-            s = custom_data['s']
 
-            try:
-                revlog = mw.col.card_stats_data(cid).revlog[0]
-            except IndexError:
-                continue
+        last_due = get_last_review_date(revlog)
+        new_ivl = mw.col.sched.today - last_due
+        card = update_card_due_ivl(card, revlog, new_ivl)
+        card.flush()
+        cnt += 1
 
-            ivl = datetime.today().toordinal() - datetime.fromtimestamp(revlog.time).toordinal()
-            r = math.pow(0.9, ivl / s)
-            if r < target_retention:
-                new_ivl = min(max(int(round(math.log(target_retention) / math.log(0.9) * s)), 1), max_ivl)
-                offset = new_ivl - card.ivl
-                card.ivl = new_ivl
-                if card.odid:  # Also update cards in filtered decks
-                    card.odue += offset
-                else:
-                    card.due += offset
-                card.flush()
-                cnt += 1
+        new_retention = math.pow(0.9, new_ivl / stability)
+        max_retention = max(max_retention, new_retention)
 
     mw.progress.finish()
     mw.col.reset()
     mw.reset()
 
-    tooltip(_(f"""{cnt} cards advanced"""))
+    tooltip(f"""{cnt} cards advanced, max retention: {max_retention:.2%}""")
