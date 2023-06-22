@@ -2,19 +2,26 @@ from .utils import *
 from .configuration import Config
 from anki.decks import DeckManager
 from anki.utils import ids2str
+from aqt.gui_hooks import reviewer_did_show_answer
 from collections import defaultdict
 from datetime import datetime, timedelta
 import copy
 
-DM = None
 did_to_deck_parameters = {}
-free_days = []
-enable_load_balance = False
+config = Config()
+config.load()
+enable_load_balance = config.load_balance
+free_days = config.free_days
 
 def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if did is not None:
-        did_list = ids2str(DM.deck_and_child_ids(did))
-    siblings = mw.col.db.all(f"""SELECT id, nid, did, data
+        did_list = ids2str(mw.col.decks.deck_and_child_ids(did))
+    siblings = mw.col.db.all(f"""
+    SELECT 
+        id, 
+        nid, 
+        did,
+        json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s')
     FROM cards
     WHERE nid IN (
         SELECT nid
@@ -31,7 +38,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     AND queue != -1
     {"AND did IN %s" % did_list if did is not None else ""}
     """)
-    siblings = map(lambda x: (x[0], x[1], x[2], json.loads(json.loads(x[3])['cd'])['s']), siblings)
+    siblings = filter(lambda x: x[3] is not None, siblings)
     siblings_dict = {}
     for cid, nid, did, stability in siblings:
         if nid not in siblings_dict:
@@ -72,8 +79,6 @@ def disperse_siblings(did, filter_flag=False, filtered_nid_string="", text_from_
     mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter_flag, filtered_nid_string, text_from_reschedule))
 
 def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""):
-    global DM
-    DM = DeckManager(mw.col)
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
     if custom_scheduler is None:
         return
@@ -95,12 +100,6 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
 
     mw.checkpoint("Siblings Dispersing")
     mw.taskman.run_on_main(lambda: mw.progress.start(label="Siblings Dispersing", max=len(siblings), immediate=False))
-
-    config = Config()
-    config.load()
-    global enable_load_balance, free_days
-    enable_load_balance = config.load_balance
-    free_days = config.free_days
 
     for nid, cards in siblings.items():
         best_due_dates = disperse(cards)
@@ -238,3 +237,57 @@ def due_sampler(min_due, max_due):
         return random.choice(due_list)
     else:
         return random.randint(min_due, max_due)
+
+def get_siblings_when_review(card: Card):
+    siblings = mw.col.db.all(f"""
+    SELECT 
+        id, 
+        nid, 
+        did,
+        json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s')
+    FROM cards
+    WHERE nid = {card.nid}
+    AND id != {card.id}
+    AND data like '%"cd"%'
+    AND type = 2
+    AND queue != -1
+    """)
+    siblings = filter(lambda x: x[3] is not None, siblings)
+    siblings_dict = {}
+    for cid, nid, did, stability in siblings:
+        if nid not in siblings_dict:
+            siblings_dict[nid] = []
+        siblings_dict[nid].append((cid, did, stability))
+    return siblings_dict
+
+@reviewer_did_show_answer.append
+def disperse_siblings_when_review(card: Card):
+    if not config.auto_disperse:
+        return
+    
+    custom_scheduler = check_fsrs4anki(mw.col.all_config())
+    if custom_scheduler is None:
+        return
+    version = get_version(custom_scheduler)
+    if version[0] < 3:
+        showWarning("Require FSRS4Anki version >= 3.0.0")
+        return
+
+    deck_parameters = get_deck_parameters(custom_scheduler)
+    skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
+    global_deck_name = get_global_config_deck_name(version)
+
+    global did_to_deck_parameters
+    did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
+    
+    siblings = get_siblings_when_review(card)
+    card_cnt = 0
+    for nid, cards in siblings.items():
+        best_due_dates = disperse(cards)
+        for cid, due in best_due_dates.items():
+            card = mw.col.get_card(cid)
+            last_revlog = mw.col.card_stats_data(cid).revlog[0]
+            last_due = get_last_review_date(last_revlog)
+            card = update_card_due_ivl(card, last_revlog, due - last_due)
+            card.flush()
+            card_cnt += 1
