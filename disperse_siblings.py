@@ -291,5 +291,3 @@ def disperse_siblings_when_review(card: Card):
             card = update_card_due_ivl(card, last_revlog, due - last_due)
             card.flush()
             card_cnt += 1
-    if card_cnt > 0:
-        tooltip(f"Dispersed {card_cnt} siblings")
