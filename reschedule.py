@@ -287,10 +287,10 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     finished_text = f"{cnt} cards rescheduled"
 
     def on_finish():
+        tooltip(finished_text)
         mw.progress.finish()
         mw.col.reset()
         mw.reset()
-        tooltip(finished_text)
     
     mw.taskman.run_on_main(on_finish)
     return finished_text

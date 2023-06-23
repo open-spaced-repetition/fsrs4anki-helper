@@ -104,8 +104,7 @@ def postpone(did):
         new_retention = math.pow(0.9, new_ivl / stability)
         min_retention = min(min_retention, new_retention)
 
+    tooltip(f"""{cnt} cards postponed, min retention: {min_retention:.2%}""")
     mw.progress.finish()
     mw.col.reset()
     mw.reset()
-
-    tooltip(f"""{cnt} cards postponed, min retention: {min_retention:.2%}""")

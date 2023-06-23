@@ -52,8 +52,7 @@ def reset(did):
             card.flush()
             cnt += 1
 
+    tooltip(f"""{cnt} cards reseted.""")
     mw.progress.finish()
     mw.col.reset()
     mw.reset()
-
-    tooltip(f"""{cnt} cards reseted.""")
