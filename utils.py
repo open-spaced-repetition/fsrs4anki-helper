@@ -1,5 +1,5 @@
 import re
-from aqt.utils import tooltip, getText, showWarning, askUser
+from aqt.utils import tooltip, getText, showWarning, askUser, showText
 from collections import OrderedDict
 from typing import List, Dict
 from anki.stats_pb2 import CardStatsResponse
@@ -17,6 +17,7 @@ from aqt import mw
 import json
 import math
 import random
+from datetime import datetime, timedelta
 
 
 DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)
@@ -239,6 +240,12 @@ def get_fuzz_range(interval, elapsed_days):
     if interval > elapsed_days:
         min_ivl = max(min_ivl, elapsed_days + 1)
     return min_ivl, max_ivl
+
+
+def due_to_date(due: int) -> str:
+    offset = due - mw.col.sched.today
+    today_date = datetime.today()
+    return (today_date + timedelta(days=offset)).strftime("%Y-%m-%d")
 
 
 if __name__ == '__main__':

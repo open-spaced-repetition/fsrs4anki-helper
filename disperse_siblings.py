@@ -1,17 +1,15 @@
 from .utils import *
 from .configuration import Config
 from anki.decks import DeckManager
-from anki.utils import ids2str
+from anki.utils import ids2str, html_to_text_line
 from aqt.gui_hooks import reviewer_did_answer_card
 from collections import defaultdict
 from datetime import datetime, timedelta
 import copy
 
 did_to_deck_parameters = {}
-config = Config()
-config.load()
-enable_load_balance = config.load_balance
-free_days = config.free_days
+enable_load_balance = None
+free_days = None
 
 def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if did is not None:
@@ -73,6 +71,7 @@ def disperse(siblings):
     last_due = {cid: last_due for cid, (due_range, last_due) in due_ranges_last_due.items()}
     latest_due = max(last_due.values())
     due_ranges[-1] = (latest_due, latest_due)
+    print(due_ranges)
     best_due_dates = maximize_siblings_due_gap(due_ranges)
     best_due_dates.pop(-1)
     return best_due_dates
@@ -95,6 +94,12 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
 
     global did_to_deck_parameters
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
+
+    config = Config()
+    config.load()
+    global enable_load_balance, free_days
+    enable_load_balance = config.load_balance
+    free_days = config.free_days
 
     card_cnt = 0
     note_cnt = 0
@@ -244,8 +249,8 @@ def due_sampler(min_due, max_due):
 def get_siblings_when_review(card: Card):
     siblings = mw.col.db.all(f"""
     SELECT 
-        id, 
-        nid, 
+        id,
+        nid,
         did,
         json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s'),
         CASE WHEN odid==0 THEN due ELSE odue END
@@ -265,6 +270,11 @@ def get_siblings_when_review(card: Card):
 
 @reviewer_did_answer_card.append
 def disperse_siblings_when_review(reviewer, card: Card, ease):
+    config = Config()
+    config.load()
+    global enable_load_balance, free_days
+    enable_load_balance = config.load_balance
+    free_days = config.free_days
     if not config.auto_disperse:
         return
     
@@ -283,14 +293,23 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     global did_to_deck_parameters
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
     
-    siblings = get_siblings_when_review(card)
+    nid_siblings = get_siblings_when_review(card)
+    
     card_cnt = 0
-    for nid, cards in siblings.items():
-        best_due_dates = disperse(cards)
+    messages = []
+    for nid, siblings in nid_siblings.items():
+        if len(siblings) <= 1:
+            return
+        best_due_dates = disperse(siblings)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
+            old_due = card.odue if card.odid else card.due
             last_revlog = mw.col.card_stats_data(cid).revlog[0]
             last_due = get_last_review_date(last_revlog)
             card = update_card_due_ivl(card, last_revlog, due - last_due)
             card.flush()
             card_cnt += 1
+            message = f"Dispersed card {html_to_text_line(card.question())} from {due_to_date(old_due)} to {due_to_date(due)}"
+            messages.append(message)
+    # tooltip(f"Dispersed {card_cnt} cards")
+    # showText("\n".join(messages))
