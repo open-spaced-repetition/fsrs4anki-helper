@@ -100,8 +100,7 @@ def advance(did):
         new_retention = math.pow(0.9, new_ivl / stability)
         max_retention = max(max_retention, new_retention)
 
+    tooltip(f"""{cnt} cards advanced, max retention: {max_retention:.2%}""")
     mw.progress.finish()
     mw.col.reset()
     mw.reset()
-
-    tooltip(f"""{cnt} cards advanced, max retention: {max_retention:.2%}""")

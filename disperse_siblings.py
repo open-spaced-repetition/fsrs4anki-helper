@@ -119,10 +119,10 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
     finished_text = f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed."
 
     def on_finish():
+        tooltip(finished_text)
         mw.progress.finish()
         mw.col.reset()
         mw.reset()
-        tooltip(finished_text)
 
     mw.taskman.run_on_main(on_finish)
     return finished_text
