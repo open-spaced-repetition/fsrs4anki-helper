@@ -21,7 +21,7 @@ def reset(did):
     
     skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
 
-    mw.checkpoint("Resetting")
+    undo_entry = mw.col.add_custom_undo_entry("Reset")
     mw.progress.start()
 
     cnt = 0
@@ -49,7 +49,8 @@ def reset(did):
             reset_ivl_and_due(cid, revlogs)
             card = mw.col.get_card(cid)
             card.custom_data = json.dumps({})
-            card.flush()
+            mw.col.update_card(card)
+            mw.col.merge_undo_entries(undo_entry)
             cnt += 1
 
     tooltip(f"""{cnt} cards reseted.""")

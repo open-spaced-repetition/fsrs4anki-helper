@@ -135,7 +135,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     global_deck_name = get_global_config_deck_name(version)
     rollover = mw.col.all_config()['rollover']
 
-    mw.checkpoint("Rescheduling")
+    undo_entry = mw.col.add_custom_undo_entry("Reschedule")
     mw.taskman.run_on_main(lambda: mw.progress.start(label="Rescheduling", immediate=False))
 
     cnt = 0
@@ -277,7 +277,8 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
                     fsrs.due_cnt_perday_from_first_day[due_before] -= 1
                     fsrs.due_cnt_perday_from_first_day.setdefault(due_after, 0)
                     fsrs.due_cnt_perday_from_first_day[due_after] += 1
-            card.flush()
+            mw.col.update_card(card)
+            mw.col.merge_undo_entries(undo_entry)
             cnt += 1
 
             if cnt % 500 == 0:

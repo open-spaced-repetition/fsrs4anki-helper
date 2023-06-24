@@ -75,7 +75,7 @@ def postpone(did):
             showWarning("Please enter a positive integer.")
             return
 
-    mw.checkpoint("Postponing")
+    undo_entry = mw.col.add_custom_undo_entry("Postpone")
     mw.progress.start()
 
     cnt = 0
@@ -98,7 +98,8 @@ def postpone(did):
         delay = elapsed_days - ivl
         new_ivl = min(max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay), max_ivl)
         card = update_card_due_ivl(card, revlog, new_ivl)
-        card.flush()
+        mw.col.update_card(card)
+        mw.col.merge_undo_entries(undo_entry)
         cnt += 1
 
         new_retention = math.pow(0.9, new_ivl / stability)

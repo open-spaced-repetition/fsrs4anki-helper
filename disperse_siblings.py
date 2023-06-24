@@ -1,27 +1,25 @@
 from .utils import *
 from .configuration import Config
-from anki.decks import DeckManager
-from anki.utils import ids2str
-from aqt.gui_hooks import reviewer_did_show_answer
+from anki.utils import ids2str, html_to_text_line
+from aqt.gui_hooks import reviewer_did_answer_card
 from collections import defaultdict
 from datetime import datetime, timedelta
 import copy
 
 did_to_deck_parameters = {}
-config = Config()
-config.load()
-enable_load_balance = config.load_balance
-free_days = config.free_days
+enable_load_balance = None
+free_days = None
 
 def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if did is not None:
         did_list = ids2str(mw.col.decks.deck_and_child_ids(did))
     siblings = mw.col.db.all(f"""
     SELECT 
-        id, 
-        nid, 
+        id,
+        nid,
         did,
-        json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s')
+        json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s'),
+        CASE WHEN odid==0 THEN due ELSE odue END
     FROM cards
     WHERE nid IN (
         SELECT nid
@@ -39,14 +37,14 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     {"AND did IN %s" % did_list if did is not None else ""}
     """)
     siblings = filter(lambda x: x[3] is not None, siblings)
-    siblings_dict = {}
-    for cid, nid, did, stability in siblings:
-        if nid not in siblings_dict:
-            siblings_dict[nid] = []
-        siblings_dict[nid].append((cid, did, stability))
-    return siblings_dict
+    nid_siblings_dict = {}
+    for cid, nid, did, stability, due in siblings:
+        if nid not in nid_siblings_dict:
+            nid_siblings_dict[nid] = []
+        nid_siblings_dict[nid].append((cid, did, stability, due))
+    return nid_siblings_dict
 
-def get_due_range(cid, parameters, stability):
+def get_due_range(cid, parameters, stability, due):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_due = get_last_review_date(revlogs[0])
     last_rating = revlogs[0].button_chosen
@@ -55,22 +53,24 @@ def get_due_range(cid, parameters, stability):
     else:
         easy_bonus = 1
     new_ivl = int(round(stability * easy_bonus * math.log(parameters['r']) / math.log(0.9)))
-    due = last_due + new_ivl
     if new_ivl <= 2.5:
         return (due, due), last_due
     last_elapsed_days = int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days)
     due_range = (last_due + min_ivl, last_due + max_ivl)
+    if due > mw.col.sched.today:
+        due_range = tuple(map(lambda x: max(x, due), due_range))
     if due_range[1] < mw.col.sched.today:
         due_range = (due, due)
     return due_range, last_due
 
 def disperse(siblings):
-    due_ranges_last_due = {cid: get_due_range(cid, did_to_deck_parameters[did], stability) for cid, did, stability in siblings}
+    due_ranges_last_due = {cid: get_due_range(cid, did_to_deck_parameters[did], stability, due) for cid, did, stability, due in siblings}
     due_ranges = {cid: due_range for cid, (due_range, last_due) in due_ranges_last_due.items()}
     last_due = {cid: last_due for cid, (due_range, last_due) in due_ranges_last_due.items()}
     latest_due = max(last_due.values())
     due_ranges[-1] = (latest_due, latest_due)
+    print(due_ranges)
     best_due_dates = maximize_siblings_due_gap(due_ranges)
     best_due_dates.pop(-1)
     return best_due_dates
@@ -94,26 +94,34 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
     global did_to_deck_parameters
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
 
+    config = Config()
+    config.load()
+    global enable_load_balance, free_days
+    enable_load_balance = config.load_balance
+    free_days = config.free_days
+
     card_cnt = 0
     note_cnt = 0
-    siblings = get_siblings(did, filter_flag, filtered_nid_string)
+    nid_siblings = get_siblings(did, filter_flag, filtered_nid_string)
+    sibilings_cnt = len(nid_siblings)
 
-    mw.checkpoint("Siblings Dispersing")
-    mw.taskman.run_on_main(lambda: mw.progress.start(label="Siblings Dispersing", max=len(siblings), immediate=False))
+    undo_entry = mw.col.add_custom_undo_entry("Disperse Siblings")
+    mw.taskman.run_on_main(lambda: mw.progress.start(label="Siblings Dispersing", max=sibilings_cnt, immediate=False))
 
-    for nid, cards in siblings.items():
-        best_due_dates = disperse(cards)
+    for nid, siblings in nid_siblings.items():
+        best_due_dates = disperse(siblings)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
             last_revlog = mw.col.card_stats_data(cid).revlog[0]
             last_due = get_last_review_date(last_revlog)
             card = update_card_due_ivl(card, last_revlog, due - last_due)
-            card.flush()
+            mw.col.update_card(card)
+            mw.col.merge_undo_entries(undo_entry)
             card_cnt += 1
         note_cnt += 1
 
         if note_cnt % 500 == 0:
-            mw.taskman.run_on_main(lambda: mw.progress.update(value=note_cnt, label=f"{note_cnt}/{len(siblings)} notes dispersed"))
+            mw.taskman.run_on_main(lambda: mw.progress.update(label=f"{note_cnt}/{len(nid_siblings)} notes dispersed", value=note_cnt, max=sibilings_cnt))
             if mw.progress.want_cancel(): break
             
     finished_text = f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed."
@@ -241,27 +249,32 @@ def due_sampler(min_due, max_due):
 def get_siblings_when_review(card: Card):
     siblings = mw.col.db.all(f"""
     SELECT 
-        id, 
-        nid, 
+        id,
+        nid,
         did,
-        json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s')
+        json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s'),
+        CASE WHEN odid==0 THEN due ELSE odue END
     FROM cards
     WHERE nid = {card.nid}
-    AND id != {card.id}
     AND data like '%"cd"%'
     AND type = 2
     AND queue != -1
     """)
     siblings = filter(lambda x: x[3] is not None, siblings)
     siblings_dict = {}
-    for cid, nid, did, stability in siblings:
+    for cid, nid, did, stability, due in siblings:
         if nid not in siblings_dict:
             siblings_dict[nid] = []
-        siblings_dict[nid].append((cid, did, stability))
+        siblings_dict[nid].append((cid, did, stability, due))
     return siblings_dict
 
-@reviewer_did_show_answer.append
-def disperse_siblings_when_review(card: Card):
+@reviewer_did_answer_card.append
+def disperse_siblings_when_review(reviewer, card: Card, ease):
+    config = Config()
+    config.load()
+    global enable_load_balance, free_days
+    enable_load_balance = config.load_balance
+    free_days = config.free_days
     if not config.auto_disperse:
         return
     
@@ -280,14 +293,25 @@ def disperse_siblings_when_review(card: Card):
     global did_to_deck_parameters
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
     
-    siblings = get_siblings_when_review(card)
+    nid_siblings = get_siblings_when_review(card)
+    undo_entry = mw.col.undo_status().last_step
+    
     card_cnt = 0
-    for nid, cards in siblings.items():
-        best_due_dates = disperse(cards)
+    messages = []
+    for nid, siblings in nid_siblings.items():
+        if len(siblings) <= 1:
+            return
+        best_due_dates = disperse(siblings)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
+            old_due = card.odue if card.odid else card.due
             last_revlog = mw.col.card_stats_data(cid).revlog[0]
             last_due = get_last_review_date(last_revlog)
             card = update_card_due_ivl(card, last_revlog, due - last_due)
-            card.flush()
+            mw.col.update_card(card)
+            mw.col.merge_undo_entries(undo_entry)
             card_cnt += 1
+            message = f"Dispersed card {html_to_text_line(card.question())} from {due_to_date(old_due)} to {due_to_date(due)}"
+            messages.append(message)
+    # tooltip(f"Dispersed {card_cnt} cards")
+    # showText("\n".join(messages))
