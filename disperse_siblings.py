@@ -294,7 +294,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
     
     nid_siblings = get_siblings_when_review(card)
-    undo_entry = mw.col.add_custom_undo_entry("Disperse Siblings When Review")
+    undo_entry = mw.col.undo_status().last_step
     
     card_cnt = 0
     messages = []
