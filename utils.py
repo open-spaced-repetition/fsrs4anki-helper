@@ -195,7 +195,7 @@ def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry
         card.odue = max(due, 1)
     else:
         card.due = due
-    card.flush()
+    mw.col.update_card(card)
 
 
 def filter_revlogs(revlogs: List[CardStatsResponse.StatsRevlogEntry]) -> List[CardStatsResponse.StatsRevlogEntry]:
