@@ -136,12 +136,13 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
     return finished_text
 
 # https://stackoverflow.com/questions/68180974/given-n-points-where-each-point-has-its-own-range-adjust-all-points-to-maximize
+# https://stackoverflow.com/questions/68180974/given-n-points-where-each-point-has-its-own-range-adjust-all-points-to-maximize
 def maximize_siblings_due_gap(cid_to_due_ranges: Dict[int, tuple]):
     max_attempts = 10
     allocation = allocate_ranges(list(cid_to_due_ranges.values()), max_attempts)
-    due_dates_to_due_ranges = dict(sorted(allocation.items(), key=lambda item: item[1]))
-    cid_to_due_ranges = dict(sorted(cid_to_due_ranges.items(), key=lambda item: item[1]))
-    return {card_id: due_date for card_id, due_date in sorted(zip(cid_to_due_ranges.keys(), due_dates_to_due_ranges.keys()))}
+    due_dates = (due_date for due_dates_list in [(x[0],) * len(x[1]) for x in sorted(allocation.items(), key=lambda item: item[1])] for due_date in due_dates_list)
+    cids = (x[0] for x in sorted(cid_to_due_ranges.items(), key=lambda item: item[1]))
+    return {card_id: due_date for card_id, due_date in zip(cids, due_dates)}
 
 def get_dues_bordering_min_gap(due_to_ranges, min_gap):
     dues_bordering_min_gap = set()
