@@ -136,7 +136,6 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
     return finished_text
 
 # https://stackoverflow.com/questions/68180974/given-n-points-where-each-point-has-its-own-range-adjust-all-points-to-maximize
-# https://stackoverflow.com/questions/68180974/given-n-points-where-each-point-has-its-own-range-adjust-all-points-to-maximize
 def maximize_siblings_due_gap(cid_to_due_ranges: Dict[int, tuple]):
     max_attempts = 10
     allocation = allocate_ranges(list(cid_to_due_ranges.values()), max_attempts)
