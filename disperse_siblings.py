@@ -54,23 +54,23 @@ def get_due_range(cid, parameters, stability, due):
         easy_bonus = 1
     new_ivl = int(round(stability * easy_bonus * math.log(parameters['r']) / math.log(0.9)))
     if new_ivl <= 2.5:
-        return (due, due), last_due
+        return (due, due, cid), last_due
     last_elapsed_days = int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days)
-    due_range = (last_due + min_ivl, last_due + max_ivl)
     if due > mw.col.sched.today:
-        due_range = tuple(map(lambda x: max(x, due), due_range))
+        due_range = (max(last_due + min_ivl, due), max(last_due + max_ivl, due), cid)
+    else:
+        due_range = (last_due + min_ivl, last_due + max_ivl, cid)
     if due_range[1] < mw.col.sched.today:
-        due_range = (due, due)
+        due_range = (due, due, cid)
     return due_range, last_due
 
 def disperse(siblings):
     due_ranges_last_due = {cid: get_due_range(cid, did_to_deck_parameters[did], stability, due) for cid, did, stability, due in siblings}
-    due_ranges = {cid: due_range for cid, (due_range, last_due) in due_ranges_last_due.items()}
-    last_due = {cid: last_due for cid, (due_range, last_due) in due_ranges_last_due.items()}
+    due_ranges = {cid: due_range for cid, (due_range, _) in due_ranges_last_due.items()}
+    last_due = {cid: last_due for cid, (_, last_due) in due_ranges_last_due.items()}
     latest_due = max(last_due.values())
-    due_ranges[-1] = (latest_due, latest_due)
-    print(due_ranges)
+    due_ranges[-1] = (latest_due, latest_due, -1)
     best_due_dates = maximize_siblings_due_gap(due_ranges)
     best_due_dates.pop(-1)
     return best_due_dates
@@ -139,9 +139,7 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
 def maximize_siblings_due_gap(cid_to_due_ranges: Dict[int, tuple]):
     max_attempts = 10
     allocation = allocate_ranges(list(cid_to_due_ranges.values()), max_attempts)
-    due_dates = (due_date for due_dates_list in [(x[0],) * len(x[1]) for x in sorted(allocation.items(), key=lambda item: item[1])] for due_date in due_dates_list)
-    cids = (x[0] for x in sorted(cid_to_due_ranges.items(), key=lambda item: item[1]))
-    return {card_id: due_date for card_id, due_date in zip(cids, due_dates)}
+    return {item[2]: due_date for due_date, due_ranges in allocation.items() for item in due_ranges}
 
 def get_dues_bordering_min_gap(due_to_ranges, min_gap):
     dues_bordering_min_gap = set()
@@ -218,12 +216,12 @@ def allocate_ranges(input_ranges, max_attempts):
                 if improved_results:
                     found_improvement = True
                     min_gap = trial_min_gap
-                    print(f"found improvement!: {min_gap}")
+                    # print(f"found improvement!: {min_gap}")
                     due_to_ranges = improved_results
         if min_gap > best_min_gap:
             best_min_gap = min_gap
             best_allocation = copy.deepcopy(due_to_ranges)
-            print(f"found new gap after {attempts} tries: {best_min_gap}")
+            # print(f"found new gap after {attempts} tries: {best_min_gap}")
             attempts = 0
         dues_to_adjust = get_dues_bordering_min_gap(due_to_ranges, min_gap)
         ranges_to_reallocate = []
