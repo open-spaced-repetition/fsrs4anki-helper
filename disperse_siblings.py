@@ -78,8 +78,8 @@ def disperse(siblings):
 def disperse_siblings(did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""):
 
     def on_done(future):
-        tooltip(future.result())
         mw.progress.finish()
+        tooltip(future.result())
         mw.col.reset()
         mw.reset()
 
