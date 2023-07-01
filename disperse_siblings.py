@@ -76,7 +76,14 @@ def disperse(siblings):
     return best_due_dates
 
 def disperse_siblings(did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""):
-    mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter_flag, filtered_nid_string, text_from_reschedule))
+
+    def on_done(future):
+        tooltip(future.result())
+        mw.progress.finish()
+        mw.col.reset()
+        mw.reset()
+
+    mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter_flag, filtered_nid_string, text_from_reschedule), on_done)
 
 def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""):
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
@@ -123,17 +130,8 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
         if note_cnt % 500 == 0:
             mw.taskman.run_on_main(lambda: mw.progress.update(label=f"{note_cnt}/{len(nid_siblings)} notes dispersed", value=note_cnt, max=sibilings_cnt))
             if mw.progress.want_cancel(): break
-            
-    finished_text = f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed."
 
-    def on_finish():
-        tooltip(finished_text)
-        mw.progress.finish()
-        mw.col.reset()
-        mw.reset()
-
-    mw.taskman.run_on_main(on_finish)
-    return finished_text
+    return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed."
 
 # https://stackoverflow.com/questions/68180974/given-n-points-where-each-point-has-its-own-range-adjust-all-points-to-maximize
 def maximize_siblings_due_gap(cid_to_due_ranges: Dict[int, tuple]):

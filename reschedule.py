@@ -102,16 +102,19 @@ def reschedule(did, recent=False, filter_flag=False, filtered_cids={}, filtered_
 
     def on_done(future):
         tooltip(future.result())
+        mw.progress.finish()
+        mw.col.reset()
+        mw.reset()
 
     if filter_flag and len(filtered_cids) > 0:
-        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids))
+        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids), on_done)
         config = Config()
         config.load()
         if config.auto_disperse:
             text = fut.result()
             fut = mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter_flag, filtered_nid_string, text_from_reschedule=text), on_done)
     else:
-        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids))
+        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids), on_done)
     
     return fut
 
@@ -284,14 +287,5 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
             if cnt % 500 == 0:
                 mw.taskman.run_on_main(lambda: mw.progress.update(value=cnt, label=f"{cnt} cards rescheduled"))
                 if mw.progress.want_cancel(): cancelled = True
-        
-    finished_text = f"{cnt} cards rescheduled"
 
-    def on_finish():
-        tooltip(finished_text)
-        mw.progress.finish()
-        mw.col.reset()
-        mw.reset()
-    
-    mw.taskman.run_on_main(on_finish)
-    return finished_text
+    return f"{cnt} cards rescheduled"
