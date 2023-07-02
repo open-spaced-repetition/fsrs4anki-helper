@@ -239,6 +239,16 @@ title="Install local optimizer?")
     downloader.readyReadStandardOutput.connect(lambda: onReadyReadStandardOutput(diag))
     downloader.readyReadStandardError.connect(lambda: onReadyReadStandardOutput(diag))
 
+    cancelled = False
+
+    def cancel(_):
+        nonlocal cancelled
+        cancelled = True
+        downloader.close()
+        showCritical("Installation canceled by user.")
+
+    diag.closeEvent = cancel
+
     if confirmed: 
         # Not everyone is going to have git installed but works for testing.
         PACKAGE = 'fsrs4anki-optimizer'
@@ -261,6 +271,9 @@ title="Install local optimizer?")
         tooltip("Installing optimizer")
 
         def finished(exitCode,  exitStatus):
+            if cancelled:
+                return
+
             if exitCode == 0:
                 showInfo("Optimizer installed successfully, restart for it to take effect")
             else:
