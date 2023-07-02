@@ -243,7 +243,7 @@ title="Install local optimizer?")
 
     if confirmed: 
         # Not everyone is going to have git installed but works for testing.
-        PACKAGE = 'fsrs4anki_optimizer==3.25.3'
+        PACKAGE = 'fsrs4anki-optimizer'
 
         if platform.system() in ("Windows", "Darwin"): # For windows
             anki_path = sys.executable
