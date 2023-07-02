@@ -77,7 +77,7 @@ def set_auto_disperse(checked):
 
 
 menu_auto_disperse = checkable(
-    title="Auto disperse siblings after auto rescheduling",
+    title="Auto disperse siblings after sync and review",
     on_click=set_auto_disperse
 )
 

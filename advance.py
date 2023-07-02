@@ -75,7 +75,7 @@ def advance(did):
             showWarning("Please enter a positive integer.")
             return
 
-    mw.checkpoint("Advancing")
+    undo_entry = mw.col.add_custom_undo_entry("Advance")
     mw.progress.start()
 
     cnt = 0
@@ -94,14 +94,14 @@ def advance(did):
         last_due = get_last_review_date(revlog)
         new_ivl = mw.col.sched.today - last_due
         card = update_card_due_ivl(card, revlog, new_ivl)
-        card.flush()
+        mw.col.update_card(card)
+        mw.col.merge_undo_entries(undo_entry)
         cnt += 1
 
         new_retention = math.pow(0.9, new_ivl / stability)
         max_retention = max(max_retention, new_retention)
 
+    tooltip(f"""{cnt} cards advanced, max retention: {max_retention:.2%}""")
     mw.progress.finish()
     mw.col.reset()
     mw.reset()
-
-    tooltip(f"""{cnt} cards advanced, max retention: {max_retention:.2%}""")

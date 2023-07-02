@@ -101,17 +101,20 @@ class FSRS:
 def reschedule(did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""):
 
     def on_done(future):
+        mw.progress.finish()
         tooltip(future.result())
+        mw.col.reset()
+        mw.reset()
 
     if filter_flag and len(filtered_cids) > 0:
-        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids))
+        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids), on_done)
         config = Config()
         config.load()
         if config.auto_disperse:
             text = fut.result()
             fut = mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter_flag, filtered_nid_string, text_from_reschedule=text), on_done)
     else:
-        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids))
+        fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids), on_done)
     
     return fut
 
@@ -135,7 +138,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     global_deck_name = get_global_config_deck_name(version)
     rollover = mw.col.all_config()['rollover']
 
-    mw.checkpoint("Rescheduling")
+    undo_entry = mw.col.add_custom_undo_entry("Reschedule")
     mw.taskman.run_on_main(lambda: mw.progress.start(label="Rescheduling", immediate=False))
 
     cnt = 0
@@ -277,20 +280,12 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
                     fsrs.due_cnt_perday_from_first_day[due_before] -= 1
                     fsrs.due_cnt_perday_from_first_day.setdefault(due_after, 0)
                     fsrs.due_cnt_perday_from_first_day[due_after] += 1
-            card.flush()
+            mw.col.update_card(card)
+            mw.col.merge_undo_entries(undo_entry)
             cnt += 1
 
             if cnt % 500 == 0:
                 mw.taskman.run_on_main(lambda: mw.progress.update(value=cnt, label=f"{cnt} cards rescheduled"))
                 if mw.progress.want_cancel(): cancelled = True
-        
-    finished_text = f"{cnt} cards rescheduled"
 
-    def on_finish():
-        mw.progress.finish()
-        mw.col.reset()
-        mw.reset()
-        tooltip(finished_text)
-    
-    mw.taskman.run_on_main(on_finish)
-    return finished_text
+    return f"{cnt} cards rescheduled"
