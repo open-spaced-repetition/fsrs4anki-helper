@@ -9,6 +9,7 @@ from anki.decks import DeckManager
 from aqt.qt import QProcess, QThreadPool, QRunnable, QObject, pyqtSignal, QDialog
 from aqt.utils import showInfo, showCritical, askUserDialog
 import aqt
+import aqt.forms
 
 import os
 import time
@@ -222,12 +223,9 @@ def install(_):
 """This will install the optimizer onto your system.
 
 You will need to install python or at least pip for this to work.
-You may also need to install git.
 
 This will occupy about 1GB of space and can take some time.
 Please dont close anki until the popup arrives telling you its complete.
-
-I reccomend that you launch anki with command line (anki-console.bat on windows) as otherwise there is no progress bar.
 
 There are other options if you just need to optimize a few decks
 (consult https://github.com/open-spaced-repetition/fsrs4anki/releases).
