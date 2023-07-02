@@ -211,12 +211,6 @@ You have to do some reviews on the deck before you optimize it!""")
 downloader = QProcess()
 # downloader.setProcessChannelMode(QProcess.ProcessChannelMode.ForwardedChannels)
     
-
-def onReadyReadStandardOutput(diag):
-    diag._on_log_entry(downloader.readAllStandardOutput().data().decode("utf-8"))
-    diag._on_log_entry(downloader.readAllStandardError().data().decode("utf-8"))
-    # print(downloader.readAllStandardError().data().decode("utf-8"))
-
 def install(_):
     global downloader
     confirmed = askUser(
@@ -236,8 +230,14 @@ title="Install local optimizer?")
         
     diag = InstallerQDialog(mw)
     diag.show()
-    downloader.readyReadStandardOutput.connect(lambda: onReadyReadStandardOutput(diag))
-    downloader.readyReadStandardError.connect(lambda: onReadyReadStandardOutput(diag))
+
+    def onReadyReadStandardOutput():
+        diag._on_log_entry(downloader.readAllStandardOutput().data().decode("utf-8"))
+        diag._on_log_entry(downloader.readAllStandardError().data().decode("utf-8"))
+        # print(downloader.readAllStandardError().data().decode("utf-8"))
+
+    downloader.readyReadStandardOutput.connect(onReadyReadStandardOutput)
+    downloader.readyReadStandardError.connect(onReadyReadStandardOutput)
 
     cancelled = False
 
