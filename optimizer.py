@@ -253,9 +253,10 @@ title="Install local optimizer?")
             print(anki_lib_path)
 
             # https://stackoverflow.com/a/2916320
-            downloader.start("pip", ["install", f'--target={anki_lib_path}', PACKAGE])
+            # --no-user apparently helps with microsoft store installed python https://stackoverflow.com/questions/63783587/pip-install-cannot-combine-user-and-target
+            downloader.start("pip", ["install", f'--target={anki_lib_path}', PACKAGE, "--no-user"])
         elif platform.system() == "Linux": # For linux (mac untested)
-            downloader.start(sys.executable, ["-m", "pip", "install", PACKAGE])
+            downloader.start(sys.executable, ["-m", "pip", "install", "--user", "--break-system-packages", PACKAGE])
         else:
             showCritical(f"Not supported for operating system: '{platform.system()}'")
 
