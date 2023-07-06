@@ -175,7 +175,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
                 w, retention, max_ivl, easy_bonus, hard_factor = params.values()
                 break
         fsrs.w = w
-        query = f"\"deck:{deck['name']}\" \"is:review\" -\"is:suspended\""
+        query = f"\"deck:{deck['name']}\" (\"is:review\" OR \"is:learn\") -\"is:suspended\""
         if recent:
             query += f" \"rated:{config.days_to_reschedule}\""
         for cid in mw.col.find_cards(query.replace('\\', '\\\\')):
