@@ -153,7 +153,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     for deck in decks:
         if cancelled: break
         if any([deck['name'].startswith(i) for i in skip_decks if i != ""]):
-            rescheduled_cards = rescheduled_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" \"is:review\"".replace('\\', '\\\\')))
+            rescheduled_cards = rescheduled_cards.union(mw.col.find_cards(f"\"deck:{deck['name']}\" (\"is:review\" OR \"is:learn\")".replace('\\', '\\\\')))
             continue
         if did is not None:
             deck_name = mw.col.decks.get(did)['name']
