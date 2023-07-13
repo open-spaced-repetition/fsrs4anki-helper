@@ -91,8 +91,6 @@ class StabilitySearchNode(CustomSearchNode):
 class RetentionSearchNode(CustomSearchNode):
 
     parameter_name = "r"
-    custom_scheduler = check_fsrs4anki(mw.col.all_config())
-    version = get_version(custom_scheduler)
 
     def __init__(self, browser, operator: str, value: str):
         self.browser = browser
@@ -100,6 +98,8 @@ class RetentionSearchNode(CustomSearchNode):
         self.value = value
 
     def filter_ids(self, ids: Sequence[ItemId]) -> Sequence[ItemId]:
+        custom_scheduler = check_fsrs4anki(mw.col.all_config())
+        version = get_version(custom_scheduler)
         try:
             retention = float(self.value)
             if retention < 0 or retention > 1:
@@ -108,9 +108,9 @@ class RetentionSearchNode(CustomSearchNode):
             raise ValueError(
                 f"Invalid value for {self.parameter_name}: {self.value}. Must be a number between 0 and 1."
             )
-        if self.version[0] == 3:
+        if version[0] == 3:
             threshold = math.log(retention) / math.log(0.9)
-        elif self.version[0] == 4:
+        elif version[0] == 4:
             threshold = 9 * (1 / retention - 1)
         ids = self._retain_ids_where(ids, f"""case when odid==0 
         then -({mw.col.sched.today} - (due-ivl)) / json_extract(json_extract(data, '$.cd'), '$.s')
