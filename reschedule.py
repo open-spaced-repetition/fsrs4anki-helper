@@ -90,7 +90,7 @@ class FSRS:
         elif self.version[0] == 4:
             return min(max(0.1, self.w[11] * 
                                 math.pow(d, -self.w[12]) * 
-                                math.pow(s, self.w[13]) * 
+                                (math.pow(s + 1, self.w[13]) - 1) * 
                                 math.exp((1 - r) * self.w[14])), s)
 
     def set_fuzz_factor(self, cid: int, reps: int):
