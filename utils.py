@@ -282,6 +282,14 @@ def due_to_date(due: int) -> str:
     return (today_date + timedelta(days=offset)).strftime("%Y-%m-%d")
 
 
+def exponential_forgetting_curve(elapsed_days, stability):
+    return 0.9 ** (elapsed_days / stability)
+
+
+def power_forgetting_curve(elapsed_days, stability):
+    return (1 + elapsed_days / (9 * stability)) ** -1
+
+
 if __name__ == '__main__':
     """Small test for 'uses_new_code'. Will check numbers of versions below, at
     and above the version number defined in the global configuration.

@@ -94,6 +94,8 @@ class DifficultyColumn(CustomColumn):
 
 
 class RetentionColumn(CustomColumn):
+    custom_scheduler = check_fsrs4anki(mw.col.all_config())
+    version = get_version(custom_scheduler)
     builtin_column = Column(
         key="retention",
         cards_mode_label="Retention",
@@ -117,7 +119,7 @@ class RetentionColumn(CustomColumn):
         else:
             last_due = card.due - card.ivl
         elapsed_days = today - last_due
-        retention = math.pow(0.9, elapsed_days / custom_data['s'])
+        retention = exponential_forgetting_curve(elapsed_days, custom_data['s']) if self.version[0] == 3 else power_forgetting_curve(elapsed_days, custom_data['s'])
         return f"{retention * 100:.2f}%"
     
     def order_by_str(self) -> str:

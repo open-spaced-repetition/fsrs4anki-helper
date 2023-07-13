@@ -125,7 +125,10 @@ class FSRS:
         return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
 
     def next_interval(self, stability, retention, max_ivl):
-        new_interval = self.apply_fuzz(stability * math.log(retention) / math.log(0.9))
+        if self.version[0] == 3:
+            new_interval = self.apply_fuzz(stability * math.log(retention) / math.log(0.9))
+        elif self.version[0] == 4:
+            new_interval = self.apply_fuzz(9 * stability * (1 / retention - 1))
         return min(max(int(round(new_interval)), 1), max_ivl)
 
     def set_card(self, card: Card):
@@ -277,7 +280,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
                     elapsed_days = datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal() - last_date.toordinal()
                     if elapsed_days <= 0 and revlog.review_kind in (REVLOG_LRN, REVLOG_RELRN):
                         continue
-                    r = math.pow(0.9, elapsed_days / s)
+                    r = exponential_forgetting_curve(elapsed_days, s) if version[0] == 3 else power_forgetting_curve(elapsed_days, s)
                     fsrs.elapsed_days = elapsed_days
                     again_s = fsrs.next_forget_stability(fsrs.next_difficulty(d, 1), s, r)
                     hard_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 2), s, r, 2)
