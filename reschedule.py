@@ -19,8 +19,12 @@ class FSRS:
     card: Card
     elapsed_days: int
 
-    def __init__(self) -> None:
-        self.w = [1., 1., 5., -0.5, -0.5, 0.2, 1.4, -0.12, 0.8, 2., -0.2, 0.2, 1.]
+    def __init__(self, version) -> None:
+        self.version = version
+        if version[0] == 3:
+            self.w = [1., 1., 5., -0.5, -0.5, 0.2, 1.4, -0.12, 0.8, 2., -0.2, 0.2, 1.]
+        elif version[0] == 4:
+            self.w = [1., 2., 3., 4., 5., 0.5, 0.5, 0.2, 1.4, 0.2, 0.8, 2., 0.2, 0.2, 1., 0.5, 2.]
         self.enable_fuzz = False
         self.enable_load_balance = False
         self.free_days = []
@@ -42,23 +46,52 @@ class FSRS:
                 GROUP BY (id/1000-{mw.col.sched.day_cutoff})/86400""")}
 
     def init_stability(self, rating: int) -> float:
-        return max(0.1, self.w[0] + self.w[1] * (rating - 1))
+        if self.version[0] == 3:
+            return max(0.1, self.w[0] + self.w[1] * (rating - 1))
+        elif self.version[0] == 4:
+            return max(0.1, self.w[rating - 1])
 
     def init_difficulty(self, rating: int) -> float:
-        return constrain_difficulty(self.w[2] + self.w[3] * (rating - 3))
+        if self.version[0] == 3:
+            return constrain_difficulty(self.w[2] + self.w[3] * (rating - 3))
+        elif self.version[0] == 4:
+            return constrain_difficulty(self.w[4] - self.w[5] * (rating - 3))
 
     def next_difficulty(self, d: float, rating: int) -> float:
-        new_d = d + self.w[4] * (rating - 3)
-        return constrain_difficulty(self.mean_reversion(self.w[2], new_d))
+        if self.version[0] == 3:
+            new_d = d + self.w[4] * (rating - 3)
+            return constrain_difficulty(self.mean_reversion(self.w[2], new_d))
+        elif self.version[0] == 4:
+            new_d = d - self.w[6] * (rating - 3)
+            return constrain_difficulty(self.mean_reversion(self.w[4], new_d))
 
     def mean_reversion(self, init: float, current: float) -> float:
-        return self.w[5] * init + (1 - self.w[5]) * current
+        if self.version[0] == 3:
+            return self.w[5] * init + (1 - self.w[5]) * current
+        elif self.version[0] == 4:
+            return self.w[7] * init + (1 - self.w[7]) * current
 
-    def next_recall_stability(self, d: float, s: float, r: float) -> float:
-        return min(max(0.1, s * (1 + math.exp(self.w[6]) * (11 - d) * math.pow(s, self.w[7]) * (math.exp((1 - r) * self.w[8]) - 1))), 36500)
+    def next_recall_stability(self, d: float, s: float, r: float, rating: int) -> float:
+        if self.version[0] == 3:
+            return min(max(0.1, s * (1 + math.exp(self.w[6]) * (11 - d) * math.pow(s, self.w[7]) * (math.exp((1 - r) * self.w[8]) - 1))), 36500)
+        elif self.version[0] == 4:
+            hard_penalty = self.w[15] if rating == 2 else 1
+            easy_bonus = self.w[16] if rating == 4 else 1
+            return min(max(0.1, s * (1 + math.exp(self.w[8]) * 
+                                        (11 - d) * 
+                                        math.pow(s, -self.w[9]) * 
+                                        (math.exp((1 - r) * self.w[10]) - 1) *
+                                        hard_penalty *
+                                        easy_bonus)), 36500)
 
     def next_forget_stability(self, d: float, s: float, r: float) -> float:
-        return min(max(0.1, self.w[9] * math.pow(d, self.w[10]) * math.pow(s, self.w[11]) * math.exp((1 - r) * self.w[12])), s)
+        if self.version[0] == 3:
+            return min(max(0.1, self.w[9] * math.pow(d, self.w[10]) * math.pow(s, self.w[11]) * math.exp((1 - r) * self.w[12])), s)
+        elif self.version[0] == 4:
+            return min(max(0.1, self.w[11] * 
+                                math.pow(d, -self.w[12]) * 
+                                math.pow(s, self.w[13]) * 
+                                math.exp((1 - r) * self.w[14])), s)
 
     def set_fuzz_factor(self, cid: int, reps: int):
         random.seed(cid + reps)
@@ -144,7 +177,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     cnt = 0
     rescheduled_cards = set()
     decks = sorted(mw.col.decks.all(), key=lambda item: item['name'], reverse=True)
-    fsrs = FSRS()
+    fsrs = FSRS(version)
     fsrs.enable_fuzz = get_fuzz_bool(custom_scheduler)
     if fsrs.enable_fuzz and config.load_balance:
         fsrs.set_load_balance()
@@ -160,19 +193,29 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
             if not deck['name'].startswith(deck_name):
                 continue
         try:
-            (
-                w,
-                retention,
-                max_ivl,
-                easy_bonus,
-                hard_factor,
-            ) = deck_parameters[global_deck_name].values()
+            if version[0] == 3:
+                (
+                    w,
+                    retention,
+                    max_ivl,
+                    easy_bonus,
+                    hard_factor,
+                ) = deck_parameters[global_deck_name].values()
+            elif version[0] == 4:
+                (
+                    w,
+                    retention,
+                    max_ivl,
+                ) = deck_parameters[global_deck_name].values()
         except KeyError:
             mw.taskman.run_on_main(lambda: showWarning("Global config is not found."))
             break
         for name, params in deck_parameters.items():
             if deck['name'].startswith(name):
-                w, retention, max_ivl, easy_bonus, hard_factor = params.values()
+                if version[0] == 3:
+                    w, retention, max_ivl, easy_bonus, hard_factor = params.values()
+                elif version[0] == 4:
+                    w, retention, max_ivl = params.values()
                 break
         fsrs.w = w
         query = f"\"deck:{deck['name']}\" (\"is:review\" OR \"is:learn\") -\"is:suspended\""
@@ -237,11 +280,11 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
                     r = math.pow(0.9, elapsed_days / s)
                     fsrs.elapsed_days = elapsed_days
                     again_s = fsrs.next_forget_stability(fsrs.next_difficulty(d, 1), s, r)
-                    hard_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 2), s, r)
-                    good_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 3), s, r)
-                    easy_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 4), s, r)
+                    hard_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 2), s, r, 2)
+                    good_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 3), s, r, 3)
+                    easy_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 4), s, r, 4)
                     d = fsrs.next_difficulty(d, rating)
-                    s = fsrs.next_recall_stability(d, s, r) if rating > 1 else fsrs.next_forget_stability(d, s, r)
+                    s = fsrs.next_recall_stability(d, s, r, rating) if rating > 1 else fsrs.next_forget_stability(d, s, r)
                     last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
                     last_rating = rating
             if rating is None or s is None:
@@ -262,13 +305,13 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
                     again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
                     hard_ivl = fsrs.next_interval(hard_s, retention, max_ivl)
                     good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
-                    easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl)
+                    easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(easy_s, retention, max_ivl)
                     easy_ivl = max(good_ivl + 1, easy_ivl)
                 else:
                     again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
-                    hard_ivl = fsrs.next_interval(last_s * hard_factor, retention, max_ivl)
+                    hard_ivl = fsrs.next_interval(last_s * hard_factor, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(hard_s, retention, max_ivl)
                     good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
-                    easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl)
+                    easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(easy_s, retention, max_ivl)
                     hard_ivl = min(hard_ivl, good_ivl)
                     good_ivl = max(hard_ivl + 1, good_ivl)
                     easy_ivl = max(good_ivl + 1, easy_ivl)

@@ -49,7 +49,10 @@ def get_due_range(cid, parameters, stability, due):
     last_due = get_last_review_date(revlogs[0])
     last_rating = revlogs[0].button_chosen
     if last_rating == 4:
-        easy_bonus = parameters['e']
+        try:
+            easy_bonus = parameters['e']
+        except KeyError:
+            easy_bonus = 1
     else:
         easy_bonus = 1
     new_ivl = int(round(stability * easy_bonus * math.log(parameters['r']) / math.log(0.9)))
