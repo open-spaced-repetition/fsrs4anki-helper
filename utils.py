@@ -78,21 +78,28 @@ def get_global_config_deck_name(version):
 
 
 def _get_regex_patterns(version):
-    if uses_new_params_config(version):
+    if version[0] == 3:
+        if uses_new_params_config(version):
+            decks = r'"deckName".*"(.*)"'
+            weights = r'"w".*\[(.*)]'
+            retentions = r'"requestRetention"[:\s]+([\d.]+)'
+            max_intervals = r'"maximumInterval"[:\s]+(\d+)'
+            easy_bonuses = r'"easyBonus"[:\s]+([\d.]+)'
+            hard_intervals = r'"hardInterval"[:\s]+([\d.]+)'
+        else:
+            decks = r'deck_name(?: ?== ?|.startsWith\()+"(.*)"'
+            weights = r'[var ]?w ?= ?([0-9\-., \[\]]*)'
+            retentions = r'requestRetention ?= ?([0-9.]*)'
+            max_intervals = r'maximumInterval ?= ?([0-9.]*)'
+            easy_bonuses = r'easyBonus ?= ?([0-9.]*)'
+            hard_intervals = r'hardInterval ?= ?([0-9.]*)'
+        return decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
+    elif version[0] == 4:
         decks = r'"deckName".*"(.*)"'
         weights = r'"w".*\[(.*)]'
         retentions = r'"requestRetention"[:\s]+([\d.]+)'
         max_intervals = r'"maximumInterval"[:\s]+(\d+)'
-        easy_bonuses = r'"easyBonus"[:\s]+([\d.]+)'
-        hard_intervals = r'"hardInterval"[:\s]+([\d.]+)'
-    else:
-        decks = r'deck_name(?: ?== ?|.startsWith\()+"(.*)"'
-        weights = r'[var ]?w ?= ?([0-9\-., \[\]]*)'
-        retentions = r'requestRetention ?= ?([0-9.]*)'
-        max_intervals = r'maximumInterval ?= ?([0-9.]*)'
-        easy_bonuses = r'easyBonus ?= ?([0-9.]*)'
-        hard_intervals = r'hardInterval ?= ?([0-9.]*)'
-    return decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
+        return decks, weights, retentions, max_intervals
 
 
 def _get_weights(version, str_matches):
@@ -117,35 +124,62 @@ def _remove_comment_line(custom_scheduler):
 
 def get_deck_parameters(custom_scheduler):
     version = get_version(custom_scheduler)
-    d_pat, w_pat, r_pat, m_pat, e_pat, h_pat = _get_regex_patterns(version)
     custom_scheduler = _remove_comment_line(custom_scheduler)
-    d_str_matches = re.findall(d_pat, custom_scheduler)
-    decks = _get_deck_names(version, d_str_matches)
-    w_str_matches = re.findall(w_pat, custom_scheduler)
-    weights = _get_weights(version, w_str_matches)
-    retentions = re.findall(r_pat, custom_scheduler)
-    max_intervals = re.findall(m_pat, custom_scheduler)
-    easy_bonuses = re.findall(e_pat, custom_scheduler)
-    hard_intervals = re.findall(h_pat, custom_scheduler)
-    if not all([len(x) == len(decks) for x in [
-        decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
-    ]]):
-        mw.taskman.run_on_main(lambda: showWarning(
-            "The number of deckName, w, requestRetention, maximumInterval, easyBonus, or hardInterval unmatch.\n" +
-            "Please confirm each item of deckParams have deckName, w, requestRetention, maximumInterval, easyBonus, and hardInterval."
-        ))
-        return
-    deck_parameters = {
-        d: {
-            "w": w,
-            "r": float(r),
-            "m": int(m),
-            "e": float(e),
-            "h": float(h),
-        } for d, w, r, m, e, h in zip(
+    if version[0] == 3:
+        d_pat, w_pat, r_pat, m_pat, e_pat, h_pat = _get_regex_patterns(version)
+        d_str_matches = re.findall(d_pat, custom_scheduler)
+        decks = _get_deck_names(version, d_str_matches)
+        w_str_matches = re.findall(w_pat, custom_scheduler)
+        weights = _get_weights(version, w_str_matches)
+        retentions = re.findall(r_pat, custom_scheduler)
+        max_intervals = re.findall(m_pat, custom_scheduler)
+        easy_bonuses = re.findall(e_pat, custom_scheduler)
+        hard_intervals = re.findall(h_pat, custom_scheduler)
+        if not all([len(x) == len(decks) for x in [
             decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
-        )
-    }
+        ]]):
+            mw.taskman.run_on_main(lambda: showWarning(
+                "The number of deckName, w, requestRetention, maximumInterval, easyBonus, or hardInterval unmatch.\n" +
+                "Please confirm each item of deckParams have deckName, w, requestRetention, maximumInterval, easyBonus, and hardInterval."
+            ))
+            return
+        deck_parameters = {
+            d: {
+                "w": w,
+                "r": float(r),
+                "m": int(m),
+                "e": float(e),
+                "h": float(h),
+            } for d, w, r, m, e, h in zip(
+                decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
+            )
+        }
+    elif version[0] == 4:
+        d_pat, w_pat, r_pat, m_pat = _get_regex_patterns(version)
+        d_str_matches = re.findall(d_pat, custom_scheduler)
+        decks = _get_deck_names(version, d_str_matches)
+        w_str_matches = re.findall(w_pat, custom_scheduler)
+        weights = _get_weights(version, w_str_matches)
+        retentions = re.findall(r_pat, custom_scheduler)
+        max_intervals = re.findall(m_pat, custom_scheduler)
+        if not all([len(x) == len(decks) for x in [
+            decks, weights, retentions, max_intervals
+        ]]):
+            mw.taskman.run_on_main(lambda: showWarning(
+                "The number of deckName, w, requestRetention or maximumInterval unmatch.\n" +
+                "Please confirm each item of deckParams have deckName, w, requestRetention and maximumInterval."
+            ))
+            return
+        deck_parameters = {
+            d: {
+                "w": w,
+                "r": float(r),
+                "m": int(m),
+            } for d, w, r, m in zip(
+                decks, weights, retentions, max_intervals
+            )
+        }
+
     deck_parameters = OrderedDict(
         {name: parameters for name, parameters in sorted(
             deck_parameters.items(),
@@ -246,6 +280,14 @@ def due_to_date(due: int) -> str:
     offset = due - mw.col.sched.today
     today_date = datetime.today()
     return (today_date + timedelta(days=offset)).strftime("%Y-%m-%d")
+
+
+def exponential_forgetting_curve(elapsed_days, stability):
+    return 0.9 ** (elapsed_days / stability)
+
+
+def power_forgetting_curve(elapsed_days, stability):
+    return (1 + elapsed_days / (9 * stability)) ** -1
 
 
 if __name__ == '__main__':

@@ -104,6 +104,8 @@ class RetentionColumn(CustomColumn):
     )
 
     def _display_value(self, card: Card) -> str:
+        custom_scheduler = check_fsrs4anki(mw.col.all_config())
+        version = get_version(custom_scheduler)
         if card.type != 2:
             return "N/A"
         if card.custom_data == "":
@@ -112,12 +114,13 @@ class RetentionColumn(CustomColumn):
         if 's' not in custom_data:
             return "N/A"
         today = mw.col.sched.today
-        if card.odid:
-            last_due = card.odue - card.ivl
-        else:
-            last_due = card.due - card.ivl
+        try:
+            revlog = filter_revlogs(mw.col.card_stats_data(card.id).revlog)[0]
+        except IndexError:
+            return "N/A"
+        last_due = get_last_review_date(revlog)
         elapsed_days = today - last_due
-        retention = math.pow(0.9, elapsed_days / custom_data['s'])
+        retention = exponential_forgetting_curve(elapsed_days, custom_data['s']) if version[0] == 3 else power_forgetting_curve(elapsed_days, custom_data['s'])
         return f"{retention * 100:.2f}%"
     
     def order_by_str(self) -> str:
