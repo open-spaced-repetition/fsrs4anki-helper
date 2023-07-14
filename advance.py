@@ -67,8 +67,8 @@ def advance(did):
         cards = sorted(cards, key=lambda x: (1-math.log(x[6])/math.log(x[5]), -x[2]))
         safe_cnt = len(list(filter(lambda x: 1-math.log(x[6])/math.log(x[5]) < 0.13, cards)))
     elif version[0] == 4:
-        cards = sorted(cards, key=lambda x: (1-(math.pow(x[6], -1) - 1)/(math.pow(x[5], -1) - 1), -x[2]))
-        safe_cnt = len(list(filter(lambda x: math.log(x[6])/math.log(x[5])-1 < 0.15, cards))) 
+        cards = sorted(cards, key=lambda x: (1-(1/x[6]-1)/(1/x[5]-1), -x[2]))
+        safe_cnt = len(list(filter(lambda x: 1-(1/x[6]-1)/(1/x[5]-1) < 0.13, cards))) 
 
     (desired_advance_cnt, resp) = get_desired_advance_cnt_with_response(safe_cnt, did)
     if desired_advance_cnt is None:

@@ -62,8 +62,12 @@ def postpone(did):
     cards = map(lambda x: (x + [did_to_deck_parameters[x[1]]["r"], exponential_forgetting_curve(x[4], x[3]) if version[0] == 3 else power_forgetting_curve(x[4], x[3])]), cards)
     # sort by (elapsed_days / scheduled_days - 1)
     # = ln(current retention)/ln(requested retention)-1, -interval (ascending)
-    cards = sorted(cards, key=lambda x: (math.log(x[6])/math.log(x[5])-1, -x[2]))
-    safe_cnt = len(list(filter(lambda x: math.log(x[6])/math.log(x[5])-1 < 0.15, cards)))
+    if version[0] == 3:
+        cards = sorted(cards, key=lambda x: (math.log(x[6])/math.log(x[5])-1, -x[2]))
+        safe_cnt = len(list(filter(lambda x: math.log(x[6])/math.log(x[5])-1 < 0.15, cards)))
+    elif version[0] == 4:
+        cards = sorted(cards, key=lambda x: ((1/x[6]-1)/(1/x[5]-1)-1, -x[2]))
+        safe_cnt = len(list(filter(lambda x: (1/x[6]-1)/(1/x[5]-1)-1 < 0.15, cards))) 
 
     (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response(safe_cnt, did)
     if desired_postpone_cnt is None:
