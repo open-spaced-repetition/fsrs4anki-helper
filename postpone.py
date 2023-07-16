@@ -27,7 +27,7 @@ def postpone(did):
     if deck_parameters is None:
         return
     
-    skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
+    skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
     global_deck_name = get_global_config_deck_name(version)
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
 

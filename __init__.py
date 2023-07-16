@@ -85,7 +85,7 @@ def set_load_balance(checked):
 
 
 menu_load_balance = checkable(
-    title="Load Balance when rescheduling (requires Fuzz)",
+    title="Load Balance when rescheduling",
     on_click=set_load_balance
 )
 
