@@ -19,7 +19,7 @@ def reset(did):
     Are you sure?"""):
         return
     
-    skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
+    skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
 
     undo_entry = mw.col.add_custom_undo_entry("Reset")
     mw.progress.start()
