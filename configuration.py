@@ -111,16 +111,22 @@ class Config:
     @staticmethod
     def result_string(result: dict[str]):
         """Produce the pasteable config for a singular result"""
-        return \
+        out = \
 f"""    {{
         // Generated, Optimized anki deck settings
         "deckName": "{result["name"]}",
         "w": {result["w"]},
         "requestRetention": {result[REQUEST_RETENTION]}, {"//Un-optimized, Replace this with desired number." if result[RETENTION_IS_NOT_OPTIMIZED] else ""}
-        "maximumInterval": {result[MAX_INTERVAL]},
+        "maximumInterval": {result[MAX_INTERVAL]},"""
+        
+        if len(result["w"]) != 17: # Occlude these attributes for version 4
+            out +=  \
+f"""
         "easyBonus": {result[EASY_BONUS]},
         "hardInterval": {result[HARD_INTERVAL]},
     }},"""
+        
+        return out
 
     def results_string(self):
         """Get the config for every result"""
