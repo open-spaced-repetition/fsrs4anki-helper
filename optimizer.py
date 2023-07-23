@@ -156,8 +156,13 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
 """You got a value error, This usually happens when the deck has no or very few reviews.
 You have to do some reviews on the deck before you optimize it!""")
                 raise e
+            
             optimizer.define_model()
-            optimizer.train()
+            try:
+                optimizer.pretrain(verbose=False)
+            except AttributeError: # The optimizer in version 3 has no pretrain function
+                pass
+            optimizer.train(verbose=False)
 
             DEFAULT_RETENTION = 0.8
 
