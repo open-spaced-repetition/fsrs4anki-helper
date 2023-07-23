@@ -120,11 +120,12 @@ f"""    {{
         "maximumInterval": {result[MAX_INTERVAL]},"""
         
         if len(result["w"]) != 17: # Occlude these attributes for version 4
-            out +=  \
+            out += \
 f"""
         "easyBonus": {result[EASY_BONUS]},
-        "hardInterval": {result[HARD_INTERVAL]},
-    }},"""
+        "hardInterval": {result[HARD_INTERVAL]},"""
+        
+        out += "}},"
         
         return out
 
