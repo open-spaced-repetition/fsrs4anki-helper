@@ -27,7 +27,7 @@ def advance(did):
     if deck_parameters is None:
         return
     
-    skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
+    skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
     global_deck_name = get_global_config_deck_name(version)
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
 
@@ -59,11 +59,16 @@ def advance(did):
     # x[5]: requested retention
     # x[6]: current retention
     cards = filter(lambda x: x[3] is not None, cards)
-    cards = map(lambda x: (x + [did_to_deck_parameters[x[1]]["r"], math.pow(0.9, x[4]/x[3])]), cards)
+    cards = map(lambda x: (x + [did_to_deck_parameters[x[1]]["r"], exponential_forgetting_curve(x[4], x[3]) if version[0] == 3 else power_forgetting_curve(x[4], x[3])]), cards)
+    
     # sort by (1 - elapsed_day / scheduled_day)
     # = 1-ln(current retention)/ln(requested retention), -interval (ascending)
-    cards = sorted(cards, key=lambda x: (1-math.log(x[6])/math.log(x[5]), -x[2]))
-    safe_cnt = len(list(filter(lambda x: 1-math.log(x[6])/math.log(x[5]) < 0.13, cards)))
+    if version[0] == 3:
+        cards = sorted(cards, key=lambda x: (1-math.log(x[6])/math.log(x[5]), -x[2]))
+        safe_cnt = len(list(filter(lambda x: 1-math.log(x[6])/math.log(x[5]) < 0.13, cards)))
+    elif version[0] == 4:
+        cards = sorted(cards, key=lambda x: (1-(1/x[6]-1)/(1/x[5]-1), -x[2]))
+        safe_cnt = len(list(filter(lambda x: 1-(1/x[6]-1)/(1/x[5]-1) < 0.13, cards))) 
 
     (desired_advance_cnt, resp) = get_desired_advance_cnt_with_response(safe_cnt, did)
     if desired_advance_cnt is None:
@@ -98,7 +103,7 @@ def advance(did):
         mw.col.merge_undo_entries(undo_entry)
         cnt += 1
 
-        new_retention = math.pow(0.9, new_ivl / stability)
+        new_retention = exponential_forgetting_curve(new_ivl, stability) if version[0] == 3 else power_forgetting_curve(new_ivl, stability)
         max_retention = max(max_retention, new_retention)
 
     tooltip(f"""{cnt} cards advanced, max retention: {max_retention:.2%}""")

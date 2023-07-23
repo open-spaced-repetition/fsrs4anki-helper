@@ -27,7 +27,7 @@ def postpone(did):
     if deck_parameters is None:
         return
     
-    skip_decks = get_skip_decks(custom_scheduler) if version[1] >= 12 else []
+    skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
     global_deck_name = get_global_config_deck_name(version)
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
 
@@ -59,11 +59,15 @@ def postpone(did):
     # x[5]: requested retention
     # x[6]: current retention
     cards = filter(lambda x: x[3] is not None, cards)
-    cards = map(lambda x: (x + [did_to_deck_parameters[x[1]]["r"], math.pow(0.9, x[4]/x[3])]), cards)
+    cards = map(lambda x: (x + [did_to_deck_parameters[x[1]]["r"], exponential_forgetting_curve(x[4], x[3]) if version[0] == 3 else power_forgetting_curve(x[4], x[3])]), cards)
     # sort by (elapsed_days / scheduled_days - 1)
     # = ln(current retention)/ln(requested retention)-1, -interval (ascending)
-    cards = sorted(cards, key=lambda x: (math.log(x[6])/math.log(x[5])-1, -x[2]))
-    safe_cnt = len(list(filter(lambda x: math.log(x[6])/math.log(x[5])-1 < 0.15, cards)))
+    if version[0] == 3:
+        cards = sorted(cards, key=lambda x: (math.log(x[6])/math.log(x[5])-1, -x[2]))
+        safe_cnt = len(list(filter(lambda x: math.log(x[6])/math.log(x[5])-1 < 0.15, cards)))
+    elif version[0] == 4:
+        cards = sorted(cards, key=lambda x: ((1/x[6]-1)/(1/x[5]-1)-1, -x[2]))
+        safe_cnt = len(list(filter(lambda x: (1/x[6]-1)/(1/x[5]-1)-1 < 0.15, cards))) 
 
     (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response(safe_cnt, did)
     if desired_postpone_cnt is None:
@@ -102,7 +106,7 @@ def postpone(did):
         mw.col.merge_undo_entries(undo_entry)
         cnt += 1
 
-        new_retention = math.pow(0.9, new_ivl / stability)
+        new_retention = exponential_forgetting_curve(new_ivl, stability) if version[0] == 3 else power_forgetting_curve(new_ivl, stability)
         min_retention = min(min_retention, new_retention)
 
     tooltip(f"""{cnt} cards postponed, min retention: {min_retention:.2%}""")
