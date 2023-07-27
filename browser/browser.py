@@ -12,7 +12,7 @@ from .custom_columns import (
     CustomColumn,
     DifficultyColumn,
     StabilityColumn,
-    RetentionColumn,
+    RetrievabilityColumn,
 )
 from .custom_search_nodes import (
     CustomSearchNode,
@@ -21,7 +21,7 @@ from ..utils import *
 
 browser: Optional[Browser] = None
 
-custom_columns = [DifficultyColumn(), StabilityColumn(), RetentionColumn()]
+custom_columns = [DifficultyColumn(), StabilityColumn(), RetrievabilityColumn()]
 
 # stores the custom search nodes for the current search
 custom_search_nodes: List[CustomSearchNode] = []
