@@ -225,7 +225,7 @@ def get_current_deck_parameter(deckname, deck_parameters, global_deck_name):
             break
     return deck_parameter
 
-def reschedule_card(cid, fsrs, rollover, version, params):
+def reschedule_card(cid, fsrs: FSRS, rollover, version, params):
     if version[0] == 3:
         w, retention, max_ivl, easy_bonus, hard_factor = params.values()
     elif version[0] == 4:
@@ -298,6 +298,7 @@ def reschedule_card(cid, fsrs, rollover, version, params):
     if card.custom_data != "":
         old_custom_data = json.loads(card.custom_data)
         if "seed" in old_custom_data:
+            fsrs.fuzz_factor = old_custom_data["seed"] / 10000
             new_custom_data["seed"] = old_custom_data["seed"]
     if "seed" not in new_custom_data:
         new_custom_data["seed"] = seed
