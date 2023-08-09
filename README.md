@@ -26,18 +26,18 @@ Installation link: https://ankiweb.net/shared/info/759844606
 
 | Feature name      | How does it work?                                            | When should I use it?                                        |
 | ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| Reschedule        | Calculates the stability, difficulty, and the optimum interval from the entire review logs for each card with the weights stored in your FSRS4Anki Scheduler code. | When you update the weights or other parameters in your FSRS4Anki Scheduler code. |
+| Reschedule        | Calculates the stability, difficulty, and the optimum interval from the entire review logs for each card with the weights stored in your FSRS4Anki Scheduler code. Then, it replaces the current due dates with the calculated ones. | When you update the weights or other parameters in your FSRS4Anki Scheduler code. |
 | Advance           | Decreases the intervals of undue cards based on current and requested R, and interval length to minimize damage to long-term learning. | When you want to review your material ahead of time, for example, before a test. |
-| Postpone          | Increases the intervals of cards that are due today based on current and requested R, and interval length in a way that minimizes damage to long-term learning. | When you are dealing with a large number of reviews after taking a break from Anki. |
+| Postpone          | Increases the intervals of cards that are due today based on current and requested R, and interval length in a way that minimizes damage to long-term learning. | When you are dealing with a large number of reviews after taking a break from Anki or after rescheduling. |
 | Load Balancing    | After the optimal interval is calculated, it is adjusted by a random amount to make the distribution of reviews over time more uniform. | Always. This feature makes your workload (reviews per day) more consistent. |
 | Free Days         | After the optimal interval is calculated, it is slightly adjusted to change the due date. | If you don't want to study on some days of the week, for example, Sundays. |
 | Disperse Siblings | Siblings are cards generated from the same note. Their intervals are adjusted to spread them further apart from each other. | Always. This feature alleviates the interference; disabling it will only decrease the efficiency of spaced repetition. |
 
 ## Reschedule
 
-Rescheduling all cards can predict the memory status based on each card's review history and arrange intervals, using the personalized parameters we filled in earlier.
+Rescheduling all cards can predict the memory status based on each card's review history and arrange intervals, using the parameters from the Scheduler code. These parameters can be personalized with the FSRS Optimizer.
 
-Note: For cards that have been reviewed multiple times using Anki's default algorithm, rescheduling may give different intervals than the Scheduler because the Scheduler can't access the full review history when running. In this case, the intervals given by rescheduling will be more accurate. But afterward, there will be no difference between the two.
+Note: For cards that have been reviewed multiple times using Anki's default algorithm, rescheduling may give different intervals than the Scheduler because the Scheduler can't access the full review history when running. In this case, the intervals given by rescheduling will be more accurate. But after rescheduling once, there will be no difference between the two.
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/d59f5fef-ebe0-4741-bce6-941e9d6db7cf)
 
@@ -63,7 +63,7 @@ Here's a comparison, the first graph is rescheduling before enabling it, and the
 
 ## Free days
 
-You can choose any days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid these days when rescheduling.
+You can choose any day or days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid these days when rescheduling.
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/798dc25c-f06c-40fe-8866-ac28c8392273)
 
@@ -83,7 +83,7 @@ In the card browser, you can right-click on the header and click on Difficulty, 
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/7fb2b357-19d0-45fb-9cc0-f925258a6280)
 
-It also supports filtering syntax for three attributes, here are some examples:
+The Helper also adds [search syntax](https://docs.ankiweb.net/searching.html) for these three attributes, here are some examples:
 
 - s<10: Cards with memory stability less than 10 days
 - d=5: Cards with difficulty equal to 5
@@ -91,15 +91,17 @@ It also supports filtering syntax for three attributes, here are some examples:
 
 ## Advanced Statistics
 
-Hold down the Shift key and click "Stats" to enter the old version of Anki's statistics interface.
+Hold down the Shift key and click "Stats" to enter the old version of Anki's statistics interface. They remain unaffected by the 1 month/year settings.
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/db368bcb-54a5-4ca2-bc14-acad382f643f)
 
 The FSRS Stats are based on all cards in your deck or collection (whichever is selected) that you have ever reviewed.
 
-Average retention (rate) reflects the percentage of cards that you would recall correctly if you were tested today.
+The [two component model of memory](https://supermemo.guru/wiki/Two_component_model_of_memory):
 
-Average (memory) stability reflects how fast you forget (forgetting rate). The greater the stability, the slower the forgetting rate.
+- Average retention reflects the percentage of cards that you would recall correctly if you were tested today.
+
+- Average (memory) stability reflects how fast you forget (forgetting rate). The greater the stability, the slower the forgetting rate.
 
 Total burden, as defined by Piotr Woźniak here: https://supermemo.guru/wiki/Burden
 
