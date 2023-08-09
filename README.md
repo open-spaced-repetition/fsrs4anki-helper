@@ -1,6 +1,7 @@
 # FSRS4Anki Helper
 
 FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) scheduler. It has six features:
+
 - **Reschedule** cards based on their entire review histories.
 - **Postpone** a selected number of due cards.
 - **Advance** a selected number of undue cards.
@@ -16,7 +17,7 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 
 # Installation
 
-The FSRS4Anki Helper add-on is purely an added bonus and is not recommended for extensive use. 
+The FSRS4Anki Helper add-on is purely an added bonus and is not recommended for extensive use.
 
 Installation link: https://ankiweb.net/shared/info/759844606
 
@@ -37,7 +38,7 @@ Installation link: https://ankiweb.net/shared/info/759844606
 
 Rescheduling all cards can predict the memory status based on each card's review history and arrange intervals, using the parameters from the Scheduler code. These parameters can be personalized with the FSRS Optimizer.
 
-Note: For cards that have been reviewed multiple times using Anki's default algorithm, rescheduling may give different intervals than the Scheduler because the Scheduler can't access the full review history when running. In this case, the intervals given by rescheduling will be more accurate. But after rescheduling once, there will be no difference between the two.
+**Note**: For cards that have been reviewed multiple times using Anki's default algorithm, rescheduling may give different intervals than the Scheduler because the Scheduler can't access the full review history when running. In this case, the intervals given by rescheduling will be more accurate. But after rescheduling once, there will be no difference between the two.
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/d59f5fef-ebe0-4741-bce6-941e9d6db7cf)
 
@@ -67,7 +68,7 @@ You can choose any day or days from Monday to Sunday to take off. Once enabled, 
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/798dc25c-f06c-40fe-8866-ac28c8392273)
 
-Effect:
+**Effect**:
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/7fe6b4d0-ae99-40f8-8bd9-0f7c3ff1c638)
 
@@ -99,11 +100,11 @@ The FSRS Stats are based on all cards in your deck or collection (whichever is s
 
 The [two component model of memory](https://supermemo.guru/wiki/Two_component_model_of_memory):
 
-- Average retention reflects the percentage of cards that you would recall correctly if you were tested today.
+- Average **retention** reflects the percentage of cards that you would recall correctly if you were tested today.
 
-- Average (memory) stability reflects how fast you forget (forgetting rate). The greater the stability, the slower the forgetting rate.
+- Average (memory) **stability** reflects how fast you forget (forgetting rate). The greater the stability, the slower the forgetting rate.
 
-Total burden, as defined by Piotr Woźniak here: https://supermemo.guru/wiki/Burden
+Total **burden**, as defined by Piotr Woźniak here: https://supermemo.guru/wiki/Burden
 
 # Mechanism
 
