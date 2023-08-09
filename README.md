@@ -92,11 +92,11 @@ The Helper also adds [search syntax](https://docs.ankiweb.net/searching.html) fo
 
 ## Advanced Statistics
 
-Hold down the Shift key and click "Stats" to enter the old version of Anki's statistics interface. They remain unaffected by the 1 month/year settings.
+Hold down the Shift key and click "Stats" to enter the old version of Anki's statistics interface.
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/db368bcb-54a5-4ca2-bc14-acad382f643f)
 
-The FSRS Stats are based on all cards in your deck or collection (whichever is selected) that you have ever reviewed.
+The FSRS Stats are based on all cards in your deck or collection (whichever is selected) that you have ever reviewed. They remain unaffected by the 1 month/year settings.
 
 The [two component model of memory](https://supermemo.guru/wiki/Two_component_model_of_memory):
 
