@@ -4,10 +4,11 @@ from .utils import *
 
 def _line_now(i, a, b, bold=True):
     colon = ":"
+    style = "style='padding: 5px'"
     if bold:
-        i.append(("<tr><td align=left>%s%s</td><td align=left><b>%s</b></td></tr>") % (a,colon,b))
+        i.append(("<tr><td align=left %s>%s%s</td><td align=left><b>%s</b></td></tr>") % (style, a,colon,b))
     else:
-        i.append(("<tr><td align=left>%s%s</td><td align=left>%s</td></tr>") % (a,colon,b))
+        i.append(("<tr><td align=left %s>%s%s</td><td align=left>%s</td></tr>") % (style, a,colon,b))
 
 
 def _lineTbl_now(i):
@@ -68,8 +69,10 @@ def todayStats_new(self):
         + "<li><b>Estimated total knowledge</b>: the number of cards that the user is expected to know today, calculated as the product of average retention and count.</li>" \
         + "</ul>"
 
-    return todayStats_old(self) + "<br><br><table style='text-align: center'><tr><td style='padding: 5px'>" \
-        + anki.stats.CollectionStats._title(self, "FSRS Stats") + stats_data + "</td></tr></table>" \
+    return todayStats_old(self) \
+        + anki.stats.CollectionStats._title(self, "FSRS Stats", 
+        "Only calculated for cards with custom data (affected by FSRS)") \
+        + stats_data  \
         + "<table style='text-align: left'><tr><td style='padding: 5px'>" + interpretation + "</td></tr></table>" + get_true_retention(self)
 
 
