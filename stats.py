@@ -1,5 +1,5 @@
 import anki.stats
-import math
+from .configuration import Config
 from .utils import *
 
 def _line_now(i, a, b, bold=True):
@@ -126,8 +126,6 @@ def init_stats():
 
 # code modified from https://ankiweb.net/shared/info/1779060522
 
-MATURE_IVL = 21 # mature card interval in days
-
 def get_true_retention(self):
     lim = self._revlogLimit()
     if lim:
@@ -203,6 +201,8 @@ def retentionAsString(n, d):
     return "%0.1f%%" % ((n * 100) / d) if d else "N/A"
 
 def stats_list(lim, span):
+    config = Config()
+    config.load()
     yflunked, ypassed, mflunked, mpassed, learned, relearned = mw.col.db.first("""
     select
     sum(case when lastIvl < %(i)d and ease = 1 and type == 1 then 1 else 0 end), /* flunked young */
@@ -211,7 +211,7 @@ def stats_list(lim, span):
     sum(case when lastIvl >= %(i)d and ease > 1 and type == 1 then 1 else 0 end), /* passed mature */
     sum(case when ivl > 0 and type == 0 then 1 else 0 end), /* learned */
     sum(case when ivl > 0 and type == 2 then 1 else 0 end) /* relearned */
-    from revlog where id > ? """ % dict(i=MATURE_IVL) +lim, span)
+    from revlog where id > ? """ % dict(i=config.mature_ivl) +lim, span)
     yflunked, mflunked = yflunked or 0, mflunked or 0
     ypassed, mpassed = ypassed or 0, mpassed or 0
     learned, relearned = learned or 0, relearned or 0
