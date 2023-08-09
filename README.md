@@ -8,7 +8,7 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 - **No Anki** on Free Days (such as weekends) during rescheduling (based on load balance).
 - **Disperse** Siblings (cards with the same note) to avoid interference & reminder.
 
-# Requirement
+# Requirements
 
 - Anki version >= 2.1.55
 - Enable V3 Scheduler
@@ -31,7 +31,7 @@ Installation link: https://ankiweb.net/shared/info/759844606
 | Postpone          | Increases the intervals of cards that are due today based on current and requested R, and interval length in a way that minimizes damage to long-term learning. | When you are dealing with a large number of reviews after taking a break from Anki. |
 | Load Balancing    | After the optimal interval is calculated, it is adjusted by a random amount to make the distribution of reviews over time more uniform. | Always. This feature makes your workload (reviews/day) more consistent. |
 | Free Days         | After the optimal interval is calculated, it is slightly adjusted to change the due date. | If you don't want to study on some days of the week, for example, Sundays. |
-| Disperse Siblings | Siblings are cards generated from the same note. Their intervals are adjusted to spread them further apart from each other. | Always. This feature alleviate the interference; disabling it will only decrease the efficiency of spaced repetition. |
+| Disperse Siblings | Siblings are cards generated from the same note. Their intervals are adjusted to spread them further apart from each other. | Always. This feature alleviates the interference; disabling it will only decrease the efficiency of spaced repetition. |
 
 ## Reschedule
 
@@ -61,7 +61,7 @@ Here's a comparison, the first graph is rescheduling before enabling it, and the
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/1c4f430d-824b-4145-801e-68fc0329fbbd)
 
-## Free days
+## Free Days
 
 In fact, you can choose any days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid the dates you set for review when rescheduling.
 
@@ -73,7 +73,7 @@ Effect:
 
 ## Disperse Siblings
 
-In Anki, some templates will generate multiple cards related in content from the same note, such as reversed cards (Front->Back, Back->Front) and cloze cards (when you make many cloze on the same note). If the review dates of these cards are too close, they may interfere or remind each other. Dispersing siblings can stagger the review dates of these cards as much as possible.
+In Anki, some templates will generate multiple cards related in content from the same note, such as reversed cards (Front->Back, Back->Front) and cloze cards (when you make many clozes on the same note). If the review dates of these cards are too close, they may interfere or remind each other. Dispersing siblings can stagger the review dates of these cards as much as possible.
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/2e87b9c7-136d-4dc8-8677-c81bc28a0f6b)
 
