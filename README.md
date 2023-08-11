@@ -98,7 +98,7 @@ Hold down the Shift key and click "Stats" to enter the old version of Anki's sta
 
 The FSRS Stats are based on all cards in your deck or collection (whichever is selected) that you have ever reviewed. They remain unaffected by the 1 month/year settings.
 
-Definitions:
+Interpretation:
 
 - Total **burden**, as defined by Piotr Woźniak here: https://supermemo.guru/wiki/Burden
 - The three component of the memory model used by FSRS:
