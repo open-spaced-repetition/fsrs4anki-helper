@@ -84,7 +84,7 @@ def _plot(self, data, title, subtitle, color):
 
     graph_data = [dict(data=data, color=color)]
 
-    yaxes = [dict(min=min(y for x, y in data),
+    yaxes = [dict(min=0,
                   max=max(y for x, y in data))]
 
     txt += self._graph(
@@ -117,7 +117,7 @@ def difficulty_distribution_graph(self):
     # x[0]: difficulty
     # x[1]: cnt
     difficulty_count = tuple(filter(lambda x: x[0] is not None, difficulty_count))
-    distribution_graph = _plot(self, difficulty_count, "Difficulty Distribution", "Lower number = less difficult (easier), higher number = more difficult (harder)", "#add8e6")
+    distribution_graph = _plot(self, difficulty_count, "Difficulty Distribution", "Lower value of D (horizontal axis) = less difficult, higher value of D = more difficult", "#72bcd4")
     return cardGraph_old(self) + distribution_graph
 
 def init_stats():
