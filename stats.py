@@ -1,13 +1,14 @@
 import anki.stats
-import math
+from .configuration import Config
 from .utils import *
 
 def _line_now(i, a, b, bold=True):
     colon = ":"
+    style = "style='padding: 5px'"
     if bold:
-        i.append(("<tr><td align=left>%s%s</td><td align=left><b>%s</b></td></tr>") % (a,colon,b))
+        i.append(("<tr><td align=left %s>%s%s</td><td align=left><b>%s</b></td></tr>") % (style, a,colon,b))
     else:
-        i.append(("<tr><td align=left>%s%s</td><td align=left>%s</td></tr>") % (a,colon,b))
+        i.append(("<tr><td align=left %s>%s%s</td><td align=left>%s</td></tr>") % (style, a,colon,b))
 
 
 def _lineTbl_now(i):
@@ -67,9 +68,12 @@ def todayStats_new(self):
         + "<li><b>Count</b>: the number of cards with custom data, in other words, cards that are affected by FSRS (this does not include cards in the (re)learning stage).</li> " \
         + "<li><b>Estimated total knowledge</b>: the number of cards that the user is expected to know today, calculated as the product of average retention and count.</li>" \
         + "</ul>"
-    return todayStats_old(self) + "<br><br><table style='text-align: center'><tr><td style='padding: 5px'>" \
-        + "<h2>FSRS Stats</h2>" + stats_data + "</td></tr></table>" \
-        + "<table style='text-align: left'><tr><td style='padding: 5px'>" + interpretation + "</td></tr></table>"
+
+    return todayStats_old(self) \
+        + anki.stats.CollectionStats._title(self, "FSRS Stats", 
+        "Only calculated for cards with custom data (affected by FSRS)") \
+        + stats_data  \
+        + "<table style='text-align: left'><tr><td style='padding: 5px'>" + interpretation + "</td></tr></table>" + get_true_retention(self)
 
 
 def _plot(self, data, title, subtitle, color):
@@ -80,7 +84,7 @@ def _plot(self, data, title, subtitle, color):
 
     graph_data = [dict(data=data, color=color)]
 
-    yaxes = [dict(min=min(y for x, y in data),
+    yaxes = [dict(min=0,
                   max=max(y for x, y in data))]
 
     txt += self._graph(
@@ -113,11 +117,8 @@ def difficulty_distribution_graph(self):
     # x[0]: difficulty
     # x[1]: cnt
     difficulty_count = tuple(filter(lambda x: x[0] is not None, difficulty_count))
-    distribution_graph = _plot(self, difficulty_count, "Difficulty Distribution", "Lower number = less difficult (easier), higher number = more difficult (harder)", "#add8e6")
+    distribution_graph = _plot(self, difficulty_count, "Difficulty Distribution", "Lower value of D (horizontal axis) = less difficult, higher value of D = more difficult", "#72bcd4")
     return cardGraph_old(self) + distribution_graph
-
-
-
 
 def init_stats():
     global todayStats_old, cardGraph_old
@@ -125,3 +126,125 @@ def init_stats():
     cardGraph_old = anki.stats.CollectionStats.cardGraph 
     anki.stats.CollectionStats.todayStats = todayStats_new
     anki.stats.CollectionStats.cardGraph = difficulty_distribution_graph
+
+# code modified from https://ankiweb.net/shared/info/1779060522
+
+def get_true_retention(self):
+    lim = self._revlogLimit()
+    if lim:
+        lim = " AND " + lim
+    pastDay = stats_list(lim, (mw.col.sched.dayCutoff-86400)*1000)
+
+    pastYesterday = stats_list(lim, (mw.col.sched.dayCutoff-86400*2)*1000)
+    pastYesterday[0] -= pastDay[0]
+    pastYesterday[1] -= pastDay[1]
+    pastYesterday[2] = retentionAsString(pastYesterday[0], pastYesterday[0] + pastYesterday[1])
+    pastYesterday[3] -= pastDay[3]
+    pastYesterday[4] -= pastDay[4]
+    pastYesterday[5] = retentionAsString(pastYesterday[3], pastYesterday[3] + pastYesterday[4])
+    pastYesterday[6] = pastYesterday[0] + pastYesterday[3]
+    pastYesterday[7] = pastYesterday[1] + pastYesterday[4]
+    pastYesterday[8] = retentionAsString(pastYesterday[6], pastYesterday[6] + pastYesterday[7])
+    pastYesterday[9] -= pastDay[9]
+    pastYesterday[10] -= pastDay[10]
+
+    pastWeek = stats_list(lim, (mw.col.sched.dayCutoff-86400*7)*1000)
+    
+    if self.type == 0:
+        period = 31; pname = u"Month"
+    elif self.type == 1:
+        period = 365; pname = u"Year"
+    elif self.type == 2:
+        period = 10000; pname = u"Deck life"    
+    pastPeriod = stats_list(lim, (mw.col.sched.dayCutoff-86400*period)*1000)
+    true_retention_part = anki.stats.CollectionStats._title(self, "True Retention", "The true retention is calculated on learned cards only.")
+    true_retention_part += u"""
+        <style>
+            td.trl { border: 1px solid; text-align: left; padding: 5px  }
+            td.trr { border: 1px solid; text-align: right; padding: 5px  }
+            td.trc { border: 1px solid; text-align: center; padding: 5px }
+            span.young { color: #77cc77 }
+            span.mature { color: #00aa00 }
+            span.yam { color: #55aa55 }
+            span.relearn { color: #c35617 }
+        </style>
+        <br /><br />
+        <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
+            <tr>
+                <td class="trl" rowspan=3><b>Past</b></td>
+                <td class="trc" colspan=9><b>Reviews on Cards</b></td>
+                <td class="trc" colspan=2 valign=middle><b>Cards</b></td>
+            </tr>
+            <tr>
+                <td class="trc" colspan=3><span class="young"><b>Young</b></span></td>
+                <td class="trc" colspan=3><span class="mature"><b>Mature</b></span></td>
+                <td class="trc" colspan=3><span class="yam"><b>Young and Mature</b></span></td>
+                <td class="trc" rowspan=2><span class="young"><b>Graduated</b></span></td>
+                <td class="trc" rowspan=2><span class="relearn"><b>Relearned</b></span></td>
+            </tr>
+            <tr>
+                <td class="trc"><span class="young">Pass</span></td>
+                <td class="trc"><span class="young">Fail</span></td>
+                <td class="trc"><span class="young">Retention</span></td>
+                <td class="trc"><span class="mature">Pass</span></td>
+                <td class="trc"><span class="mature">Fail</span></td>
+                <td class="trc"><span class="mature">Retention</span></td>
+                <td class="trc"><span class="yam">Pass</span></td>
+                <td class="trc"><span class="yam">Fail</span></td>
+                <td class="trc"><span class="yam">Retention</span></td>
+            </tr>"""
+    true_retention_part += stats_row("Day", pastDay)
+    true_retention_part += stats_row("Yesterday", pastYesterday)
+    true_retention_part += stats_row("Week", pastWeek)
+    true_retention_part += stats_row(pname, pastPeriod)
+    true_retention_part += "</table>"
+    return true_retention_part
+
+def retentionAsString(n, d):
+    return "%0.1f%%" % ((n * 100) / d) if d else "N/A"
+
+def stats_list(lim, span):
+    config = Config()
+    config.load()
+    yflunked, ypassed, mflunked, mpassed, learned, relearned = mw.col.db.first("""
+    select
+    sum(case when lastIvl < %(i)d and ease = 1 and type == 1 then 1 else 0 end), /* flunked young */
+    sum(case when lastIvl < %(i)d and ease > 1 and type == 1 then 1 else 0 end), /* passed young */
+    sum(case when lastIvl >= %(i)d and ease = 1 and type == 1 then 1 else 0 end), /* flunked mature */
+    sum(case when lastIvl >= %(i)d and ease > 1 and type == 1 then 1 else 0 end), /* passed mature */
+    sum(case when ivl > 0 and type == 0 then 1 else 0 end), /* learned */
+    sum(case when ivl > 0 and type == 2 then 1 else 0 end) /* relearned */
+    from revlog where id > ? """ % dict(i=config.mature_ivl) +lim, span)
+    yflunked, mflunked = yflunked or 0, mflunked or 0
+    ypassed, mpassed = ypassed or 0, mpassed or 0
+    learned, relearned = learned or 0, relearned or 0
+
+    return [
+        ypassed,
+        yflunked,
+        retentionAsString(ypassed, float(ypassed + yflunked)), 
+        mpassed,
+        mflunked,
+        retentionAsString(mpassed, float(mpassed + mflunked)), 
+        ypassed + mpassed,
+        yflunked + mflunked,
+        retentionAsString(ypassed + mpassed, float(ypassed + mpassed + yflunked + mflunked)), 
+        learned,
+        relearned]
+
+def stats_row(name, values):
+    return u"""
+        <tr>
+            <td class="trl">""" + name + """</td>
+            <td class="trr"><span class="young">""" + str(values[0]) + u"""</span></td>
+            <td class="trr"><span class="young">""" + str(values[1]) + u"""</span></td>
+            <td class="trr"><span class="young">""" + values[2] + u"""</span></td>
+            <td class="trr"><span class="mature">""" + str(values[3]) + u"""</span></td>
+            <td class="trr"><span class="mature">""" + str(values[4]) + u"""</span></td>
+            <td class="trr"><span class="mature">""" + values[5] + u"""</span></td>
+            <td class="trr"><span class="yam">""" + str(values[6]) + u"""</span></td>
+            <td class="trr"><span class="yam">""" + str(values[7]) + u"""</span></td>
+            <td class="trr"><span class="yam">""" + values[8] + u"""</span></td>
+            <td class="trr"><span class="young">""" + str(values[9]) + u"""</span></td>
+            <td class="trr"><span class="relearn">""" + str(values[10]) + u"""</span></td>
+        </tr>"""
