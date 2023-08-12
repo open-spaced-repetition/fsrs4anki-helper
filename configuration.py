@@ -8,6 +8,7 @@ FREE_DAYS = "free_days"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 AUTO_DISPERSE = "auto_disperse"
+MATURE_IVL = "mature_ivl"
 
 
 def load_config():
@@ -77,4 +78,13 @@ class Config:
     @auto_disperse.setter
     def auto_disperse(self, value):
         self.data[AUTO_DISPERSE] = value
+        self.save()
+
+    @property
+    def mature_ivl(self):
+        return self.data[MATURE_IVL]
+
+    @mature_ivl.setter
+    def mature_ivl(self, value):
+        self.data[MATURE_IVL] = value
         self.save()
