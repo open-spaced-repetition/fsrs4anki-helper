@@ -104,9 +104,8 @@ Interpretation:
 - The [three component of the memory model](https://supermemo.guru/wiki/Three_component_model_of_memory) used by FSRS:
 	- Average **retention** reflects the percentage of cards that you would recall correctly if you were tested today.
 	- Average (memory) **stability** reflects how fast you forget (forgetting rate). The greater the stability, the slower the forgetting rate.
-	- **Difficulty** reflects how hard it is to increase or maintain the stability of a memory. The relative difficulty distribution within the deck/collection can be viewed at the bottom of the statistics interface:
-    [screenshot of Difficulty Distribution]
-
+	- **Difficulty** reflects how hard it is to increase or maintain the stability of a memory. Its relative distribution within the deck/collection can be viewed at the bottom of the statistics interface:
+	![image](https://user-images.githubusercontent.com/32575846/260213063-9b18fbaa-6b92-4392-8984-03b85f3fcedd.png)
 # Mechanism
 
 Please see this wiki page: [FSRS4Anki Helper WIKI](https://github.com/open-spaced-repetition/fsrs4anki-helper/wiki)
