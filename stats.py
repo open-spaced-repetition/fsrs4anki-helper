@@ -160,9 +160,9 @@ def get_true_retention(self):
     true_retention_part = anki.stats.CollectionStats._title(self, "True Retention", "The true retention is calculated on learned cards only.")
     true_retention_part += u"""
         <style>
-            td.trl { border: 1px solid; text-align: left }
-            td.trr { border: 1px solid; text-align: right }
-            td.trc { border: 1px solid; text-align: center }
+            td.trl { border: 1px solid; text-align: left; padding: 5px  }
+            td.trr { border: 1px solid; text-align: right; padding: 5px  }
+            td.trc { border: 1px solid; text-align: center; padding: 5px }
             span.young { color: #77cc77 }
             span.mature { color: #00aa00 }
             span.yam { color: #55aa55 }
@@ -185,13 +185,13 @@ def get_true_retention(self):
             <tr>
                 <td class="trc"><span class="young">Pass</span></td>
                 <td class="trc"><span class="young">Fail</span></td>
-                <td class="trc"><span class="young"><i>Retention</i></span></td>
+                <td class="trc"><span class="young">Retention</span></td>
                 <td class="trc"><span class="mature">Pass</span></td>
                 <td class="trc"><span class="mature">Fail</span></td>
-                <td class="trc"><span class="mature"><i>Retention</i></span></td>
+                <td class="trc"><span class="mature">Retention</span></td>
                 <td class="trc"><span class="yam">Pass</span></td>
                 <td class="trc"><span class="yam">Fail</span></td>
-                <td class="trc"><span class="yam"><i>Retention</i></span></td>
+                <td class="trc"><span class="yam">Retention</span></td>
             </tr>"""
     true_retention_part += stats_row("Day", pastDay)
     true_retention_part += stats_row("Yesterday", pastYesterday)
@@ -238,13 +238,13 @@ def stats_row(name, values):
             <td class="trl">""" + name + """</td>
             <td class="trr"><span class="young">""" + str(values[0]) + u"""</span></td>
             <td class="trr"><span class="young">""" + str(values[1]) + u"""</span></td>
-            <td class="trr"><span class="young"><i>""" + values[2] + u"""</i></span></td>
+            <td class="trr"><span class="young">""" + values[2] + u"""</span></td>
             <td class="trr"><span class="mature">""" + str(values[3]) + u"""</span></td>
             <td class="trr"><span class="mature">""" + str(values[4]) + u"""</span></td>
-            <td class="trr"><span class="mature"><i>""" + values[5] + u"""</i></span></td>
+            <td class="trr"><span class="mature">""" + values[5] + u"""</span></td>
             <td class="trr"><span class="yam">""" + str(values[6]) + u"""</span></td>
             <td class="trr"><span class="yam">""" + str(values[7]) + u"""</span></td>
-            <td class="trr"><span class="yam"><i>""" + values[8] + u"""</i></span></td>
+            <td class="trr"><span class="yam">""" + values[8] + u"""</span></td>
             <td class="trr"><span class="young">""" + str(values[9]) + u"""</span></td>
             <td class="trr"><span class="relearn">""" + str(values[10]) + u"""</span></td>
         </tr>"""
