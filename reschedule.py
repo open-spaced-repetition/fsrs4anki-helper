@@ -39,6 +39,10 @@ class FSRS:
                 WHERE type = 2  
                 AND queue != -1
                 GROUP BY {true_due}""")}
+        for day in list(self.due_cnt_perday_from_first_day.keys()):
+            if day < mw.col.sched.today:
+                self.due_cnt_perday_from_first_day[mw.col.sched.today] = self.due_cnt_perday_from_first_day.get(mw.col.sched.today, 0) + self.due_cnt_perday_from_first_day[day]
+                self.due_cnt_perday_from_first_day.pop(day)
         self.learned_cnt_perday_from_today = {day: cnt for day, cnt in mw.col.db.all(
             f"""SELECT (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid)
                 FROM revlog
@@ -113,10 +117,8 @@ class FSRS:
                 check_due = due + check_ivl - self.card.ivl
                 day_offset = check_due - mw.col.sched.today
                 due_date = datetime.now() + timedelta(days=day_offset)
-                due_cards = self.due_cnt_perday_from_first_day.setdefault(check_due, 0)
-                rated_cards = 0
-                if day_offset <= 0:
-                    rated_cards = self.learned_cnt_perday_from_today.setdefault(day_offset, 0)
+                due_cards = self.due_cnt_perday_from_first_day.get(max(check_due, mw.col.sched.today), 0)
+                rated_cards = self.learned_cnt_perday_from_today.get(0, 0) if day_offset <= 0 else 0
                 num_cards = due_cards + rated_cards
                 if num_cards < min_num_cards and due_date.weekday() not in self.free_days:
                     best_ivl = check_ivl
@@ -320,11 +322,10 @@ def reschedule_card(cid, fsrs: FSRS, rollover, version, params):
             good_ivl = max(hard_ivl + 1, good_ivl)
             easy_ivl = max(good_ivl + 1, easy_ivl)
         new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
-        due_before = card.odue if card.odid else card.due
+        due_before = max(card.odue if card.odid else card.due, mw.col.sched.today)
         card = update_card_due_ivl(card, revlogs[0], new_ivl)
-        due_after = card.odue if card.odid else card.due
+        due_after = max(card.odue if card.odid else card.due, mw.col.sched.today)
         if fsrs.enable_load_balance:
             fsrs.due_cnt_perday_from_first_day[due_before] -= 1
-            fsrs.due_cnt_perday_from_first_day.setdefault(due_after, 0)
-            fsrs.due_cnt_perday_from_first_day[due_after] += 1
+            fsrs.due_cnt_perday_from_first_day[due_after] = fsrs.due_cnt_perday_from_first_day.get(due_after, 0) + 1
     return card
