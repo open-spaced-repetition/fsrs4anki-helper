@@ -10,6 +10,7 @@ DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 AUTO_DISPERSE = "auto_disperse"
 SAVED_OPTIMIZED_PARAMETERS = "saved_optimized"
+MATURE_IVL = "mature_ivl"
 
 # Deck params
 RETENTION_IS_NOT_OPTIMIZED = "unoptimized_retention_warning"
@@ -146,3 +147,12 @@ const deckParams = [
 {results}
 ]
 """
+
+    @property
+    def mature_ivl(self):
+        return self.data[MATURE_IVL]
+
+    @mature_ivl.setter
+    def mature_ivl(self, value):
+        self.data[MATURE_IVL] = value
+        self.save()

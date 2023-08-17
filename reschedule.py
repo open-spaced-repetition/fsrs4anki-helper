@@ -39,6 +39,10 @@ class FSRS:
                 WHERE type = 2  
                 AND queue != -1
                 GROUP BY {true_due}""")}
+        for day in list(self.due_cnt_perday_from_first_day.keys()):
+            if day < mw.col.sched.today:
+                self.due_cnt_perday_from_first_day[mw.col.sched.today] = self.due_cnt_perday_from_first_day.get(mw.col.sched.today, 0) + self.due_cnt_perday_from_first_day[day]
+                self.due_cnt_perday_from_first_day.pop(day)
         self.learned_cnt_perday_from_today = {day: cnt for day, cnt in mw.col.db.all(
             f"""SELECT (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid)
                 FROM revlog
@@ -113,10 +117,8 @@ class FSRS:
                 check_due = due + check_ivl - self.card.ivl
                 day_offset = check_due - mw.col.sched.today
                 due_date = datetime.now() + timedelta(days=day_offset)
-                due_cards = self.due_cnt_perday_from_first_day.setdefault(check_due, 0)
-                rated_cards = 0
-                if day_offset <= 0:
-                    rated_cards = self.learned_cnt_perday_from_today.setdefault(day_offset, 0)
+                due_cards = self.due_cnt_perday_from_first_day.get(max(check_due, mw.col.sched.today), 0)
+                rated_cards = self.learned_cnt_perday_from_today.get(0, 0) if day_offset <= 0 else 0
                 num_cards = due_cards + rated_cards
                 if num_cards < min_num_cards and due_date.weekday() not in self.free_days:
                     best_ivl = check_ivl
@@ -154,26 +156,20 @@ def reschedule(did, recent=False, filter_flag=False, filtered_cids={}, filtered_
     
     return fut
 
-
 def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}):
     config = Config()
     config.load()
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
-    if custom_scheduler is None:
-        return
+    if custom_scheduler is None: return
     version = get_version(custom_scheduler)
     if version[0] < 3:
         mw.taskman.run_on_main(lambda: showWarning("Require FSRS4Anki version >= 3.0.0"))
         return
-
     deck_parameters = get_deck_parameters(custom_scheduler)
-    if deck_parameters is None:
-        return
-    
+    if deck_parameters is None: return    
     skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
     global_deck_name = get_global_config_deck_name(version)
     rollover = mw.col.all_config()['rollover']
-
     undo_entry = mw.col.add_custom_undo_entry("Reschedule")
     mw.taskman.run_on_main(lambda: mw.progress.start(label="Rescheduling", immediate=False))
 
@@ -193,34 +189,10 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
             continue
         if did is not None:
             deck_name = mw.col.decks.get(did)['name']
-            if not deck['name'].startswith(deck_name):
-                continue
-        try:
-            if version[0] == 3:
-                (
-                    w,
-                    retention,
-                    max_ivl,
-                    easy_bonus,
-                    hard_factor,
-                ) = deck_parameters[global_deck_name].values()
-            elif version[0] == 4:
-                (
-                    w,
-                    retention,
-                    max_ivl,
-                ) = deck_parameters[global_deck_name].values()
-        except KeyError:
-            mw.taskman.run_on_main(lambda: showWarning("Global config is not found."))
-            break
-        for name, params in deck_parameters.items():
-            if deck['name'].startswith(name):
-                if version[0] == 3:
-                    w, retention, max_ivl, easy_bonus, hard_factor = params.values()
-                elif version[0] == 4:
-                    w, retention, max_ivl = params.values()
-                break
-        fsrs.w = w
+            if not deck['name'].startswith(deck_name): continue
+        cur_deck_param = get_current_deck_parameter(deck['name'], deck_parameters, global_deck_name)
+        if cur_deck_param is None: break
+        fsrs.w = cur_deck_param['w']
         query = f"\"deck:{deck['name']}\" (\"is:review\" OR \"is:learn\") -\"is:suspended\""
         if recent:
             query += f" \"rated:{config.days_to_reschedule}\""
@@ -232,106 +204,128 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
                 continue
             if filter_flag and cid not in filtered_cids:
                 continue
-            last_date = None
-            last_s = None
-            last_rating = None
-            last_kind = None
-            s = None
-            d = None
-            rating = None
-            revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
-            reps = len(revlogs)
-            for i, revlog in enumerate(reversed(revlogs)):
-                if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)) and not (has_again(revlogs) or has_manual_reset(revlogs)):
-                    break
-                last_s = s
-                rating = revlog.button_chosen
-
-                if last_kind is not None and last_kind in (REVLOG_REV, REVLOG_RELRN) and revlog.review_kind == REVLOG_LRN:
-                    # forget card
-                    last_date = None
-                    last_s = None
-                    s = None
-                    d = None
-                last_kind = revlog.review_kind
-
-                if last_kind == REVLOG_RESCHED:
-                    if revlog.ease != 0:
-                        # set due date
-                        continue
-                    else:
-                        # forget card
-                        last_date = None
-                        last_s = None
-                        s = None
-                        d = None
-                        continue
-                
-                if last_date is None:
-                    again_s = fsrs.init_stability(1)
-                    hard_s = fsrs.init_stability(2)
-                    good_s = fsrs.init_stability(3)
-                    easy_s = fsrs.init_stability(4)
-                    d = fsrs.init_difficulty(rating)
-                    s = fsrs.init_stability(rating)
-                    last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
-                    last_rating = rating
-                else:
-                    elapsed_days = datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal() - last_date.toordinal()
-                    if elapsed_days <= 0 and revlog.review_kind in (REVLOG_LRN, REVLOG_RELRN):
-                        continue
-                    r = exponential_forgetting_curve(elapsed_days, s) if version[0] == 3 else power_forgetting_curve(elapsed_days, s)
-                    fsrs.elapsed_days = elapsed_days
-                    again_s = fsrs.next_forget_stability(fsrs.next_difficulty(d, 1), s, r)
-                    hard_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 2), s, r, 2)
-                    good_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 3), s, r, 3)
-                    easy_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 4), s, r, 4)
-                    d = fsrs.next_difficulty(d, rating)
-                    s = fsrs.next_recall_stability(d, s, r, rating) if rating > 1 else fsrs.next_forget_stability(d, s, r)
-                    last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
-                    last_rating = rating
-            if rating is None or s is None:
-                continue
-            new_custom_data = {"s": round(s, 2), "d": round(d, 2), "v": "helper"}
-            card = mw.col.get_card(cid)
-            seed = fsrs.set_fuzz_factor(cid, reps)
-            if card.custom_data != "":
-                old_custom_data = json.loads(card.custom_data)
-                if "seed" in old_custom_data:
-                    new_custom_data["seed"] = old_custom_data["seed"]
-            if "seed" not in new_custom_data:
-                new_custom_data["seed"] = seed
-            card.custom_data = json.dumps(new_custom_data)
-            if card.type == CARD_TYPE_REV and last_kind != REVLOG_RESCHED:
-                fsrs.set_card(card)
-                if last_s is None:
-                    again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
-                    hard_ivl = fsrs.next_interval(hard_s, retention, max_ivl)
-                    good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
-                    easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(easy_s, retention, max_ivl)
-                    easy_ivl = max(good_ivl + 1, easy_ivl)
-                else:
-                    again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
-                    hard_ivl = fsrs.next_interval(last_s * hard_factor, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(hard_s, retention, max_ivl)
-                    good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
-                    easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(easy_s, retention, max_ivl)
-                    hard_ivl = min(hard_ivl, good_ivl)
-                    good_ivl = max(hard_ivl + 1, good_ivl)
-                    easy_ivl = max(good_ivl + 1, easy_ivl)
-                new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
-                due_before = card.odue if card.odid else card.due
-                card = update_card_due_ivl(card, revlogs[0], new_ivl)
-                due_after = card.odue if card.odid else card.due
-                if fsrs.enable_load_balance:
-                    fsrs.due_cnt_perday_from_first_day[due_before] -= 1
-                    fsrs.due_cnt_perday_from_first_day.setdefault(due_after, 0)
-                    fsrs.due_cnt_perday_from_first_day[due_after] += 1
+            card = reschedule_card(cid, fsrs, rollover, version, cur_deck_param)
+            if card is None: continue
             mw.col.update_card(card)
             mw.col.merge_undo_entries(undo_entry)
             cnt += 1
-
             if cnt % 500 == 0:
                 mw.taskman.run_on_main(lambda: mw.progress.update(value=cnt, label=f"{cnt} cards rescheduled"))
                 if mw.progress.want_cancel(): cancelled = True
 
     return f"{cnt} cards rescheduled"
+
+def get_current_deck_parameter(deckname, deck_parameters, global_deck_name):
+    try:
+        deck_parameter = deck_parameters[global_deck_name]
+    except KeyError:
+        mw.taskman.run_on_main(lambda: showWarning("Global config is not found."))
+        return None
+    for name, params in deck_parameters.items():
+        if deckname.startswith(name):
+            deck_parameter = params
+            break
+    return deck_parameter
+
+def reschedule_card(cid, fsrs: FSRS, rollover, version, params):
+    if version[0] == 3:
+        w, retention, max_ivl, easy_bonus, hard_factor = params.values()
+    elif version[0] == 4:
+        w, retention, max_ivl = params.values()
+    last_date = None
+    last_s = None
+    last_rating = None
+    last_kind = None
+    s = None
+    d = None
+    rating = None
+    revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
+    reps = len(revlogs)
+    for i, revlog in enumerate(reversed(revlogs)):
+        if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)) and not (has_again(revlogs) or has_manual_reset(revlogs)):
+            break
+        last_s = s
+        rating = revlog.button_chosen
+
+        if last_kind is not None and last_kind in (REVLOG_REV, REVLOG_RELRN) and revlog.review_kind == REVLOG_LRN:
+            # forget card
+            last_date = None
+            last_s = None
+            s = None
+            d = None
+        last_kind = revlog.review_kind
+
+        if last_kind == REVLOG_RESCHED:
+            if revlog.ease != 0:
+                # set due date
+                continue
+            else:
+                # forget card
+                last_date = None
+                last_s = None
+                s = None
+                d = None
+                continue
+        
+        if last_date is None:
+            again_s = fsrs.init_stability(1)
+            hard_s = fsrs.init_stability(2)
+            good_s = fsrs.init_stability(3)
+            easy_s = fsrs.init_stability(4)
+            d = fsrs.init_difficulty(rating)
+            s = fsrs.init_stability(rating)
+            last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
+            last_rating = rating
+        else:
+            elapsed_days = datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal() - last_date.toordinal()
+            if elapsed_days <= 0 and revlog.review_kind in (REVLOG_LRN, REVLOG_RELRN):
+                continue
+            r = exponential_forgetting_curve(elapsed_days, s) if version[0] == 3 else power_forgetting_curve(elapsed_days, s)
+            fsrs.elapsed_days = elapsed_days
+            again_s = fsrs.next_forget_stability(fsrs.next_difficulty(d, 1), s, r)
+            hard_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 2), s, r, 2)
+            good_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 3), s, r, 3)
+            easy_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 4), s, r, 4)
+            d = fsrs.next_difficulty(d, rating)
+            s = fsrs.next_recall_stability(d, s, r, rating) if rating > 1 else fsrs.next_forget_stability(d, s, r)
+            last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
+            last_rating = rating
+
+    if rating is None or s is None:
+        return None
+    
+    new_custom_data = {"s": round(s, 2), "d": round(d, 2), "v": "helper"}
+    card = mw.col.get_card(cid)
+    seed = fsrs.set_fuzz_factor(cid, reps)
+    if card.custom_data != "":
+        old_custom_data = json.loads(card.custom_data)
+        if "seed" in old_custom_data:
+            fsrs.fuzz_factor = old_custom_data["seed"] / 10000
+            new_custom_data["seed"] = old_custom_data["seed"]
+    if "seed" not in new_custom_data:
+        new_custom_data["seed"] = seed
+    card.custom_data = json.dumps(new_custom_data)
+    if card.type == CARD_TYPE_REV and last_kind != REVLOG_RESCHED:
+        fsrs.set_card(card)
+        if last_s is None:
+            again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
+            hard_ivl = fsrs.next_interval(hard_s, retention, max_ivl)
+            good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
+            easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(easy_s, retention, max_ivl)
+            easy_ivl = max(good_ivl + 1, easy_ivl)
+        else:
+            again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
+            hard_ivl = fsrs.next_interval(last_s * hard_factor, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(hard_s, retention, max_ivl)
+            good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
+            easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(easy_s, retention, max_ivl)
+            hard_ivl = min(hard_ivl, good_ivl)
+            good_ivl = max(hard_ivl + 1, good_ivl)
+            easy_ivl = max(good_ivl + 1, easy_ivl)
+        new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
+        due_before = max(card.odue if card.odid else card.due, mw.col.sched.today)
+        card = update_card_due_ivl(card, revlogs[0], new_ivl)
+        due_after = max(card.odue if card.odid else card.due, mw.col.sched.today)
+        if fsrs.enable_load_balance:
+            fsrs.due_cnt_perday_from_first_day[due_before] -= 1
+            fsrs.due_cnt_perday_from_first_day[due_after] = fsrs.due_cnt_perday_from_first_day.get(due_after, 0) + 1
+    return card

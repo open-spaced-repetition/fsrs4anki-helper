@@ -93,11 +93,11 @@ class DifficultyColumn(CustomColumn):
         return "json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.d') DESC"
 
 
-class RetentionColumn(CustomColumn):
+class RetrievabilityColumn(CustomColumn):
     builtin_column = Column(
-        key="retention",
-        cards_mode_label="Retention",
-        notes_mode_label="Retention",
+        key="retrievability",
+        cards_mode_label="Retrievability",
+        notes_mode_label="Retrievability",
         sorting=BrowserColumns.SORTING_DESCENDING,
         uses_cell_font=False,
         alignment=BrowserColumns.ALIGNMENT_CENTER,
@@ -120,8 +120,8 @@ class RetentionColumn(CustomColumn):
             return "N/A"
         last_due = get_last_review_date(revlog)
         elapsed_days = today - last_due
-        retention = exponential_forgetting_curve(elapsed_days, custom_data['s']) if version[0] == 3 else power_forgetting_curve(elapsed_days, custom_data['s'])
-        return f"{retention * 100:.2f}%"
+        retrievability = exponential_forgetting_curve(elapsed_days, custom_data['s']) if version[0] == 3 else power_forgetting_curve(elapsed_days, custom_data['s'])
+        return f"{retrievability * 100:.2f}%"
     
     def order_by_str(self) -> str:
         return f"""CASE WHEN odid==0 
