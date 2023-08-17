@@ -47,7 +47,21 @@ _progress.progress.connect(Progress.tooltip)
 _progress.critical.connect(showCritical)
 _stage = "Error"
 
+_optimizing = False
+
 def optimize(did: int):
+    global _optimizing
+
+    if not _optimizing:
+        _optimizing = True
+        try:
+            _optimize(did)
+        except:
+            _optimizing = False
+    else:
+        showWarning("A deck is already optimizing please wait.")
+
+def _optimize(did: int):
 
     try: # This code is here so that when it fails the popup can show immediately rather than after the after the cancel prompt
         # Progress bar -> tooltip
@@ -189,7 +203,10 @@ You have to do some reviews on the deck before you optimize it!""")
             self.events.finished.emit(result)
 
     def on_complete(result: dict[str]):
-        
+        global _optimizing
+
+        _optimizing = False
+
         config.load()
 
         saved_results = config.saved_optimized
