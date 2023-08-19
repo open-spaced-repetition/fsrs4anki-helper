@@ -47,10 +47,10 @@ def retention_stability_burden(lim) -> float:
 
 
 def todayStats_new(self):
-    return todayStats_old(self) + get_true_retention(self) + get_fsrs_state(self)
+    return todayStats_old(self) + get_true_retention(self) + get_fsrs_stats(self) + get_retention_graph(self)
 
 
-def get_fsrs_state(self):
+def get_fsrs_stats(self):
     lim = self._limit()
     if lim:
         lim = " AND did IN %s" % lim
@@ -73,10 +73,76 @@ def get_fsrs_state(self):
         + "<li><b>Count</b>: the number of cards with custom data, in other words, cards that are affected by FSRS (this does not include cards in the (re)learning stage).</li> " \
         + "<li><b>Estimated total knowledge</b>: the number of cards that the user is expected to know today, calculated as the product of average retention and count.</li>" \
         + "</ul></details>"
-    return title + stats_data + "<table style='text-align: left'><tr><td style='padding: 5px'>" + interpretation + "</td></tr></table>"
+    return self._section(title + stats_data + "<table style='text-align: left'><tr><td style='padding: 5px'>" + interpretation + "</td></tr></table>")
 
 
-def _plot(self, data, title, subtitle, color):
+def get_retention_graph(self):
+    start, days, chunk = self.get_start_end_chunk()
+    lims = []
+    if days is not None:
+        lims.append(
+            "id > %d" % ((self.col.sched.day_cutoff - (days * chunk * 86400)) * 1000)
+        )
+    lim = "cid in (select id from cards where did in %s)" % self._limit()
+    if lim:
+        lims.append(lim)
+    if lims:
+        lim = "AND " + " AND ".join(lims)
+
+    query = f"""SELECT
+    CAST((id/1000.0 - {mw.col.sched.day_cutoff}) / 86400.0 as int)/{chunk} AS day,
+    SUM(CASE WHEN  ease == 1 THEN 0.0 ELSE 1.0 END) / COUNT(*) AS retention,
+    COUNT(*) AS review_cnt
+    FROM revlog
+    WHERE type = 1
+    {lim}
+    GROUP BY day
+    """
+
+    offset_retention_review_cnt = mw.col.db.all(query)
+    data, _ = self._splitRepData(
+        offset_retention_review_cnt,
+        (
+        (1, '#070', "Retenion Rate"),
+        (2, '#00F', "Review Cnt"),
+        )
+    )
+
+    if not data:
+        return ""
+
+    rate_data, _, cnt_data, _ = data
+
+    rate_data['lines'] = {"show": True}
+    rate_data['bars'] = {"show": False}
+    rate_data['yaxis'] = 1
+
+    cnt_data['lines'] = {"show": False}
+    cnt_data['bars'] = {"show": True}
+    cnt_data['yaxis'] = 2
+
+    data = [rate_data, cnt_data]
+    print(data)
+
+    conf = dict(
+        xaxis=dict(tickDecimals=0, max=0.5),
+        yaxes=[dict(min=0, max=1, ticks=[[x/10, str(round(x/10, 1))] for x in range(0, 11)]), dict(position="right", min=0)],
+    )
+    if days is not None:
+        conf["xaxis"]["min"] = -days + 0.5
+
+    def plot(id: str, data, ylabel: str, ylabel2: str) -> str:
+        return self._graph(
+            id, data=data, conf=conf, xunit=chunk, ylabel=ylabel, ylabel2=ylabel2
+        )
+    
+
+    txt1 = self._title("Retenion Graph", "Retention rate and review count over time")
+    txt1 += plot("retention", data, ylabel="Retenion Rate", ylabel2="Review Count")
+    return self._section(txt1)
+
+
+def bar_plot(self, data, title, subtitle, color):
     if not data:
         return ""
 
@@ -117,7 +183,7 @@ def difficulty_distribution_graph(self):
     # x[0]: difficulty
     # x[1]: cnt
     difficulty_count = tuple(filter(lambda x: x[0] is not None, difficulty_count))
-    distribution_graph = _plot(self, difficulty_count, "Difficulty Distribution", "Lower value of D (horizontal axis) = less difficult, higher value of D = more difficult", "#72bcd4")
+    distribution_graph = bar_plot(self, difficulty_count, "Difficulty Distribution", "Lower value of D (horizontal axis) = less difficult, higher value of D = more difficult", "#72bcd4")
     return cardGraph_old(self) + distribution_graph
 
 def init_stats():
@@ -198,7 +264,7 @@ def get_true_retention(self):
     true_retention_part += stats_row("Week", pastWeek)
     true_retention_part += stats_row(pname, pastPeriod)
     true_retention_part += "</table>"
-    return true_retention_part
+    return self._section(true_retention_part)
 
 def retentionAsString(n, d):
     return "%0.1f%%" % ((n * 100) / d) if d else "N/A"
@@ -214,7 +280,7 @@ def stats_list(lim, span):
     sum(case when lastIvl >= %(i)d and ease > 1 and type == 1 then 1 else 0 end), /* passed mature */
     sum(case when ivl > 0 and type == 0 then 1 else 0 end), /* learned */
     sum(case when ivl > 0 and type == 2 then 1 else 0 end) /* relearned */
-    from revlog where id > ? """ % dict(i=config.mature_ivl) +lim, span)
+    from revlog where id > ? """ % dict(i=config.mature_ivl) + lim, span)
     yflunked, mflunked = yflunked or 0, mflunked or 0
     ypassed, mpassed = ypassed or 0, mpassed or 0
     learned, relearned = learned or 0, relearned or 0
