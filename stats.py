@@ -130,12 +130,12 @@ def init_stats():
 # code modified from https://ankiweb.net/shared/info/1779060522
 
 def get_true_retention(self):
-    lim = self._revlogLimit()
+    lim = "cid in (select id from cards where did in %s)" % self._limit()
     if lim:
         lim = " AND " + lim
-    pastDay = stats_list(lim, (mw.col.sched.dayCutoff-86400)*1000)
+    pastDay = stats_list(lim, (mw.col.sched.day_cutoff-86400)*1000)
 
-    pastYesterday = stats_list(lim, (mw.col.sched.dayCutoff-86400*2)*1000)
+    pastYesterday = stats_list(lim, (mw.col.sched.day_cutoff-86400*2)*1000)
     pastYesterday[0] -= pastDay[0]
     pastYesterday[1] -= pastDay[1]
     pastYesterday[2] = retentionAsString(pastYesterday[0], pastYesterday[0] + pastYesterday[1])
@@ -148,7 +148,7 @@ def get_true_retention(self):
     pastYesterday[9] -= pastDay[9]
     pastYesterday[10] -= pastDay[10]
 
-    pastWeek = stats_list(lim, (mw.col.sched.dayCutoff-86400*7)*1000)
+    pastWeek = stats_list(lim, (mw.col.sched.day_cutoff-86400*7)*1000)
     
     if self.type == 0:
         period = 31; pname = u"Month"
@@ -156,7 +156,7 @@ def get_true_retention(self):
         period = 365; pname = u"Year"
     elif self.type == 2:
         period = 10000; pname = u"Deck life"    
-    pastPeriod = stats_list(lim, (mw.col.sched.dayCutoff-86400*period)*1000)
+    pastPeriod = stats_list(lim, (mw.col.sched.day_cutoff-86400*period)*1000)
     true_retention_part = anki.stats.CollectionStats._title(self, "True Retention", "The true retention is calculated on learned cards only.")
     true_retention_part += u"""
         <style>
