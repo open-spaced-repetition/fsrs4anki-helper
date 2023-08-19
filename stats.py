@@ -47,6 +47,10 @@ def retention_stability_burden(lim) -> float:
 
 
 def todayStats_new(self):
+    return todayStats_old(self) + get_true_retention(self) + get_fsrs_state(self)
+
+
+def get_fsrs_state(self):
     lim = self._limit()
     if lim:
         lim = " AND did IN %s" % lim
@@ -59,21 +63,17 @@ def todayStats_new(self):
     _line_now(i, "Burden", f"{burden: .2f} reviews/day")
     _line_now(i, "Count", f"{count} cards")
     _line_now(i, "Estimated total knowledge", f"{estimated_total_knowledge} cards")
+    title = anki.stats.CollectionStats._title(self, "FSRS Stats", "Only calculated for cards with custom data (affected by FSRS)")
     stats_data = _lineTbl_now(i)
-    interpretation = "<h3>Interpretation</h3>" \
+    interpretation = "<details><summary>Interpretation</summary>" \
         + "<ul>" \
         + "<li><b>Average retention</b>: the average probability of recalling a card today. In most cases, it is higher than requested retention because requested retention refers to retention at the time of a review, whereas average retention is calculated based on all cards, including undue cards.</li>" \
         + "<li><b>Stability</b>: the number of days it takes for the retention to decay from 100% to 90%.</li>" \
         + "<li><b>Burden</b>: an estimate of the average number of cards that have to be reviewed daily (assuming review at the scheduled time without advancing or postponing). Burden = 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub> where I<sub>n</sub> - current interval of the n-th card.</li>" \
         + "<li><b>Count</b>: the number of cards with custom data, in other words, cards that are affected by FSRS (this does not include cards in the (re)learning stage).</li> " \
         + "<li><b>Estimated total knowledge</b>: the number of cards that the user is expected to know today, calculated as the product of average retention and count.</li>" \
-        + "</ul>"
-
-    return todayStats_old(self) \
-        + anki.stats.CollectionStats._title(self, "FSRS Stats", 
-        "Only calculated for cards with custom data (affected by FSRS)") \
-        + stats_data  \
-        + "<table style='text-align: left'><tr><td style='padding: 5px'>" + interpretation + "</td></tr></table>" + get_true_retention(self)
+        + "</ul></details>"
+    return title + stats_data + "<table style='text-align: left'><tr><td style='padding: 5px'>" + interpretation + "</td></tr></table>"
 
 
 def _plot(self, data, title, subtitle, color):
