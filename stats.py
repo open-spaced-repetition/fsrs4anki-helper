@@ -223,7 +223,7 @@ def get_true_retention(self):
     elif self.type == 2:
         period = 10000; pname = u"Deck life"    
     pastPeriod = stats_list(lim, (mw.col.sched.day_cutoff-86400*period)*1000)
-    true_retention_part = anki.stats.CollectionStats._title(self, "True Retention", "The true retention is calculated on learned cards only.")
+    true_retention_part = anki.stats.CollectionStats._title(self, "True Retention", "The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.")
     true_retention_part += u"""
         <style>
             td.trl { border: 1px solid; text-align: left; padding: 5px  }
@@ -274,12 +274,12 @@ def stats_list(lim, span):
     config.load()
     yflunked, ypassed, mflunked, mpassed, learned, relearned = mw.col.db.first("""
     select
-    sum(case when lastIvl < %(i)d and ease = 1 and type == 1 then 1 else 0 end), /* flunked young */
-    sum(case when lastIvl < %(i)d and ease > 1 and type == 1 then 1 else 0 end), /* passed young */
-    sum(case when lastIvl >= %(i)d and ease = 1 and type == 1 then 1 else 0 end), /* flunked mature */
-    sum(case when lastIvl >= %(i)d and ease > 1 and type == 1 then 1 else 0 end), /* passed mature */
-    sum(case when ivl > 0 and type == 0 then 1 else 0 end), /* learned */
-    sum(case when ivl > 0 and type == 2 then 1 else 0 end) /* relearned */
+    sum(case when lastIvl < %(i)d and ease = 1 and (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1) then 1 else 0 end), /* flunked young */
+    sum(case when lastIvl < %(i)d and ease > 1 and (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1) then 1 else 0 end), /* passed young */
+    sum(case when lastIvl >= %(i)d and ease = 1 and (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1) then 1 else 0 end), /* flunked mature */
+    sum(case when lastIvl >= %(i)d and ease > 1 and (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1) then 1 else 0 end), /* passed mature */
+    sum(case when (ivl >= 1 OR ivl <= -86400) and type = 0 then 1 else 0 end), /* learned */
+    sum(case when (ivl >= 1 OR ivl <= -86400) and type = 2 then 1 else 0 end) /* relearned */
     from revlog where id > ? """ % dict(i=config.mature_ivl) + lim, span)
     yflunked, mflunked = yflunked or 0, mflunked or 0
     ypassed, mpassed = ypassed or 0, mpassed or 0
