@@ -94,7 +94,7 @@ def get_retention_graph(self):
     SUM(CASE WHEN  ease == 1 THEN 0.0 ELSE 1.0 END) / COUNT(*) AS retention,
     COUNT(*) AS review_cnt
     FROM revlog
-    WHERE type = 1
+    WHERE (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1)
     {lim}
     GROUP BY day
     """
@@ -103,7 +103,7 @@ def get_retention_graph(self):
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
-        (1, '#070', "Retenion Rate"),
+        (1, '#070', "Retention Rate"),
         (2, '#00F', "Review Cnt"),
         )
     )
@@ -137,8 +137,8 @@ def get_retention_graph(self):
         )
     
 
-    txt1 = self._title("Retenion Graph", "Retention rate and review count over time")
-    txt1 += plot("retention", data, ylabel="Retenion Rate", ylabel2="Review Count")
+    txt1 = self._title("Retention Graph", "Retention rate and review count over time")
+    txt1 += plot("retention", data, ylabel="Retention Rate", ylabel2="Review Count")
     return self._section(txt1)
 
 
