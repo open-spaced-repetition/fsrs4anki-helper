@@ -1,15 +1,14 @@
-from anki.lang import _
 from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
 from aqt import mw
 from aqt.qt import QAction
 from typing import Callable
 
 from .sync_hook import init_sync_hook
-from .reschedule import reschedule
-from .postpone import postpone
-from .advance import advance
-from .reset import reset
-from .disperse_siblings import disperse_siblings
+from .schedule.reschedule import reschedule
+from .schedule.postpone import postpone
+from .schedule.advance import advance
+from .schedule.reset import reset
+from .schedule.disperse_siblings import disperse_siblings
 from .stats import init_stats
 from .browser.browser import init_browser
 from .configuration import (

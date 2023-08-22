@@ -1,5 +1,5 @@
-from .utils import *
-from .configuration import Config
+from ..utils import *
+from ..configuration import Config
 from anki.utils import ids2str, html_to_text_line
 from aqt.gui_hooks import reviewer_did_answer_card
 from collections import defaultdict

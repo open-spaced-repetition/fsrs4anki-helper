@@ -1,6 +1,5 @@
 from aqt.gui_hooks import sync_will_start, sync_did_finish
-from aqt import QMessageBox, QTimer
-from .reschedule import reschedule
+from .schedule.reschedule import reschedule
 from .configuration import Config
 from .utils import *
 

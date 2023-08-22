@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-from .utils import *
-from .configuration import Config
+from ..utils import *
+from ..configuration import Config
 from anki.cards import Card
 from .disperse_siblings import disperse_siblings_backgroud
 
