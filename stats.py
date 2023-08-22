@@ -245,8 +245,8 @@ def get_true_retention(self):
                 <td class="trc" colspan=3><span class="young"><b>Young</b></span></td>
                 <td class="trc" colspan=3><span class="mature"><b>Mature</b></span></td>
                 <td class="trc" colspan=3><span class="yam"><b>Young and Mature</b></span></td>
-                <td class="trc" rowspan=2><span class="young"><b>Learnt</b></span></td>
-                <td class="trc" rowspan=2><span class="relearn"><b>Relearnt</b></span></td>
+                <td class="trc" rowspan=2><span class="young"><b>Learned</b></span></td>
+                <td class="trc" rowspan=2><span class="relearn"><b>Relearned</b></span></td>
             </tr>
             <tr>
                 <td class="trc"><span class="young">Pass</span></td>
