@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta
 from ..utils import *
 from ..configuration import Config
 from anki.cards import Card
 from .disperse_siblings import disperse_siblings_backgroud
+from aqt.gui_hooks import reviewer_did_answer_card
 
 
 def constrain_difficulty(difficulty: float) -> float:
@@ -29,7 +29,7 @@ class FSRS:
         self.enable_load_balance = False
         self.free_days = []
         self.elapsed_days = 0
-    
+
     def set_load_balance(self):
         self.enable_load_balance = True
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
@@ -41,7 +41,9 @@ class FSRS:
                 GROUP BY {true_due}""")}
         for day in list(self.due_cnt_perday_from_first_day.keys()):
             if day < mw.col.sched.today:
-                self.due_cnt_perday_from_first_day[mw.col.sched.today] = self.due_cnt_perday_from_first_day.get(mw.col.sched.today, 0) + self.due_cnt_perday_from_first_day[day]
+                self.due_cnt_perday_from_first_day[mw.col.sched.today] = \
+                    self.due_cnt_perday_from_first_day.get(mw.col.sched.today, 0) + \
+                    self.due_cnt_perday_from_first_day[day]
                 self.due_cnt_perday_from_first_day.pop(day)
         self.learned_cnt_perday_from_today = {day: cnt for day, cnt in mw.col.db.all(
             f"""SELECT (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid)
@@ -77,25 +79,32 @@ class FSRS:
 
     def next_recall_stability(self, d: float, s: float, r: float, rating: int) -> float:
         if self.version[0] == 3:
-            return min(max(0.1, s * (1 + math.exp(self.w[6]) * (11 - d) * math.pow(s, self.w[7]) * (math.exp((1 - r) * self.w[8]) - 1))), 36500)
+            return min(max(0.1, s *
+                                (1 + math.exp(self.w[6]) *
+                                (11 - d) *
+                                math.pow(s, self.w[7]) *
+                                (math.exp((1 - r) * self.w[8]) - 1))), 36500)
         elif self.version[0] == 4:
             hard_penalty = self.w[15] if rating == 2 else 1
             easy_bonus = self.w[16] if rating == 4 else 1
-            return min(max(0.1, s * (1 + math.exp(self.w[8]) * 
-                                        (11 - d) * 
-                                        math.pow(s, -self.w[9]) * 
-                                        (math.exp((1 - r) * self.w[10]) - 1) *
-                                        hard_penalty *
-                                        easy_bonus)), 36500)
+            return min(max(0.1, s * (1 + math.exp(self.w[8]) *
+                                     (11 - d) *
+                                     math.pow(s, -self.w[9]) *
+                                     (math.exp((1 - r) * self.w[10]) - 1) *
+                                     hard_penalty *
+                                     easy_bonus)), 36500)
 
     def next_forget_stability(self, d: float, s: float, r: float) -> float:
         if self.version[0] == 3:
-            return min(max(0.1, self.w[9] * math.pow(d, self.w[10]) * math.pow(s, self.w[11]) * math.exp((1 - r) * self.w[12])), s)
+            return min(max(0.1, self.w[9] *
+                           math.pow(d, self.w[10]) *
+                           math.pow(s, self.w[11]) *
+                           math.exp((1 - r) * self.w[12])), s)
         elif self.version[0] == 4:
-            return min(max(0.1, self.w[11] * 
-                                math.pow(d, -self.w[12]) * 
-                                (math.pow(s + 1, self.w[13]) - 1) * 
-                                math.exp((1 - r) * self.w[14])), s)
+            return min(max(0.1, self.w[11] *
+                           math.pow(d, -self.w[12]) *
+                           (math.pow(s + 1, self.w[13]) - 1) *
+                           math.exp((1 - r) * self.w[14])), s)
 
     def set_fuzz_factor(self, cid: int, reps: int):
         random.seed(cid + reps)
@@ -136,8 +145,8 @@ class FSRS:
     def set_card(self, card: Card):
         self.card = card
 
-def reschedule(did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""):
 
+def reschedule(did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""):
     def on_done(future):
         mw.progress.finish()
         tooltip(future.result())
@@ -153,8 +162,9 @@ def reschedule(did, recent=False, filter_flag=False, filtered_cids={}, filtered_
             fut = mw.taskman.run_in_background(lambda: disperse_siblings_backgroud(did, filter_flag, filtered_nid_string, text_from_reschedule=text), on_done)
     else:
         fut = mw.taskman.run_in_background(lambda: reschedule_background(did, recent, filter_flag, filtered_cids), on_done)
-    
+
     return fut
+
 
 def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}):
     config = Config()
@@ -166,7 +176,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
         mw.taskman.run_on_main(lambda: showWarning("Require FSRS4Anki version >= 3.0.0"))
         return
     deck_parameters = get_deck_parameters(custom_scheduler)
-    if deck_parameters is None: return    
+    if deck_parameters is None: return
     skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
     global_deck_name = get_global_config_deck_name(version)
     rollover = mw.col.all_config()['rollover']
@@ -215,6 +225,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
 
     return f"{cnt} cards rescheduled"
 
+
 def get_current_deck_parameter(deckname, deck_parameters, global_deck_name):
     try:
         deck_parameter = deck_parameters[global_deck_name]
@@ -227,10 +238,11 @@ def get_current_deck_parameter(deckname, deck_parameters, global_deck_name):
             break
     return deck_parameter
 
-def reschedule_card(cid, fsrs: FSRS, rollover, version, params):
-    if version[0] == 3:
+
+def reschedule_card(cid, fsrs: FSRS, rollover, params):
+    if fsrs.version[0] == 3:
         w, retention, max_ivl, easy_bonus, hard_factor = params.values()
-    elif version[0] == 4:
+    elif fsrs.version[0] == 4:
         w, retention, max_ivl = params.values()
     last_date = None
     last_s = None
@@ -242,7 +254,8 @@ def reschedule_card(cid, fsrs: FSRS, rollover, version, params):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     reps = len(revlogs)
     for i, revlog in enumerate(reversed(revlogs)):
-        if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)) and not (has_again(revlogs) or has_manual_reset(revlogs)):
+        if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)) and not (
+                has_again(revlogs) or has_manual_reset(revlogs)):
             break
         last_s = s
         rating = revlog.button_chosen
@@ -266,7 +279,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, version, params):
                 s = None
                 d = None
                 continue
-        
+
         if last_date is None:
             again_s = fsrs.init_stability(1)
             hard_s = fsrs.init_stability(2)
@@ -280,7 +293,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, version, params):
             elapsed_days = datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal() - last_date.toordinal()
             if elapsed_days <= 0 and revlog.review_kind in (REVLOG_LRN, REVLOG_RELRN):
                 continue
-            r = exponential_forgetting_curve(elapsed_days, s) if version[0] == 3 else power_forgetting_curve(elapsed_days, s)
+            r = exponential_forgetting_curve(elapsed_days, s) if fsrs.version[0] == 3 else power_forgetting_curve(elapsed_days, s)
             fsrs.elapsed_days = elapsed_days
             again_s = fsrs.next_forget_stability(fsrs.next_difficulty(d, 1), s, r)
             hard_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 2), s, r, 2)
@@ -293,7 +306,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, version, params):
 
     if rating is None or s is None:
         return None
-    
+
     new_custom_data = {"s": round(s, 2), "d": round(d, 2), "v": "helper"}
     card = mw.col.get_card(cid)
     seed = fsrs.set_fuzz_factor(cid, reps)
@@ -311,13 +324,13 @@ def reschedule_card(cid, fsrs: FSRS, rollover, version, params):
             again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
             hard_ivl = fsrs.next_interval(hard_s, retention, max_ivl)
             good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
-            easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(easy_s, retention, max_ivl)
+            easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl) if fsrs.version[0] == 3 else fsrs.next_interval(easy_s, retention, max_ivl)
             easy_ivl = max(good_ivl + 1, easy_ivl)
         else:
             again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
-            hard_ivl = fsrs.next_interval(last_s * hard_factor, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(hard_s, retention, max_ivl)
+            hard_ivl = fsrs.next_interval(last_s * hard_factor, retention, max_ivl) if fsrs.version[0] == 3 else fsrs.next_interval(hard_s, retention, max_ivl)
             good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
-            easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl) if version[0] == 3 else fsrs.next_interval(easy_s, retention, max_ivl)
+            easy_ivl = fsrs.next_interval(easy_s * easy_bonus, retention, max_ivl) if fsrs.version[0] == 3 else fsrs.next_interval(easy_s, retention, max_ivl)
             hard_ivl = min(hard_ivl, good_ivl)
             good_ivl = max(hard_ivl + 1, good_ivl)
             easy_ivl = max(good_ivl + 1, easy_ivl)
@@ -329,3 +342,38 @@ def reschedule_card(cid, fsrs: FSRS, rollover, version, params):
             fsrs.due_cnt_perday_from_first_day[due_before] -= 1
             fsrs.due_cnt_perday_from_first_day[due_after] = fsrs.due_cnt_perday_from_first_day.get(due_after, 0) + 1
     return card
+
+
+@reviewer_did_answer_card.append
+def reschedule_when_review(reviewer, card: Card, ease):
+    config = Config()
+    config.load()
+    custom_scheduler = check_fsrs4anki(mw.col.all_config())
+    if custom_scheduler is None: return
+    version = get_version(custom_scheduler)
+    if version[0] < 3:
+        showWarning("Require FSRS4Anki version >= 3.0.0")
+        return
+
+    skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
+    deck_name = mw.col.decks.name(card.current_deck_id())
+    if any([deck_name.startswith(deck) for deck in skip_decks if deck != ""]): return
+
+    deck_parameters = get_deck_parameters(custom_scheduler)
+    if deck_parameters is None: return
+
+    global_deck_name = get_global_config_deck_name(version)
+    cur_deck_param = get_current_deck_parameter(deck_name, deck_parameters, global_deck_name)
+
+    rollover = mw.col.all_config()['rollover']
+    undo_entry = mw.col.undo_status().last_step
+
+    fsrs = FSRS(version)
+    fsrs.enable_fuzz = get_fuzz_bool(custom_scheduler)
+    if fsrs.enable_fuzz and config.load_balance:
+        fsrs.set_load_balance()
+    fsrs.free_days = config.free_days
+
+    card = reschedule_card(card.id, fsrs, rollover, cur_deck_param)
+    mw.col.update_card(card)
+    mw.col.merge_undo_entries(undo_entry)
