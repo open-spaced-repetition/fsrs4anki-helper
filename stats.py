@@ -245,7 +245,7 @@ def get_true_retention(self):
                 <td class="trc" colspan=3><span class="young"><b>Young</b></span></td>
                 <td class="trc" colspan=3><span class="mature"><b>Mature</b></span></td>
                 <td class="trc" colspan=3><span class="yam"><b>Young and Mature</b></span></td>
-                <td class="trc" rowspan=2><span class="young"><b>Graduated</b></span></td>
+                <td class="trc" rowspan=2><span class="young"><b>Learned</b></span></td>
                 <td class="trc" rowspan=2><span class="relearn"><b>Relearned</b></span></td>
             </tr>
             <tr>
@@ -278,8 +278,8 @@ def stats_list(lim, span):
     sum(case when lastIvl < %(i)d and ease > 1 and (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1) then 1 else 0 end), /* passed young */
     sum(case when lastIvl >= %(i)d and ease = 1 and (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1) then 1 else 0 end), /* flunked mature */
     sum(case when lastIvl >= %(i)d and ease > 1 and (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1) then 1 else 0 end), /* passed mature */
-    sum(case when (ivl >= 1 OR ivl <= -86400) and type = 0 then 1 else 0 end), /* learned */
-    sum(case when (ivl >= 1 OR ivl <= -86400) and type = 2 then 1 else 0 end) /* relearned */
+    count(DISTINCT case when type = 0 and (ivl >= 1 OR ivl <= -86400) and cid NOT in ( SELECT id FROM cards WHERE type = 0) then cid else NULL end), /* learned */
+    sum(case when type = 2 and (ivl >= 1 OR ivl <= -86400) and (lastIvl > -86400 and lastIvl <= 0) then 1 else 0 end) + sum(case when type = 0 and (lastIvl <= -86400 OR lastIvl >= 1) and ease = 1 then 1 else 0 end)/* relearned */
     from revlog where id > ? """ % dict(i=config.mature_ivl) + lim, span)
     yflunked, mflunked = yflunked or 0, mflunked or 0
     ypassed, mpassed = ypassed or 0, mpassed or 0
