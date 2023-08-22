@@ -214,7 +214,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
                 continue
             if filter_flag and cid not in filtered_cids:
                 continue
-            card = reschedule_card(cid, fsrs, rollover, version, cur_deck_param)
+            card = reschedule_card(cid, fsrs, rollover, cur_deck_param)
             if card is None: continue
             mw.col.update_card(card)
             mw.col.merge_undo_entries(undo_entry)
@@ -252,6 +252,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     d = None
     rating = None
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
+    print(revlogs)
     reps = len(revlogs)
     for i, revlog in enumerate(reversed(revlogs)):
         if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)) and not (
@@ -303,6 +304,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
             s = fsrs.next_recall_stability(d, s, r, rating) if rating > 1 else fsrs.next_forget_stability(d, s, r)
             last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
             last_rating = rating
+            print(f"again_s: {again_s}, hard_s: {hard_s}, good_s: {good_s}, easy_s: {easy_s}, d: {d}, s: {s}")
 
     if rating is None or s is None:
         return None
@@ -369,11 +371,18 @@ def reschedule_when_review(reviewer, card: Card, ease):
     undo_entry = mw.col.undo_status().last_step
 
     fsrs = FSRS(version)
+    fsrs.w = cur_deck_param['w']
     fsrs.enable_fuzz = get_fuzz_bool(custom_scheduler)
     if fsrs.enable_fuzz and config.load_balance:
         fsrs.set_load_balance()
     fsrs.free_days = config.free_days
 
+    original_interval = card.ivl
+    original_stability = json.loads(card.custom_data)['s']
     card = reschedule_card(card.id, fsrs, rollover, cur_deck_param)
+    rescheduled_interval = card.ivl
+    rescheduled_stability = json.loads(card.custom_data)['s']
     mw.col.update_card(card)
     mw.col.merge_undo_entries(undo_entry)
+    tooltip(f"Original interval: {original_interval} days, stability: {original_stability}\n" + \
+            f"Rescheduled interval: {rescheduled_interval} days, stability: {rescheduled_stability}")
