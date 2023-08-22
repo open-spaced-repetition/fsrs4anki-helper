@@ -9,6 +9,7 @@ from .schedule.postpone import postpone
 from .schedule.advance import advance
 from .schedule.reset import reset
 from .schedule.disperse_siblings import disperse_siblings
+from .schedule import init_review_hook
 from .stats import init_stats
 from .browser.browser import init_browser
 from .configuration import (
@@ -180,3 +181,4 @@ def configuration_changed():
 init_sync_hook()
 init_stats()
 init_browser()
+init_review_hook()

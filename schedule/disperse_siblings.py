@@ -1,7 +1,6 @@
 from ..utils import *
 from ..configuration import Config
 from anki.utils import ids2str, html_to_text_line
-from aqt.gui_hooks import reviewer_did_answer_card
 from collections import defaultdict
 from datetime import datetime, timedelta
 import copy
@@ -267,8 +266,8 @@ def get_siblings_when_review(card: Card):
         siblings_dict[nid].append((cid, did, stability, due))
     return siblings_dict
 
-@reviewer_did_answer_card.append
-def disperse_siblings_when_review(reviewer, card: Card, ease):
+
+def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
     config = Config()
     config.load()
     global enable_load_balance, free_days
@@ -293,7 +292,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
     
     nid_siblings = get_siblings_when_review(card)
-    undo_entry = mw.col.undo_status().last_step
+    undo_entry = mw.col.undo_status().last_step if undo_entry is None else undo_entry
     
     card_cnt = 0
     messages = []

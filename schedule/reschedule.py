@@ -252,7 +252,6 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     d = None
     rating = None
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
-    print(revlogs)
     reps = len(revlogs)
     for i, revlog in enumerate(reversed(revlogs)):
         if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)) and not (
@@ -304,7 +303,6 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
             s = fsrs.next_recall_stability(d, s, r, rating) if rating > 1 else fsrs.next_forget_stability(d, s, r)
             last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
             last_rating = rating
-            print(f"again_s: {again_s}, hard_s: {hard_s}, good_s: {good_s}, easy_s: {easy_s}, d: {d}, s: {s}")
 
     if rating is None or s is None:
         return None
@@ -346,7 +344,6 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     return card
 
 
-@reviewer_did_answer_card.append
 def reschedule_when_review(reviewer, card: Card, ease):
     config = Config()
     config.load()
@@ -386,3 +383,4 @@ def reschedule_when_review(reviewer, card: Card, ease):
     mw.col.merge_undo_entries(undo_entry)
     tooltip(f"Original interval: {original_interval} days, stability: {original_stability}\n" + \
             f"Rescheduled interval: {rescheduled_interval} days, stability: {rescheduled_stability}")
+    return undo_entry
