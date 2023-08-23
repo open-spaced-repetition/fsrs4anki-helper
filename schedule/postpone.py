@@ -1,4 +1,4 @@
-from .utils import *
+from ..utils import *
 from anki.decks import DeckManager
 from anki.utils import ids2str
 
