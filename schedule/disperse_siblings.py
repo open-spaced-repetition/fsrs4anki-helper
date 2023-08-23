@@ -270,15 +270,15 @@ def get_siblings_when_review(card: Card):
 def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
     config = Config()
     config.load()
+    if not config.auto_disperse: return
+
     global enable_load_balance, free_days
     enable_load_balance = config.load_balance
     free_days = config.free_days
-    if not config.auto_disperse:
-        return
     
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
-    if custom_scheduler is None:
-        return
+    if custom_scheduler is None: return
+
     version = get_version(custom_scheduler)
     if version[0] < 3:
         showWarning("Require FSRS4Anki version >= 3.0.0")
@@ -286,30 +286,32 @@ def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
 
     deck_parameters = get_deck_parameters(custom_scheduler)
     skip_decks = get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
-    global_deck_name = get_global_config_deck_name(version)
+    deck_name = mw.col.decks.name(card.current_deck_id())
+    if any([deck_name.startswith(deck) for deck in skip_decks if deck != ""]): return
 
+    global_deck_name = get_global_config_deck_name(version)
     global did_to_deck_parameters
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
     
     nid_siblings = get_siblings_when_review(card)
-    undo_entry = mw.col.undo_status().last_step if undo_entry is None else undo_entry
     
     card_cnt = 0
-    messages = []
-    for nid, siblings in nid_siblings.items():
+    # messages = []
+    undo_entry = mw.col.undo_status().last_step if undo_entry is None else undo_entry
+    for _, siblings in nid_siblings.items():
         if len(siblings) <= 1:
             return
         best_due_dates = disperse(siblings)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
-            old_due = card.odue if card.odid else card.due
+            # old_due = card.odue if card.odid else card.due
             last_revlog = mw.col.card_stats_data(cid).revlog[0]
             last_due = get_last_review_date(last_revlog)
             card = update_card_due_ivl(card, last_revlog, due - last_due)
             mw.col.update_card(card)
             mw.col.merge_undo_entries(undo_entry)
             card_cnt += 1
-            message = f"Dispersed card {html_to_text_line(card.question())} from {due_to_date(old_due)} to {due_to_date(due)}"
-            messages.append(message)
+            # message = f"Dispersed card {html_to_text_line(card.question())} from {due_to_date(old_due)} to {due_to_date(due)}"
+            # messages.append(message)
     # tooltip(f"Dispersed {card_cnt} cards")
     # showText("\n".join(messages))

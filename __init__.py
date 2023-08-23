@@ -70,6 +70,16 @@ menu_auto_reschedule = checkable(
 )
 
 
+def set_auto_reschedule_after_review(checked):
+    config.auto_reschedule_after_review = checked
+
+
+menu_auto_reschedule_after_review = checkable(
+    title="Auto reschedule the card after each review",
+    on_click=set_auto_reschedule_after_review
+)
+
+
 def set_auto_disperse(checked):
     config.auto_disperse = checked
 
@@ -113,6 +123,7 @@ menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings"
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
+menu_for_helper.addAction(menu_auto_reschedule_after_review)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_load_balance)
 menu_for_free_days = menu_for_helper.addMenu("No Anki on Free Days (requires Load Balancing)")
@@ -156,6 +167,7 @@ def adjust_menu():
     if mw.col is not None:
         menu_reschedule_recent.setText(f"Reschedule cards reviewed in the last {config.days_to_reschedule} days")
         menu_auto_reschedule.setChecked(config.auto_reschedule_after_sync)
+        menu_auto_reschedule_after_review.setChecked(config.auto_reschedule_after_review)
         menu_auto_disperse.setChecked(config.auto_disperse)
         menu_load_balance.setChecked(config.load_balance)
         menu_for_free_0.setChecked(0 in config.free_days)

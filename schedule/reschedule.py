@@ -10,6 +10,7 @@ def constrain_difficulty(difficulty: float) -> float:
 
 
 class FSRS:
+    version: Tuple[int, int, int]
     w: List[float]
     enable_fuzz: bool
     enable_load_balance: bool
@@ -347,8 +348,11 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
 def reschedule_when_review(reviewer, card: Card, ease):
     config = Config()
     config.load()
+    if not config.auto_reschedule_after_review: return
+
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
     if custom_scheduler is None: return
+
     version = get_version(custom_scheduler)
     if version[0] < 3:
         showWarning("Require FSRS4Anki version >= 3.0.0")
@@ -364,9 +368,6 @@ def reschedule_when_review(reviewer, card: Card, ease):
     global_deck_name = get_global_config_deck_name(version)
     cur_deck_param = get_current_deck_parameter(deck_name, deck_parameters, global_deck_name)
 
-    rollover = mw.col.all_config()['rollover']
-    undo_entry = mw.col.undo_status().last_step
-
     fsrs = FSRS(version)
     fsrs.w = cur_deck_param['w']
     fsrs.enable_fuzz = get_fuzz_bool(custom_scheduler)
@@ -374,13 +375,8 @@ def reschedule_when_review(reviewer, card: Card, ease):
         fsrs.set_load_balance()
     fsrs.free_days = config.free_days
 
-    original_interval = card.ivl
-    original_stability = json.loads(card.custom_data)['s']
-    card = reschedule_card(card.id, fsrs, rollover, cur_deck_param)
-    rescheduled_interval = card.ivl
-    rescheduled_stability = json.loads(card.custom_data)['s']
+    undo_entry = mw.col.undo_status().last_step
+    card = reschedule_card(card.id, fsrs, mw.col.all_config()['rollover'], cur_deck_param)
     mw.col.update_card(card)
     mw.col.merge_undo_entries(undo_entry)
-    tooltip(f"Original interval: {original_interval} days, stability: {original_stability}\n" + \
-            f"Rescheduled interval: {rescheduled_interval} days, stability: {rescheduled_stability}")
     return undo_entry
