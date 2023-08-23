@@ -308,7 +308,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     if rating is None or s is None:
         return None
 
-    new_custom_data = {"s": round(s, 2), "d": round(d, 2), "v": "helper"}
+    new_custom_data = {"s": round(s, 2), "d": round(d, 2), "v": "reschedule"}
     card = mw.col.get_card(cid)
     seed = fsrs.set_fuzz_factor(cid, reps)
     if card.custom_data != "":
