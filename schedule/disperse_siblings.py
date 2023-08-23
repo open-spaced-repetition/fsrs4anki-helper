@@ -124,6 +124,9 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
             last_revlog = mw.col.card_stats_data(cid).revlog[0]
             last_due = get_last_review_date(last_revlog)
             card = update_card_due_ivl(card, last_revlog, due - last_due)
+            old_custom_data = json.loads(card.custom_data)
+            old_custom_data['v'] = 'disperse'
+            card.custom_data = json.dumps(old_custom_data)
             mw.col.update_card(card)
             mw.col.merge_undo_entries(undo_entry)
             card_cnt += 1
