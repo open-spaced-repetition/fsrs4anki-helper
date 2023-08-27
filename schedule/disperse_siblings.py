@@ -251,7 +251,6 @@ def get_siblings_when_review(card: Card):
     siblings = mw.col.db.all(f"""
     SELECT 
         id,
-        nid,
         did,
         json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s'),
         CASE WHEN odid==0 THEN due ELSE odue END
@@ -261,13 +260,7 @@ def get_siblings_when_review(card: Card):
     AND type = 2
     AND queue != -1
     """)
-    siblings = filter(lambda x: x[3] is not None, siblings)
-    siblings_dict = {}
-    for cid, nid, did, stability, due in siblings:
-        if nid not in siblings_dict:
-            siblings_dict[nid] = []
-        siblings_dict[nid].append((cid, did, stability, due))
-    return siblings_dict[nid]
+    return list(filter(lambda x: x[2] is not None, siblings))
 
 
 def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
