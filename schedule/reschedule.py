@@ -375,7 +375,7 @@ def reschedule_when_review(reviewer, card: Card, ease):
         fsrs.set_load_balance()
     fsrs.free_days = config.free_days
 
-    undo_entry = mw.col.undo_status().last_step
+    undo_entry = mw.col.add_custom_undo_entry("Reschedule")
     card = reschedule_card(card.id, fsrs, mw.col.all_config()['rollover'], cur_deck_param)
     mw.col.update_card(card)
     mw.col.merge_undo_entries(undo_entry)

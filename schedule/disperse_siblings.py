@@ -267,7 +267,7 @@ def get_siblings_when_review(card: Card):
         if nid not in siblings_dict:
             siblings_dict[nid] = []
         siblings_dict[nid].append((cid, did, stability, due))
-    return siblings_dict
+    return siblings_dict[nid]
 
 
 def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
@@ -296,24 +296,28 @@ def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
     global did_to_deck_parameters
     did_to_deck_parameters = get_did_parameters(mw.col.decks.all(), deck_parameters, global_deck_name)
     
-    nid_siblings = get_siblings_when_review(card)
+    siblings = get_siblings_when_review(card)
+
+    if len(siblings) <= 1:
+        return
+    
+    # messages = []
     
     card_cnt = 0
-    # messages = []
-    undo_entry = mw.col.undo_status().last_step if undo_entry is None else undo_entry
-    for _, siblings in nid_siblings.items():
-        if len(siblings) <= 1:
-            return
-        best_due_dates = disperse(siblings)
-        for cid, due in best_due_dates.items():
-            card = mw.col.get_card(cid)
-            # old_due = card.odue if card.odid else card.due
-            last_revlog = mw.col.card_stats_data(cid).revlog[0]
-            last_due = get_last_review_date(last_revlog)
-            card = update_card_due_ivl(card, last_revlog, due - last_due)
-            mw.col.update_card(card)
-            mw.col.merge_undo_entries(undo_entry)
-            card_cnt += 1
+    undo_entry = mw.col.add_custom_undo_entry("Disperse") if undo_entry is None else undo_entry
+    best_due_dates = disperse(siblings)
+    for cid, due in best_due_dates.items():
+        card = mw.col.get_card(cid)
+        # old_due = card.odue if card.odid else card.due
+        last_revlog = mw.col.card_stats_data(cid).revlog[0]
+        last_due = get_last_review_date(last_revlog)
+        card = update_card_due_ivl(card, last_revlog, due - last_due)
+        old_custom_data = json.loads(card.custom_data)
+        old_custom_data['v'] = 'disperse'
+        card.custom_data = json.dumps(old_custom_data)
+        mw.col.update_card(card)
+        mw.col.merge_undo_entries(undo_entry)
+        card_cnt += 1
             # message = f"Dispersed card {html_to_text_line(card.question())} from {due_to_date(old_due)} to {due_to_date(due)}"
             # messages.append(message)
     # tooltip(f"Dispersed {card_cnt} cards")
