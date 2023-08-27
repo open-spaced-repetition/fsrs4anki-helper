@@ -64,7 +64,7 @@ Here's a comparison, the first graph is rescheduling before enabling it, and the
 
 ## Free days
 
-You can choose any day or days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid these days when rescheduling.
+You can choose any day or days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid these days when rescheduling. Note: Free days only works for review cards. Due to technical limitations, FSRS doesn't modify the interval and due date of (re)learning cards.
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/798dc25c-f06c-40fe-8866-ac28c8392273)
 
