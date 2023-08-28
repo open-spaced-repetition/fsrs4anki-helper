@@ -55,6 +55,8 @@ def get_due_range(cid, parameters, stability, due):
     else:
         new_ivl = int(round(stability * math.log(parameters['r']) / math.log(0.9)))
 
+    new_ivl = min(new_ivl, parameters['m'])
+
     if new_ivl <= 2.5:
         return (due, due, cid), last_due
     last_elapsed_days = int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
