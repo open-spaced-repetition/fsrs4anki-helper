@@ -50,7 +50,7 @@ def get_due_range(cid, parameters, stability, due):
     if version[0] == 4:
         new_ivl = int(round(9 * stability * (1 / parameters['r'] - 1)))
     else:
-         if last_rating == 4:
+        if last_rating == 4:
             new_ivl = int(round(stability * parameters['e'] * math.log(parameters['r']) / math.log(0.9)))
         else:
             new_ivl = int(round(stability * math.log(parameters['r']) / math.log(0.9)))        
