@@ -47,13 +47,13 @@ def get_due_range(cid, parameters, stability, due):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_due = get_last_review_date(revlogs[0])
     last_rating = revlogs[0].button_chosen
-    if version[0] == 3:
-        if last_rating == 4:
+    if version[0] == 4:
+        new_ivl = int(round(9 * stability * (1 / parameters['r'] - 1)))
+    else:
+         if last_rating == 4:
             new_ivl = int(round(stability * parameters['e'] * math.log(parameters['r']) / math.log(0.9)))
         else:
-            new_ivl = int(round(stability * math.log(parameters['r']) / math.log(0.9)))
-    else:
-        new_ivl = int(round(9 * stability * (1 / parameters['r'] - 1)))          
+            new_ivl = int(round(stability * math.log(parameters['r']) / math.log(0.9)))        
 
     new_ivl = min(new_ivl, parameters['m'])
 
