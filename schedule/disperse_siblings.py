@@ -46,6 +46,8 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 def get_due_range(cid, parameters, stability, due):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_due = get_last_review_date(revlogs[0])
+    custom_scheduler = check_fsrs4anki(mw.col.all_config())
+    if custom_scheduler is None: return
     version = get_version(custom_scheduler)
     if version[0] == 4:
         new_ivl = int(round(9 * stability * (1 / parameters['r'] - 1)))
