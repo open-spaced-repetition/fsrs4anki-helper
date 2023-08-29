@@ -300,14 +300,14 @@ def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
     if len(siblings) <= 1:
         return
     
-    # messages = []
+    messages = []
     
     card_cnt = 0
     undo_entry = mw.col.add_custom_undo_entry("Disperse") if undo_entry is None else undo_entry
     best_due_dates = disperse(siblings)
     for cid, due in best_due_dates.items():
         card = mw.col.get_card(cid)
-        # old_due = card.odue if card.odid else card.due
+        old_due = card.odue if card.odid else card.due
         last_revlog = mw.col.card_stats_data(cid).revlog[0]
         last_due = get_last_review_date(last_revlog)
         card = update_card_due_ivl(card, last_revlog, due - last_due)
@@ -317,7 +317,8 @@ def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
         mw.col.update_card(card)
         mw.col.merge_undo_entries(undo_entry)
         card_cnt += 1
-            # message = f"Dispersed card {html_to_text_line(card.question())} from {due_to_date(old_due)} to {due_to_date(due)}"
-            # messages.append(message)
-    # tooltip(f"Dispersed {card_cnt} cards")
-    # showText("\n".join(messages))
+        message = f"Dispersed card {card.id} from {due_to_date(old_due)} to {due_to_date(due)}"
+        messages.append(message)
+
+    if config.debug_notify:
+        tooltip("<br/>".join(messages))
