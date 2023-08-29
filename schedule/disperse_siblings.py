@@ -8,6 +8,7 @@ import copy
 did_to_deck_parameters = {}
 enable_load_balance = None
 free_days = None
+version = None
 
 def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if did is not None:
@@ -46,12 +47,9 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 def get_due_range(cid, parameters, stability, due):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_due = get_last_review_date(revlogs[0])
-    custom_scheduler = check_fsrs4anki(mw.col.all_config())
-    if custom_scheduler is None: return
-    version = get_version(custom_scheduler)
     if version[0] == 4:
         new_ivl = int(round(9 * stability * (1 / parameters['r'] - 1)))
-    else:
+    elif version[0] == 3:
         last_rating = revlogs[0].button_chosen
         if last_rating == 4:
             new_ivl = int(round(stability * parameters['e'] * math.log(parameters['r']) / math.log(0.9)))
@@ -62,6 +60,7 @@ def get_due_range(cid, parameters, stability, due):
 
     if new_ivl <= 2.5:
         return (due, due, cid), last_due
+
     last_elapsed_days = int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days)
     if due > mw.col.sched.today:
@@ -96,6 +95,7 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
     if custom_scheduler is None:
         return
+    global version
     version = get_version(custom_scheduler)
     if version[0] < 3:
         mw.taskman.run_on_main(lambda: showWarning("Require FSRS4Anki version >= 3.0.0"))
@@ -280,6 +280,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
     if custom_scheduler is None: return
 
+    global version
     version = get_version(custom_scheduler)
     if version[0] < 3:
         showWarning("Require FSRS4Anki version >= 3.0.0")
