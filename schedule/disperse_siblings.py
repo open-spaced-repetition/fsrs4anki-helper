@@ -8,6 +8,7 @@ import copy
 did_to_deck_parameters = {}
 enable_load_balance = None
 free_days = None
+version = None
 
 def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if did is not None:
@@ -46,19 +47,20 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 def get_due_range(cid, parameters, stability, due):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_due = get_last_review_date(revlogs[0])
-    last_rating = revlogs[0].button_chosen
-    if last_rating == 4:
-        try:
+    if version[0] == 4:
+        new_ivl = int(round(9 * stability * (1 / parameters['r'] - 1)))
+    elif version[0] == 3:
+        last_rating = revlogs[0].button_chosen
+        if last_rating == 4:
             new_ivl = int(round(stability * parameters['e'] * math.log(parameters['r']) / math.log(0.9)))
-        except KeyError:
-            new_ivl = int(round(9 * stability * (1 / parameters['r'] - 1)))
-    else:
-        new_ivl = int(round(stability * math.log(parameters['r']) / math.log(0.9)))
+        else:
+            new_ivl = int(round(stability * math.log(parameters['r']) / math.log(0.9)))        
 
     new_ivl = min(new_ivl, parameters['m'])
 
     if new_ivl <= 2.5:
         return (due, due, cid), last_due
+
     last_elapsed_days = int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days)
     if due > mw.col.sched.today:
@@ -93,6 +95,7 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
     if custom_scheduler is None:
         return
+    global version
     version = get_version(custom_scheduler)
     if version[0] < 3:
         mw.taskman.run_on_main(lambda: showWarning("Require FSRS4Anki version >= 3.0.0"))
@@ -277,6 +280,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
     custom_scheduler = check_fsrs4anki(mw.col.all_config())
     if custom_scheduler is None: return
 
+    global version
     version = get_version(custom_scheduler)
     if version[0] < 3:
         showWarning("Require FSRS4Anki version >= 3.0.0")
@@ -296,14 +300,14 @@ def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
     if len(siblings) <= 1:
         return
     
-    # messages = []
+    messages = []
     
     card_cnt = 0
     undo_entry = mw.col.add_custom_undo_entry("Disperse") if undo_entry is None else undo_entry
     best_due_dates = disperse(siblings)
     for cid, due in best_due_dates.items():
         card = mw.col.get_card(cid)
-        # old_due = card.odue if card.odid else card.due
+        old_due = card.odue if card.odid else card.due
         last_revlog = mw.col.card_stats_data(cid).revlog[0]
         last_due = get_last_review_date(last_revlog)
         card = update_card_due_ivl(card, last_revlog, due - last_due)
@@ -313,7 +317,8 @@ def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
         mw.col.update_card(card)
         mw.col.merge_undo_entries(undo_entry)
         card_cnt += 1
-            # message = f"Dispersed card {html_to_text_line(card.question())} from {due_to_date(old_due)} to {due_to_date(due)}"
-            # messages.append(message)
-    # tooltip(f"Dispersed {card_cnt} cards")
-    # showText("\n".join(messages))
+        message = f"Dispersed card {card.id} from {due_to_date(old_due)} to {due_to_date(due)}"
+        messages.append(message)
+
+    if config.debug_notify:
+        tooltip("<br/>".join(messages))

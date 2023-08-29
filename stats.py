@@ -231,7 +231,7 @@ def get_true_retention(self):
             td.trc { border: 1px solid; text-align: center; padding: 5px }
             span.young { color: #77cc77 }
             span.mature { color: #00aa00 }
-            span.yam { color: #55aa55 }
+            span.total { color: #55aa55 }
             span.relearn { color: #c35617 }
         </style>
         <br /><br />
@@ -244,7 +244,7 @@ def get_true_retention(self):
             <tr>
                 <td class="trc" colspan=3><span class="young"><b>Young</b></span></td>
                 <td class="trc" colspan=3><span class="mature"><b>Mature</b></span></td>
-                <td class="trc" colspan=3><span class="yam"><b>Young and Mature</b></span></td>
+                <td class="trc" colspan=3><span class="total"><b>Total</b></span></td>
                 <td class="trc" rowspan=2><span class="young"><b>Learned</b></span></td>
                 <td class="trc" rowspan=2><span class="relearn"><b>Relearned</b></span></td>
             </tr>
@@ -255,9 +255,9 @@ def get_true_retention(self):
                 <td class="trc"><span class="mature">Pass</span></td>
                 <td class="trc"><span class="mature">Fail</span></td>
                 <td class="trc"><span class="mature">Retention</span></td>
-                <td class="trc"><span class="yam">Pass</span></td>
-                <td class="trc"><span class="yam">Fail</span></td>
-                <td class="trc"><span class="yam">Retention</span></td>
+                <td class="trc"><span class="total">Pass</span></td>
+                <td class="trc"><span class="total">Fail</span></td>
+                <td class="trc"><span class="total">Retention</span></td>
             </tr>"""
     true_retention_part += stats_row("Day", pastDay)
     true_retention_part += stats_row("Yesterday", pastYesterday)
@@ -308,9 +308,9 @@ def stats_row(name, values):
             <td class="trr"><span class="mature">""" + str(values[3]) + u"""</span></td>
             <td class="trr"><span class="mature">""" + str(values[4]) + u"""</span></td>
             <td class="trr"><span class="mature">""" + values[5] + u"""</span></td>
-            <td class="trr"><span class="yam">""" + str(values[6]) + u"""</span></td>
-            <td class="trr"><span class="yam">""" + str(values[7]) + u"""</span></td>
-            <td class="trr"><span class="yam">""" + values[8] + u"""</span></td>
+            <td class="trr"><span class="total">""" + str(values[6]) + u"""</span></td>
+            <td class="trr"><span class="total">""" + str(values[7]) + u"""</span></td>
+            <td class="trr"><span class="total">""" + values[8] + u"""</span></td>
             <td class="trr"><span class="young">""" + str(values[9]) + u"""</span></td>
             <td class="trr"><span class="relearn">""" + str(values[10]) + u"""</span></td>
         </tr>"""

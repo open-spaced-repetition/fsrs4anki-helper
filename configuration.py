@@ -10,6 +10,7 @@ AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 AUTO_RESCHEDULE_AFTER_REVIEW = "auto_reschedule_after_review"
 AUTO_DISPERSE = "auto_disperse"
 MATURE_IVL = "mature_ivl"
+DEBUG_NOTIFY = "debug_notify"
 
 
 def load_config():
@@ -97,4 +98,13 @@ class Config:
     @mature_ivl.setter
     def mature_ivl(self, value):
         self.data[MATURE_IVL] = value
+        self.save()
+
+    @property
+    def debug_notify(self):
+        return self.data[DEBUG_NOTIFY]
+
+    @debug_notify.setter
+    def debug_notify(self, value):
+        self.data[DEBUG_NOTIFY] = value
         self.save()
