@@ -128,3 +128,35 @@ class RetrievabilityColumn(CustomColumn):
         THEN ({mw.col.sched.today} - (due-ivl)) / json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s')
         ELSE ({mw.col.sched.today} - (odue-ivl)) / json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s')
         END ASC"""
+
+class TargetRetrievabilityColumn(CustomColumn):
+    builtin_column = Column(
+        key="target_retrievability",
+        cards_mode_label="Target R",
+        notes_mode_label="Target R",
+        sorting=BrowserColumns.SORTING_DESCENDING,
+        uses_cell_font=False,
+        alignment=BrowserColumns.ALIGNMENT_CENTER,
+    )
+
+    def _display_value(self, card: Card) -> str:
+        custom_scheduler = check_fsrs4anki(mw.col.all_config())
+        version = get_version(custom_scheduler)
+        if card.type != 2:
+            return "N/A"
+        if card.custom_data == "":
+            return "N/A"
+        custom_data = json.loads(card.custom_data)
+        if 's' not in custom_data:
+            return "N/A"
+        today = mw.col.sched.today
+        try:
+            revlog = filter_revlogs(mw.col.card_stats_data(card.id).revlog)[0]
+        except IndexError:
+            return "N/A"
+        interval = card.ivl
+        retrievability = exponential_forgetting_curve(interval, custom_data['s']) if version[0] == 3 else power_forgetting_curve(interval, custom_data['s'])
+        return f"{retrievability * 100:.2f}%"
+    
+    def order_by_str(self) -> str:
+        return f"""ivl / json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s') ASC"""
