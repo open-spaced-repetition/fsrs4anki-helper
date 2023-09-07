@@ -127,6 +127,8 @@ def disperse_siblings_backgroud(did, filter_flag=False, filtered_nid_string="", 
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
             last_revlog = mw.col.card_stats_data(cid).revlog[0]
+            if last_revlog.review_kind == REVLOG_RESCHED:
+                continue
             last_due = get_last_review_date(last_revlog)
             card = update_card_due_ivl(card, last_revlog, due - last_due)
             old_custom_data = json.loads(card.custom_data)
