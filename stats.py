@@ -37,6 +37,7 @@ def retention_stability_burden(lim) -> float:
         ,json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s')
         ,ivl 
         ,(SELECT COUNT(*) FROM cards c2 WHERE c1.nid = c2.nid)
+        ,nid
     FROM cards c1
     WHERE queue >= 1 
     AND data like '%\"cd\"%'
@@ -47,6 +48,7 @@ def retention_stability_burden(lim) -> float:
     # x[1]: stability
     # x[2]: interval
     # x[3]: same nid count
+    # x[4]: nid
     elapse_stability_ivl_list = filter(
         lambda x: x[1] is not None, elapse_stability_ivl_list
     )
@@ -59,13 +61,15 @@ def retention_stability_burden(lim) -> float:
                 x[1],
                 1 / max(1, x[2]),
                 x[3],
+                x[4],
             ),
             elapse_stability_ivl_list,
         )
     )
-    cnt = len(retention_stability_burden_list)
-    if cnt == 0:
-        return 0, 0, 0, 0, 0, 0
+    card_cnt = len(retention_stability_burden_list)
+    note_cnt = len(set(x[4] for x in retention_stability_burden_list))
+    if card_cnt == 0:
+        return 0, 0, 0, 0, 0, 0, 0
     recall_sum = sum(item[0] for item in retention_stability_burden_list)
     stability_sum = sum(item[1] for item in retention_stability_burden_list)
     burden_sum = sum(item[2] for item in retention_stability_burden_list)
@@ -73,12 +77,13 @@ def retention_stability_burden(lim) -> float:
         sum(item[0] / item[3] for item in retention_stability_burden_list)
     )
     return (
-        recall_sum / cnt,
-        stability_sum / cnt,
+        recall_sum / card_cnt,
+        stability_sum / card_cnt,
         burden_sum,
-        cnt,
+        card_cnt,
         round(recall_sum),
         estimated_total_knowledge_notes,
+        note_cnt,
     )
 
 
@@ -100,19 +105,20 @@ def get_fsrs_stats(self):
         retention,
         stability,
         burden,
-        count,
+        card_cnt,
         estimated_total_knowledge,
         estimated_total_knowledge_notes,
+        note_cnt,
     ) = retention_stability_burden(lim)
     i = []
     _line_now(i, "Average retention", f"{retention * 100: .2f}%")
     _line_now(i, "Average stability", f"{int(stability)} days")
     _line_now(i, "Burden", f"{burden: .2f} reviews/day")
-    _line_now(i, "Count", f"{count} cards")
+    _line_now(i, "Count", f"{card_cnt} cards ({note_cnt} notes)")
     _line_now(
         i,
         "Estimated total knowledge",
-        f"{estimated_total_knowledge} cards/{estimated_total_knowledge_notes} notes",
+        f"{estimated_total_knowledge} cards ({estimated_total_knowledge_notes} notes)",
     )
     title = anki.stats.CollectionStats._title(
         self,
