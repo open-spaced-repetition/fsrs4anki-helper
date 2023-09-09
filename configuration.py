@@ -1,4 +1,3 @@
-
 from aqt import mw
 
 tag = mw.addonManager.addonFromModule(__name__)
