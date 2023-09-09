@@ -363,7 +363,9 @@ def get_true_retention(self):
     true_retention_part += stats_row("Week", pastWeek)
     true_retention_part += stats_row(pname, pastPeriod)
     true_retention_part += "</table>"
-    true_retention_part += "<p>By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config. The current value is %(i)d days.</p>"
+    config = Config()
+    config.load()
+    true_retention_part += f"<p>By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config. The current value is {config.mature_ivl} days.</p>"
     return self._section(true_retention_part)
 
 
