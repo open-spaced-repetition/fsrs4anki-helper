@@ -1,4 +1,4 @@
-from aqt.utils import askUser, showInfo, showCritical
+from aqt.utils import askUser, showInfo, showCritical, showWarning
 from aqt import mw
 from ..utils import get_version, geq_version
 
@@ -12,6 +12,13 @@ def get_internet_scheduler():
     with urllib.request.urlopen(SCHEDULER_URL) as req:
         return req.read().decode("UTF8")
 
+def set_scheduler(new_scheduler: str):
+    # Backup the old scheduler to a file in case something goes wrong.
+    with open(os.path.expanduser("~/fsrs4anki_scheduler_revert.js"), "w") as f: 
+        f.write(new_scheduler)
+
+    mw.col.set_config("cardStateCustomizer", new_scheduler, undoable=True)
+
 def update_scheduler(_):
     local_scheduler = mw.col.get_config("cardStateCustomizer", None)
     try:
@@ -19,10 +26,18 @@ def update_scheduler(_):
     except IndexError:
         if askUser(
             "You dont appear to have the fsrs4anki scheduler set up\n"
-            "Would you like to replace your custom scheduling code with the latest?"
+            "Would you like to set up your custom scheduling code to enable fsrs?"
         ):
-            mw.col.set_config("cardStateCustomizer", get_internet_scheduler(), undoable=True)
-            showInfo("Successfully added scheduler, check it in the custom scheduling section of your deck config")
+            if local_scheduler:
+                if not askUser(
+                    "You appear to have some none Fsrs scheduling code already, This will overwrite that.\n"
+                    "Are you sure you want to continue?"
+                    , title="Warning"
+                ):
+                    return
+
+            set_scheduler(get_internet_scheduler())
+            showInfo("Successfully added scheduler. Find it in the custom scheduling section of your deck config.")
             return
         else:
             return
@@ -63,10 +78,6 @@ def update_scheduler(_):
             return 
 
         new_scheduler = re.sub(config_regex, old_config.group(), internet_scheduler, flags=re.DOTALL)
-        mw.col.set_config("cardStateCustomizer", new_scheduler, undoable=True)
-
-        # Backup the old scheduler to a file in case something goes wrong.
-        with open(os.path.expanduser("~/fsrs4anki_scheduler_revert.js"), "w") as f: 
-            f.write(local_scheduler)
+        set_scheduler(new_scheduler)
 
         showInfo("Scheduler updated successfully.")
