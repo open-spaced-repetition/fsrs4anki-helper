@@ -3,22 +3,32 @@ from aqt import mw
 from ..utils import get_version, geq_version
 
 import urllib.request
+import socket
 import re
 import os.path
 
 SCHEDULER4_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/main/fsrs4anki_scheduler.js"
 SCHEDULER3_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/v3.26.2/fsrs4anki_scheduler.js"
 
+
 def get_internet_scheduler(url: str):
-    with urllib.request.urlopen(url) as req:
-        return req.read().decode("UTF8")
+    try:
+        with urllib.request.urlopen(url, timeout=10) as req:
+            return req.read().decode("UTF8")
+    except socket.timeout:
+        showWarning(
+            "Timeout while downloading scheduler, please try again later.\n"
+            + "If you are in China, please use proxy or VPN."
+        )
+
 
 def set_scheduler(new_scheduler: str):
     # Backup the old scheduler to a file in case something goes wrong.
-    with open(os.path.expanduser("~/fsrs4anki_scheduler_revert.js"), "w") as f: 
+    with open(os.path.expanduser("~/fsrs4anki_scheduler_revert.js"), "w") as f:
         f.write(new_scheduler)
 
     mw.col.set_config("cardStateCustomizer", new_scheduler, undoable=True)
+
 
 def update_scheduler(_):
     local_scheduler = mw.col.get_config("cardStateCustomizer", None)
@@ -32,20 +42,29 @@ def update_scheduler(_):
             if local_scheduler:
                 if not askUser(
                     "You appear to have some none Fsrs scheduling code already, This will overwrite that.\n"
-                    "Are you sure you want to continue?"
-                    , title="Warning"
+                    "Are you sure you want to continue?",
+                    title="Warning",
                 ):
                     return
 
-            set_scheduler(get_internet_scheduler(SCHEDULER4_URL))
-            showInfo("Successfully added scheduler. Find it in the custom scheduling section of your deck config.")
+            internet_scheduler = get_internet_scheduler(SCHEDULER4_URL)
+            if internet_scheduler is None:
+                return
+            set_scheduler(internet_scheduler)
+            showInfo(
+                "Successfully added scheduler. Find it in the custom scheduling section of your deck config."
+            )
             return
         else:
             return
-    
-    scheduler_url = SCHEDULER3_URL if local_scheduler_version[0] == 3 else SCHEDULER4_URL
+
+    scheduler_url = (
+        SCHEDULER3_URL if local_scheduler_version[0] == 3 else SCHEDULER4_URL
+    )
 
     internet_scheduler = get_internet_scheduler(scheduler_url)
+    if internet_scheduler is None:
+        return
     internet_scheduler_version = get_version(internet_scheduler)
 
     # Weight length checks
@@ -61,7 +80,7 @@ def update_scheduler(_):
             )
             return 0
 
-        return weight_match.group(1).strip(',').count(',')
+        return weight_match.group(1).strip(",").count(",")
 
     if weight_count(local_scheduler) != weight_count(internet_scheduler):
         showWarning(
@@ -70,26 +89,23 @@ def update_scheduler(_):
             "Upgrade at your own risk."
         )
 
-    def version_tuple_to_str(version : tuple[int, int, int]):
+    def version_tuple_to_str(version: tuple[int, int, int]):
         return ".".join(str(a) for a in version)
 
-    comparison =  (
-            f"Latest scheduler version = {version_tuple_to_str(internet_scheduler_version)}\n"
-            f"Local scheduler version = {version_tuple_to_str(local_scheduler_version)}"
+    comparison = (
+        f"Latest scheduler version = {version_tuple_to_str(internet_scheduler_version)}\n"
+        f"Local scheduler version = {version_tuple_to_str(local_scheduler_version)}"
     )
 
     if geq_version(local_scheduler_version, internet_scheduler_version):
-        showInfo(
-            comparison + "\n"
-            "You are already up to date"
-        )
+        showInfo(comparison + "\n" "You are already up to date")
     else:
         if not askUser(
             comparison + "\n"
             "Update the scheduler with the latest version? (Your config will be preserved)"
         ):
             return
-        
+
         config_regex = r"\/\/\s*Configuration\s+Start.+\/\/\s*Configuration\s+End"
 
         old_config = re.search(config_regex, local_scheduler, re.DOTALL)
@@ -101,9 +117,11 @@ def update_scheduler(_):
                 "\n"
                 "No changes have been made."
             )
-            return 
+            return
 
-        new_scheduler = re.sub(config_regex, old_config.group(), internet_scheduler, flags=re.DOTALL)
+        new_scheduler = re.sub(
+            config_regex, old_config.group(), internet_scheduler, flags=re.DOTALL
+        )
         set_scheduler(new_scheduler)
 
         showInfo("Scheduler updated successfully.")
