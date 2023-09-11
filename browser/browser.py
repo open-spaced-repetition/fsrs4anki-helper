@@ -1,4 +1,3 @@
-
 from typing import Optional, Sequence
 from aqt.browser import Browser, CellRow, Column, ItemId, SearchContext
 from aqt.gui_hooks import (
@@ -13,6 +12,7 @@ from .custom_columns import (
     DifficultyColumn,
     StabilityColumn,
     RetrievabilityColumn,
+    TargetRetrievabilityColumn,
 )
 from .custom_search_nodes import (
     CustomSearchNode,
@@ -21,7 +21,12 @@ from ..utils import *
 
 browser: Optional[Browser] = None
 
-custom_columns = [DifficultyColumn(), StabilityColumn(), RetrievabilityColumn()]
+custom_columns = [
+    DifficultyColumn(),
+    StabilityColumn(),
+    RetrievabilityColumn(),
+    TargetRetrievabilityColumn(),
+]
 
 # stores the custom search nodes for the current search
 custom_search_nodes: List[CustomSearchNode] = []
@@ -32,6 +37,7 @@ def init_browser() -> None:
 
     _setup_custom_columns()
     _setup_search()
+
 
 def _store_browser_reference(browser_: Browser) -> None:
     global browser
@@ -63,6 +69,7 @@ def _on_browser_did_fetch_row(
             row=row,
             active_columns=active_columns,
         )
+
 
 # cutom search nodes
 def _setup_search():
@@ -98,7 +105,11 @@ def _on_browser_will_search_handle_custom_search_parameters(ctx: SearchContext):
     for m in re.finditer(r"( |^)(d|s|r)(<=|>=|!=|=|<|>)(\d+\.{0,1}\d*)", ctx.search):
         if m.group(0) == "":
             continue
-        parameter_name, parameter_operator, parameter_value = m.group(2), m.group(3), m.group(4)
+        parameter_name, parameter_operator, parameter_value = (
+            m.group(2),
+            m.group(3),
+            m.group(4),
+        )
         try:
             custom_search_nodes.append(
                 CustomSearchNode.from_parameter_type_opt_and_value(
@@ -111,6 +122,7 @@ def _on_browser_will_search_handle_custom_search_parameters(ctx: SearchContext):
 
         # remove the custom search parameter from the search string
         ctx.search = ctx.search.replace(m.group(0), "")
+
 
 def _on_browser_did_search(ctx: SearchContext):
     _on_browser_did_search_handle_custom_search_parameters(ctx)

@@ -1,14 +1,11 @@
 from aqt.gui_hooks import sync_will_start, sync_did_finish
-from aqt import QMessageBox, QTimer
-from .reschedule import reschedule
+from .schedule.reschedule import reschedule
 from .configuration import Config
 from .utils import *
 
 
 def create_comparelog(local_rids: List[int]) -> None:
-    local_rids.extend(
-        [id for id in mw.col.db.list("SELECT id FROM revlog")]
-    )
+    local_rids.extend([id for id in mw.col.db.list("SELECT id FROM revlog")])
 
 
 def auto_reschedule(local_rids: List[int]):
@@ -22,14 +19,18 @@ def auto_reschedule(local_rids: List[int]):
     local_rid_string = ",".join([str(local_rid) for local_rid in local_rids])
 
     # exclude entries where ivl == lastIvl: they indicate a dynamic deck without rescheduling
-    remote_reviewed_cids = [cid for cid in mw.col.db.list(
+    remote_reviewed_cids = [
+        cid
+        for cid in mw.col.db.list(
             f"SELECT DISTINCT cid FROM revlog WHERE id NOT IN ({local_rid_string}) and ivl != lastIvl"
         )
     ]
 
     remote_reviewed_cid_string = ",".join([str(cid) for cid in remote_reviewed_cids])
-    rescheduled_nids = [nid for nid in mw.col.db.list(
-        f"""SELECT DISTINCT nid 
+    rescheduled_nids = [
+        nid
+        for nid in mw.col.db.list(
+            f"""SELECT DISTINCT nid 
             FROM cards 
             WHERE id IN ({remote_reviewed_cid_string})
         """
@@ -37,7 +38,13 @@ def auto_reschedule(local_rids: List[int]):
     ]
 
     filtered_nid_string = ",".join([str(nid) for nid in rescheduled_nids])
-    fut = reschedule(None, recent=False, filter_flag=True, filtered_cids=set(remote_reviewed_cids), filtered_nid_string=filtered_nid_string)
+    fut = reschedule(
+        None,
+        recent=False,
+        filter_flag=True,
+        filtered_cids=set(remote_reviewed_cids),
+        filtered_nid_string=filtered_nid_string,
+    )
 
     # wait for reschedule to finish
     return fut.result()

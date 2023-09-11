@@ -1,4 +1,3 @@
-
 from aqt import mw
 
 tag = mw.addonManager.addonFromModule(__name__)
@@ -8,9 +7,12 @@ LOAD_BALANCE = "load_balance"
 FREE_DAYS = "free_days"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
+AUTO_RESCHEDULE_AFTER_REVIEW = "auto_reschedule_after_review"
 AUTO_DISPERSE = "auto_disperse"
 SAVED_OPTIMIZED_PARAMETERS = "saved_optimized"
 MATURE_IVL = "mature_ivl"
+DEBUG_NOTIFY = "debug_notify"
+FSRS_STATS = "fsrs_stats"
 
 # Deck params
 RETENTION_IS_NOT_OPTIMIZED = "unoptimized_retention_warning"
@@ -92,6 +94,15 @@ class Config:
         self.save()
 
     @property
+    def auto_reschedule_after_review(self):
+        return self.data[AUTO_RESCHEDULE_AFTER_REVIEW]
+
+    @auto_reschedule_after_review.setter
+    def auto_reschedule_after_review(self, value):
+        self.data[AUTO_RESCHEDULE_AFTER_REVIEW] = value
+        self.save()
+
+    @property
     def auto_disperse(self):
         return self.data[AUTO_DISPERSE]
 
@@ -155,4 +166,22 @@ const deckParams = [
     @mature_ivl.setter
     def mature_ivl(self, value):
         self.data[MATURE_IVL] = value
+        self.save()
+
+    @property
+    def debug_notify(self):
+        return self.data[DEBUG_NOTIFY]
+
+    @debug_notify.setter
+    def debug_notify(self, value):
+        self.data[DEBUG_NOTIFY] = value
+        self.save()
+
+    @property
+    def fsrs_stats(self):
+        return self.data[FSRS_STATS]
+
+    @fsrs_stats.setter
+    def fsrs_stats(self, value):
+        self.data[FSRS_STATS] = value
         self.save()

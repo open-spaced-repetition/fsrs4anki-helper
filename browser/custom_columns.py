@@ -6,6 +6,7 @@ from anki.collection import BrowserColumns
 from aqt.browser import Browser, CellRow, Column, ItemId
 from ..utils import *
 
+
 class CustomColumn:
     builtin_column: Column
 
@@ -45,7 +46,7 @@ class CustomColumn:
         """Return the SQL string that will be appended after "ORDER BY" to the query that
         fetches the search results when sorting by this column."""
         return None
-    
+
 
 class StabilityColumn(CustomColumn):
     builtin_column = Column(
@@ -61,11 +62,11 @@ class StabilityColumn(CustomColumn):
         if card.custom_data == "":
             return "N/A"
         custom_data = json.loads(card.custom_data)
-        if 's' not in custom_data:
+        if "s" not in custom_data:
             return "N/A"
 
         return f"{custom_data['s']:.2f} days"
-    
+
     def order_by_str(self) -> str:
         return "json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s') DESC"
 
@@ -84,11 +85,11 @@ class DifficultyColumn(CustomColumn):
         if card.custom_data == "":
             return "N/A"
         custom_data = json.loads(card.custom_data)
-        if 'd' not in custom_data:
+        if "d" not in custom_data:
             return "N/A"
 
-        return custom_data['d']
-    
+        return custom_data["d"]
+
     def order_by_str(self) -> str:
         return "json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.d') DESC"
 
@@ -111,7 +112,7 @@ class RetrievabilityColumn(CustomColumn):
         if card.custom_data == "":
             return "N/A"
         custom_data = json.loads(card.custom_data)
-        if 's' not in custom_data:
+        if "s" not in custom_data:
             return "N/A"
         today = mw.col.sched.today
         try:
@@ -120,11 +121,52 @@ class RetrievabilityColumn(CustomColumn):
             return "N/A"
         last_due = get_last_review_date(revlog)
         elapsed_days = today - last_due
-        retrievability = exponential_forgetting_curve(elapsed_days, custom_data['s']) if version[0] == 3 else power_forgetting_curve(elapsed_days, custom_data['s'])
+        retrievability = (
+            exponential_forgetting_curve(elapsed_days, custom_data["s"])
+            if version[0] == 3
+            else power_forgetting_curve(elapsed_days, custom_data["s"])
+        )
         return f"{retrievability * 100:.2f}%"
-    
+
     def order_by_str(self) -> str:
         return f"""CASE WHEN odid==0 
         THEN ({mw.col.sched.today} - (due-ivl)) / json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s')
         ELSE ({mw.col.sched.today} - (odue-ivl)) / json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s')
         END ASC"""
+
+
+class TargetRetrievabilityColumn(CustomColumn):
+    builtin_column = Column(
+        key="target_retrievability",
+        cards_mode_label="Target R",
+        notes_mode_label="Target R",
+        sorting=BrowserColumns.SORTING_DESCENDING,
+        uses_cell_font=False,
+        alignment=BrowserColumns.ALIGNMENT_CENTER,
+    )
+
+    def _display_value(self, card: Card) -> str:
+        custom_scheduler = check_fsrs4anki(mw.col.all_config())
+        version = get_version(custom_scheduler)
+        if card.type != 2:
+            return "N/A"
+        if card.custom_data == "":
+            return "N/A"
+        custom_data = json.loads(card.custom_data)
+        if "s" not in custom_data:
+            return "N/A"
+        today = mw.col.sched.today
+        try:
+            revlog = filter_revlogs(mw.col.card_stats_data(card.id).revlog)[0]
+        except IndexError:
+            return "N/A"
+        interval = card.ivl
+        retrievability = (
+            exponential_forgetting_curve(interval, custom_data["s"])
+            if version[0] == 3
+            else power_forgetting_curve(interval, custom_data["s"])
+        )
+        return f"{retrievability * 100:.2f}%"
+
+    def order_by_str(self) -> str:
+        return f"""ivl / json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s') ASC"""

@@ -1,17 +1,17 @@
 import re
 from aqt.utils import tooltip, getText, showWarning, askUser, showText
 from collections import OrderedDict
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from anki.stats_pb2 import CardStatsResponse
 from anki.cards import Card
 from anki.stats import (
-    REVLOG_LRN, 
-    REVLOG_REV, 
+    REVLOG_LRN,
+    REVLOG_REV,
     REVLOG_RELRN,
     REVLOG_CRAM,
     REVLOG_RESCHED,
     CARD_TYPE_REV,
-    QUEUE_TYPE_REV
+    QUEUE_TYPE_REV,
 )
 from aqt import mw
 import json
@@ -24,25 +24,37 @@ DECOUPLE_PARAMS_CODE_INITIAL_VERSION = (3, 14, 0)
 GLOBAL_DECK_CONFIG_NAME = "global config for FSRS4Anki"
 VERSION_NUMBER_LEN = 3
 
+
 def check_fsrs4anki(all_config):
     if "cardStateCustomizer" not in all_config:
-        mw.taskman.run_on_main(lambda: showWarning(
-            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen."))
+        mw.taskman.run_on_main(
+            lambda: showWarning(
+                "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen."
+            )
+        )
         return
-    custom_scheduler = all_config['cardStateCustomizer']
+    custom_scheduler = all_config["cardStateCustomizer"]
     if "// FSRS4Anki" not in custom_scheduler:
-        mw.taskman.run_on_main(lambda: showWarning(
-            "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen."))
+        mw.taskman.run_on_main(
+            lambda: showWarning(
+                "Please paste the code of FSRS4Anki into custom scheduling at the bottom of the deck options screen."
+            )
+        )
         return
     return custom_scheduler
 
 
 def get_version(custom_scheduler):
-    str_matches = re.findall(r'// FSRS4Anki v(\d+).(\d+).(\d+) Scheduler', custom_scheduler)
+    str_matches = re.findall(
+        r"// FSRS4Anki v(\d+).(\d+).(\d+) Scheduler", custom_scheduler
+    )
     version = tuple(map(int, str_matches[0]))
     if len(version) != VERSION_NUMBER_LEN:
-        mw.taskman.run_on_main(lambda: showWarning(
-            "Please check whether the version of FSRS4Anki scheduler matches X.Y.Z."))
+        mw.taskman.run_on_main(
+            lambda: showWarning(
+                "Please check whether the version of FSRS4Anki scheduler matches X.Y.Z."
+            )
+        )
         return
     return version
 
@@ -53,7 +65,9 @@ def get_fuzz_bool(custom_scheduler):
     )[0]
     if enable_fuzz:
         return True if enable_fuzz == "true" else False
-    mw.taskman.run_on_main(lambda: showWarning("Unable to get the value of enable_fuzz."))
+    mw.taskman.run_on_main(
+        lambda: showWarning("Unable to get the value of enable_fuzz.")
+    )
     return
 
 
@@ -74,7 +88,7 @@ def geq_version(version_1, version_2):
 def get_global_config_deck_name(version):
     if uses_new_params_config(version):
         return GLOBAL_DECK_CONFIG_NAME
-    return 'global'
+    return "global"
 
 
 def _get_regex_patterns(version):
@@ -88,11 +102,11 @@ def _get_regex_patterns(version):
             hard_intervals = r'"hardInterval"[:\s]+([\d.]+)'
         else:
             decks = r'deck_name(?: ?== ?|.startsWith\()+"(.*)"'
-            weights = r'[var ]?w ?= ?([0-9\-., \[\]]*)'
-            retentions = r'requestRetention ?= ?([0-9.]*)'
-            max_intervals = r'maximumInterval ?= ?([0-9.]*)'
-            easy_bonuses = r'easyBonus ?= ?([0-9.]*)'
-            hard_intervals = r'hardInterval ?= ?([0-9.]*)'
+            weights = r"[var ]?w ?= ?([0-9\-., \[\]]*)"
+            retentions = r"requestRetention ?= ?([0-9.]*)"
+            max_intervals = r"maximumInterval ?= ?([0-9.]*)"
+            easy_bonuses = r"easyBonus ?= ?([0-9.]*)"
+            hard_intervals = r"hardInterval ?= ?([0-9.]*)"
         return decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
     elif version[0] == 4:
         decks = r'"deckName".*"(.*)"'
@@ -106,7 +120,7 @@ def _get_weights(version, str_matches):
     if uses_new_params_config(version):
         return [list(map(float, w.split(", "))) for w in str_matches]
     else:
-        return [list(map(float, w.strip('][').split(', '))) for w in str_matches]
+        return [list(map(float, w.strip("][").split(", "))) for w in str_matches]
 
 
 def _get_deck_names(version, str_matches):
@@ -118,7 +132,9 @@ def _get_deck_names(version, str_matches):
 
 
 def _remove_comment_line(custom_scheduler):
-    not_comment_line = '\n'.join([re.sub('^ *//..*$', '', _) for _ in custom_scheduler.split('\n')])
+    not_comment_line = "\n".join(
+        [re.sub("^ *//..*$", "", _) for _ in custom_scheduler.split("\n")]
+    )
     return not_comment_line
 
 
@@ -135,13 +151,33 @@ def get_deck_parameters(custom_scheduler):
         max_intervals = re.findall(m_pat, custom_scheduler)
         easy_bonuses = re.findall(e_pat, custom_scheduler)
         hard_intervals = re.findall(h_pat, custom_scheduler)
-        if not all([len(x) == len(decks) for x in [
-            decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
-        ]]):
-            mw.taskman.run_on_main(lambda: showWarning(
-                "The number of deckName, w, requestRetention, maximumInterval, easyBonus, or hardInterval unmatch.\n" +
-                "Please confirm each item of deckParams have deckName, w, requestRetention, maximumInterval, easyBonus, and hardInterval."
-            ))
+        if any(len(w) != 13 for w in weights):
+            mw.taskman.run_on_main(
+                lambda: showWarning(
+                    "The weights between v3 and v4 are incompatible.\n"
+                    "Please use v3 Optimizer to generate the weights."
+                )
+            )
+            return
+        if not all(
+            [
+                len(x) == len(decks)
+                for x in [
+                    decks,
+                    weights,
+                    retentions,
+                    max_intervals,
+                    easy_bonuses,
+                    hard_intervals,
+                ]
+            ]
+        ):
+            mw.taskman.run_on_main(
+                lambda: showWarning(
+                    "The number of deckName, w, requestRetention, maximumInterval, easyBonus, or hardInterval unmatch.\n"
+                    + "Please confirm each item of deckParams have deckName, w, requestRetention, maximumInterval, easyBonus, and hardInterval."
+                )
+            )
             return
         deck_parameters = {
             d: {
@@ -150,7 +186,8 @@ def get_deck_parameters(custom_scheduler):
                 "m": int(m),
                 "e": float(e),
                 "h": float(h),
-            } for d, w, r, m, e, h in zip(
+            }
+            for d, w, r, m, e, h in zip(
                 decks, weights, retentions, max_intervals, easy_bonuses, hard_intervals
             )
         }
@@ -162,30 +199,40 @@ def get_deck_parameters(custom_scheduler):
         weights = _get_weights(version, w_str_matches)
         retentions = re.findall(r_pat, custom_scheduler)
         max_intervals = re.findall(m_pat, custom_scheduler)
-        if not all([len(x) == len(decks) for x in [
-            decks, weights, retentions, max_intervals
-        ]]):
-            mw.taskman.run_on_main(lambda: showWarning(
-                "The number of deckName, w, requestRetention or maximumInterval unmatch.\n" +
-                "Please confirm each item of deckParams have deckName, w, requestRetention and maximumInterval."
-            ))
+        if any(len(w) != 17 for w in weights):
+            mw.taskman.run_on_main(
+                lambda: showWarning(
+                    "The weights between v3 and v4 are incompatible.\n"
+                    "Please use v4 Optimizer to generate the weights."
+                )
+            )
+            return
+        if not all(
+            [len(x) == len(decks) for x in [decks, weights, retentions, max_intervals]]
+        ):
+            mw.taskman.run_on_main(
+                lambda: showWarning(
+                    "The number of deckName, w, requestRetention or maximumInterval unmatch.\n"
+                    + "Please confirm each item of deckParams have deckName, w, requestRetention and maximumInterval."
+                )
+            )
             return
         deck_parameters = {
             d: {
                 "w": w,
                 "r": float(r),
                 "m": int(m),
-            } for d, w, r, m in zip(
-                decks, weights, retentions, max_intervals
-            )
+            }
+            for d, w, r, m in zip(decks, weights, retentions, max_intervals)
         }
 
     deck_parameters = OrderedDict(
-        {name: parameters for name, parameters in sorted(
-            deck_parameters.items(),
-            key=lambda item: item[0],
-            reverse=True
-        )}
+        {
+            name: parameters
+            for name, parameters in sorted(
+                deck_parameters.items(), key=lambda item: item[0], reverse=True
+            )
+        }
     )
     return deck_parameters
 
@@ -200,7 +247,7 @@ def get_did_parameters(deck_list, deck_parameters, global_deck_name):
             if prefix in mapping:
                 return mapping[prefix]
         return mapping[global_deck_name]
-    
+
     for d in deck_list:
         parameters = get_parameters(d["name"], deck_parameters)
         did_to_deck_parameters[d["id"]] = parameters
@@ -208,9 +255,9 @@ def get_did_parameters(deck_list, deck_parameters, global_deck_name):
 
 
 def get_skip_decks(custom_scheduler):
-    pattern = r'[const ]?skip_decks ?= ?(.*);'
+    pattern = r"[const ]?skip_decks ?= ?(.*);"
     str_matches = re.findall(pattern, custom_scheduler)
-    names = str_matches[0].split(', ')
+    names = str_matches[0].split(", ")
     return list(map(lambda x: x.strip(']["'), names))
 
 
@@ -224,7 +271,12 @@ def RepresentsInt(s):
 def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     card = mw.col.get_card(cid)
     card.ivl = int(revlogs[0].interval / 86400)
-    due = math.ceil((revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today
+    due = (
+        math.ceil(
+            (revlogs[0].time + revlogs[0].interval - mw.col.sched.day_cutoff) / 86400
+        )
+        + mw.col.sched.today
+    )
     if card.odid:
         card.odue = max(due, 1)
     else:
@@ -232,15 +284,22 @@ def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry
     mw.col.update_card(card)
 
 
-def filter_revlogs(revlogs: List[CardStatsResponse.StatsRevlogEntry]) -> List[CardStatsResponse.StatsRevlogEntry]:
+def filter_revlogs(
+    revlogs: List[CardStatsResponse.StatsRevlogEntry],
+) -> List[CardStatsResponse.StatsRevlogEntry]:
     return list(filter(lambda x: x.review_kind != REVLOG_CRAM or x.ease != 0, revlogs))
 
 
 def get_last_review_date(last_revlog: CardStatsResponse.StatsRevlogEntry):
-    return math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400) + mw.col.sched.today
+    return (
+        math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400)
+        + mw.col.sched.today
+    )
 
 
-def update_card_due_ivl(card: Card, last_revlog: CardStatsResponse.StatsRevlogEntry, new_ivl: int):
+def update_card_due_ivl(
+    card: Card, last_revlog: CardStatsResponse.StatsRevlogEntry, new_ivl: int
+):
     card.ivl = new_ivl
     last_review_date = get_last_review_date(last_revlog)
     if card.odid:
@@ -262,7 +321,11 @@ def has_manual_reset(revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     for r in revlogs:
         if r.button_chosen == 0:
             return True
-        if last_kind is not None and last_kind in (REVLOG_REV, REVLOG_RELRN) and r.review_kind == REVLOG_LRN:
+        if (
+            last_kind is not None
+            and last_kind in (REVLOG_REV, REVLOG_RELRN)
+            and r.review_kind == REVLOG_LRN
+        ):
             return True
         last_kind = r.review_kind
     return False
@@ -290,21 +353,21 @@ def power_forgetting_curve(elapsed_days, stability):
     return (1 + elapsed_days / (9 * stability)) ** -1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """Small test for 'uses_new_code'. Will check numbers of versions below, at
     and above the version number defined in the global configuration.
-    Base 3 is used because all we need to check are the numbers one unit above 
+    Base 3 is used because all we need to check are the numbers one unit above
     or below the version.
     """
     initial_version = DECOUPLE_PARAMS_CODE_INITIAL_VERSION
-    print('does each version use the new code?:')
+    print("does each version use the new code?:")
     for i in range(27):  # 222 in base 3
-        modifier = (i // 9 - 1, i % 9 // 3 - 1, i % 3-1)  # produces numbers in base 3
+        modifier = (i // 9 - 1, i % 9 // 3 - 1, i % 3 - 1)  # produces numbers in base 3
         modified = tuple(sum(tup) for tup in zip(initial_version, modifier))
-        print(modified, end=' is ')
+        print(modified, end=" is ")
         if i >= 13:  # 111 in base 3
-            print(' True', end='. ')
+            print(" True", end=". ")
         else:
-            print(False, end='. ')
-        print(uses_new_params_config(modified), end=' ')
-        print('<-- Func returns ')
+            print(False, end=". ")
+        print(uses_new_params_config(modified), end=" ")
+        print("<-- Func returns ")
