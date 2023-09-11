@@ -6,10 +6,11 @@ import urllib.request
 import re
 import os.path
 
-SCHEDULER_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/main/fsrs4anki_scheduler.js"
+SCHEDULER4_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/main/fsrs4anki_scheduler.js"
+SCHEDULER3_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/6066c7174dfefa4ac4cb930dcb70063b906cb6c8/fsrs4anki_scheduler.js"
 
-def get_internet_scheduler():
-    with urllib.request.urlopen(SCHEDULER_URL) as req:
+def get_internet_scheduler(url: str):
+    with urllib.request.urlopen(url) as req:
         return req.read().decode("UTF8")
 
 def set_scheduler(new_scheduler: str):
@@ -36,13 +37,15 @@ def update_scheduler(_):
                 ):
                     return
 
-            set_scheduler(get_internet_scheduler())
+            set_scheduler(get_internet_scheduler(SCHEDULER4_URL))
             showInfo("Successfully added scheduler. Find it in the custom scheduling section of your deck config.")
             return
         else:
             return
-        
-    internet_scheduler = get_internet_scheduler()
+    
+    scheduler_url = SCHEDULER4_URL if local_scheduler_version[0] == 4 else SCHEDULER3_URL
+
+    internet_scheduler = get_internet_scheduler(scheduler_url)
     internet_scheduler_version = get_version(internet_scheduler)
 
     # Weight length checks
