@@ -4,6 +4,7 @@ from ..utils import get_version, geq_version
 
 import urllib.request
 import re
+import os.path
 
 SCHEDULER_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/main/fsrs4anki_scheduler.js"
 
@@ -63,5 +64,9 @@ def update_scheduler(_):
 
         new_scheduler = re.sub(config_regex, old_config.group(), internet_scheduler, flags=re.DOTALL)
         mw.col.set_config("cardStateCustomizer", new_scheduler, undoable=True)
+
+        # Backup the old scheduler to a file in case something goes wrong.
+        with open(os.path.expanduser("~/fsrs4anki_scheduler_revert.js"), "w") as f: 
+            f.write(local_scheduler)
 
         showInfo("Scheduler updated successfully.")
