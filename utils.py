@@ -151,6 +151,14 @@ def get_deck_parameters(custom_scheduler):
         max_intervals = re.findall(m_pat, custom_scheduler)
         easy_bonuses = re.findall(e_pat, custom_scheduler)
         hard_intervals = re.findall(h_pat, custom_scheduler)
+        if any(len(w) != 13 for w in weights):
+            mw.taskman.run_on_main(
+                lambda: showWarning(
+                    "The weights between v3 and v4 are incompatible.\n"
+                    "Please use v3 Optimizer to generate the weights."
+                )
+            )
+            return
         if not all(
             [
                 len(x) == len(decks)
@@ -191,6 +199,14 @@ def get_deck_parameters(custom_scheduler):
         weights = _get_weights(version, w_str_matches)
         retentions = re.findall(r_pat, custom_scheduler)
         max_intervals = re.findall(m_pat, custom_scheduler)
+        if any(len(w) != 17 for w in weights):
+            mw.taskman.run_on_main(
+                lambda: showWarning(
+                    "The weights between v3 and v4 are incompatible.\n"
+                    "Please use v4 Optimizer to generate the weights."
+                )
+            )
+            return
         if not all(
             [len(x) == len(decks) for x in [decks, weights, retentions, max_intervals]]
         ):
