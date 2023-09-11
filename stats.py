@@ -271,11 +271,14 @@ def difficulty_distribution_graph(self):
 
 
 def init_stats():
-    global todayStats_old, cardGraph_old
-    todayStats_old = anki.stats.CollectionStats.todayStats
-    cardGraph_old = anki.stats.CollectionStats.cardGraph
-    anki.stats.CollectionStats.todayStats = todayStats_new
-    anki.stats.CollectionStats.cardGraph = difficulty_distribution_graph
+    config = Config()
+    config.load()
+    if config.fsrs_stats:
+        global todayStats_old, cardGraph_old
+        todayStats_old = anki.stats.CollectionStats.todayStats
+        cardGraph_old = anki.stats.CollectionStats.cardGraph
+        anki.stats.CollectionStats.todayStats = todayStats_new
+        anki.stats.CollectionStats.cardGraph = difficulty_distribution_graph
 
 
 # code modified from https://ankiweb.net/shared/info/1779060522

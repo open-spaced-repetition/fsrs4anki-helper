@@ -6,5 +6,6 @@
     "auto_reschedule_after_review": false,
     "auto_disperse": true,
     "mature_ivl": 21,
-    "debug_notify": false
+    "debug_notify": false,
+    "fsrs_stats": true
 }

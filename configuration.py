@@ -10,6 +10,7 @@ AUTO_RESCHEDULE_AFTER_REVIEW = "auto_reschedule_after_review"
 AUTO_DISPERSE = "auto_disperse"
 MATURE_IVL = "mature_ivl"
 DEBUG_NOTIFY = "debug_notify"
+FSRS_STATS = "fsrs_stats"
 
 
 def load_config():
@@ -106,4 +107,13 @@ class Config:
     @debug_notify.setter
     def debug_notify(self, value):
         self.data[DEBUG_NOTIFY] = value
+        self.save()
+
+    @property
+    def fsrs_stats(self):
+        return self.data[FSRS_STATS]
+
+    @fsrs_stats.setter
+    def fsrs_stats(self, value):
+        self.data[FSRS_STATS] = value
         self.save()

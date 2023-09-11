@@ -9,6 +9,7 @@ from .schedule.postpone import postpone
 from .schedule.advance import advance
 from .schedule.reset import reset
 from .schedule.disperse_siblings import disperse_siblings
+from .schedule.update_scheduler import update_scheduler
 from .schedule import init_review_hook
 from .stats import init_stats
 from .browser.browser import init_browser
@@ -118,6 +119,8 @@ menu_reset = build_action(reset, "Undo reschedulings in all cards")
 
 menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings")
 
+menu_update_scheduler = build_action(update_scheduler, "Update scheduler")
+
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
 menu_for_helper.addAction(menu_auto_reschedule_after_review)
@@ -133,6 +136,7 @@ menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
 menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
+menu_for_helper.addAction(menu_update_scheduler)
 
 
 def set_free_days(day, checked):
