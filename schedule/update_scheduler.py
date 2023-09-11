@@ -43,7 +43,7 @@ def update_scheduler(_):
         else:
             return
     
-    scheduler_url = SCHEDULER4_URL if local_scheduler_version[0] == 4 else SCHEDULER3_URL
+    scheduler_url = SCHEDULER3_URL if local_scheduler_version[0] == 3 else SCHEDULER4_URL
 
     internet_scheduler = get_internet_scheduler(scheduler_url)
     internet_scheduler_version = get_version(internet_scheduler)
