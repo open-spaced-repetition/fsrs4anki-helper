@@ -543,6 +543,8 @@ def reschedule_when_review(reviewer, card: Card, ease):
     card = reschedule_card(
         card.id, fsrs, mw.col.all_config()["rollover"], cur_deck_param
     )
+    if card is None:
+        return undo_entry
     mw.col.update_card(card)
     mw.col.merge_undo_entries(undo_entry)
     return undo_entry
