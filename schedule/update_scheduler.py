@@ -13,7 +13,7 @@ def get_internet_scheduler():
 def update_scheduler(_):
     custom_scheduler = mw.col.get_config("cardStateCustomizer", None)
     try:
-        version = get_version(custom_scheduler)
+        local_scheduler_version = get_version(custom_scheduler)
     except IndexError:
         if askUser(
             "You dont appear to have the fsrs4anki scheduler set up\n"
@@ -24,3 +24,25 @@ def update_scheduler(_):
             return
         else:
             return
+        
+    internet_scheduler = get_internet_scheduler()
+    internet_scheduler_version = get_version(internet_scheduler)
+
+    def version_tuple_to_str(version : tuple[int, int, int]):
+        return ".".join(str(a) for a in version)
+
+    comparison =  (
+            f"Latest scheduler version = {version_tuple_to_str(internet_scheduler_version)}\n"
+            f"Local scheduler version = {version_tuple_to_str(local_scheduler_version)}"
+    )
+
+    if geq_version(local_scheduler_version, internet_scheduler_version):
+        showInfo(
+            comparison + "\n"
+            "You are already up to date"
+        )
+    else:
+        askUser(
+            comparison + "\n"
+            "Update the scheduler with the latest version? (Your config will be preserved)"
+        )
