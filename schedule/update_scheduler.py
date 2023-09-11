@@ -59,10 +59,11 @@ def update_scheduler(_):
             "You are already up to date"
         )
     else:
-        askUser(
+        if not askUser(
             comparison + "\n"
             "Update the scheduler with the latest version? (Your config will be preserved)"
-        )
+        ):
+            return
         
         config_regex = r"\/\/\s*Configuration\s+Start.+\/\/\s*Configuration\s+End"
 
