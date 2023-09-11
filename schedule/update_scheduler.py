@@ -45,6 +45,28 @@ def update_scheduler(_):
     internet_scheduler = get_internet_scheduler()
     internet_scheduler_version = get_version(internet_scheduler)
 
+    # Weight length checks
+
+    def weight_count(scheduler: str):
+        weight_regex = r'"w".*\[(.*)]'
+        weight_match = re.search(weight_regex, scheduler)
+
+        if weight_match is None:
+            showWarning(
+                "Could not find any weights in the scheduler config.\n"
+                "If you wish to reinstall the scheduler from scratch clear the entire custom scheduler section."
+            )
+            return 0
+
+        return weight_match.group(1).strip(',').count(',')
+
+    if weight_count(local_scheduler) != weight_count(internet_scheduler):
+        showWarning(
+            "The amount of weights in the latest scheduler default config and the amount of weights in the local scheduler differ.\n"
+            "This likely means your configuration is incompatible with that of the latest optimizer\n"
+            "Upgrade at your own risk."
+        )
+
     def version_tuple_to_str(version : tuple[int, int, int]):
         return ".".join(str(a) for a in version)
 
