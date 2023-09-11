@@ -1,4 +1,4 @@
-from aqt.utils import askUser, showInfo, showCritical, showWarning
+from aqt.utils import askUser, askUserDialog, showInfo, showCritical, showWarning
 from aqt import mw
 from ..utils import get_version, geq_version
 
@@ -57,10 +57,25 @@ def update_scheduler(_):
             return
         else:
             return
+    
+    if local_scheduler_version[0] == 3:
+        upgrade_to_dialog = askUserDialog(
+            "It is recommended that you upgrade to the V4 scheduler as the V3 scheduler is no longer getting updated.\n"
+            "This will require you to re-optimize your decks\n",
+            ["Upgrade to V4", "Upgrade to latest V3", "Cancel"],
+        )
+        upgrade_to_dialog.setDefault(1)
 
-    scheduler_url = (
-        SCHEDULER3_URL if local_scheduler_version[0] == 3 else SCHEDULER4_URL
-    )
+        upgrade_to_response = upgrade_to_dialog.run()
+
+        if upgrade_to_response == "Cancel":
+            return
+        scheduler_url = ( 
+            SCHEDULER4_URL if upgrade_to_response == "Upgrade to V4" else SCHEDULER3_URL
+        )
+    else:
+        scheduler_url = SCHEDULER4_URL
+    
 
     internet_scheduler = get_internet_scheduler(scheduler_url)
     if internet_scheduler is None:
@@ -76,7 +91,7 @@ def update_scheduler(_):
         if weight_match is None:
             showWarning(
                 "Could not find any weights in the scheduler config.\n"
-                "If you wish to reinstall the scheduler from scratch clear the entire custom scheduler section."
+                "If you wish to reinstall the scheduler from scratch, clear the entire custom scheduler section."
             )
             return 0
 
