@@ -7,7 +7,7 @@ import re
 import os.path
 
 SCHEDULER4_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/main/fsrs4anki_scheduler.js"
-SCHEDULER3_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/6066c7174dfefa4ac4cb930dcb70063b906cb6c8/fsrs4anki_scheduler.js"
+SCHEDULER3_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/v3.26.2/fsrs4anki_scheduler.js"
 
 def get_internet_scheduler(url: str):
     with urllib.request.urlopen(url) as req:
