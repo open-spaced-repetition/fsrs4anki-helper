@@ -1,8 +1,9 @@
-from aqt.utils import askUser, showInfo
+from aqt.utils import askUser, showInfo, showCritical
 from aqt import mw
 from ..utils import get_version, geq_version
 
 import urllib.request
+import re
 
 SCHEDULER_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/main/fsrs4anki_scheduler.js"
 
@@ -11,9 +12,9 @@ def get_internet_scheduler():
         return req.read().decode("UTF8")
 
 def update_scheduler(_):
-    custom_scheduler = mw.col.get_config("cardStateCustomizer", None)
+    local_scheduler = mw.col.get_config("cardStateCustomizer", None)
     try:
-        local_scheduler_version = get_version(custom_scheduler)
+        local_scheduler_version = get_version(local_scheduler)
     except IndexError:
         if askUser(
             "You dont appear to have the fsrs4anki scheduler set up\n"
@@ -46,3 +47,21 @@ def update_scheduler(_):
             comparison + "\n"
             "Update the scheduler with the latest version? (Your config will be preserved)"
         )
+        
+        config_regex = r"\/\/\s*Configuration\s+Start.+\/\/\s*Configuration\s+End"
+
+        old_config = re.search(config_regex, local_scheduler, re.DOTALL)
+
+        if old_config is None:
+            showCritical(
+                "Error extracting config from local scheduler\n."
+                "Please ensure your config is surrounded by '// Configuration Start' and '// Configuration End'\n"
+                "\n"
+                "No changes have been made."
+            )
+            return 
+
+        new_scheduler = re.sub(config_regex, old_config.group(), internet_scheduler, flags=re.DOTALL)
+        mw.col.set_config("cardStateCustomizer", new_scheduler, undoable=True)
+
+        showInfo("Scheduler updated successfully.")
