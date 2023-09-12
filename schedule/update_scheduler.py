@@ -106,8 +106,10 @@ def update_scheduler(_):
         ):
             return
 
+        start_regex = r"^.*\/\/\s*FSRS4Anki"
         config_regex = r"\/\/\s*Configuration\s+Start.+\/\/\s*Configuration\s+End"
 
+        old_start = re.search(start_regex, local_scheduler, re.DOTALL)
         old_config = re.search(config_regex, local_scheduler, re.DOTALL)
 
         if old_config is None:
@@ -119,8 +121,12 @@ def update_scheduler(_):
             )
             return
 
+        if old_start is not None:
+            new_scheduler = re.sub(
+                start_regex, old_start.group(), internet_scheduler, flags=re.DOTALL
+            )
         new_scheduler = re.sub(
-            config_regex, old_config.group(), internet_scheduler, flags=re.DOTALL
+            config_regex, old_config.group(), new_scheduler, flags=re.DOTALL
         )
         set_scheduler(new_scheduler)
 
