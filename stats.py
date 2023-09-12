@@ -324,8 +324,10 @@ def get_true_retention(self):
     true_retention_part = anki.stats.CollectionStats._title(
         self,
         "True Retention",
-        "The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.",
+        "<p>The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.</p>",
     )
+    config = Config()
+    config.load()
     true_retention_part += """
         <style>
             td.trl { border: 1px solid; text-align: left; padding: 5px  }
@@ -335,8 +337,8 @@ def get_true_retention(self):
             span.mature { color: #00aa00 }
             span.total { color: #55aa55 }
             span.relearn { color: #c35617 }
-        </style>
-        <br /><br />
+        </style>"""
+    true_retention_part += f"""
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
                 <td class="trl" rowspan=3><b>Past</b></td>
@@ -344,8 +346,8 @@ def get_true_retention(self):
                 <td class="trc" colspan=2 valign=middle><b>Cards</b></td>
             </tr>
             <tr>
-                <td class="trc" colspan=3><span class="young"><b>Young</b></span></td>
-                <td class="trc" colspan=3><span class="mature"><b>Mature</b></span></td>
+                <td class="trc" colspan=3><span class="young"><b>Young (ivl < {config.mature_ivl} d)</b></span></td>
+                <td class="trc" colspan=3><span class="mature"><b>Mature (ivl ≥ {config.mature_ivl} d)</b></span></td>
                 <td class="trc" colspan=3><span class="total"><b>Total</b></span></td>
                 <td class="trc" rowspan=2><span class="young"><b>Learned</b></span></td>
                 <td class="trc" rowspan=2><span class="relearn"><b>Relearned</b></span></td>
@@ -366,9 +368,7 @@ def get_true_retention(self):
     true_retention_part += stats_row("Week", pastWeek)
     true_retention_part += stats_row(pname, pastPeriod)
     true_retention_part += "</table>"
-    config = Config()
-    config.load()
-    true_retention_part += f"<p>By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config. The current value is {config.mature_ivl} days.</p>"
+    true_retention_part += f"<p>By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config.</p>"
     return self._section(true_retention_part)
 
 
