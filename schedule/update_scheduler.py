@@ -7,7 +7,7 @@ import socket
 import re
 import os.path
 
-scheduler_qt_suffix = "_qt5" if qVersion().split(".")[0] == 5 else ""
+scheduler_qt_suffix = "_qt5" if qVersion().split(".")[0] == "5" else ""
 
 scheduler4_url = f"https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/main/fsrs4anki_scheduler{scheduler_qt_suffix}.js"
 scheduler3_url = f"https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/v3.26.2/fsrs4anki_scheduler{scheduler_qt_suffix}.js"
