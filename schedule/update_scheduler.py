@@ -1,5 +1,5 @@
 from aqt.utils import askUser, askUserDialog, showInfo, showCritical, showWarning
-from aqt import mw
+from aqt import mw, qVersion
 from ..utils import get_version, geq_version
 
 import urllib.request
@@ -7,9 +7,10 @@ import socket
 import re
 import os.path
 
-SCHEDULER4_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/main/fsrs4anki_scheduler.js"
-SCHEDULER3_URL = "https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/v3.26.2/fsrs4anki_scheduler.js"
+scheduler_qt_suffix = "_qt5" if qVersion().split(".")[0] == 5 else ""
 
+scheduler4_url = f"https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/main/fsrs4anki_scheduler{scheduler_qt_suffix}.js"
+scheduler3_url = f"https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/v3.26.2/fsrs4anki_scheduler{scheduler_qt_suffix}.js"
 
 def get_internet_scheduler(url: str):
     try:
@@ -47,7 +48,7 @@ def update_scheduler(_):
                 ):
                     return
 
-            internet_scheduler = get_internet_scheduler(SCHEDULER4_URL)
+            internet_scheduler = get_internet_scheduler(scheduler4_url)
             if internet_scheduler is None:
                 return
             set_scheduler(internet_scheduler)
@@ -76,15 +77,15 @@ def update_scheduler(_):
         if upgrade_to_response == "Cancel":
             return
         if upgrade_to_response == "Upgrade to V4":
-            scheduler_url = SCHEDULER4_URL
+            scheduler_url = scheduler4_url
             upgraded_from_v3 = True
             local_scheduler = re.sub(
                 r"\s*\"(?:easyBonus|hardInterval)\".*,", "", local_scheduler)
         else:
-            scheduler_url = SCHEDULER3_URL
+            scheduler_url = scheduler3_url
 
     else:
-        scheduler_url = SCHEDULER4_URL
+        scheduler_url = scheduler4_url
 
     internet_scheduler = get_internet_scheduler(scheduler_url)
     if internet_scheduler is None:
