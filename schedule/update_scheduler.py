@@ -70,9 +70,12 @@ def update_scheduler(_):
 
         if upgrade_to_response == "Cancel":
             return
-        scheduler_url = ( 
-            SCHEDULER4_URL if upgrade_to_response == "Upgrade to V4" else SCHEDULER3_URL
-        )
+        if upgrade_to_response == "Upgrade to V4":
+            scheduler_url = SCHEDULER4_URL
+            local_scheduler = re.sub(r"\s*\"(?:easyBonus|hardInterval)\".*,", "", local_scheduler)
+        else:
+            scheduler_url = SCHEDULER3_URL
+            
     else:
         scheduler_url = SCHEDULER4_URL
     
