@@ -25,7 +25,7 @@ def get_internet_scheduler(url: str):
 def set_scheduler(new_scheduler: str):
     # Backup the old scheduler to a file in case something goes wrong.
     with open(os.path.expanduser("~/fsrs4anki_scheduler_revert.js"), "w") as f:
-        f.write(new_scheduler)
+        f.write(mw.col.get_config("cardStateCustomizer"))
 
     mw.col.set_config("cardStateCustomizer", new_scheduler, undoable=True)
 
