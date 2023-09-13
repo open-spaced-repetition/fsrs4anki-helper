@@ -69,7 +69,7 @@ def update_scheduler(_):
             "\n"
             "NOTE: The weights of the v3 scheduler are incompatible with those of the v4 scheduler.\n"
             "If you upgrade to v4, you must re-optimize your weights using the optimizer and then replace the weights in the scheduler config.\n"
-            "Your deck param configs will each be replaced with the default until you do this."
+            "Your deck param configs will each be replaced with the default until you do this.\n"
             "\n"
             "More info on optimizing: https://github.com/open-spaced-repetition/fsrs4anki/blob/main/README.md#step-2-personalizing-fsrs",
             ["Upgrade to V4", "Upgrade to latest V3", "Cancel"]
