@@ -197,8 +197,9 @@ def update_scheduler(_):
         showInfo(
             "Scheduler updated successfully."
             if not upgrade_from_v3 else
-            "Scheduler updated from v3 to v4 successfully.\n"
+            "FSRS scheduler updated from v3 to v4 successfully.\n"
             "\n"
-            "the weights have been replaced by the default weights for v4.\n"
-            "Remember to re-optimize your weights using the optimizer and then replace the weights in the scheduler config."
+            "Because the weights of the v3 and the v4 FSRS scheduler are incompatible with each other, the weights have been replaced by the default weights for v4.\n"
+            "\n"
+            "For better results, re-optimize your weights using the optimizer and then manually replace the weights in the scheduler config."
         )
