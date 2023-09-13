@@ -6,11 +6,14 @@ import urllib.request
 import socket
 import re
 import os.path
+import sys
+import traceback
 
 scheduler_qt_suffix = "_qt5" if qVersion().split(".")[0] == "5" else ""
 
 scheduler4_url = f"https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/main/fsrs4anki_scheduler{scheduler_qt_suffix}.js"
 scheduler3_url = f"https://raw.githubusercontent.com/open-spaced-repetition/fsrs4anki/v3.26.2/fsrs4anki_scheduler{scheduler_qt_suffix}.js"
+
 
 def get_internet_scheduler(url: str):
     try:
@@ -59,13 +62,14 @@ def update_scheduler(_):
         else:
             return
 
-    upgraded_from_v3 = False
+    upgrade_from_v3 = False
     if local_scheduler_version[0] == 3:
         upgrade_to_dialog = askUserDialog(
             "The v4 FSRS scheduler has been released and the v3 FSRS scheduler is no longer getting updates. So it is recommended that you upgrade to the v4 FSRS scheduler.\n"
             "\n"
             "NOTE: The weights of the v3 scheduler are incompatible with those of the v4 scheduler.\n"
             "If you upgrade to v4, you must re-optimize your weights using the optimizer and then replace the weights in the scheduler config.\n"
+            "Your deck param configs will each be replaced with the default until you do this."
             "\n"
             "More info on optimizing: https://github.com/open-spaced-repetition/fsrs4anki/blob/main/README.md#step-2-personalizing-fsrs",
             ["Upgrade to V4", "Upgrade to latest V3", "Cancel"]
@@ -78,9 +82,7 @@ def update_scheduler(_):
             return
         if upgrade_to_response == "Upgrade to V4":
             scheduler_url = scheduler4_url
-            upgraded_from_v3 = True
-            local_scheduler = re.sub(
-                r"\s*\"(?:easyBonus|hardInterval)\".*,", "", local_scheduler)
+            upgrade_from_v3 = True
         else:
             scheduler_url = scheduler3_url
 
@@ -107,7 +109,7 @@ def update_scheduler(_):
 
         return weight_match.group(1).strip(",").count(",")
 
-    if not upgraded_from_v3 and weight_count(local_scheduler) != weight_count(internet_scheduler):
+    if not upgrade_from_v3 and weight_count(local_scheduler) != weight_count(internet_scheduler):
         showWarning(
             "The amount of weights in the latest scheduler default config and the amount of weights in the local scheduler differ.\n"
             "This likely means your configuration is incompatible with that of the latest optimizer\n"
@@ -146,18 +148,43 @@ def update_scheduler(_):
             )
             return
 
+        old_config = old_config.group()
+
+        # Upgrade config replacement
+        if upgrade_from_v3:
+            # Try block as this step isn't essential
+            try:
+                pref_regex = r"{.+?\"deckName\"\s*:\s*\"(.+?)\".+?}"
+
+                new_default = re.search(pref_regex, internet_scheduler, re.DOTALL)
+                assert new_default is not None
+                new_default = new_default.group()
+
+                old_prefs: list[re.Match[str]] = re.findall(
+                    pref_regex, old_config, re.DOTALL)
+                assert old_prefs is not None
+                new_prefs = ",\n  ".join(re.sub(
+                    r"(\"deckName\"\s*:.+?\").+?,", f"\g<1>{pref}\"", new_default) for pref in old_prefs)
+                new_prefs = f"\g<1>[\n  {new_prefs}\n]"
+
+                old_config = re.sub(r"(const\s+deckParams\s*=\s*).+]",
+                                    new_prefs, old_config, flags=re.DOTALL)
+            except Exception:
+                print(traceback.print_exc(), file=sys.stderr)
+                showWarning(f"There was an error setting your deck configs to defaults. Make sure you do this manually!")
+
         if old_start is not None:
             new_scheduler = re.sub(
                 start_regex, old_start.group(), internet_scheduler, flags=re.DOTALL
             )
         new_scheduler = re.sub(
-            config_regex, old_config.group(), new_scheduler, flags=re.DOTALL
+            config_regex, old_config, new_scheduler, flags=re.DOTALL
         )
         set_scheduler(new_scheduler)
 
         showInfo(
             "Scheduler updated successfully."
-            if not upgraded_from_v3 else
+            if not upgrade_from_v3 else
             "Scheduler updated from v3 to v4 successfully.\n"
             "Remember to re-optimize your weights using the optimizer and then replace the weights in the scheduler config."
         )
