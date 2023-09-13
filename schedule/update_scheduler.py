@@ -188,5 +188,7 @@ def update_scheduler(_):
             "Scheduler updated successfully."
             if not upgrade_from_v3 else
             "Scheduler updated from v3 to v4 successfully.\n"
+            "\n"
+            "the weights have been replaced by the default weights for v4.\n"
             "Remember to re-optimize your weights using the optimizer and then replace the weights in the scheduler config."
         )
