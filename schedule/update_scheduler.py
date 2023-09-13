@@ -165,7 +165,7 @@ def update_scheduler(_):
                     pref_regex, old_config, re.DOTALL)
                 assert old_prefs is not None
                 new_prefs = ",\n  ".join(re.sub(
-                    r"(\"deckName\"\s*:.+?\").+?,", f"\g<1>{pref}\"", new_default) for pref in old_prefs)
+                    r"(\"deckName\"\s*:.+?\").+?,", f"\g<1>{pref},\"", new_default) for pref in old_prefs)
                 new_prefs = f"\g<1>[\n  {new_prefs}\n]"
 
                 old_config = re.sub(r"(const\s+deckParams\s*=\s*).+]",
