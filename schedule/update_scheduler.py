@@ -156,7 +156,8 @@ def update_scheduler(_):
             try:
                 pref_regex = r"{.+?\"deckName\"\s*:\s*\"(.+?)\".+?}"
 
-                new_default = re.search(pref_regex, internet_scheduler, re.DOTALL)
+                new_default = re.search(
+                    pref_regex, internet_scheduler, re.DOTALL)
                 assert new_default is not None
                 new_default = new_default.group()
 
@@ -171,7 +172,8 @@ def update_scheduler(_):
                                     new_prefs, old_config, flags=re.DOTALL)
             except Exception:
                 print(traceback.print_exc(), file=sys.stderr)
-                showWarning(f"There was an error setting your deck configs to defaults. Make sure you do this manually!")
+                showWarning(
+                    f"There was an error setting your deck configs to defaults. Make sure you do this manually!")
 
         if old_start is not None:
             new_scheduler = re.sub(
