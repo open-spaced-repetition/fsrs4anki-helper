@@ -129,7 +129,7 @@ def update_scheduler(_):
     else:
         if not askUser(
             comparison + "\n"
-            "Update the scheduler with the latest version? (Your config will be preserved)"
+            f"Update the scheduler with the latest version? (Your config will {'NOT!!! ' if upgrade_from_v3 else ''}be preserved)"
         ):
             return
 
