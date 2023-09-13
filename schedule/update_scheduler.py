@@ -165,7 +165,7 @@ def update_scheduler(_):
                     pref_regex, old_config, re.DOTALL)
                 assert old_prefs is not None
 
-                def pref_replace(pref: tuple[str, str, str]):
+                def pref_replace(pref: tuple[str, str]):
                     out = re.sub(r"(\"deckName\"\s*:.+?\").+?,", f"\g<1>{pref[0]}\",", new_default)
                     out = re.sub(r"(\"requestRetention\"\s*:).+?,", f"\g<1>{pref[1]},", out)
                     return out
