@@ -129,8 +129,8 @@ def update_scheduler(_):
     else:
         if not askUser(
             comparison + "\n"
-            "Update the scheduler with the latest version" + (
-                "(Your config will be preserved)"
+            "Update the scheduler with the latest version?" + (
+                "(Your config will be preserved.)"
                 if not upgrade_from_v3 else
                 "\n\n"
                 "PARTS OF YOUR CONFIG WILL BE OVERWRITTEN!"
