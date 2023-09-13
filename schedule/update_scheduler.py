@@ -154,18 +154,23 @@ def update_scheduler(_):
         if upgrade_from_v3:
             # Try block as this step isn't essential
             try:
-                pref_regex = r"{.+?\"deckName\"\s*:\s*\"(.+?)\".+?}"
+                pref_regex = r"{.+?\"deckName\"\s*:\s*\"(.+?)\".+?\"requestRetention\":(.+?),.+?}"
 
                 new_default = re.search(
                     pref_regex, internet_scheduler, re.DOTALL)
                 assert new_default is not None
                 new_default = new_default.group()
 
-                old_prefs: list[re.Match[str]] = re.findall(
+                old_prefs: list[tuple[str, str]] = re.findall(
                     pref_regex, old_config, re.DOTALL)
                 assert old_prefs is not None
-                new_prefs = ",\n  ".join(re.sub(
-                    r"(\"deckName\"\s*:.+?\").+?,", f"\g<1>{pref}\",", new_default) for pref in old_prefs)
+
+                def pref_replace(pref: tuple[str, str, str]):
+                    out = re.sub(r"(\"deckName\"\s*:.+?\").+?,", f"\g<1>{pref[0]}\",", new_default)
+                    out = re.sub(r"(\"requestRetention\"\s*:).+?,", f"\g<1>{pref[1]},", out)
+                    return out
+
+                new_prefs = ",\n  ".join(pref_replace(pref) for pref in old_prefs)
                 new_prefs = f"\g<1>[\n  {new_prefs}\n]"
 
                 old_config = re.sub(r"(const\s+deckParams\s*=\s*).+]",
