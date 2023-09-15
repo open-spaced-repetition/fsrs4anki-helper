@@ -1,4 +1,4 @@
-import anki.stats
+from anki.stats import CollectionStats
 from .configuration import Config
 from .utils import *
 
@@ -96,7 +96,7 @@ def todayStats_new(self):
     )
 
 
-def get_fsrs_stats(self):
+def get_fsrs_stats(self: CollectionStats):
     lim = self._limit()
     if lim:
         lim = " AND did IN %s" % lim
@@ -132,7 +132,7 @@ def get_fsrs_stats(self):
         "Estimated total knowledge",
         f"{round(estimated_total_knowledge_notes)} notes ({(estimated_total_knowledge_notes / max(note_cnt, 1)) * 100:.2f}%)",
     )
-    title = anki.stats.CollectionStats._title(
+    title = CollectionStats._title(
         self,
         "FSRS Stats",
         "Only calculated for cards with custom data (affected by FSRS)",
@@ -157,7 +157,7 @@ def get_fsrs_stats(self):
     )
 
 
-def get_retention_graph(self):
+def get_retention_graph(self: CollectionStats):
     start, days, chunk = self.get_start_end_chunk()
     lims = []
     if days is not None:
@@ -199,17 +199,18 @@ def get_retention_graph(self):
     rate_data_young["lines"] = {"show": True}
     rate_data_young["bars"] = {"show": False}
     rate_data_young["yaxis"] = 1
+    rate_data_young["stack"] = -1
 
     rate_data_mature["lines"] = {"show": True}
     rate_data_mature["bars"] = {"show": False}
-    rate_data_mature["yaxis"] = 1
+    rate_data_mature["stack"] = -2
 
     cnt_data["lines"] = {"show": False}
     cnt_data["bars"] = {"show": True}
     cnt_data["yaxis"] = 2
+    rate_data_mature["stack"] = -3
 
     data = [rate_data_young, rate_data_mature, cnt_data]
-    print(data)
 
     conf = dict(
         xaxis=dict(tickDecimals=0, max=0.5),
@@ -293,10 +294,10 @@ def init_stats():
     config.load()
     if config.fsrs_stats:
         global todayStats_old, cardGraph_old
-        todayStats_old = anki.stats.CollectionStats.todayStats
-        cardGraph_old = anki.stats.CollectionStats.cardGraph
-        anki.stats.CollectionStats.todayStats = todayStats_new
-        anki.stats.CollectionStats.cardGraph = difficulty_distribution_graph
+        todayStats_old = CollectionStats.todayStats
+        cardGraph_old = CollectionStats.cardGraph
+        CollectionStats.todayStats = todayStats_new
+        CollectionStats.cardGraph = difficulty_distribution_graph
 
 
 # code modified from https://ankiweb.net/shared/info/1779060522
@@ -339,7 +340,7 @@ def get_true_retention(self):
         period = 10000
         pname = "Deck life"
     pastPeriod = stats_list(lim, (mw.col.sched.day_cutoff - 86400 * period) * 1000)
-    true_retention_part = anki.stats.CollectionStats._title(
+    true_retention_part = CollectionStats._title(
         self,
         "True Retention",
         "<p>The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.</p>",
