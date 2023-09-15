@@ -124,7 +124,7 @@ def get_fsrs_stats(self):
     _line_now(
         i,
         "Estimated total knowledge",
-        f"{round(estimated_total_knowledge_notes)} notes ({(estimated_total_knowledge_notes / note_cnt) * 100:.2f}%)",
+        f"{round(estimated_total_knowledge_notes)} notes ({(estimated_total_knowledge_notes / max(note_cnt, 1)) * 100:.2f}%)",
     )
     title = anki.stats.CollectionStats._title(
         self,
