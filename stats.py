@@ -172,7 +172,8 @@ def get_retention_graph(self):
 
     query = f"""SELECT
     CAST((id/1000.0 - {mw.col.sched.day_cutoff}) / 86400.0 as int)/{chunk} AS day,
-    SUM(CASE WHEN  ease == 1 THEN 0.0 ELSE 1.0 END) / COUNT(*) AS retention,
+    SUM(CASE WHEN ease == 1 AND lastIvl < 21 THEN 0.0 ELSE 1.0 END) / COUNT(*) AS retention_young,
+    SUM(CASE WHEN ease == 1 AND lastIvl >= 21 THEN 0.0 ELSE 1.0 END) / COUNT(*) AS retention_mature,
     COUNT(*) AS review_cnt
     FROM revlog
     WHERE (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1)
@@ -184,25 +185,30 @@ def get_retention_graph(self):
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
-            (1, "#070", "Retention Rate"),
-            (2, "#00F", "Review Cnt"),
+            (1, "#070", "Retention Rate (young)"),
+            (2, "#707", "Retention Rate (mature)"),
+            (3, "#00F", "Review Cnt"),
         ),
     )
 
     if not data:
         return ""
 
-    rate_data, _, cnt_data, _ = data
+    rate_data_young, _, rate_data_mature, _, cnt_data, _ = data
 
-    rate_data["lines"] = {"show": True}
-    rate_data["bars"] = {"show": False}
-    rate_data["yaxis"] = 1
+    rate_data_young["lines"] = {"show": True}
+    rate_data_young["bars"] = {"show": False}
+    rate_data_young["yaxis"] = 1
+
+    rate_data_mature["lines"] = {"show": True}
+    rate_data_mature["bars"] = {"show": False}
+    rate_data_mature["yaxis"] = 1
 
     cnt_data["lines"] = {"show": False}
     cnt_data["bars"] = {"show": True}
     cnt_data["yaxis"] = 2
 
-    data = [rate_data, cnt_data]
+    data = [rate_data_young, rate_data_mature, cnt_data]
     print(data)
 
     conf = dict(
