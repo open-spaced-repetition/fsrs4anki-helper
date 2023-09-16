@@ -174,9 +174,10 @@ def get_retention_graph(self: CollectionStats):
 
     query = f"""SELECT
     CAST((id/1000.0 - {mw.col.sched.day_cutoff}) / 86400.0 as int)/{chunk} AS day,
-    (COUNT(CASE WHEN ease > 1 AND lastIvl < {config.mature_ivl} THEN id ELSE NULL END) + 0.001) / (COUNT(CASE WHEN lastIvl < {config.mature_ivl} THEN id ELSE NULL END) + 0.001) AS retention_young,
-    (COUNT(CASE WHEN ease > 1 AND lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) + 0.001) / (COUNT(CASE WHEN lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) + 0.001) AS retention_mature,
-    COUNT(*) AS review_cnt
+    COUNT(CASE WHEN ease > 1 AND lastIvl < {config.mature_ivl} THEN id ELSE NULL END) / (COUNT(CASE WHEN lastIvl < {config.mature_ivl} THEN id ELSE NULL END) + 0.001) AS retention_young,
+    COUNT(CASE WHEN ease > 1 AND lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) / (COUNT(CASE WHEN lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) + 0.001) AS retention_mature,
+    COUNT(CASE WHEN lastIvl < {config.mature_ivl} THEN id ELSE NULL END) AS review_cnt_young,
+    COUNT(CASE WHEN lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) AS review_cnt_mature
     FROM revlog
     WHERE (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1)
     {lim}
@@ -187,38 +188,38 @@ def get_retention_graph(self: CollectionStats):
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
-            (1, "#070", "Retention Rate (young)"),
-            (2, "#707", "Retention Rate (mature)"),
-            (3, "#00F", "Review Count"),
+            (1, "#7c7", "Retention Rate (young)"),
+            (2, "#070", "Retention Rate (mature)"),
+            (3, "#7c7", "Review Count (young)"),
+            (4, "#070", "Review Count (mature)"),
         ),
     )
 
     if not data:
         return ""
 
-    rate_data_young, _, rate_data_mature, _, cnt_data, _ = data
+    tmp = -2
+    new_data = []
+    for item in filter(lambda x: x['label'] is not None, data):
+        if item['label'].startswith("Retention"):
+            item["lines"] = {"show": True}
+            item["bars"] = {"show": False}
+            item["yaxis"] = 2
+            item["stack"] = tmp
+            tmp -= 1
+        else:
+            item["lines"] = {"show": False}
+            item["bars"] = {"show": True}
+            item["yaxis"] = 1
+            item["stack"] = -1
+        new_data.append(item)
+    del tmp
+    data = new_data
 
     recall_min = min(min(item[1], item[2]) for item in offset_retention_review_cnt)
     recall_min = math.floor(recall_min * 10) / 10
     recall_max = max(max(item[1], item[2]) for item in offset_retention_review_cnt)
     recall_max = math.ceil(recall_max * 10) / 10
-
-    cnt_data["lines"] = {"show": False}
-    cnt_data["bars"] = {"show": True}
-    cnt_data["yaxis"] = 1
-    rate_data_mature["stack"] = -1
-
-    rate_data_young["lines"] = {"show": True}
-    rate_data_young["bars"] = {"show": False}
-    rate_data_young["yaxis"] = 2
-    rate_data_young["stack"] = -2
-
-    rate_data_mature["lines"] = {"show": True}
-    rate_data_mature["bars"] = {"show": False}
-    rate_data_mature["yaxis"] = 2
-    rate_data_mature["stack"] = -3
-
-    data = [cnt_data, rate_data_young, rate_data_mature]
 
     conf = dict(
         xaxis=dict(tickDecimals=0, max=0.5),
