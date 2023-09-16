@@ -106,7 +106,7 @@ def disperse_siblings(
 
     def on_done(future):
         mw.progress.finish()
-        tooltip(f"{future.result()} in {time.time() - start_time:.2f}")
+        tooltip(f"{future.result()} in {time.time() - start_time:.2f} seconds")
         mw.col.reset()
         mw.reset()
 
