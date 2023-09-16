@@ -427,7 +427,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
                 datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal()
                 - last_date.toordinal()
             )
-            if elapsed_days <= 0 and revlog.review_kind in (REVLOG_LRN, REVLOG_RELRN):
+            if elapsed_days <= 0:
                 continue
             r = (
                 exponential_forgetting_curve(elapsed_days, s)
@@ -500,52 +500,3 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
                 fsrs.due_cnt_perday_from_first_day.get(due_after, 0) + 1
             )
     return card
-
-
-def reschedule_when_review(reviewer, card: Card, ease):
-    config = Config()
-    config.load()
-    if not config.auto_reschedule_after_review:
-        return
-
-    custom_scheduler = check_fsrs4anki(mw.col.all_config())
-    if custom_scheduler is None:
-        return
-
-    version = get_version(custom_scheduler)
-    if version[0] < 3:
-        showWarning("Require FSRS4Anki version >= 3.0.0")
-        return
-
-    skip_decks = (
-        get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
-    )
-    deck_name = mw.col.decks.name(card.current_deck_id())
-    if any([deck_name.startswith(deck) for deck in skip_decks if deck != ""]):
-        return
-
-    deck_parameters = get_deck_parameters(custom_scheduler)
-    if deck_parameters is None:
-        return
-
-    global_deck_name = get_global_config_deck_name(version)
-    cur_deck_param = get_current_deck_parameter(
-        deck_name, deck_parameters, global_deck_name
-    )
-
-    fsrs = FSRS(version)
-    fsrs.w = cur_deck_param["w"]
-    fsrs.enable_fuzz = get_fuzz_bool(custom_scheduler)
-    if fsrs.enable_fuzz and config.load_balance:
-        fsrs.set_load_balance()
-    fsrs.free_days = config.free_days
-
-    undo_entry = mw.col.add_custom_undo_entry("Reschedule")
-    card = reschedule_card(
-        card.id, fsrs, mw.col.all_config()["rollover"], cur_deck_param
-    )
-    if card is None:
-        return undo_entry
-    mw.col.update_card(card)
-    mw.col.merge_undo_entries(undo_entry)
-    return undo_entry

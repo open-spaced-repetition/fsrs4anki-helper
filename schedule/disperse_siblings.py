@@ -20,7 +20,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
         id,
         nid,
         did,
-        json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s'),
+        json_extract(data, '$.s'),
         CASE WHEN odid==0 THEN due ELSE odue END
     FROM cards
     WHERE nid IN (
@@ -28,12 +28,12 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
         FROM cards
         WHERE type = 2
         AND queue != -1
-        AND data like '%"cd"%'
+        AND json_extract(data, '$.s') IS NOT NULL
         {"AND nid IN (" + filtered_nid_string + ")" if filter_flag else ""}
         GROUP BY nid
         HAVING count(*) > 1
     )
-    AND data like '%"cd"%'
+    AND json_extract(data, '$.s') IS NOT NULL
     AND type = 2
     AND queue != -1
     {"AND did IN %s" % did_list if did is not None else ""}
@@ -319,11 +319,11 @@ def get_siblings_when_review(card: Card):
     SELECT 
         id,
         did,
-        json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s'),
+        json_extract(data, '$.s'),
         CASE WHEN odid==0 THEN due ELSE odue END
     FROM cards
     WHERE nid = {card.nid}
-    AND data like '%"cd"%'
+    AND json_extract(data, '$.s') IS NOT NULL
     AND type = 2
     AND queue != -1
     """
@@ -331,7 +331,7 @@ def get_siblings_when_review(card: Card):
     return list(filter(lambda x: x[2] is not None, siblings))
 
 
-def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
+def disperse_siblings_when_review(reviewer, card: Card, ease):
     config = Config()
     config.load()
     if not config.auto_disperse:
@@ -373,9 +373,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
     messages = []
 
     card_cnt = 0
-    undo_entry = (
-        mw.col.add_custom_undo_entry("Disperse") if undo_entry is None else undo_entry
-    )
+    undo_entry = mw.col.add_custom_undo_entry("Disperse")
     best_due_dates = disperse(siblings)
     for cid, due in best_due_dates.items():
         card = mw.col.get_card(cid)

@@ -19,26 +19,6 @@ def get_desired_postpone_cnt_with_response(safe_cnt, did):
 
 
 def postpone(did):
-    custom_scheduler = check_fsrs4anki(mw.col.all_config())
-    if custom_scheduler is None:
-        return
-    version = get_version(custom_scheduler)
-    if version[0] < 3:
-        showWarning("Require FSRS4Anki version >= 3.0.0")
-        return
-
-    deck_parameters = get_deck_parameters(custom_scheduler)
-    if deck_parameters is None:
-        return
-
-    skip_decks = (
-        get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
-    )
-    global_deck_name = get_global_config_deck_name(version)
-    did_to_deck_parameters = get_did_parameters(
-        mw.col.decks.all(), deck_parameters, global_deck_name
-    )
-
     DM = DeckManager(mw.col)
     if did is not None:
         did_list = ids2str(DM.deck_and_child_ids(did))
@@ -49,13 +29,13 @@ def postpone(did):
             id, 
             did,
             ivl,
-            json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s'),
+            json_extract(data, '$.s'),
             CASE WHEN odid==0
             THEN {mw.col.sched.today} - (due - ivl)
             ELSE {mw.col.sched.today} - (odue - ivl)
             END
         FROM cards
-        WHERE data like '%"cd"%'
+        WHERE json_extract(data, '$.s') IS NOT NULL
         AND due <= {mw.col.sched.today}
         AND queue = {QUEUE_TYPE_REV}
         {"AND did IN %s" % did_list if did is not None else ""}
@@ -73,30 +53,18 @@ def postpone(did):
         lambda x: (
             x
             + [
-                did_to_deck_parameters[x[1]]["r"],
-                exponential_forgetting_curve(x[4], x[3])
-                if version[0] == 3
-                else power_forgetting_curve(x[4], x[3]),
+                DM.config_dict_for_deck_id(x[1])["desiredRetention"],
+                power_forgetting_curve(x[4], x[3]),
             ]
         ),
         cards,
     )
     # sort by (elapsed_days / scheduled_days - 1)
     # = ln(current retention)/ln(requested retention)-1, -interval (ascending)
-    if version[0] == 3:
-        cards = sorted(
-            cards, key=lambda x: (math.log(x[6]) / math.log(x[5]) - 1, -x[2])
-        )
-        safe_cnt = len(
-            list(filter(lambda x: math.log(x[6]) / math.log(x[5]) - 1 < 0.15, cards))
-        )
-    elif version[0] == 4:
-        cards = sorted(
-            cards, key=lambda x: ((1 / x[6] - 1) / (1 / x[5] - 1) - 1, -x[2])
-        )
-        safe_cnt = len(
-            list(filter(lambda x: (1 / x[6] - 1) / (1 / x[5] - 1) - 1 < 0.15, cards))
-        )
+    cards = sorted(cards, key=lambda x: ((1 / x[6] - 1) / (1 / x[5] - 1) - 1, -x[2]))
+    safe_cnt = len(
+        list(filter(lambda x: (1 / x[6] - 1) / (1 / x[5] - 1) - 1 < 0.15, cards))
+    )
 
     (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response(safe_cnt, did)
     if desired_postpone_cnt is None:
@@ -120,7 +88,7 @@ def postpone(did):
             break
 
         card = mw.col.get_card(cid)
-        max_ivl = did_to_deck_parameters[did]["m"]
+        max_ivl = DM.config_dict_for_deck_id(did)["rev"]["maxIvl"]
 
         try:
             revlog = filter_revlogs(mw.col.card_stats_data(cid).revlog)[0]
@@ -142,11 +110,7 @@ def postpone(did):
         mw.col.merge_undo_entries(undo_entry)
         cnt += 1
 
-        new_retention = (
-            exponential_forgetting_curve(new_ivl, stability)
-            if version[0] == 3
-            else power_forgetting_curve(new_ivl, stability)
-        )
+        new_retention = power_forgetting_curve(new_ivl, stability)
         min_retention = min(min_retention, new_retention)
 
     tooltip(

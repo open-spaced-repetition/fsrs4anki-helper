@@ -9,27 +9,15 @@ from aqt.gui_hooks import (
 )
 from .custom_columns import (
     CustomColumn,
-    DifficultyColumn,
-    StabilityColumn,
-    RetrievabilityColumn,
     TargetRetrievabilityColumn,
-)
-from .custom_search_nodes import (
-    CustomSearchNode,
 )
 from ..utils import *
 
 browser: Optional[Browser] = None
 
 custom_columns = [
-    DifficultyColumn(),
-    StabilityColumn(),
-    RetrievabilityColumn(),
     TargetRetrievabilityColumn(),
 ]
-
-# stores the custom search nodes for the current search
-custom_search_nodes: List[CustomSearchNode] = []
 
 
 def init_browser() -> None:
@@ -79,7 +67,6 @@ def _setup_search():
 
 def _on_browser_will_search(ctx: SearchContext):
     _on_browser_will_search_handle_custom_column_ordering(ctx)
-    _on_browser_will_search_handle_custom_search_parameters(ctx)
 
 
 def _on_browser_will_search_handle_custom_column_ordering(ctx: SearchContext):
@@ -93,35 +80,6 @@ def _on_browser_will_search_handle_custom_column_ordering(ctx: SearchContext):
         return
 
     ctx.order = custom_column.order_by_str()
-
-
-def _on_browser_will_search_handle_custom_search_parameters(ctx: SearchContext):
-    if not ctx.search:
-        return
-
-    global custom_search_nodes
-    custom_search_nodes = []
-
-    for m in re.finditer(r"( |^)(d|s|r)(<=|>=|!=|=|<|>)(\d+\.{0,1}\d*)", ctx.search):
-        if m.group(0) == "":
-            continue
-        parameter_name, parameter_operator, parameter_value = (
-            m.group(2),
-            m.group(3),
-            m.group(4),
-        )
-        try:
-            custom_search_nodes.append(
-                CustomSearchNode.from_parameter_type_opt_and_value(
-                    browser, parameter_name, parameter_operator, parameter_value
-                )
-            )
-        except ValueError as e:
-            showWarning(f"FSRS search error: {e}")
-            return
-
-        # remove the custom search parameter from the search string
-        ctx.search = ctx.search.replace(m.group(0), "")
 
 
 def _on_browser_did_search(ctx: SearchContext):

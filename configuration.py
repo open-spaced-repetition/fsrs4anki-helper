@@ -6,7 +6,6 @@ LOAD_BALANCE = "load_balance"
 FREE_DAYS = "free_days"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
-AUTO_RESCHEDULE_AFTER_REVIEW = "auto_reschedule_after_review"
 AUTO_DISPERSE = "auto_disperse"
 MATURE_IVL = "mature_ivl"
 DEBUG_NOTIFY = "debug_notify"
@@ -71,15 +70,6 @@ class Config:
     @auto_reschedule_after_sync.setter
     def auto_reschedule_after_sync(self, value):
         self.data[AUTO_RESCHEDULE_AFTER_SYNC] = value
-        self.save()
-
-    @property
-    def auto_reschedule_after_review(self):
-        return self.data[AUTO_RESCHEDULE_AFTER_REVIEW]
-
-    @auto_reschedule_after_review.setter
-    def auto_reschedule_after_review(self, value):
-        self.data[AUTO_RESCHEDULE_AFTER_REVIEW] = value
         self.save()
 
     @property
