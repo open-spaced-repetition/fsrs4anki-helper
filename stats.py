@@ -189,7 +189,7 @@ def get_retention_graph(self: CollectionStats):
         (
             (1, "#070", "Retention Rate (young)"),
             (2, "#707", "Retention Rate (mature)"),
-            (3, "#00F", "Review Cnt"),
+            (3, "#00F", "Review Count"),
         ),
     )
 
