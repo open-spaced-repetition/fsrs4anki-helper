@@ -172,8 +172,8 @@ def get_retention_graph(self: CollectionStats):
 
     query = f"""SELECT
     CAST((id/1000.0 - {mw.col.sched.day_cutoff}) / 86400.0 as int)/{chunk} AS day,
-    SUM(CASE WHEN ease == 1 AND lastIvl < 21 THEN 0.0 ELSE 1.0 END) / COUNT(*) AS retention_young,
-    SUM(CASE WHEN ease == 1 AND lastIvl >= 21 THEN 0.0 ELSE 1.0 END) / COUNT(*) AS retention_mature,
+    COUNT(CASE WHEN ease > 1 AND lastIvl < 21 THEN cid ELSE NULL END) / COUNT(CASE WHEN lastIvl < 21 THEN cid ELSE NULL END) AS retention_young,
+    COUNT(CASE WHEN ease > 1 AND lastIvl >= 21 THEN cid ELSE NULL END) / COUNT(CASE WHEN lastIvl >= 21 THEN cid ELSE NULL END) AS retention_mature,
     COUNT(*) AS review_cnt
     FROM revlog
     WHERE (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1)
