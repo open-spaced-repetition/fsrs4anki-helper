@@ -199,33 +199,37 @@ def get_retention_graph(self: CollectionStats):
     rate_data_young, _, rate_data_mature, _, cnt_data, _ = data
 
     recall_min = min(min(item[1], item[2]) for item in offset_retention_review_cnt)
+    recall_min = math.floor(recall_min * 10) / 10
     recall_max = max(max(item[1], item[2]) for item in offset_retention_review_cnt)
-
-    rate_data_young["lines"] = {"show": True}
-    rate_data_young["bars"] = {"show": False}
-    rate_data_young["yaxis"] = 1
-    rate_data_young["stack"] = -1
-
-    rate_data_mature["lines"] = {"show": True}
-    rate_data_mature["bars"] = {"show": False}
-    rate_data_mature["stack"] = -2
+    recall_max = math.ceil(recall_max * 10) / 10
 
     cnt_data["lines"] = {"show": False}
     cnt_data["bars"] = {"show": True}
-    cnt_data["yaxis"] = 2
+    cnt_data["yaxis"] = 1
+    rate_data_mature["stack"] = -1
+
+    rate_data_young["lines"] = {"show": True}
+    rate_data_young["bars"] = {"show": False}
+    rate_data_young["yaxis"] = 2
+    rate_data_young["stack"] = -2
+
+    rate_data_mature["lines"] = {"show": True}
+    rate_data_mature["bars"] = {"show": False}
+    rate_data_mature["yaxis"] = 2
     rate_data_mature["stack"] = -3
 
-    data = [rate_data_young, rate_data_mature, cnt_data]
+    data = [cnt_data, rate_data_young, rate_data_mature]
 
     conf = dict(
         xaxis=dict(tickDecimals=0, max=0.5),
         yaxes=[
+            dict(position="left", min=0),
             dict(
+                position="right", 
                 min=recall_min,
                 max=recall_max,
                 ticks=[[x / 10, str(round(x / 10, 1))] for x in range(0, 11)],
             ),
-            dict(position="right", min=0),
         ],
     )
     if days is not None:
@@ -237,7 +241,7 @@ def get_retention_graph(self: CollectionStats):
         )
 
     txt1 = self._title("Retention Graph", "Retention rate and review count over time")
-    txt1 += plot("retention", data, ylabel="Retention Rate", ylabel2="Review Count")
+    txt1 += plot("retention", data, ylabel="Review Count", ylabel2="Retention Rate")
     return self._section(txt1)
 
 
