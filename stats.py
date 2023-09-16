@@ -198,6 +198,9 @@ def get_retention_graph(self: CollectionStats):
 
     rate_data_young, _, rate_data_mature, _, cnt_data, _ = data
 
+    recall_min = min(min(item[1], item[2]) for item in offset_retention_review_cnt)
+    recall_max = max(max(item[1], item[2]) for item in offset_retention_review_cnt)
+
     rate_data_young["lines"] = {"show": True}
     rate_data_young["bars"] = {"show": False}
     rate_data_young["yaxis"] = 1
@@ -218,8 +221,8 @@ def get_retention_graph(self: CollectionStats):
         xaxis=dict(tickDecimals=0, max=0.5),
         yaxes=[
             dict(
-                min=0,
-                max=1,
+                min=recall_min,
+                max=recall_max,
                 ticks=[[x / 10, str(round(x / 10, 1))] for x in range(0, 11)],
             ),
             dict(position="right", min=0),
