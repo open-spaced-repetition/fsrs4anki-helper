@@ -26,6 +26,8 @@ def reset(did):
     )
 
     undo_entry = mw.col.add_custom_undo_entry("Reset")
+    
+    start_time = time.time()
     mw.progress.start()
 
     cnt = 0
@@ -65,7 +67,7 @@ def reset(did):
             mw.col.merge_undo_entries(undo_entry)
             cnt += 1
 
-    tooltip(f"""{cnt} cards reseted.""")
+    tooltip(f"""{cnt} cards reset in {time.time() - start_time:.2f} seconds.""")
     mw.progress.finish()
     mw.col.reset()
     mw.reset()

@@ -102,9 +102,11 @@ def disperse(siblings):
 def disperse_siblings(
     did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""
 ):
+    start_time = time.time()
+
     def on_done(future):
         mw.progress.finish()
-        tooltip(future.result())
+        tooltip(f"{future.result()} in {time.time() - start_time:.2f} seconds")
         mw.col.reset()
         mw.reset()
 
@@ -187,7 +189,7 @@ def disperse_siblings_backgroud(
             if mw.progress.want_cancel():
                 break
 
-    return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed."
+    return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed"
 
 
 # https://stackoverflow.com/questions/68180974/given-n-points-where-each-point-has-its-own-range-adjust-all-points-to-maximize

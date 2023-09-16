@@ -233,9 +233,11 @@ class FSRS:
 def reschedule(
     did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""
 ):
+    start_time = time.time()
+
     def on_done(future):
         mw.progress.finish()
-        tooltip(future.result())
+        tooltip(f"{future.result()} in {time.time() - start_time:.2f} seconds")
         mw.col.reset()
         mw.reset()
 
