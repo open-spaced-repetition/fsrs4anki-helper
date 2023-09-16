@@ -200,8 +200,8 @@ def get_retention_graph(self: CollectionStats):
 
     tmp = -2
     new_data = []
-    for item in filter(lambda x: x['label'] is not None, data):
-        if item['label'].startswith("Retention"):
+    for item in filter(lambda x: x["label"] is not None, data):
+        if item["label"].startswith("Retention"):
             item["lines"] = {"show": True}
             item["bars"] = {"show": False}
             item["yaxis"] = 2
@@ -221,15 +221,21 @@ def get_retention_graph(self: CollectionStats):
     recall_max = max(max(item[1], item[2]) for item in offset_retention_review_cnt)
     recall_max = math.ceil(recall_max * 10) / 10
 
+    step = round((recall_max - recall_min) / 5, 2)
+    ticks = [
+        [recall_min + step * i, str(round(recall_min + step * i, 2))]
+        for i in range(0, 6)
+    ]
+
     conf = dict(
         xaxis=dict(tickDecimals=0, max=0.5),
         yaxes=[
             dict(position="left", min=0),
             dict(
-                position="right", 
+                position="right",
                 min=recall_min,
                 max=recall_max,
-                ticks=[[x / 10, str(round(x / 10, 1))] for x in range(0, 11)],
+                ticks=ticks,
             ),
         ],
     )
