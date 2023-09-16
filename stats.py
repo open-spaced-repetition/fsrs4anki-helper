@@ -188,10 +188,10 @@ def get_retention_graph(self: CollectionStats):
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
-            (1, "#7c7", "Retention Rate (young)"),
-            (2, "#070", "Retention Rate (mature)"),
             (3, "#7c7", "Review Count (young)"),
             (4, "#070", "Review Count (mature)"),
+            (1, "#7c7", "Retention Rate (young)"),
+            (2, "#070", "Retention Rate (mature)"),
         ),
     )
 
