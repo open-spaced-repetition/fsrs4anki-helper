@@ -2,7 +2,6 @@ from ..utils import *
 from ..configuration import Config
 from anki.cards import Card
 from .disperse_siblings import disperse_siblings_backgroud
-from aqt.gui_hooks import reviewer_did_answer_card
 
 
 def constrain_difficulty(difficulty: float) -> float:

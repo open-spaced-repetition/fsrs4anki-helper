@@ -109,7 +109,7 @@ def postpone(did):
             return
 
     undo_entry = mw.col.add_custom_undo_entry("Postpone")
-    
+
     mw.progress.start()
     start_time = time.time()
 
@@ -149,7 +149,9 @@ def postpone(did):
         )
         min_retention = min(min_retention, new_retention)
 
-    tooltip(f"""{cnt} cards postponed in {time.time() - start_time:.2f} seconds. min retention: {min_retention:.2%}""")
+    tooltip(
+        f"""{cnt} cards postponed in {time.time() - start_time:.2f} seconds. min retention: {min_retention:.2%}"""
+    )
     mw.progress.finish()
     mw.col.reset()
     mw.reset()

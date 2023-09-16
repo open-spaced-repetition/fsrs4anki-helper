@@ -72,7 +72,7 @@ def update_scheduler(_):
             "Your deck param configs will each be replaced with the default until you do this.\n"
             "\n"
             "More info on optimizing: https://github.com/open-spaced-repetition/fsrs4anki/blob/main/README.md#step-2-personalizing-fsrs",
-            ["Upgrade to V4", "Upgrade to latest V3", "Cancel"]
+            ["Upgrade to V4", "Upgrade to latest V3", "Cancel"],
         )
         upgrade_to_dialog.setDefault(1)
 
@@ -109,7 +109,9 @@ def update_scheduler(_):
 
         return weight_match.group(1).strip(",").count(",")
 
-    if not upgrade_from_v3 and weight_count(local_scheduler) != weight_count(internet_scheduler):
+    if not upgrade_from_v3 and weight_count(local_scheduler) != weight_count(
+        internet_scheduler
+    ):
         showWarning(
             "The amount of weights in the latest scheduler default config and the amount of weights in the local scheduler differ.\n"
             "This likely means your configuration is incompatible with that of the latest optimizer\n"
@@ -129,11 +131,11 @@ def update_scheduler(_):
     else:
         if not askUser(
             comparison + "\n"
-            "Update the scheduler with the latest version?" + (
+            "Update the scheduler with the latest version?"
+            + (
                 "(Your config will be preserved.)"
-                if not upgrade_from_v3 else
-                "\n\n"
-                "PARTS OF YOUR CONFIG WILL BE OVERWRITTEN!"
+                if not upgrade_from_v3
+                else "\n\n" "PARTS OF YOUR CONFIG WILL BE OVERWRITTEN!"
             )
         ):
             return
@@ -161,43 +163,50 @@ def update_scheduler(_):
             try:
                 pref_regex = r"{.+?\"deckName\"\s*:\s*\"(.+?)\".+?\"requestRetention\":(.+?),.+?}"
 
-                new_default = re.search(
-                    pref_regex, internet_scheduler, re.DOTALL)
+                new_default = re.search(pref_regex, internet_scheduler, re.DOTALL)
                 assert new_default is not None
                 new_default = new_default.group()
 
                 old_prefs: list[tuple[str, str]] = re.findall(
-                    pref_regex, old_config, re.DOTALL)
+                    pref_regex, old_config, re.DOTALL
+                )
                 assert old_prefs is not None
 
                 def pref_replace(pref: tuple[str, str]):
-                    out = re.sub(r"(\"deckName\"\s*:.+?\").+?,", f"\g<1>{pref[0]}\",", new_default)
-                    out = re.sub(r"(\"requestRetention\"\s*:).+?,", f"\g<1>{pref[1]},", out)
+                    out = re.sub(
+                        r"(\"deckName\"\s*:.+?\").+?,", f'\g<1>{pref[0]}",', new_default
+                    )
+                    out = re.sub(
+                        r"(\"requestRetention\"\s*:).+?,", f"\g<1>{pref[1]},", out
+                    )
                     return out
 
                 new_prefs = ",\n  ".join(pref_replace(pref) for pref in old_prefs)
                 new_prefs = f"\g<1>[\n  {new_prefs}\n]"
 
-                old_config = re.sub(r"(const\s+deckParams\s*=\s*).+]",
-                                    new_prefs, old_config, flags=re.DOTALL)
+                old_config = re.sub(
+                    r"(const\s+deckParams\s*=\s*).+]",
+                    new_prefs,
+                    old_config,
+                    flags=re.DOTALL,
+                )
             except Exception:
                 print(traceback.print_exc(), file=sys.stderr)
                 showWarning(
-                    f"There was an error setting your deck configs to defaults. Make sure you do this manually!")
+                    f"There was an error setting your deck configs to defaults. Make sure you do this manually!"
+                )
 
         if old_start is not None:
             new_scheduler = re.sub(
                 start_regex, old_start.group(), internet_scheduler, flags=re.DOTALL
             )
-        new_scheduler = re.sub(
-            config_regex, old_config, new_scheduler, flags=re.DOTALL
-        )
+        new_scheduler = re.sub(config_regex, old_config, new_scheduler, flags=re.DOTALL)
         set_scheduler(new_scheduler)
 
         showInfo(
             "Scheduler updated successfully."
-            if not upgrade_from_v3 else
-            "FSRS scheduler updated from v3 to v4 successfully.\n"
+            if not upgrade_from_v3
+            else "FSRS scheduler updated from v3 to v4 successfully.\n"
             "\n"
             "Because the weights of the v3 and the v4 FSRS scheduler are incompatible with each other, the weights have been replaced by the default weights for v4.\n"
             "\n"

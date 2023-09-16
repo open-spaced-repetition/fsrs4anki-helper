@@ -26,7 +26,7 @@ def reset(did):
     )
 
     undo_entry = mw.col.add_custom_undo_entry("Reset")
-    
+
     start_time = time.time()
     mw.progress.start()
 

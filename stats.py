@@ -73,7 +73,9 @@ def retention_stability_burden(lim) -> float:
     recall_sum = sum(item[0] for item in retention_stability_burden_list)
     stability_sum = sum(item[1] for item in retention_stability_burden_list)
     burden_sum = sum(item[2] for item in retention_stability_burden_list)
-    estimated_total_knowledge_notes = sum(item[0] / item[3] for item in retention_stability_burden_list)
+    estimated_total_knowledge_notes = sum(
+        item[0] / item[3] for item in retention_stability_burden_list
+    )
     return (
         recall_sum / card_cnt,
         stability_sum / card_cnt,
@@ -112,14 +114,18 @@ def get_fsrs_stats(self):
     _line_now(i, "Average retention", f"{retention * 100: .2f}%")
     _line_now(i, "Average stability", f"{round(stability)} days")
     _line_now(i, "Burden", f"{round(burden)} reviews/day")
-    i.append("<tr><td align=left style='padding: 5px'><b>Retention by Cards:</b></td></tr>")
+    i.append(
+        "<tr><td align=left style='padding: 5px'><b>Retention by Cards:</b></td></tr>"
+    )
     _line_now(i, "Total Count", f"{card_cnt} cards")
     _line_now(
         i,
         "Estimated total knowledge",
         f"{estimated_total_knowledge} cards ({retention * 100:.2f}%)",
     )
-    i.append("<tr><td align=left style='padding: 5px'><b>Retention by Notes:</b></td></tr>")
+    i.append(
+        "<tr><td align=left style='padding: 5px'><b>Retention by Notes:</b></td></tr>"
+    )
     _line_now(i, "Total Count", f"{note_cnt} notes")
     _line_now(
         i,
