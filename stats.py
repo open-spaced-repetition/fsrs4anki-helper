@@ -174,24 +174,36 @@ def get_retention_graph(self: CollectionStats):
 
     query = f"""SELECT
     CAST((id/1000.0 - {mw.col.sched.day_cutoff}) / 86400.0 as int)/{chunk} AS day,
-    COUNT(CASE WHEN ease > 1 AND lastIvl < {config.mature_ivl} THEN id ELSE NULL END) / (COUNT(CASE WHEN lastIvl < {config.mature_ivl} THEN id ELSE NULL END) + 0.001) AS retention_young,
-    COUNT(CASE WHEN ease > 1 AND lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) / (COUNT(CASE WHEN lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) + 0.001) AS retention_mature,
     COUNT(CASE WHEN lastIvl < {config.mature_ivl} THEN id ELSE NULL END) AS review_cnt_young,
-    COUNT(CASE WHEN lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) AS review_cnt_mature
+    COUNT(CASE WHEN lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) AS review_cnt_mature,
+    COUNT(CASE WHEN ease > 1 AND lastIvl < {config.mature_ivl} THEN id ELSE NULL END) AS passed_young,
+    COUNT(CASE WHEN ease > 1 AND lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) AS passed_mature
     FROM revlog
     WHERE (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1)
     {lim}
     GROUP BY day
     """
 
-    offset_retention_review_cnt = mw.col.db.all(query)
+    offset_review_cnt_passed = mw.col.db.all(query)
+    offset_retention_review_cnt = list(
+        map(
+            lambda x: (
+                x[1],
+                x[2],
+                x[3]/max(x[1], 1),
+                x[4]/max(x[2], 1)
+            ),
+            offset_review_cnt_passed,
+        )
+    )
+
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
-            (3, "#7c7", "Review Count (young)"),
-            (4, "#070", "Review Count (mature)"),
-            (1, "#7c7", "Retention Rate (young)"),
-            (2, "#070", "Retention Rate (mature)"),
+            (1, "#7c7", "Review Count (young)"),
+            (2, "#070", "Review Count (mature)"),
+            (3, "#7c7", "Retention Rate (young)"),
+            (4, "#070", "Retention Rate (mature)"),
         ),
     )
 
@@ -216,9 +228,9 @@ def get_retention_graph(self: CollectionStats):
     del tmp
     data = new_data
 
-    recall_min = min(min(item[1], item[2]) for item in offset_retention_review_cnt)
+    recall_min = min(min(item[3], item[4]) for item in offset_retention_review_cnt)
     recall_min = math.floor(recall_min * 10) / 10
-    recall_max = max(max(item[1], item[2]) for item in offset_retention_review_cnt)
+    recall_max = max(max(item[3], item[4]) for item in offset_retention_review_cnt)
     recall_max = math.ceil(recall_max * 10) / 10
 
     step = round((recall_max - recall_min) / 5, 2)
