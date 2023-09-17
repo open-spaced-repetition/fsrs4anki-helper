@@ -174,36 +174,25 @@ def get_retention_graph(self: CollectionStats):
 
     query = f"""SELECT
     CAST((id/1000.0 - {mw.col.sched.day_cutoff}) / 86400.0 as int)/{chunk} AS day,
-    COUNT(CASE WHEN lastIvl < {config.mature_ivl} THEN id ELSE NULL END) AS review_cnt_young,
-    COUNT(CASE WHEN lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) AS review_cnt_mature,
-    COUNT(CASE WHEN ease > 1 AND lastIvl < {config.mature_ivl} THEN id ELSE NULL END) AS passed_young,
-    COUNT(CASE WHEN ease > 1 AND lastIvl >= {config.mature_ivl} THEN id ELSE NULL END) AS passed_mature
+    COUNT(CASE WHEN lastIvl < {config.mature_ivl} AND lastIvl > {config.mature_ivl} * -86400 THEN id ELSE NULL END) AS review_cnt_young,
+    COUNT(CASE WHEN lastIvl >= {config.mature_ivl} OR lastIvl <= {config.mature_ivl} * -86400 THEN id ELSE NULL END) AS review_cnt_mature,
+    COUNT(CASE WHEN ease > 1 AND lastIvl < {config.mature_ivl} AND lastIvl > {config.mature_ivl} * -86400 THEN id ELSE NULL END) / (COUNT(CASE WHEN lastIvl < {config.mature_ivl} AND lastIvl > {config.mature_ivl} * -86400 THEN id ELSE NULL END) + 0.0001),
+    COUNT(CASE WHEN ease > 1 AND (lastIvl >= {config.mature_ivl} OR lastIvl <= {config.mature_ivl} * -86400) THEN id ELSE NULL END) / (COUNT(CASE WHEN lastIvl >= {config.mature_ivl} OR lastIvl <= {config.mature_ivl} * -86400 THEN id ELSE NULL END) + 0.0001)
     FROM revlog
     WHERE (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1)
     {lim}
     GROUP BY day
     """
 
-    offset_review_cnt_passed = mw.col.db.all(query)
-    offset_retention_review_cnt = list(
-        map(
-            lambda x: (
-                x[1],
-                x[2],
-                x[3]/max(x[1], 1),
-                x[4]/max(x[2], 1)
-            ),
-            offset_review_cnt_passed,
-        )
-    )
+    offset_retention_review_cnt = mw.col.db.all(query)
 
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
             (1, "#7c7", "Review Count (young)"),
             (2, "#070", "Review Count (mature)"),
-            (3, "#7c7", "Retention Rate (young)"),
-            (4, "#070", "Retention Rate (mature)"),
+            (3, "#ffd268", "Retention Rate (young)"),
+            (4, "#e49a60", "Retention Rate (mature)"),
         ),
     )
 
