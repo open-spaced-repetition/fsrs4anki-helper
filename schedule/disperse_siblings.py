@@ -76,11 +76,9 @@ def get_due_range(cid, parameters, stability, due):
         int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     )
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days)
-    if due > mw.col.sched.today:
+    if due >= mw.col.sched.today:
         due_range = (max(last_due + min_ivl, due), max(last_due + max_ivl, due), cid)
     else:
-        due_range = (last_due + min_ivl, last_due + max_ivl, cid)
-    if due_range[1] < mw.col.sched.today:
         due_range = (due, due, cid)
     return due_range, last_due
 
