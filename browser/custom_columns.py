@@ -119,8 +119,8 @@ class RetrievabilityColumn(CustomColumn):
             revlog = filter_revlogs(mw.col.card_stats_data(card.id).revlog)[0]
         except IndexError:
             return "N/A"
-        last_due = get_last_review_date(revlog)
-        elapsed_days = today - last_due
+        last_review = get_last_review_date(revlog)
+        elapsed_days = today - last_review
         retrievability = (
             exponential_forgetting_curve(elapsed_days, custom_data["s"])
             if version[0] == 3
