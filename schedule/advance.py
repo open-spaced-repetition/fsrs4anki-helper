@@ -127,8 +127,8 @@ def advance(did):
         except IndexError:
             continue
 
-        last_due = get_last_review_date(revlog)
-        new_ivl = mw.col.sched.today - last_due
+        last_review = get_last_review_date(revlog)
+        new_ivl = mw.col.sched.today - last_review
         card = update_card_due_ivl(card, revlog, new_ivl)
         old_custom_data = json.loads(card.custom_data)
         old_custom_data["v"] = "advance"
