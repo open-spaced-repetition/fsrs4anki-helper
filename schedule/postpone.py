@@ -128,8 +128,8 @@ def postpone(did):
             continue
 
         random.seed(cid + ivl)
-        last_due = get_last_review_date(revlog)
-        elapsed_days = mw.col.sched.today - last_due
+        last_review = get_last_review_date(revlog)
+        elapsed_days = mw.col.sched.today - last_review
         delay = elapsed_days - ivl
         new_ivl = min(
             max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay), max_ivl

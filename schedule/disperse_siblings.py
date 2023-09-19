@@ -50,7 +50,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 
 def get_due_range(cid, parameters, stability, due):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
-    last_due = get_last_review_date(revlogs[0])
+    last_review = get_last_review_date(revlogs[0])
     if version[0] == 4:
         new_ivl = int(round(9 * stability * (1 / parameters["r"] - 1)))
     elif version[0] == 3:
@@ -70,28 +70,30 @@ def get_due_range(cid, parameters, stability, due):
     new_ivl = min(new_ivl, parameters["m"])
 
     if new_ivl <= 2.5:
-        return (due, due, cid), last_due
+        return (due, due, cid), last_review
 
     last_elapsed_days = (
         int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     )
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days)
     if due >= mw.col.sched.today:
-        due_range = (max(last_due + min_ivl, due), max(last_due + max_ivl, due), cid)
+        due_range = (max(last_review + min_ivl, mw.col.sched.today), max(last_review + max_ivl, mw.col.sched.today), cid)
+    elif last_review + max_ivl > mw.col.sched.today:
+        due_range = (mw.col.sched.today, last_review + max_ivl, cid)
     else:
         due_range = (due, due, cid)
-    return due_range, last_due
+    return due_range, last_review
 
 
 def disperse(siblings):
-    due_ranges_last_due = {
+    due_ranges_last_review = {
         cid: get_due_range(cid, did_to_deck_parameters[did], stability, due)
         for cid, did, stability, due in siblings
     }
-    due_ranges = {cid: due_range for cid, (due_range, _) in due_ranges_last_due.items()}
-    last_due = {cid: last_due for cid, (_, last_due) in due_ranges_last_due.items()}
-    latest_due = max(last_due.values())
-    due_ranges[-1] = (latest_due, latest_due, -1)
+    due_ranges = {cid: due_range for cid, (due_range, _) in due_ranges_last_review.items()}
+    last_review = {cid: last_review for cid, (_, last_review) in due_ranges_last_review.items()}
+    latest_review = max(last_review.values())
+    due_ranges[-1] = (latest_review, latest_review, -1)
     best_due_dates = maximize_siblings_due_gap(due_ranges)
     best_due_dates.pop(-1)
     return best_due_dates
@@ -166,8 +168,8 @@ def disperse_siblings_backgroud(
             last_revlog = mw.col.card_stats_data(cid).revlog[0]
             if last_revlog.review_kind == REVLOG_RESCHED:
                 continue
-            last_due = get_last_review_date(last_revlog)
-            card = update_card_due_ivl(card, last_revlog, due - last_due)
+            last_review = get_last_review_date(last_revlog)
+            card = update_card_due_ivl(card, last_revlog, due - last_review)
             old_custom_data = json.loads(card.custom_data)
             old_custom_data["v"] = "disperse"
             card.custom_data = json.dumps(old_custom_data)
@@ -379,8 +381,8 @@ def disperse_siblings_when_review(reviewer, card: Card, ease, undo_entry=None):
         card = mw.col.get_card(cid)
         old_due = card.odue if card.odid else card.due
         last_revlog = mw.col.card_stats_data(cid).revlog[0]
-        last_due = get_last_review_date(last_revlog)
-        card = update_card_due_ivl(card, last_revlog, due - last_due)
+        last_review = get_last_review_date(last_revlog)
+        card = update_card_due_ivl(card, last_revlog, due - last_review)
         old_custom_data = json.loads(card.custom_data)
         old_custom_data["v"] = "disperse"
         card.custom_data = json.dumps(old_custom_data)
