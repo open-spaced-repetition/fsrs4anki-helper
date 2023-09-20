@@ -52,22 +52,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 def get_due_range(cid, parameters, stability, due):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_review = get_last_review_date(revlogs[0])
-    if version[0] == 4:
-        new_ivl = int(round(9 * stability * (1 / parameters["r"] - 1)))
-    elif version[0] == 3:
-        last_rating = revlogs[0].button_chosen
-        if last_rating == 4:
-            new_ivl = int(
-                round(
-                    stability
-                    * parameters["e"]
-                    * math.log(parameters["r"])
-                    / math.log(0.9)
-                )
-            )
-        else:
-            new_ivl = int(round(stability * math.log(parameters["r"]) / math.log(0.9)))
-
+    new_ivl = int(round(9 * stability * (1 / parameters["r"] - 1)))
     new_ivl = min(new_ivl, parameters["m"])
 
     if new_ivl <= 2.5:
