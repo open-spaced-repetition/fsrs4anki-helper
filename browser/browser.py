@@ -4,7 +4,6 @@ from aqt.gui_hooks import (
     browser_did_fetch_columns,
     browser_did_fetch_row,
     browser_will_show,
-    browser_did_search,
     browser_will_search,
 )
 from .custom_columns import (
@@ -62,7 +61,6 @@ def _on_browser_did_fetch_row(
 # cutom search nodes
 def _setup_search():
     browser_will_search.append(_on_browser_will_search)
-    browser_did_search.append(_on_browser_did_search)
 
 
 def _on_browser_will_search(ctx: SearchContext):
@@ -80,25 +78,3 @@ def _on_browser_will_search_handle_custom_column_ordering(ctx: SearchContext):
         return
 
     ctx.order = custom_column.order_by_str()
-
-
-def _on_browser_did_search(ctx: SearchContext):
-    _on_browser_did_search_handle_custom_search_parameters(ctx)
-
-
-def _on_browser_did_search_handle_custom_search_parameters(ctx: SearchContext):
-    global custom_search_nodes
-
-    if not custom_search_nodes:
-        return
-
-    try:
-        original_ids = ctx.ids
-        for node in custom_search_nodes:
-            ctx.ids = node.filter_ids(ctx.ids)
-        ctx.ids = [id for id in original_ids if id in ctx.ids]
-    except ValueError as e:
-        showWarning(f"FSRS search error: {e}")
-        return
-    finally:
-        custom_search_nodes = []

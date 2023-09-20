@@ -58,12 +58,12 @@ class TargetRetrievabilityColumn(CustomColumn):
     )
 
     def _display_value(self, card: Card) -> str:
-        if card.type != 2:
+        if card.ivl < 1:
             return "N/A"
         retrievability = power_forgetting_curve(
-            card.ivl, card.fsrs_memory_state.stability
+            card.ivl, card.memory_state.stability
         )
         return f"{retrievability * 100:.2f}%"
 
     def order_by_str(self) -> str:
-        return f"""ivl / json_extract(json_extract(IIF(c.data != '', c.data, NULL), '$.cd'), '$.s') ASC"""
+        return f"""ivl / json_extract(c.data, '$.s') ASC"""
