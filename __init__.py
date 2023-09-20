@@ -66,6 +66,7 @@ menu_auto_reschedule = checkable(
     on_click=set_auto_reschedule,
 )
 
+
 def set_auto_disperse(checked):
     config.auto_disperse = checked
 
