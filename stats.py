@@ -23,10 +23,6 @@ def _lineTbl_now(i):
 
 
 def retention_stability_burden(lim) -> float:
-    custom_scheduler = check_fsrs4anki(mw.col.all_config())
-    if custom_scheduler is None:
-        return
-    version = get_version(custom_scheduler)
     elapse_stability_ivl_list = mw.col.db.all(
         f"""
     SELECT 
@@ -55,9 +51,7 @@ def retention_stability_burden(lim) -> float:
     retention_stability_burden_list = list(
         map(
             lambda x: (
-                exponential_forgetting_curve(max(x[0], 0), x[1])
-                if version[0] == 3
-                else power_forgetting_curve(max(x[0], 0), x[1]),
+                power_forgetting_curve(max(x[0], 0), x[1]),
                 x[1],
                 1 / max(1, x[2]),
                 x[3],

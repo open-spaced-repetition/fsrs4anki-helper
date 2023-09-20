@@ -58,25 +58,10 @@ class TargetRetrievabilityColumn(CustomColumn):
     )
 
     def _display_value(self, card: Card) -> str:
-        custom_scheduler = check_fsrs4anki(mw.col.all_config())
-        version = get_version(custom_scheduler)
         if card.type != 2:
             return "N/A"
-        if card.custom_data == "":
-            return "N/A"
-        custom_data = json.loads(card.custom_data)
-        if "s" not in custom_data:
-            return "N/A"
-        today = mw.col.sched.today
-        try:
-            revlog = filter_revlogs(mw.col.card_stats_data(card.id).revlog)[0]
-        except IndexError:
-            return "N/A"
-        interval = card.ivl
-        retrievability = (
-            exponential_forgetting_curve(interval, custom_data["s"])
-            if version[0] == 3
-            else power_forgetting_curve(interval, custom_data["s"])
+        retrievability = power_forgetting_curve(
+            card.ivl, card.fsrs_memory_state.stability
         )
         return f"{retrievability * 100:.2f}%"
 
