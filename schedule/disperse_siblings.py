@@ -1,6 +1,7 @@
 from ..utils import *
 from ..configuration import Config
 from anki.utils import ids2str, html_to_text_line
+from anki.decks import DeckManager
 from collections import defaultdict
 from datetime import datetime, timedelta
 import copy
@@ -129,27 +130,16 @@ def disperse_siblings(
 def disperse_siblings_backgroud(
     did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""
 ):
-    custom_scheduler = check_fsrs4anki(mw.col.all_config())
-    if custom_scheduler is None:
-        return
-    global version
-    version = get_version(custom_scheduler)
-    if version[0] < 3:
-        mw.taskman.run_on_main(
-            lambda: showWarning("Require FSRS4Anki version >= 3.0.0")
-        )
-        return
-
-    deck_parameters = get_deck_parameters(custom_scheduler)
-    skip_decks = (
-        get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
-    )
-    global_deck_name = get_global_config_deck_name(version)
-
     global did_to_deck_parameters
-    did_to_deck_parameters = get_did_parameters(
-        mw.col.decks.all(), deck_parameters, global_deck_name
-    )
+
+    DM = DeckManager(mw.col)
+    for deckname_id in mw.col.decks.all_names_and_ids():
+        deck_config = DM.config_dict_for_deck_id(deckname_id.id)
+        if deck_config["fsrsEnabled"]:
+            did_to_deck_parameters[deckname_id.id] = {
+                "r": deck_config["desiredRetention"],
+                "m": deck_config["rev"]["maxIvl"],
+            }
 
     config = Config()
     config.load()
@@ -349,29 +339,15 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     enable_load_balance = config.load_balance
     free_days = config.free_days
 
-    custom_scheduler = check_fsrs4anki(mw.col.all_config())
-    if custom_scheduler is None:
-        return
-
-    global version
-    version = get_version(custom_scheduler)
-    if version[0] < 3:
-        showWarning("Require FSRS4Anki version >= 3.0.0")
-        return
-
-    deck_parameters = get_deck_parameters(custom_scheduler)
-    skip_decks = (
-        get_skip_decks(custom_scheduler) if geq_version(version, (3, 12, 0)) else []
-    )
-    deck_name = mw.col.decks.name(card.current_deck_id())
-    if any([deck_name.startswith(deck) for deck in skip_decks if deck != ""]):
-        return
-
-    global_deck_name = get_global_config_deck_name(version)
     global did_to_deck_parameters
-    did_to_deck_parameters = get_did_parameters(
-        mw.col.decks.all(), deck_parameters, global_deck_name
-    )
+    DM = DeckManager(mw.col)
+    for deckname_id in mw.col.decks.all_names_and_ids():
+        deck_config = DM.config_dict_for_deck_id(deckname_id.id)
+        if deck_config["fsrsEnabled"]:
+            did_to_deck_parameters[deckname_id.id] = {
+                "r": deck_config["desiredRetention"],
+                "m": deck_config["rev"]["maxIvl"],
+            }
 
     siblings = get_siblings_when_review(card)
 

@@ -238,23 +238,6 @@ def get_deck_parameters(custom_scheduler):
     return deck_parameters
 
 
-def get_did_parameters(deck_list, deck_parameters, global_deck_name):
-    did_to_deck_parameters = {}
-
-    def get_parameters(deckname, mapping):
-        parts = deckname.split("::")
-        for i in range(len(parts), 0, -1):
-            prefix = "::".join(parts[:i])
-            if prefix in mapping:
-                return mapping[prefix]
-        return mapping[global_deck_name]
-
-    for d in deck_list:
-        parameters = get_parameters(d["name"], deck_parameters)
-        did_to_deck_parameters[d["id"]] = parameters
-    return did_to_deck_parameters
-
-
 def get_skip_decks(custom_scheduler):
     pattern = r"[const ]?skip_decks ?= ?(.*);"
     str_matches = re.findall(pattern, custom_scheduler)
