@@ -63,7 +63,7 @@ def set_auto_reschedule(checked):
 
 
 menu_auto_reschedule = checkable(
-    title="Auto reschedule cards reviewed in other device after sync",
+    title="Auto reschedule cards reviewed on other devices after sync",
     on_click=set_auto_reschedule,
 )
 
@@ -83,7 +83,7 @@ def set_auto_disperse(checked):
 
 
 menu_auto_disperse = checkable(
-    title="Auto disperse siblings after sync and review", on_click=set_auto_disperse
+    title="Auto disperse siblings", on_click=set_auto_disperse
 )
 
 
