@@ -36,7 +36,7 @@ Installation link: https://ankiweb.net/shared/info/759844606
 
 ## Reschedule
 
-Rescheduling all cards can predict the memory status based on each card's review history and arrange intervals, using the parameters from the Scheduler code. These parameters can be personalized with the FSRS Optimizer.
+Rescheduling can calculate the memory states and intervals based on each card's review history and the parameters from the Scheduler code. These parameters can be personalized with the FSRS Optimizer.
 
 **Note**: For cards that have been reviewed multiple times using Anki's default algorithm, rescheduling may give different intervals than the Scheduler because the Scheduler can't access the full review history when running. In this case, the intervals given by rescheduling will be more accurate. But after rescheduling once, there will be no difference between the two.
 
@@ -117,6 +117,7 @@ Interpretation:
     - The intervals displayed above the answer buttons may be inconsistent with the real interval after rescheduling, though the real ones will be more optimal.
     - It might have a small effect on responsiveness and power consumption because it needs more number of calculations for each review and causes constant queue rebuilding.
 - **Auto disperse siblings:** It automatically disperses siblings after each review and after sync (if auto-reschedule after sync is enabled).
+- **Reschedule all cards:** This option is used to reschedule all the cards in the decks in which FSRS is enabled. It should only be used after you have installed FSRS for the first time and/or updated your parameters.
 - **Reschedule cards reviewed in the last 7 days:** This option can be used to reschedule the cards that were reviewed in the last few days. The number of days can be adjusted in the add-on config.
 - **Update scheduler:** This option can be used to check for updates to the FSRS scheduler and update the scheduler code if an update is available. While updating the scheduler code, this option preserves your existing configuration.
 
