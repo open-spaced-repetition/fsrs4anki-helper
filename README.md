@@ -115,7 +115,7 @@ Interpretation:
 
     However, this option also has some disadvantages, which include:
     - The intervals displayed above the answer buttons may be inconsistent with the real interval after rescheduling, though the real ones will be more optimal.
-    - It might have a small effect on responsiveness and power consumption because it needs more number of calculations for each review and causes constant queue rebuilding.
+    - It might have a small effect on the responsiveness of Anki and introduce lags because it needs more calculations for each review and causes constant queue rebuilding.
 - **Auto disperse siblings:** It automatically disperses siblings after each review and after sync (if auto-reschedule after sync is enabled).
 - **Reschedule all cards:** This option is used to reschedule all the cards in the decks in which FSRS is enabled. It should only be used after you have installed FSRS for the first time and/or updated your parameters.
 - **Reschedule cards reviewed in the last 7 days:** This option can be used to reschedule the cards that were reviewed in the last few days. The number of days can be adjusted in the add-on config.
