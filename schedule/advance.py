@@ -37,9 +37,11 @@ def advance(did):
             CASE WHEN odid==0
             THEN {mw.col.sched.today} - (due - ivl)
             ELSE {mw.col.sched.today} - (odue - ivl)
-            END
+            END,
+            json_extract(data, '$.dr')
         FROM cards
         WHERE json_extract(data, '$.s') IS NOT NULL
+        AND json_extract(data, '$.dr') IS NOT NULL
         AND due > {mw.col.sched.today}
         AND queue = {QUEUE_TYPE_REV}
         {"AND did IN %s" % did_list if did is not None else ""}
@@ -57,7 +59,6 @@ def advance(did):
         lambda x: (
             x
             + [
-                DM.config_dict_for_deck_id(x[1])["desiredRetention"],
                 power_forgetting_curve(x[4], x[3]),
             ]
         ),

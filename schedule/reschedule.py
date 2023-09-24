@@ -271,11 +271,11 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
 def get_current_deck_parameter(did):
     deck_config = mw.col.decks.config_dict_for_deck_id(did)
     return {
-        "w": deck_config["fsrsWeights"]
-        if len(deck_config["fsrsWeights"]) > 0
+        "w": deck_config.get("fsrsWeights", [])
+        if len(deck_config.get("fsrsWeights", [])) > 0
         else DEFAULT_FSRS_WEIGHTS,
-        "r": deck_config["desiredRetention"],
-        "m": deck_config["rev"]["maxIvl"],
+        "r": deck_config.get("desiredRetention", 0.9),
+        "m": deck_config.get("rev", dict()).get("maxIvl", 36500),
     }
 
 
@@ -360,6 +360,8 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
 
     new_custom_data = {"v": "reschedule"}
     card = mw.col.get_card(cid)
+    if not card.memory_state:
+        print(card.id)
     card.memory_state.stability = s
     card.memory_state.difficulty = d
     seed = fsrs.set_fuzz_factor(cid, reps)

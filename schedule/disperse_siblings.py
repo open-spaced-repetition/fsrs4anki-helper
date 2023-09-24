@@ -52,7 +52,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 def get_due_range(cid, parameters, stability, due):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_review = get_last_review_date(revlogs[0])
-    new_ivl = int(round(9 * stability * (1 / parameters["r"] - 1)))
+    new_ivl = int(round(9 * stability * (1 / mw.col.get_card(cid).desired_retention - 1)))
     new_ivl = min(new_ivl, parameters["m"])
 
     if new_ivl <= 2.5:
@@ -125,8 +125,7 @@ def disperse_siblings_backgroud(
     for deckname_id in mw.col.decks.all_names_and_ids():
         deck_config = DM.config_dict_for_deck_id(deckname_id.id)
         did_to_deck_parameters[deckname_id.id] = {
-            "r": deck_config["desiredRetention"],
-            "m": deck_config["rev"]["maxIvl"],
+            "m": deck_config.get("rev", dict()).get("maxIvl", 36500),
         }
 
     config = Config()
@@ -336,7 +335,6 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     for deckname_id in mw.col.decks.all_names_and_ids():
         deck_config = DM.config_dict_for_deck_id(deckname_id.id)
         did_to_deck_parameters[deckname_id.id] = {
-            "r": deck_config["desiredRetention"],
             "m": deck_config["rev"]["maxIvl"],
         }
 
