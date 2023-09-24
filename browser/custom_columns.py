@@ -63,6 +63,8 @@ class TargetRetrievabilityColumn(CustomColumn):
             return "N/A"
         if card.ivl < 1:
             return "N/A"
+        if not card.memory_state:
+            return "N/A"
         retrievability = power_forgetting_curve(
             card.ivl, card.memory_state.stability
         )

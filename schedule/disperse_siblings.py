@@ -52,7 +52,9 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 def get_due_range(cid, parameters, stability, due):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_review = get_last_review_date(revlogs[0])
-    new_ivl = int(round(9 * stability * (1 / mw.col.get_card(cid).desired_retention - 1)))
+    new_ivl = int(
+        round(9 * stability * (1 / mw.col.get_card(cid).desired_retention - 1))
+    )
     new_ivl = min(new_ivl, parameters["m"])
 
     if new_ivl <= 2.5:

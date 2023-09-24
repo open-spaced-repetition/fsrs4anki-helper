@@ -93,7 +93,9 @@ def postpone(did):
             break
 
         card = mw.col.get_card(cid)
-        max_ivl = DM.config_dict_for_deck_id(did).get("rev", dict()).get("maxIvl", 36500)
+        max_ivl = (
+            DM.config_dict_for_deck_id(did).get("rev", dict()).get("maxIvl", 36500)
+        )
 
         try:
             revlog = filter_revlogs(mw.col.card_stats_data(cid).revlog)[0]

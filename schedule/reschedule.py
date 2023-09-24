@@ -1,6 +1,6 @@
 from ..utils import *
 from ..configuration import Config
-from anki.cards import Card
+from anki.cards import Card, FSRSMemoryState
 from .disperse_siblings import disperse_siblings_backgroud
 
 
@@ -359,10 +359,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
 
     new_custom_data = {"v": "reschedule"}
     card = mw.col.get_card(cid)
-    if not card.memory_state:
-        print(card.id)
-    card.memory_state.stability = s
-    card.memory_state.difficulty = d
+    card.memory_state = FSRSMemoryState(stability=s, difficulty=d)
     seed = fsrs.set_fuzz_factor(cid, reps)
     if card.custom_data != "":
         old_custom_data = json.loads(card.custom_data)
@@ -372,6 +369,8 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     if "seed" not in new_custom_data:
         new_custom_data["seed"] = seed
     card.custom_data = json.dumps(new_custom_data)
+    if not card.desired_retention:
+        return card
     if card.type == CARD_TYPE_REV and last_kind != REVLOG_RESCHED:
         fsrs.set_card(card)
         if last_s is None:
