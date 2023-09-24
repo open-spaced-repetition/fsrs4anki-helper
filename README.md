@@ -11,9 +11,11 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 
 # Requirements
 
-- Anki version >= 2.1.55
-- Enable V3 Scheduler
-- FSRS4Anki scheduler version >= 3.0.0
+- Anki version in 2.1.55 - 2.1.66 
+ - Enable V3 Scheduler
+ - FSRS4Anki scheduler version >= 3.0.0
+- Anki version >= 23.10
+ - Enable FSRS
 
 # Installation
 
@@ -78,7 +80,7 @@ In Anki, some templates will generate multiple cards related in content from the
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/2e87b9c7-136d-4dc8-8677-c81bc28a0f6b)
 
-## Advanced Search
+## Advanced Search (<=2.1.66)
 
 In the card browser, you can right-click on the header and click on Difficulty, Stability, Retention to display the current memory states of cards.
 
@@ -104,12 +106,12 @@ Interpretation:
 - The [three component of the memory model](https://supermemo.guru/wiki/Three_component_model_of_memory) used by FSRS:
 	- Average **retention** reflects the percentage of cards that you would recall correctly if you were tested today.
 	- Average (memory) **stability** reflects how fast you forget (forgetting rate). The greater the stability, the slower the forgetting rate.
-	- **Difficulty** reflects how hard it is to increase or maintain the stability of a memory. Its relative distribution within the deck/collection can be viewed at the bottom of the statistics interface:
+	- **Difficulty** reflects how hard it is to increase or maintain the stability of a memory. Its relative distribution within the deck/collection can be viewed at the bottom of the statistics interface (<=2.1.66):
 	![image](https://user-images.githubusercontent.com/32575846/260213063-9b18fbaa-6b92-4392-8984-03b85f3fcedd.png)
 
 ## Other features
 - **Auto reschedule cards reviewed on other devices after sync:** This option is useful if you do some (or all) of your reviews on platforms that don't support FSRS such as AnkiDroid or AnkiWeb. If this option is enabled, the reviews synced from the other devices will be automatically rescheduled according to the FSRS algorithm. If you are relying on this feature, it is recommended to sync the reviews daily for the best results.
-- **Auto reschedule the card you just reviewed:** If you enable this option, every card that you review will be rescheduled. Enabling this option is not essential for using FSRS. It is mainly intended for gradually transitioning your old cards to FSRS when starting to use FSRS. The other option for transitioning old cards to FSRS is to reschedule all cards, but this tends to induce a huge backlog for many people. Other advantages of enabling the "Auto reschedule the card you just reviewed" option include:
+- **Auto reschedule the card you just reviewed (<=2.1.66):** If you enable this option, every card that you review will be rescheduled. Enabling this option is not essential for using FSRS. It is mainly intended for gradually transitioning your old cards to FSRS when starting to use FSRS. The other option for transitioning old cards to FSRS is to reschedule all cards, but this tends to induce a huge backlog for many people. Other advantages of enabling the "Auto reschedule the card you just reviewed" option include:
     - Load balance and free days are applied when rescheduling.
     - It allows you to use learning or relearning steps longer than or equal to 1 day without breaking the scheduling. However, for best results, it is not recommended to use such steps even with this option enabled because FSRS can determine the next intervals more accurately.
 
