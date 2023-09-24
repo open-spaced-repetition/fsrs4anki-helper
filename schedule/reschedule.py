@@ -170,6 +170,10 @@ class FSRS:
 def reschedule(
     did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""
 ):
+    if not mw.col.get_config("fsrs"):
+        tooltip("Please enable FSRS first")
+        return
+
     start_time = time.time()
 
     def on_done(future):
@@ -267,7 +271,9 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
 def get_current_deck_parameter(did):
     deck_config = mw.col.decks.config_dict_for_deck_id(did)
     return {
-        "w": deck_config["fsrsWeights"] if len(deck_config["fsrsWeights"]) > 0 else DEFAULT_FSRS_WEIGHTS,
+        "w": deck_config["fsrsWeights"]
+        if len(deck_config["fsrsWeights"]) > 0
+        else DEFAULT_FSRS_WEIGHTS,
         "r": deck_config["desiredRetention"],
         "m": deck_config["rev"]["maxIvl"],
     }

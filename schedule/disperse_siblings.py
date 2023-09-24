@@ -96,6 +96,10 @@ def disperse(siblings):
 def disperse_siblings(
     did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""
 ):
+    if not mw.col.get_config("fsrs"):
+        tooltip("Please enable FSRS first")
+        return
+
     start_time = time.time()
 
     def on_done(future):
@@ -314,6 +318,10 @@ def get_siblings_when_review(card: Card):
 
 
 def disperse_siblings_when_review(reviewer, card: Card, ease):
+    if not mw.col.get_config("fsrs"):
+        tooltip("Please enable FSRS first")
+        return
+
     config = Config()
     config.load()
     if not config.auto_disperse:

@@ -82,6 +82,9 @@ def retention_stability_burden(lim) -> float:
 
 
 def todayStats_new(self):
+    if not mw.col.get_config("fsrs"):
+        tooltip("Please enable FSRS first")
+        return todayStats_old(self)
     return (
         todayStats_old(self)
         + get_true_retention(self)
@@ -247,73 +250,16 @@ def get_retention_graph(self: CollectionStats):
     return self._section(txt1)
 
 
-def bar_plot(self, data, title, subtitle, color):
-    if not data:
-        return ""
-
-    txt = self._title(title, subtitle)
-
-    graph_data = [dict(data=data, color=color)]
-
-    yaxes = [dict(min=0, max=max(y for x, y in data))]
-
-    txt += self._graph(
-        id="difficulty",
-        data=graph_data,
-        type="bars",
-        conf=dict(
-            xaxis=dict(min=0.5, max=10.5, ticks=[[i, i] for i in range(1, 11)]),
-            yaxes=yaxes,
-        ),
-        ylabel="Cards",
-    )
-
-    return txt
-
-
-def difficulty_distribution_graph(self):
-    lim = self._limit()
-    if lim:
-        lim = " AND did IN %s" % lim
-    difficulty_count = mw.col.db.all(
-        f"""
-    SELECT 
-        CAST(ROUND(json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.d')) AS INT)
-        ,count(*)
-    FROM cards 
-    WHERE queue >= 1 
-    AND data like '%\"cd\"%'
-    {lim}
-    GROUP BY CAST(ROUND(json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.d')) AS INT)
-    """
-    )
-    # x[0]: difficulty
-    # x[1]: cnt
-    difficulty_count = tuple(filter(lambda x: x[0] is not None, difficulty_count))
-    distribution_graph = bar_plot(
-        self,
-        difficulty_count,
-        "Difficulty Distribution",
-        "Lower value of D (horizontal axis) = less difficult, higher value of D = more difficult",
-        "#72bcd4",
-    )
-    return cardGraph_old(self) + distribution_graph
-
-
 def init_stats():
     config = Config()
     config.load()
     if config.fsrs_stats:
-        global todayStats_old, cardGraph_old
+        global todayStats_old
         todayStats_old = CollectionStats.todayStats
-        cardGraph_old = CollectionStats.cardGraph
         CollectionStats.todayStats = todayStats_new
-        CollectionStats.cardGraph = difficulty_distribution_graph
 
 
 # code modified from https://ankiweb.net/shared/info/1779060522
-
-
 def get_true_retention(self):
     lim = "cid in (select id from cards where did in %s)" % self._limit()
     if lim:

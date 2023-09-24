@@ -19,6 +19,10 @@ def get_desired_postpone_cnt_with_response(safe_cnt, did):
 
 
 def postpone(did):
+    if not mw.col.get_config("fsrs"):
+        tooltip("Please enable FSRS first")
+        return
+
     DM = DeckManager(mw.col)
     if did is not None:
         did_list = ids2str(DM.deck_and_child_ids(did))
