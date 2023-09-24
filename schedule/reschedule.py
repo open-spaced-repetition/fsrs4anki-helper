@@ -274,13 +274,12 @@ def get_current_deck_parameter(did):
         "w": deck_config.get("fsrsWeights", [])
         if len(deck_config.get("fsrsWeights", [])) > 0
         else DEFAULT_FSRS_WEIGHTS,
-        "r": deck_config.get("desiredRetention", 0.9),
         "m": deck_config.get("rev", dict()).get("maxIvl", 36500),
     }
 
 
 def reschedule_card(cid, fsrs: FSRS, rollover, params):
-    w, retention, max_ivl = params.values()
+    w, max_ivl = params.values()
     last_date = None
     last_s = None
     last_rating = None
@@ -376,16 +375,16 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     if card.type == CARD_TYPE_REV and last_kind != REVLOG_RESCHED:
         fsrs.set_card(card)
         if last_s is None:
-            again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
-            hard_ivl = fsrs.next_interval(hard_s, retention, max_ivl)
-            good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
-            easy_ivl = fsrs.next_interval(easy_s, retention, max_ivl)
+            again_ivl = fsrs.next_interval(again_s, card.desired_retention, max_ivl)
+            hard_ivl = fsrs.next_interval(hard_s, card.desired_retention, max_ivl)
+            good_ivl = fsrs.next_interval(good_s, card.desired_retention, max_ivl)
+            easy_ivl = fsrs.next_interval(easy_s, card.desired_retention, max_ivl)
             easy_ivl = max(good_ivl + 1, easy_ivl)
         else:
-            again_ivl = fsrs.next_interval(again_s, retention, max_ivl)
-            hard_ivl = fsrs.next_interval(hard_s, retention, max_ivl)
-            good_ivl = fsrs.next_interval(good_s, retention, max_ivl)
-            easy_ivl = fsrs.next_interval(easy_s, retention, max_ivl)
+            again_ivl = fsrs.next_interval(again_s, card.desired_retention, max_ivl)
+            hard_ivl = fsrs.next_interval(hard_s, card.desired_retention, max_ivl)
+            good_ivl = fsrs.next_interval(good_s, card.desired_retention, max_ivl)
+            easy_ivl = fsrs.next_interval(easy_s, card.desired_retention, max_ivl)
             hard_ivl = min(hard_ivl, good_ivl)
             good_ivl = max(hard_ivl + 1, good_ivl)
             easy_ivl = max(good_ivl + 1, easy_ivl)
