@@ -4,6 +4,27 @@ from anki.cards import Card
 from .disperse_siblings import disperse_siblings_backgroud
 
 
+DEFAULT_FSRS_WEIGHTS = [
+    0.4,
+    0.6,
+    2.4,
+    5.8,
+    4.93,
+    0.94,
+    0.86,
+    0.01,
+    1.49,
+    0.14,
+    0.94,
+    2.18,
+    0.05,
+    0.34,
+    1.26,
+    0.29,
+    2.61,
+]
+
+
 def constrain_difficulty(difficulty: float) -> float:
     return min(10.0, max(1.0, difficulty))
 
@@ -19,25 +40,7 @@ class FSRS:
     elapsed_days: int
 
     def __init__(self) -> None:
-        self.w = [
-            1.0,
-            2.0,
-            3.0,
-            4.0,
-            5.0,
-            0.5,
-            0.5,
-            0.2,
-            1.4,
-            0.2,
-            0.8,
-            2.0,
-            0.2,
-            0.2,
-            1.0,
-            0.5,
-            2.0,
-        ]
+        self.w = DEFAULT_FSRS_WEIGHTS
         self.enable_fuzz = False
         self.enable_load_balance = False
         self.free_days = []
@@ -224,15 +227,6 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
         deck_id, deck_name = deck_id_name.id, deck_id_name.name
         if cancelled:
             break
-        if not mw.col.decks.config_dict_for_deck_id(deck_id)["fsrsEnabled"]:
-            rescheduled_cards = rescheduled_cards.union(
-                mw.col.find_cards(
-                    f'"deck:{deck_name}" ("is:review" OR "is:learn")'.replace(
-                        "\\", "\\\\"
-                    )
-                )
-            )
-            continue
         if did is not None:
             if not deck_name.startswith(mw.col.decks.get(did)["name"]):
                 continue
@@ -272,14 +266,11 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
 
 def get_current_deck_parameter(did):
     deck_config = mw.col.decks.config_dict_for_deck_id(did)
-    if deck_config["fsrsEnabled"]:
-        return {
-            "w": deck_config["fsrsWeights"],
-            "r": deck_config["desiredRetention"],
-            "m": deck_config["rev"]["maxIvl"],
-        }
-    else:
-        return None
+    return {
+        "w": deck_config["fsrsWeights"] if len(deck_config["fsrsWeights"]) > 0 else DEFAULT_FSRS_WEIGHTS,
+        "r": deck_config["desiredRetention"],
+        "m": deck_config["rev"]["maxIvl"],
+    }
 
 
 def reschedule_card(cid, fsrs: FSRS, rollover, params):

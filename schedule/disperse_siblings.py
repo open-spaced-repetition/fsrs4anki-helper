@@ -120,11 +120,10 @@ def disperse_siblings_backgroud(
     DM = DeckManager(mw.col)
     for deckname_id in mw.col.decks.all_names_and_ids():
         deck_config = DM.config_dict_for_deck_id(deckname_id.id)
-        if deck_config["fsrsEnabled"]:
-            did_to_deck_parameters[deckname_id.id] = {
-                "r": deck_config["desiredRetention"],
-                "m": deck_config["rev"]["maxIvl"],
-            }
+        did_to_deck_parameters[deckname_id.id] = {
+            "r": deck_config["desiredRetention"],
+            "m": deck_config["rev"]["maxIvl"],
+        }
 
     config = Config()
     config.load()
@@ -328,11 +327,10 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     DM = DeckManager(mw.col)
     for deckname_id in mw.col.decks.all_names_and_ids():
         deck_config = DM.config_dict_for_deck_id(deckname_id.id)
-        if deck_config["fsrsEnabled"]:
-            did_to_deck_parameters[deckname_id.id] = {
-                "r": deck_config["desiredRetention"],
-                "m": deck_config["rev"]["maxIvl"],
-            }
+        did_to_deck_parameters[deckname_id.id] = {
+            "r": deck_config["desiredRetention"],
+            "m": deck_config["rev"]["maxIvl"],
+        }
 
     siblings = get_siblings_when_review(card)
 
