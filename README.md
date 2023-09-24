@@ -11,11 +11,11 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 
 # Requirements
 
-- Anki version in 2.1.55 - 2.1.66 
- - Enable V3 Scheduler
- - FSRS4Anki scheduler version >= 3.0.0
-- Anki version >= 23.10
- - Enable FSRS
+- For Anki version in 2.1.55 - 2.1.66 
+  - Enable V3 Scheduler
+  - FSRS4Anki scheduler version >= 3.0.0
+- For Anki version >= 23.10
+  - Enable FSRS
 
 # Installation
 
