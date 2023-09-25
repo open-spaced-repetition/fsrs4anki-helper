@@ -64,6 +64,35 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     return nid_siblings_dict
 
 
+def get_siblings_when_review(card: Card):
+    siblings = mw.col.db.all(
+        f"""
+    SELECT 
+        id,
+        CASE WHEN odid==0
+        THEN did
+        ELSE odid
+        END,
+        json_extract(data, '$.s'),
+        CASE WHEN odid==0 THEN due ELSE odue END
+    FROM cards
+    WHERE nid = {card.nid}
+    AND json_extract(data, '$.s') IS NOT NULL
+    AND type = 2
+    AND queue != -1
+    """
+    )
+    siblings = map(
+        lambda x: x
+        + [
+            mw.col.decks.config_dict_for_deck_id(x[1])["desiredRetention"],
+            mw.col.decks.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
+        ],
+        siblings,
+    )
+    return list(siblings)
+
+
 def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_review = get_last_review_date(revlogs[0])
@@ -302,24 +331,6 @@ def due_sampler(min_due, max_due):
         return random.choice(due_list)
     else:
         return random.randint(min_due, max_due)
-
-
-def get_siblings_when_review(card: Card):
-    siblings = mw.col.db.all(
-        f"""
-    SELECT 
-        id,
-        did,
-        json_extract(data, '$.s'),
-        CASE WHEN odid==0 THEN due ELSE odue END
-    FROM cards
-    WHERE nid = {card.nid}
-    AND json_extract(data, '$.s') IS NOT NULL
-    AND type = 2
-    AND queue != -1
-    """
-    )
-    return list(filter(lambda x: x[2] is not None, siblings))
 
 
 def disperse_siblings_when_review(reviewer, card: Card, ease):
