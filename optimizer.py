@@ -156,51 +156,57 @@ Alternatively, use a different method of optimizing (https://github.com/open-spa
         events = Events()
 
         def run(self):
-            optimizer = Optimizer()
-            
-            self.events.stage.emit("Exporting deck")
-            exporter.exportInto(export_file_path) # This is simply quicker than somehow making it so that anki doesn't zip the export
-            optimizer.anki_extract(export_file_path)
-
-            self.events.stage.emit("Training model")
+            global _optimizing
             try:
-                optimizer.create_time_series(timezone, revlog_start_date, rollover)
-            except ValueError as e:
-                _progress.critical.emit(
-"""You got a value error, This usually happens when the deck has no or very few reviews.
-You have to do some reviews on the deck before you optimize it!""")
-                raise e
-            
-            optimizer.define_model()
-            try:
-                optimizer.pretrain(verbose=False)
-            except AttributeError: # The optimizer in version 3 has no pretrain function
-                pass
-            optimizer.train(verbose=False)
-
-            DEFAULT_RETENTION = 0.8
-
-            if get_optimal_retention:
-                self.events.stage.emit("Finding optimal retention (Ignore right number)")
-                optimizer.predict_memory_states()
-                optimizer.find_optimal_retention(False)
-            else:
-                optimizer.optimal_retention = DEFAULT_RETENTION
-
-            result = {
-                # Calculated
-                "name": name,
-                "w": optimizer.w,
-                REQUEST_RETENTION: optimizer.optimal_retention,
-                RETENTION_IS_NOT_OPTIMIZED: not get_optimal_retention,
+                optimizer = Optimizer()
                 
-                # Defaults
-                MAX_INTERVAL: 36500, 
-                EASY_BONUS: 1.3,
-                HARD_INTERVAL: 1.2
-                }
+                self.events.stage.emit("Exporting deck")
+                exporter.exportInto(export_file_path) # This is simply quicker than somehow making it so that anki doesn't zip the export
+                optimizer.anki_extract(export_file_path)
 
-            self.events.finished.emit(result)
+                self.events.stage.emit("Training model")
+                try:
+                    optimizer.create_time_series(timezone, revlog_start_date, rollover)
+                except ValueError as e:
+                    _progress.critical.emit(
+    """You got a value error, This usually happens when the deck has no or very few reviews.
+    You have to do some reviews on the deck before you optimize it!""")
+                    raise e
+                
+                optimizer.define_model()
+                try:
+                    optimizer.pretrain(verbose=False)
+                except AttributeError: # The optimizer in version 3 has no pretrain function
+                    pass
+                optimizer.train(verbose=False)
+
+                DEFAULT_RETENTION = 0.8
+
+                if get_optimal_retention:
+                    self.events.stage.emit("Finding optimal retention (Ignore right number)")
+                    optimizer.predict_memory_states()
+                    optimizer.find_optimal_retention(False)
+                else:
+                    optimizer.optimal_retention = DEFAULT_RETENTION
+
+                result = {
+                    # Calculated
+                    "name": name,
+                    "w": optimizer.w,
+                    REQUEST_RETENTION: optimizer.optimal_retention,
+                    RETENTION_IS_NOT_OPTIMIZED: not get_optimal_retention,
+                    
+                    # Defaults
+                    MAX_INTERVAL: 36500, 
+                    EASY_BONUS: 1.3,
+                    HARD_INTERVAL: 1.2
+                    }
+
+                self.events.finished.emit(result)
+            except Exception as e:
+                _optimizing = False
+                raise e
+
 
     def on_complete(result: dict[str]):
         global _optimizing
