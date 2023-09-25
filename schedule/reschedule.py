@@ -2,6 +2,8 @@ from ..utils import *
 from ..configuration import Config
 from anki.cards import Card, FSRSMemoryState
 from .disperse_siblings import disperse_siblings_backgroud
+from anki.decks import DeckManager
+from anki.utils import ids2str
 
 
 DEFAULT_FSRS_WEIGHTS = [
@@ -31,6 +33,8 @@ def constrain_difficulty(difficulty: float) -> float:
 
 class FSRS:
     w: List[float]
+    max_ivl: int
+    dr: float
     enable_fuzz: bool
     enable_load_balance: bool
     free_days: List[int]
@@ -41,6 +45,8 @@ class FSRS:
 
     def __init__(self) -> None:
         self.w = DEFAULT_FSRS_WEIGHTS
+        self.max_ivl = 36500
+        self.dr = 0.9
         self.enable_fuzz = False
         self.enable_load_balance = False
         self.free_days = []
@@ -217,69 +223,84 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     )
 
     cnt = 0
-    rescheduled_cards = set()
-    deck_id_names = sorted(
-        mw.col.decks.all_names_and_ids(), key=lambda item: item.name, reverse=True
-    )
     fsrs = FSRS()
-    fsrs.enable_fuzz = True
-    if fsrs.enable_fuzz and config.load_balance:
+    if config.load_balance:
         fsrs.set_load_balance()
     fsrs.free_days = config.free_days
     cancelled = False
-    for deck_id_name in deck_id_names:
-        deck_id, deck_name = deck_id_name.id, deck_id_name.name
+
+    DM = DeckManager(mw.col)
+    if did is not None:
+        did_list = ids2str(DM.deck_and_child_ids(did))
+        did_query = f"AND did IN {did_list}"
+
+    if recent:
+        today_cutoff = mw.col.sched.day_cutoff
+        day_before_cutoff = today_cutoff - (config.days_to_reschedule + 1) * 86400
+        recent_query = (
+            f"AND id IN (SELECT cid FROM revlog WHERE id >= {day_before_cutoff * 1000})"
+        )
+
+    if filter_flag:
+        filter_query = f"AND id IN {ids2str(filtered_cids)}"
+
+    cards = mw.col.db.all(
+        f"""
+        SELECT 
+            id,
+            CASE WHEN odid==0
+            THEN did
+            ELSE odid
+            END
+        FROM cards
+        WHERE queue IN ({QUEUE_TYPE_REV}, {QUEUE_TYPE_REV}, {QUEUE_TYPE_DAY_LEARN_RELEARN})
+        {did_query if did is not None else ""}
+        {recent_query if recent else ""}
+        {filter_query if filter_flag else ""}
+    """
+    )
+    # x[0]: cid
+    # x[1]: did
+    # x[2]: desired retention
+    # x[3]: max interval
+    # x[4]: weights
+    cards = map(
+        lambda x: (
+            x
+            + [
+                DM.config_dict_for_deck_id(x[1])["desiredRetention"],
+                DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
+                DM.config_dict_for_deck_id(x[1])["fsrsWeights"]
+                if len(DM.config_dict_for_deck_id(x[1])["fsrsWeights"]) > 0
+                else DEFAULT_FSRS_WEIGHTS,
+            ]
+        ),
+        cards,
+    )
+
+    for cid, _, desired_retention, max_interval, wegihts in cards:
         if cancelled:
             break
-        if did is not None:
-            if not deck_name.startswith(mw.col.decks.get(did)["name"]):
-                continue
-        cur_deck_param = get_current_deck_parameter(deck_id)
-        if cur_deck_param is None:
-            break
-        fsrs.w = cur_deck_param["w"]
-        query = f'"deck:{deck_name}" ("is:review" OR "is:learn") -"is:suspended"'
-        if recent:
-            query += f' "rated:{config.days_to_reschedule}"'
-        for cid in mw.col.find_cards(query.replace("\\", "\\\\")):
-            if cancelled:
-                break
-            if cid not in rescheduled_cards:
-                rescheduled_cards.add(cid)
-            else:
-                continue
-            if filter_flag and cid not in filtered_cids:
-                continue
-            card = reschedule_card(cid, fsrs, rollover, cur_deck_param)
-            if card is None:
-                continue
-            mw.col.update_card(card)
-            mw.col.merge_undo_entries(undo_entry)
-            cnt += 1
-            if cnt % 500 == 0:
-                mw.taskman.run_on_main(
-                    lambda: mw.progress.update(
-                        value=cnt, label=f"{cnt} cards rescheduled"
-                    )
-                )
-                if mw.progress.want_cancel():
-                    cancelled = True
+        fsrs.w = wegihts
+        fsrs.dr = desired_retention
+        fsrs.max_ivl = max_interval
+        card = reschedule_card(cid, fsrs, rollover)
+        if card is None:
+            continue
+        mw.col.update_card(card)
+        mw.col.merge_undo_entries(undo_entry)
+        cnt += 1
+        if cnt % 500 == 0:
+            mw.taskman.run_on_main(
+                lambda: mw.progress.update(value=cnt, label=f"{cnt} cards rescheduled")
+            )
+            if mw.progress.want_cancel():
+                cancelled = True
 
     return f"{cnt} cards rescheduled"
 
 
-def get_current_deck_parameter(did):
-    deck_config = mw.col.decks.config_dict_for_deck_id(did)
-    return {
-        "w": deck_config.get("fsrsWeights", [])
-        if len(deck_config.get("fsrsWeights", [])) > 0
-        else DEFAULT_FSRS_WEIGHTS,
-        "m": deck_config.get("rev", dict()).get("maxIvl", 36500),
-    }
-
-
-def reschedule_card(cid, fsrs: FSRS, rollover, params):
-    w, max_ivl = params.values()
+def reschedule_card(cid, fsrs: FSRS, rollover):
     last_date = None
     last_s = None
     last_rating = None
@@ -369,21 +390,19 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     if "seed" not in new_custom_data:
         new_custom_data["seed"] = seed
     card.custom_data = json.dumps(new_custom_data)
-    if not card.desired_retention:
-        return card
     if card.type == CARD_TYPE_REV and last_kind != REVLOG_RESCHED:
         fsrs.set_card(card)
         if last_s is None:
-            again_ivl = fsrs.next_interval(again_s, card.desired_retention, max_ivl)
-            hard_ivl = fsrs.next_interval(hard_s, card.desired_retention, max_ivl)
-            good_ivl = fsrs.next_interval(good_s, card.desired_retention, max_ivl)
-            easy_ivl = fsrs.next_interval(easy_s, card.desired_retention, max_ivl)
+            again_ivl = fsrs.next_interval(again_s, fsrs.dr, fsrs.max_ivl)
+            hard_ivl = fsrs.next_interval(hard_s, fsrs.dr, fsrs.max_ivl)
+            good_ivl = fsrs.next_interval(good_s, fsrs.dr, fsrs.max_ivl)
+            easy_ivl = fsrs.next_interval(easy_s, fsrs.dr, fsrs.max_ivl)
             easy_ivl = max(good_ivl + 1, easy_ivl)
         else:
-            again_ivl = fsrs.next_interval(again_s, card.desired_retention, max_ivl)
-            hard_ivl = fsrs.next_interval(hard_s, card.desired_retention, max_ivl)
-            good_ivl = fsrs.next_interval(good_s, card.desired_retention, max_ivl)
-            easy_ivl = fsrs.next_interval(easy_s, card.desired_retention, max_ivl)
+            again_ivl = fsrs.next_interval(again_s, fsrs.dr, fsrs.max_ivl)
+            hard_ivl = fsrs.next_interval(hard_s, fsrs.dr, fsrs.max_ivl)
+            good_ivl = fsrs.next_interval(good_s, fsrs.dr, fsrs.max_ivl)
+            easy_ivl = fsrs.next_interval(easy_s, fsrs.dr, fsrs.max_ivl)
             hard_ivl = min(hard_ivl, good_ivl)
             good_ivl = max(hard_ivl + 1, good_ivl)
             easy_ivl = max(good_ivl + 1, easy_ivl)

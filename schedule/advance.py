@@ -31,7 +31,10 @@ def advance(did):
         f"""
         SELECT 
             id, 
-            did,
+            CASE WHEN odid==0
+            THEN did
+            ELSE odid
+            END,
             ivl,
             json_extract(data, '$.s'),
             CASE WHEN odid==0
@@ -52,9 +55,8 @@ def advance(did):
     # x[2]: interval
     # x[3]: stability
     # x[4]: elapsed days
-    # x[5]: requested retention
+    # x[5]: desired retention
     # x[6]: current retention
-    cards = filter(lambda x: x[3] is not None, cards)
     cards = map(
         lambda x: (
             x
