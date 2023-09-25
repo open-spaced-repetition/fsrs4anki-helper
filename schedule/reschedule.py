@@ -178,7 +178,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
             ELSE odid
             END
         FROM cards
-        WHERE queue IN ({QUEUE_TYPE_REV}, {QUEUE_TYPE_REV}, {QUEUE_TYPE_DAY_LEARN_RELEARN})
+        WHERE queue IN ({QUEUE_TYPE_LRN}, {QUEUE_TYPE_REV}, {QUEUE_TYPE_DAY_LEARN_RELEARN})
         {did_query if did is not None else ""}
         {recent_query if recent else ""}
         {filter_query if filter_flag else ""}
