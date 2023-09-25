@@ -110,7 +110,9 @@ def advance(did):
             return
 
     undo_entry = mw.col.add_custom_undo_entry("Advance")
+
     mw.progress.start()
+    start_time = time.time()
 
     cnt = 0
     max_retention = 0
@@ -125,8 +127,8 @@ def advance(did):
         except IndexError:
             continue
 
-        last_due = get_last_review_date(revlog)
-        new_ivl = mw.col.sched.today - last_due
+        last_review = get_last_review_date(revlog)
+        new_ivl = mw.col.sched.today - last_review
         card = update_card_due_ivl(card, revlog, new_ivl)
         old_custom_data = json.loads(card.custom_data)
         old_custom_data["v"] = "advance"
@@ -142,7 +144,9 @@ def advance(did):
         )
         max_retention = max(max_retention, new_retention)
 
-    tooltip(f"""{cnt} cards advanced, max retention: {max_retention:.2%}""")
+    tooltip(
+        f"""{cnt} cards advanced in {time.time() - start_time:.2f} seconds. max retention: {max_retention:.2%}"""
+    )
     mw.progress.finish()
     mw.col.reset()
     mw.reset()

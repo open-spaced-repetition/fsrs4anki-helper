@@ -1,4 +1,4 @@
-import anki.stats
+from anki.stats import CollectionStats
 from .configuration import Config
 from .utils import *
 
@@ -73,8 +73,8 @@ def retention_stability_burden(lim) -> float:
     recall_sum = sum(item[0] for item in retention_stability_burden_list)
     stability_sum = sum(item[1] for item in retention_stability_burden_list)
     burden_sum = sum(item[2] for item in retention_stability_burden_list)
-    estimated_total_knowledge_notes = round(
-        sum(item[0] / item[3] for item in retention_stability_burden_list)
+    estimated_total_knowledge_notes = sum(
+        item[0] / item[3] for item in retention_stability_burden_list
     )
     return (
         recall_sum / card_cnt,
@@ -96,7 +96,7 @@ def todayStats_new(self):
     )
 
 
-def get_fsrs_stats(self):
+def get_fsrs_stats(self: CollectionStats):
     lim = self._limit()
     if lim:
         lim = " AND did IN %s" % lim
@@ -112,15 +112,27 @@ def get_fsrs_stats(self):
     ) = retention_stability_burden(lim)
     i = []
     _line_now(i, "Average retention", f"{retention * 100: .2f}%")
-    _line_now(i, "Average stability", f"{int(stability)} days")
-    _line_now(i, "Burden", f"{burden: .2f} reviews/day")
-    _line_now(i, "Count", f"{card_cnt} cards ({note_cnt} notes)")
+    _line_now(i, "Average stability", f"{round(stability)} days")
+    _line_now(i, "Burden", f"{round(burden)} reviews/day")
+    i.append(
+        "<tr><td align=left style='padding: 5px'><b>Retention by Cards:</b></td></tr>"
+    )
+    _line_now(i, "Total Count", f"{card_cnt} cards")
     _line_now(
         i,
         "Estimated total knowledge",
-        f"{estimated_total_knowledge} cards ({estimated_total_knowledge_notes} notes)",
+        f"{estimated_total_knowledge} cards ({retention * 100:.2f}%)",
     )
-    title = anki.stats.CollectionStats._title(
+    i.append(
+        "<tr><td align=left style='padding: 5px'><b>Retention by Notes:</b></td></tr>"
+    )
+    _line_now(i, "Total Count", f"{note_cnt} notes")
+    _line_now(
+        i,
+        "Estimated total knowledge",
+        f"{round(estimated_total_knowledge_notes)} notes ({(estimated_total_knowledge_notes / max(note_cnt, 1)) * 100:.2f}%)",
+    )
+    title = CollectionStats._title(
         self,
         "FSRS Stats",
         "Only calculated for cards with custom data (affected by FSRS)",
@@ -145,7 +157,9 @@ def get_fsrs_stats(self):
     )
 
 
-def get_retention_graph(self):
+def get_retention_graph(self: CollectionStats):
+    config = Config()
+    config.load()
     start, days, chunk = self.get_start_end_chunk()
     lims = []
     if days is not None:
@@ -160,8 +174,10 @@ def get_retention_graph(self):
 
     query = f"""SELECT
     CAST((id/1000.0 - {mw.col.sched.day_cutoff}) / 86400.0 as int)/{chunk} AS day,
-    SUM(CASE WHEN  ease == 1 THEN 0.0 ELSE 1.0 END) / COUNT(*) AS retention,
-    COUNT(*) AS review_cnt
+    COUNT(CASE WHEN lastIvl < {config.mature_ivl} AND lastIvl > {config.mature_ivl} * -86400 THEN id ELSE NULL END) AS review_cnt_young,
+    COUNT(CASE WHEN lastIvl >= {config.mature_ivl} OR lastIvl <= {config.mature_ivl} * -86400 THEN id ELSE NULL END) AS review_cnt_mature,
+    COUNT(CASE WHEN ease > 1 AND lastIvl < {config.mature_ivl} AND lastIvl > {config.mature_ivl} * -86400 THEN id ELSE NULL END) / (COUNT(CASE WHEN lastIvl < {config.mature_ivl} AND lastIvl > {config.mature_ivl} * -86400 THEN id ELSE NULL END) + 0.0001),
+    COUNT(CASE WHEN ease > 1 AND (lastIvl >= {config.mature_ivl} OR lastIvl <= {config.mature_ivl} * -86400) THEN id ELSE NULL END) / (COUNT(CASE WHEN lastIvl >= {config.mature_ivl} OR lastIvl <= {config.mature_ivl} * -86400 THEN id ELSE NULL END) + 0.0001)
     FROM revlog
     WHERE (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1)
     {lim}
@@ -169,39 +185,59 @@ def get_retention_graph(self):
     """
 
     offset_retention_review_cnt = mw.col.db.all(query)
+
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
-            (1, "#070", "Retention Rate"),
-            (2, "#00F", "Review Cnt"),
+            (1, "#7c7", "Review Count (young)"),
+            (2, "#070", "Review Count (mature)"),
+            (3, "#ffd268", "Retention Rate (young)"),
+            (4, "#e49a60", "Retention Rate (mature)"),
         ),
     )
 
     if not data:
         return ""
 
-    rate_data, _, cnt_data, _ = data
+    tmp = -2
+    new_data = []
+    for item in filter(lambda x: x["label"] is not None, data):
+        if item["label"].startswith("Retention"):
+            item["lines"] = {"show": True}
+            item["bars"] = {"show": False}
+            item["yaxis"] = 2
+            item["stack"] = tmp
+            tmp -= 1
+        else:
+            item["lines"] = {"show": False}
+            item["bars"] = {"show": True}
+            item["yaxis"] = 1
+            item["stack"] = -1
+        new_data.append(item)
+    del tmp
+    data = new_data
 
-    rate_data["lines"] = {"show": True}
-    rate_data["bars"] = {"show": False}
-    rate_data["yaxis"] = 1
+    recall_min = min(min(item[3], item[4]) for item in offset_retention_review_cnt)
+    recall_min = math.floor(recall_min * 10) / 10
+    recall_max = max(max(item[3], item[4]) for item in offset_retention_review_cnt)
+    recall_max = math.ceil(recall_max * 10) / 10
 
-    cnt_data["lines"] = {"show": False}
-    cnt_data["bars"] = {"show": True}
-    cnt_data["yaxis"] = 2
-
-    data = [rate_data, cnt_data]
-    print(data)
+    step = round((recall_max - recall_min) / 5, 2)
+    ticks = [
+        [recall_min + step * i, str(round(recall_min + step * i, 2))]
+        for i in range(0, 6)
+    ]
 
     conf = dict(
         xaxis=dict(tickDecimals=0, max=0.5),
         yaxes=[
+            dict(position="left", min=0),
             dict(
-                min=0,
-                max=1,
-                ticks=[[x / 10, str(round(x / 10, 1))] for x in range(0, 11)],
+                position="right",
+                min=recall_min,
+                max=recall_max,
+                ticks=ticks,
             ),
-            dict(position="right", min=0),
         ],
     )
     if days is not None:
@@ -213,7 +249,7 @@ def get_retention_graph(self):
         )
 
     txt1 = self._title("Retention Graph", "Retention rate and review count over time")
-    txt1 += plot("retention", data, ylabel="Retention Rate", ylabel2="Review Count")
+    txt1 += plot("retention", data, ylabel="Review Count", ylabel2="Retention Rate")
     return self._section(txt1)
 
 
@@ -275,10 +311,10 @@ def init_stats():
     config.load()
     if config.fsrs_stats:
         global todayStats_old, cardGraph_old
-        todayStats_old = anki.stats.CollectionStats.todayStats
-        cardGraph_old = anki.stats.CollectionStats.cardGraph
-        anki.stats.CollectionStats.todayStats = todayStats_new
-        anki.stats.CollectionStats.cardGraph = difficulty_distribution_graph
+        todayStats_old = CollectionStats.todayStats
+        cardGraph_old = CollectionStats.cardGraph
+        CollectionStats.todayStats = todayStats_new
+        CollectionStats.cardGraph = difficulty_distribution_graph
 
 
 # code modified from https://ankiweb.net/shared/info/1779060522
@@ -321,11 +357,13 @@ def get_true_retention(self):
         period = 10000
         pname = "Deck life"
     pastPeriod = stats_list(lim, (mw.col.sched.day_cutoff - 86400 * period) * 1000)
-    true_retention_part = anki.stats.CollectionStats._title(
+    true_retention_part = CollectionStats._title(
         self,
         "True Retention",
-        "The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.",
+        "<p>The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.</p>",
     )
+    config = Config()
+    config.load()
     true_retention_part += """
         <style>
             td.trl { border: 1px solid; text-align: left; padding: 5px  }
@@ -335,8 +373,8 @@ def get_true_retention(self):
             span.mature { color: #00aa00 }
             span.total { color: #55aa55 }
             span.relearn { color: #c35617 }
-        </style>
-        <br /><br />
+        </style>"""
+    true_retention_part += f"""
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
                 <td class="trl" rowspan=3><b>Past</b></td>
@@ -344,8 +382,8 @@ def get_true_retention(self):
                 <td class="trc" colspan=2 valign=middle><b>Cards</b></td>
             </tr>
             <tr>
-                <td class="trc" colspan=3><span class="young"><b>Young</b></span></td>
-                <td class="trc" colspan=3><span class="mature"><b>Mature</b></span></td>
+                <td class="trc" colspan=3><span class="young"><b>Young (ivl < {config.mature_ivl} d)</b></span></td>
+                <td class="trc" colspan=3><span class="mature"><b>Mature (ivl ≥ {config.mature_ivl} d)</b></span></td>
                 <td class="trc" colspan=3><span class="total"><b>Total</b></span></td>
                 <td class="trc" rowspan=2><span class="young"><b>Learned</b></span></td>
                 <td class="trc" rowspan=2><span class="relearn"><b>Relearned</b></span></td>
@@ -366,9 +404,7 @@ def get_true_retention(self):
     true_retention_part += stats_row("Week", pastWeek)
     true_retention_part += stats_row(pname, pastPeriod)
     true_retention_part += "</table>"
-    config = Config()
-    config.load()
-    true_retention_part += f"<p>By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config. The current value is {config.mature_ivl} days.</p>"
+    true_retention_part += f"<p>By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config.</p>"
     return self._section(true_retention_part)
 
 
