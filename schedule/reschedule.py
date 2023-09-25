@@ -2,7 +2,6 @@ from ..utils import *
 from ..configuration import Config
 from anki.cards import Card
 from .disperse_siblings import disperse_siblings_backgroud
-from aqt.gui_hooks import reviewer_did_answer_card
 
 
 def constrain_difficulty(difficulty: float) -> float:
@@ -233,9 +232,11 @@ class FSRS:
 def reschedule(
     did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""
 ):
+    start_time = time.time()
+
     def on_done(future):
         mw.progress.finish()
-        tooltip(future.result())
+        tooltip(f"{future.result()} in {time.time() - start_time:.2f} seconds")
         mw.col.reset()
         mw.reset()
 
