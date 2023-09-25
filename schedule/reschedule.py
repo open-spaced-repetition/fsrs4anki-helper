@@ -6,33 +6,7 @@ from anki.decks import DeckManager
 from anki.utils import ids2str
 
 
-DEFAULT_FSRS_WEIGHTS = [
-    0.4,
-    0.6,
-    2.4,
-    5.8,
-    4.93,
-    0.94,
-    0.86,
-    0.01,
-    1.49,
-    0.14,
-    0.94,
-    2.18,
-    0.05,
-    0.34,
-    1.26,
-    0.29,
-    2.61,
-]
-
-
-def constrain_difficulty(difficulty: float) -> float:
-    return min(10.0, max(1.0, difficulty))
-
-
 class FSRS:
-    w: List[float]
     max_ivl: int
     dr: float
     enable_load_balance: bool
@@ -43,7 +17,6 @@ class FSRS:
     elapsed_days: int
 
     def __init__(self) -> None:
-        self.w = DEFAULT_FSRS_WEIGHTS
         self.max_ivl = 36500
         self.dr = 0.9
         self.enable_load_balance = False
@@ -79,51 +52,6 @@ class FSRS:
                 GROUP BY (id/1000-{mw.col.sched.day_cutoff})/86400"""
             )
         }
-
-    def init_stability(self, rating: int) -> float:
-        return max(0.1, self.w[rating - 1])
-
-    def init_difficulty(self, rating: int) -> float:
-        return constrain_difficulty(self.w[4] - self.w[5] * (rating - 3))
-
-    def next_difficulty(self, d: float, rating: int) -> float:
-        new_d = d - self.w[6] * (rating - 3)
-        return constrain_difficulty(self.mean_reversion(self.w[4], new_d))
-
-    def mean_reversion(self, init: float, current: float) -> float:
-        return self.w[7] * init + (1 - self.w[7]) * current
-
-    def next_recall_stability(self, d: float, s: float, r: float, rating: int) -> float:
-        hard_penalty = self.w[15] if rating == 2 else 1
-        easy_bonus = self.w[16] if rating == 4 else 1
-        return min(
-            max(
-                0.1,
-                s
-                * (
-                    1
-                    + math.exp(self.w[8])
-                    * (11 - d)
-                    * math.pow(s, -self.w[9])
-                    * (math.exp((1 - r) * self.w[10]) - 1)
-                    * hard_penalty
-                    * easy_bonus
-                ),
-            ),
-            36500,
-        )
-
-    def next_forget_stability(self, d: float, s: float, r: float) -> float:
-        return min(
-            max(
-                0.1,
-                self.w[11]
-                * math.pow(d, -self.w[12])
-                * (math.pow(s + 1, self.w[13]) - 1)
-                * math.exp((1 - r) * self.w[14]),
-            ),
-            s,
-        )
 
     def set_fuzz_factor(self, cid: int, reps: int):
         random.seed(cid + reps)
@@ -215,7 +143,6 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     config = Config()
     config.load()
 
-    rollover = mw.col.all_config()["rollover"]
     undo_entry = mw.col.add_custom_undo_entry("Reschedule")
     mw.taskman.run_on_main(
         lambda: mw.progress.start(label="Rescheduling", immediate=False)
@@ -268,21 +195,17 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
             + [
                 DM.config_dict_for_deck_id(x[1])["desiredRetention"],
                 DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
-                DM.config_dict_for_deck_id(x[1])["fsrsWeights"]
-                if len(DM.config_dict_for_deck_id(x[1])["fsrsWeights"]) > 0
-                else DEFAULT_FSRS_WEIGHTS,
             ]
         ),
         cards,
     )
 
-    for cid, _, desired_retention, max_interval, wegihts in cards:
+    for cid, _, desired_retention, max_interval in cards:
         if cancelled:
             break
-        fsrs.w = wegihts
         fsrs.dr = desired_retention
         fsrs.max_ivl = max_interval
-        card = reschedule_card(cid, fsrs, rollover)
+        card = reschedule_card(cid, fsrs, filter_flag)
         if card is None:
             continue
         mw.col.update_card(card)
@@ -298,88 +221,20 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     return f"{cnt} cards rescheduled"
 
 
-def reschedule_card(cid, fsrs: FSRS, rollover):
-    last_date = None
-    last_s = None
-    last_rating = None
-    last_kind = None
-    s = None
-    d = None
-    rating = None
-    revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
-    reps = len(revlogs)
-    for i, revlog in enumerate(reversed(revlogs)):
-        if (
-            i == 0
-            and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN))
-            and not (has_again(revlogs) or has_manual_reset(revlogs))
-        ):
-            break
-        last_s = s
-        rating = revlog.button_chosen
-
-        if (
-            last_kind is not None
-            and last_kind in (REVLOG_REV, REVLOG_RELRN)
-            and revlog.review_kind == REVLOG_LRN
-        ):
-            # forget card
-            last_date = None
-            last_s = None
-            s = None
-            d = None
-        last_kind = revlog.review_kind
-
-        if last_kind == REVLOG_RESCHED:
-            if revlog.ease != 0:
-                # set due date
-                continue
-            else:
-                # forget card
-                last_date = None
-                last_s = None
-                s = None
-                d = None
-                continue
-
-        if last_date is None:
-            again_s = fsrs.init_stability(1)
-            hard_s = fsrs.init_stability(2)
-            good_s = fsrs.init_stability(3)
-            easy_s = fsrs.init_stability(4)
-            d = fsrs.init_difficulty(rating)
-            s = fsrs.init_stability(rating)
-            last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
-            last_rating = rating
-        else:
-            elapsed_days = (
-                datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal()
-                - last_date.toordinal()
-            )
-            if elapsed_days <= 0:
-                continue
-            r = power_forgetting_curve(elapsed_days, s)
-            fsrs.elapsed_days = elapsed_days
-            again_s = fsrs.next_forget_stability(fsrs.next_difficulty(d, 1), s, r)
-            hard_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 2), s, r, 2)
-            good_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 3), s, r, 3)
-            easy_s = fsrs.next_recall_stability(fsrs.next_difficulty(d, 4), s, r, 4)
-            d = fsrs.next_difficulty(d, rating)
-            s = (
-                fsrs.next_recall_stability(d, s, r, rating)
-                if rating > 1
-                else fsrs.next_forget_stability(d, s, r)
-            )
-            last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
-            last_rating = rating
-
-    if rating is None or s is None:
-        return None
+def reschedule_card(cid, fsrs: FSRS, recompute=False):
+    card = mw.col.get_card(cid)
+    if recompute:
+        memory_state = mw.col.compute_memory_state(cid)
+        s = memory_state.stability
+        d = memory_state.difficulty
+        card.memory_state = FSRSMemoryState(stability=s, difficulty=d)
+    else:
+        memory_state = card.memory_state
+        s = memory_state.stability
+        d = memory_state.difficulty
 
     new_custom_data = {"v": "reschedule"}
-    card = mw.col.get_card(cid)
-    card.memory_state = FSRSMemoryState(stability=s, difficulty=d)
-    seed = fsrs.set_fuzz_factor(cid, reps)
+    seed = fsrs.set_fuzz_factor(cid, card.reps)
     if card.custom_data != "":
         old_custom_data = json.loads(card.custom_data)
         if "seed" in old_custom_data:
@@ -388,25 +243,17 @@ def reschedule_card(cid, fsrs: FSRS, rollover):
     if "seed" not in new_custom_data:
         new_custom_data["seed"] = seed
     card.custom_data = json.dumps(new_custom_data)
-    if card.type == CARD_TYPE_REV and last_kind != REVLOG_RESCHED:
+
+    try:
+        revlog = filter_revlogs(mw.col.card_stats_data(cid).revlog)[0]
+    except IndexError:
+        return card
+
+    if card.type == CARD_TYPE_REV and revlog.review_kind != REVLOG_RESCHED:
         fsrs.set_card(card)
-        if last_s is None:
-            again_ivl = fsrs.next_interval(again_s, fsrs.dr, fsrs.max_ivl)
-            hard_ivl = fsrs.next_interval(hard_s, fsrs.dr, fsrs.max_ivl)
-            good_ivl = fsrs.next_interval(good_s, fsrs.dr, fsrs.max_ivl)
-            easy_ivl = fsrs.next_interval(easy_s, fsrs.dr, fsrs.max_ivl)
-            easy_ivl = max(good_ivl + 1, easy_ivl)
-        else:
-            again_ivl = fsrs.next_interval(again_s, fsrs.dr, fsrs.max_ivl)
-            hard_ivl = fsrs.next_interval(hard_s, fsrs.dr, fsrs.max_ivl)
-            good_ivl = fsrs.next_interval(good_s, fsrs.dr, fsrs.max_ivl)
-            easy_ivl = fsrs.next_interval(easy_s, fsrs.dr, fsrs.max_ivl)
-            hard_ivl = min(hard_ivl, good_ivl)
-            good_ivl = max(hard_ivl + 1, good_ivl)
-            easy_ivl = max(good_ivl + 1, easy_ivl)
-        new_ivl = [again_ivl, hard_ivl, good_ivl, easy_ivl][last_rating - 1]
+        new_ivl = fsrs.next_interval(s, fsrs.dr, fsrs.max_ivl)
         due_before = max(card.odue if card.odid else card.due, mw.col.sched.today)
-        card = update_card_due_ivl(card, revlogs[0], new_ivl)
+        card = update_card_due_ivl(card, revlog, new_ivl)
         due_after = max(card.odue if card.odid else card.due, mw.col.sched.today)
         if fsrs.enable_load_balance:
             fsrs.due_cnt_perday_from_first_day[due_before] -= 1
