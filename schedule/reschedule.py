@@ -35,7 +35,6 @@ class FSRS:
     w: List[float]
     max_ivl: int
     dr: float
-    enable_fuzz: bool
     enable_load_balance: bool
     free_days: List[int]
     due_cnt_perday_from_first_day: Dict[int, int]
@@ -47,7 +46,6 @@ class FSRS:
         self.w = DEFAULT_FSRS_WEIGHTS
         self.max_ivl = 36500
         self.dr = 0.9
-        self.enable_fuzz = False
         self.enable_load_balance = False
         self.free_days = []
         self.elapsed_days = 0
@@ -133,17 +131,19 @@ class FSRS:
         return round(self.fuzz_factor * 10000, 0)
 
     def apply_fuzz(self, ivl):
-        if not self.enable_fuzz or ivl < 2.5:
+        if ivl < 2.5:
             return ivl
         ivl = int(round(ivl))
         min_ivl, max_ivl = get_fuzz_range(ivl, self.elapsed_days)
         self.elapsed_days = 0
-        if self.enable_load_balance:
+        if not self.enable_load_balance:
+            return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
+        else:
             min_num_cards = 18446744073709551616
             best_ivl = ivl
-            step = (max_ivl - min_ivl) // 1000 + 1
+            step = (max_ivl - min_ivl) // 100 + 1
             due = self.card.due if self.card.odid == 0 else self.card.odue
-            for check_ivl in reversed(range(min_ivl, max_ivl + 1, step)):
+            for check_ivl in reversed(range(min_ivl, max_ivl + step, step)):
                 check_due = due + check_ivl - self.card.ivl
                 day_offset = check_due - mw.col.sched.today
                 due_date = datetime.now() + timedelta(days=day_offset)
@@ -163,7 +163,6 @@ class FSRS:
                     best_ivl = check_ivl
                     min_num_cards = num_cards
             return best_ivl
-        return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
 
     def next_interval(self, stability, retention, max_ivl):
         new_interval = self.apply_fuzz(9 * stability * (1 / retention - 1))
@@ -226,9 +225,8 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     fsrs = FSRS()
     if config.load_balance:
         fsrs.set_load_balance()
-    fsrs.free_days = config.free_days
+        fsrs.free_days = config.free_days
     cancelled = False
-
     DM = DeckManager(mw.col)
     if did is not None:
         did_list = ids2str(DM.deck_and_child_ids(did))

@@ -57,11 +57,13 @@ def postpone(did):
     # x[4]: elapsed days
     # x[5]: desired retention
     # x[6]: current retention
+    # x[7]: max interval
     cards = map(
         lambda x: (
             x
             + [
                 power_forgetting_curve(x[4], x[3]),
+                DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
             ]
         ),
         cards,
@@ -90,14 +92,11 @@ def postpone(did):
 
     cnt = 0
     min_retention = 1
-    for cid, did, ivl, stability, elapsed_days, _, _ in cards:
+    for cid, did, ivl, stability, elapsed_days, _, _, max_ivl in cards:
         if cnt >= desired_postpone_cnt:
             break
 
         card = mw.col.get_card(cid)
-        max_ivl = (
-            DM.config_dict_for_deck_id(did).get("rev", dict()).get("maxIvl", 36500)
-        )
 
         try:
             revlog = filter_revlogs(mw.col.card_stats_data(cid).revlog)[0]

@@ -6,7 +6,6 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 import copy
 
-did_to_deck_parameters = {}
 enable_load_balance = None
 free_days = None
 version = None
@@ -15,12 +14,20 @@ version = None
 def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if did is not None:
         did_list = ids2str(mw.col.decks.deck_and_child_ids(did))
+        did_query = f"AND did IN {did_list}"
+
+    if filter_flag:
+        nid_query = f"AND nid IN ({filtered_nid_string})"
+
     siblings = mw.col.db.all(
         f"""
     SELECT 
         id,
         nid,
-        did,
+        CASE WHEN odid==0
+        THEN did
+        ELSE odid
+        END,
         json_extract(data, '$.s'),
         CASE WHEN odid==0 THEN due ELSE odue END
     FROM cards
@@ -30,32 +37,38 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
         WHERE type = 2
         AND queue != -1
         AND json_extract(data, '$.s') IS NOT NULL
-        {"AND nid IN (" + filtered_nid_string + ")" if filter_flag else ""}
+        {nid_query if filter_flag else ""}
         GROUP BY nid
         HAVING count(*) > 1
     )
     AND json_extract(data, '$.s') IS NOT NULL
     AND type = 2
     AND queue != -1
-    {"AND did IN %s" % did_list if did is not None else ""}
+    {did_query if did is not None else ""}
     """
     )
-    siblings = filter(lambda x: x[3] is not None, siblings)
     nid_siblings_dict = {}
     for cid, nid, did, stability, due in siblings:
         if nid not in nid_siblings_dict:
             nid_siblings_dict[nid] = []
-        nid_siblings_dict[nid].append((cid, did, stability, due))
+        nid_siblings_dict[nid].append(
+            (
+                cid,
+                did,
+                stability,
+                due,
+                mw.col.decks.config_dict_for_deck_id(did)["desiredRetention"],
+                mw.col.decks.config_dict_for_deck_id(did)["rev"]["maxIvl"],
+            )
+        )
     return nid_siblings_dict
 
 
-def get_due_range(cid, parameters, stability, due):
+def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_review = get_last_review_date(revlogs[0])
-    new_ivl = int(
-        round(9 * stability * (1 / mw.col.get_card(cid).desired_retention - 1))
-    )
-    new_ivl = min(new_ivl, parameters["m"])
+    new_ivl = int(round(9 * stability * (1 / desired_retention - 1)))
+    new_ivl = min(new_ivl, maximum_interval)
 
     if new_ivl <= 2.5:
         return (due, due, cid), last_review
@@ -79,8 +92,8 @@ def get_due_range(cid, parameters, stability, due):
 
 def disperse(siblings):
     due_ranges_last_review = {
-        cid: get_due_range(cid, did_to_deck_parameters[did], stability, due)
-        for cid, did, stability, due in siblings
+        cid: get_due_range(cid, stability, due, dr, max_ivl)
+        for cid, _, stability, due, dr, max_ivl in siblings
     }
     due_ranges = {
         cid: due_range for cid, (due_range, _) in due_ranges_last_review.items()
@@ -121,15 +134,6 @@ def disperse_siblings(
 def disperse_siblings_backgroud(
     did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""
 ):
-    global did_to_deck_parameters
-
-    DM = DeckManager(mw.col)
-    for deckname_id in mw.col.decks.all_names_and_ids():
-        deck_config = DM.config_dict_for_deck_id(deckname_id.id)
-        did_to_deck_parameters[deckname_id.id] = {
-            "m": deck_config.get("rev", dict()).get("maxIvl", 36500),
-        }
-
     config = Config()
     config.load()
     global enable_load_balance, free_days
@@ -331,14 +335,6 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     global enable_load_balance, free_days
     enable_load_balance = config.load_balance
     free_days = config.free_days
-
-    global did_to_deck_parameters
-    DM = DeckManager(mw.col)
-    for deckname_id in mw.col.decks.all_names_and_ids():
-        deck_config = DM.config_dict_for_deck_id(deckname_id.id)
-        did_to_deck_parameters[deckname_id.id] = {
-            "m": deck_config["rev"]["maxIvl"],
-        }
 
     siblings = get_siblings_when_review(card)
 
