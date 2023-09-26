@@ -228,6 +228,13 @@ class FSRS:
     def set_card(self, card: Card):
         self.card = card
 
+    def memory_state_from_sm2(self, ease_factor, interval, requestretention):
+        if self.version[0] == 3:
+            stability = interval * math.log(0.9) / math.log(requestretention)
+            difficulty = 11.0 - (ease_factor - 1.0) / (math.exp(self.w[6]) * math.pow(stability, self.w[7]) * (math.exp((1 - requestretention) * self.w[8]) - 1))
+        elif self.version[0] == 4:
+            stability = interval * math.log(0.9) / math.log(requestretention)
+            difficulty = 11.0 - (ease_factor - 1.0) / (math.exp(self.w[8]) * math.pow(stability, -self.w[9]) * (math.exp((1 - requestretention) * self.w[10]) - 1))
 
 def reschedule(
     did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""
@@ -380,15 +387,10 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     reps = len(revlogs)
     for i, revlog in enumerate(reversed(revlogs)):
-        if (
-            i == 0
-            and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN))
-            and not (has_again(revlogs) or has_manual_reset(revlogs))
-        ):
-            break
-        last_s = s
-        rating = revlog.button_chosen
-
+        if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)):
+            memory_state_from_sm2()
+            continue
+            
         if (
             last_kind is not None
             and last_kind in (REVLOG_REV, REVLOG_RELRN)
