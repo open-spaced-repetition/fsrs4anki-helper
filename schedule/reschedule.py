@@ -397,7 +397,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     reps = len(revlogs)
     for i, revlog in enumerate(reversed(revlogs)):
-        if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)):
+        if i == 0 and revlog.review_kind == REVLOG_REV:
             s, d = fsrs.memory_state_from_sm2(revlog.ease/100, revlog.interval/86400, retention)
             continue
         last_s = s
