@@ -109,3 +109,12 @@ def due_to_date(due: int) -> str:
 
 def power_forgetting_curve(elapsed_days, stability):
     return (1 + elapsed_days / (9 * stability)) ** -1
+
+
+def write_custom_data(card: Card, key, value):
+    if card.custom_data != "":
+        custom_data = json.loads(card.custom_data)
+        custom_data[key] = value
+    else:
+        custom_data = {key: value}
+    card.custom_data = json.dumps(custom_data)

@@ -228,10 +228,12 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         s = memory_state.stability
         d = memory_state.difficulty
         card.memory_state = FSRSMemoryState(stability=s, difficulty=d)
-    else:
+    elif card.memory_state:
         memory_state = card.memory_state
         s = memory_state.stability
         d = memory_state.difficulty
+    else:
+        return None
 
     new_custom_data = {"v": "reschedule"}
     seed = fsrs.set_fuzz_factor(cid, card.reps)

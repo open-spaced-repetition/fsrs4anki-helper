@@ -111,9 +111,7 @@ def postpone(did):
             max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay), max_ivl
         )
         card = update_card_due_ivl(card, revlog, new_ivl)
-        old_custom_data = json.loads(card.custom_data)
-        old_custom_data["v"] = "postpone"
-        card.custom_data = json.dumps(old_custom_data)
+        write_custom_data(card, "v", "postpone")
         mw.col.update_card(card)
         mw.col.merge_undo_entries(undo_entry)
         cnt += 1
