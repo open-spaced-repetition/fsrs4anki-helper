@@ -231,10 +231,20 @@ class FSRS:
     def memory_state_from_sm2(self, ease_factor, interval, requestretention):
         if self.version[0] == 3:
             stability = interval * math.log(0.9) / math.log(requestretention)
-            difficulty = 11.0 - (ease_factor - 1.0) / (math.exp(self.w[6]) * math.pow(stability, self.w[7]) * (math.exp((1 - requestretention) * self.w[8]) - 1))
+            difficulty = 11.0 - (ease_factor - 1.0) / (
+                math.exp(self.w[6])
+                * math.pow(stability, self.w[7])
+                * (math.exp((1 - requestretention) * self.w[8]) - 1)
+            )
         elif self.version[0] == 4:
             stability = interval * math.log(0.9) / math.log(requestretention)
-            difficulty = 11.0 - (ease_factor - 1.0) / (math.exp(self.w[8]) * math.pow(stability, -self.w[9]) * (math.exp((1 - requestretention) * self.w[10]) - 1))
+            difficulty = 11.0 - (ease_factor - 1.0) / (
+                math.exp(self.w[8])
+                * math.pow(stability, -self.w[9])
+                * (math.exp((1 - requestretention) * self.w[10]) - 1)
+            )
+        return stability, difficulty
+
 
 def reschedule(
     did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""
@@ -388,9 +398,10 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     reps = len(revlogs)
     for i, revlog in enumerate(reversed(revlogs)):
         if i == 0 and (revlog.review_kind not in (REVLOG_LRN, REVLOG_RELRN)):
-            memory_state_from_sm2()
+            s, d = fsrs.memory_state_from_sm2(revlog.ease/100, revlog.interval/86400, retention)
             continue
-            
+        last_s = s
+        rating = revlog.button_chosen
         if (
             last_kind is not None
             and last_kind in (REVLOG_REV, REVLOG_RELRN)
