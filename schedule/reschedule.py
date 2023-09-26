@@ -397,11 +397,19 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     reps = len(revlogs)
     for i, revlog in enumerate(reversed(revlogs)):
+        rating = revlog.button_chosen
         if i == 0 and revlog.review_kind == REVLOG_REV:
-            s, d = fsrs.memory_state_from_sm2(revlog.ease/100, revlog.interval/86400, retention)
+            s, d = fsrs.memory_state_from_sm2(revlog.ease/1000, revlog.interval/86400, retention)
+            s = max(0.1, min(s, 36500))
+            d = constrain_difficulty(d)
+            again_s = s
+            hard_s = s
+            good_s = s
+            easy_s = s
+            last_date = datetime.fromtimestamp(revlog.time - rollover * 60 * 60)
+            last_rating = rating
             continue
         last_s = s
-        rating = revlog.button_chosen
         if (
             last_kind is not None
             and last_kind in (REVLOG_REV, REVLOG_RELRN)
