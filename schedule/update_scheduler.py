@@ -184,8 +184,18 @@ def update_scheduler(_):
                 new_prefs = ",\n  ".join(pref_replace(pref) for pref in old_prefs)
                 new_prefs = f"\g<1>[\n  {new_prefs}\n]"
 
+                SKIP_DECKS_TEXT = \
+"""
+
+// To turn off FSRS in specific decks, fill them into the skip_decks list below.
+// And add <div id=deck deck_name="{{Deck}}"></div> to your card's front template's first line.
+// Please don't remove it even if you don't need it.
+const skip_decks"""
+
+                new_prefs += SKIP_DECKS_TEXT
+
                 old_config = re.sub(
-                    r"(const\s+deckParams\s*=\s*).+]",
+                    r"(const\s+deckParams\s*=\s*).+const skip_decks",
                     new_prefs,
                     old_config,
                     flags=re.DOTALL,
