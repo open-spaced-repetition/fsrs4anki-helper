@@ -353,7 +353,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     messages = []
 
     card_cnt = 0
-    undo_entry = mw.col.add_custom_undo_entry("Disperse")
+    undo_entry = mw.col.undo_status().last_step
     best_due_dates = disperse(siblings)
     for cid, due in best_due_dates.items():
         card = mw.col.get_card(cid)
