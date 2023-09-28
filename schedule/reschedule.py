@@ -403,7 +403,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
             or (revlog.review_kind == REVLOG_CRAM and revlog.ease != 0)
         ):
             s, d = fsrs.memory_state_from_sm2(
-                revlog.ease / 1000, revlog.interval / 86400, retention
+                revlog.ease / 1000, max(revlog.interval / 86400, 0.1), retention
             )
             s = max(0.1, min(s, 36500))
             d = constrain_difficulty(d)
