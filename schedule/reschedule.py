@@ -398,8 +398,13 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
     reps = len(revlogs)
     for i, revlog in enumerate(reversed(revlogs)):
         rating = revlog.button_chosen
-        if i == 0 and revlog.review_kind == REVLOG_REV:
-            s, d = fsrs.memory_state_from_sm2(revlog.ease/1000, revlog.interval/86400, retention)
+        if i == 0 and (
+            revlog.review_kind == REVLOG_REV
+            or (revlog.review_kind == REVLOG_CRAM and revlog.ease != 0)
+        ):
+            s, d = fsrs.memory_state_from_sm2(
+                revlog.ease / 1000, revlog.interval / 86400, retention
+            )
             s = max(0.1, min(s, 36500))
             d = constrain_difficulty(d)
             again_s = s
@@ -448,7 +453,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
                 datetime.fromtimestamp(revlog.time - rollover * 60 * 60).toordinal()
                 - last_date.toordinal()
             )
-            if elapsed_days <= 0 and revlog.review_kind in (REVLOG_LRN, REVLOG_RELRN):
+            if elapsed_days <= 0:
                 continue
             r = (
                 exponential_forgetting_curve(elapsed_days, s)
