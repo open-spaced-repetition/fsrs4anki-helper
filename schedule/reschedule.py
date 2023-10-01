@@ -99,6 +99,23 @@ class FSRS:
     def set_card(self, card: Card):
         self.card = card
 
+    def memory_state_from_sm2(self, ease_factor, interval, requestretention):
+        if self.version[0] == 3:
+            stability = interval * math.log(0.9) / math.log(requestretention)
+            difficulty = 11.0 - (ease_factor - 1.0) / (
+                math.exp(self.w[6])
+                * math.pow(stability, self.w[7])
+                * (math.exp((1 - requestretention) * self.w[8]) - 1)
+            )
+        elif self.version[0] == 4:
+            stability = interval * math.log(0.9) / math.log(requestretention)
+            difficulty = 11.0 - (ease_factor - 1.0) / (
+                math.exp(self.w[8])
+                * math.pow(stability, -self.w[9])
+                * (math.exp((1 - requestretention) * self.w[10]) - 1)
+            )
+        return stability, difficulty
+
 
 def reschedule(
     did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""
