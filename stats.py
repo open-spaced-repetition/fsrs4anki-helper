@@ -29,14 +29,14 @@ def retention_stability_burden(lim) -> float:
         CASE WHEN odid==0
             THEN {mw.col.sched.today} - (due - ivl)
             ELSE {mw.col.sched.today} - (odue - ivl)
-            END
-        ,json_extract(json_extract(IIF(data != '', data, NULL), '$.cd'), '$.s')
+        END
+        ,json_extract(data, '$.s')
         ,ivl 
         ,(SELECT COUNT(*) FROM cards c2 WHERE c1.nid = c2.nid)
         ,nid
     FROM cards c1
     WHERE queue >= 1 
-    AND data like '%\"cd\"%'
+    AND json_extract(data, '$.s') IS NOT NULL
     """
         + lim
     )
