@@ -479,8 +479,8 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
 
     new_custom_data = {"s": round(s, 2), "d": round(d, 2), "v": "reschedule"}
     card = mw.col.get_card(cid)
-    old_custom_data = json.loads(card.custom_data)
-    if card.custom_data != "" and "seed" in old_custom_data:
+    old_custom_data = json.loads(card.custom_data) if card.custom_data != "" else ""
+    if "seed" in old_custom_data:
         new_custom_data["seed"] = old_custom_data["seed"]
     else:
         new_custom_data["seed"] = fsrs.set_fuzz_factor(cid, card.reps)
