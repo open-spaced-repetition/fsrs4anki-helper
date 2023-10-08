@@ -479,14 +479,13 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
 
     new_custom_data = {"s": round(s, 2), "d": round(d, 2), "v": "reschedule"}
     card = mw.col.get_card(cid)
-    seed = fsrs.set_fuzz_factor(cid, reps)
     if card.custom_data != "":
         old_custom_data = json.loads(card.custom_data)
         if "seed" in old_custom_data:
             fsrs.fuzz_factor = old_custom_data["seed"] / 10000
             new_custom_data["seed"] = old_custom_data["seed"]
-    if "seed" not in new_custom_data:
-        new_custom_data["seed"] = seed
+        else:
+            new_custom_data["seed"] = fsrs.set_fuzz_factor(cid, reps)
     card.custom_data = json.dumps(new_custom_data)
     if card.type == CARD_TYPE_REV and last_kind != REVLOG_RESCHED:
         fsrs.set_card(card)
