@@ -354,6 +354,14 @@ def power_forgetting_curve(elapsed_days, stability):
     return (1 + elapsed_days / (9 * stability)) ** -1
 
 
+def rotate_number_by_k(N, K):
+    num = str(N)
+    length = len(num)
+    K = K % length
+    rotated = num[K:] + num[:K]
+    return int(rotated)
+
+
 if __name__ == "__main__":
     """Small test for 'uses_new_code'. Will check numbers of versions below, at
     and above the version number defined in the global configuration.
