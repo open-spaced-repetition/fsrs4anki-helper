@@ -179,7 +179,8 @@ class FSRS:
             )
 
     def set_fuzz_factor(self, cid: int, reps: int):
-        random.seed(cid[8:] + cid[:8] + reps)
+        cid = str(cid)
+        random.seed(int(cid[8:] + cid[:8]) + reps)
         self.fuzz_factor = random.random()
         return round(self.fuzz_factor * 10000, 0)
 
