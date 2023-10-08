@@ -28,7 +28,9 @@ def get_internet_scheduler(url: str):
 
 def set_scheduler(new_scheduler: str):
     # Backup the old scheduler to a file in case something goes wrong.
-    with open(os.path.expanduser("~/fsrs4anki_scheduler_revert.js"), "w", encoding="UTF8") as f:
+    with open(
+        os.path.expanduser("~/fsrs4anki_scheduler_revert.js"), "w", encoding="UTF8"
+    ) as f:
         f.write(mw.col.get_config("cardStateCustomizer"))
 
     mw.col.set_config("cardStateCustomizer", new_scheduler, undoable=True)
@@ -184,8 +186,7 @@ def update_scheduler(_):
                 new_prefs = ",\n  ".join(pref_replace(pref) for pref in old_prefs)
                 new_prefs = f"\g<1>[\n  {new_prefs}\n]"
 
-                SKIP_DECKS_TEXT = \
-"""
+                SKIP_DECKS_TEXT = """
 
 // To turn off FSRS in specific decks, fill them into the skip_decks list below.
 // And add <div id=deck deck_name="{{Deck}}"></div> to your card's front template's first line.

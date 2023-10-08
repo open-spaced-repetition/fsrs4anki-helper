@@ -77,7 +77,11 @@ def get_due_range(cid, parameters, stability, due):
     )
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days)
     if due >= mw.col.sched.today:
-        due_range = (max(last_review + min_ivl, mw.col.sched.today), max(last_review + max_ivl, mw.col.sched.today), cid)
+        due_range = (
+            max(last_review + min_ivl, mw.col.sched.today),
+            max(last_review + max_ivl, mw.col.sched.today),
+            cid,
+        )
     elif last_review + max_ivl > mw.col.sched.today:
         due_range = (mw.col.sched.today, last_review + max_ivl, cid)
     else:
@@ -90,8 +94,12 @@ def disperse(siblings):
         cid: get_due_range(cid, did_to_deck_parameters[did], stability, due)
         for cid, did, stability, due in siblings
     }
-    due_ranges = {cid: due_range for cid, (due_range, _) in due_ranges_last_review.items()}
-    last_review = {cid: last_review for cid, (_, last_review) in due_ranges_last_review.items()}
+    due_ranges = {
+        cid: due_range for cid, (due_range, _) in due_ranges_last_review.items()
+    }
+    last_review = {
+        cid: last_review for cid, (_, last_review) in due_ranges_last_review.items()
+    }
     latest_review = max(last_review.values())
     due_ranges[-1] = (latest_review, latest_review, -1)
     best_due_dates = maximize_siblings_due_gap(due_ranges)
