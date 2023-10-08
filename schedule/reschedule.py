@@ -486,7 +486,7 @@ def reschedule_card(cid, fsrs: FSRS, rollover, params):
         new_custom_data["seed"] = fsrs.set_fuzz_factor(cid, card.reps)
     fsrs.fuzz_factor = new_custom_data["seed"] / 10000
     card.custom_data = json.dumps(new_custom_data)
-    
+
     if card.type == CARD_TYPE_REV and last_kind != REVLOG_RESCHED:
         fsrs.set_card(card)
         if last_s is None:
