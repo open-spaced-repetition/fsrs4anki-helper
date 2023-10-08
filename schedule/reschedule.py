@@ -253,13 +253,12 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         return None
 
     new_custom_data = {"v": "reschedule"}
-    if card.custom_data != "":
-        old_custom_data = json.loads(card.custom_data)
-        if "seed" in old_custom_data:
-            fsrs.fuzz_factor = old_custom_data["seed"] / 10000
-            new_custom_data["seed"] = old_custom_data["seed"]
-        else:
-            new_custom_data["seed"] = fsrs.set_fuzz_factor(cid, card.reps)
+    old_custom_data = json.loads(card.custom_data) if card.custom_data != "" else ""
+    if "seed" in old_custom_data:
+        new_custom_data["seed"] = old_custom_data["seed"]
+    else:
+        new_custom_data["seed"] = fsrs.set_fuzz_factor(cid, card.reps)
+    fsrs.fuzz_factor = new_custom_data["seed"] / 10000
     card.custom_data = json.dumps(new_custom_data)
 
     try:
