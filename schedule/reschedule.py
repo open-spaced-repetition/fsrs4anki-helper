@@ -54,7 +54,7 @@ class FSRS:
         }
 
     def set_fuzz_factor(self, cid: int, reps: int):
-        random.seed(cid + reps)
+        random.seed(rotate_number_by_k(cid, 8) + reps)
         self.fuzz_factor = random.random()
         return round(self.fuzz_factor * 10000, 0)
 
@@ -253,14 +253,13 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         return None
 
     new_custom_data = {"v": "reschedule"}
-    seed = fsrs.set_fuzz_factor(cid, card.reps)
     if card.custom_data != "":
         old_custom_data = json.loads(card.custom_data)
         if "seed" in old_custom_data:
             fsrs.fuzz_factor = old_custom_data["seed"] / 10000
             new_custom_data["seed"] = old_custom_data["seed"]
-    if "seed" not in new_custom_data:
-        new_custom_data["seed"] = seed
+        else:
+            new_custom_data["seed"] = fsrs.set_fuzz_factor(cid, card.reps)
     card.custom_data = json.dumps(new_custom_data)
 
     try:

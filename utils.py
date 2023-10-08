@@ -118,3 +118,11 @@ def write_custom_data(card: Card, key, value):
     else:
         custom_data = {key: value}
     card.custom_data = json.dumps(custom_data)
+
+
+def rotate_number_by_k(N, K):
+    num = str(N)
+    length = len(num)
+    K = K % length
+    rotated = num[K:] + num[:K]
+    return int(rotated)
