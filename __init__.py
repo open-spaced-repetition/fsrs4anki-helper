@@ -9,10 +9,8 @@ from .schedule.postpone import postpone
 from .schedule.advance import advance
 from .schedule.reset import reset
 from .schedule.disperse_siblings import disperse_siblings
-from .schedule.update_scheduler import update_scheduler
 from .schedule import init_review_hook
 from .stats import init_stats
-from .browser.browser import init_browser
 from .configuration import Config, run_on_configuration_change
 
 
@@ -68,16 +66,6 @@ menu_auto_reschedule = checkable(
 )
 
 
-def set_auto_reschedule_after_review(checked):
-    config.auto_reschedule_after_review = checked
-
-
-menu_auto_reschedule_after_review = checkable(
-    title="Auto reschedule the card you just reviewed",
-    on_click=set_auto_reschedule_after_review,
-)
-
-
 def set_auto_disperse(checked):
     config.auto_disperse = checked
 
@@ -119,11 +107,9 @@ menu_reset = build_action(reset, "Undo reschedulings in all cards")
 
 menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings")
 
-menu_update_scheduler = build_action(update_scheduler, "Update scheduler")
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule)
-menu_for_helper.addAction(menu_auto_reschedule_after_review)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_load_balance)
 menu_for_free_days = menu_for_helper.addMenu(
@@ -136,7 +122,6 @@ menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
 menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
-menu_for_helper.addAction(menu_update_scheduler)
 
 
 def set_free_days(day, checked):
@@ -165,9 +150,6 @@ def adjust_menu():
             f"Reschedule cards reviewed in the last {config.days_to_reschedule} days"
         )
         menu_auto_reschedule.setChecked(config.auto_reschedule_after_sync)
-        menu_auto_reschedule_after_review.setChecked(
-            config.auto_reschedule_after_review
-        )
         menu_auto_disperse.setChecked(config.auto_disperse)
         menu_load_balance.setChecked(config.load_balance)
         menu_for_free_0.setChecked(0 in config.free_days)
@@ -192,5 +174,4 @@ def configuration_changed():
 
 init_sync_hook()
 init_stats()
-init_browser()
 init_review_hook()
