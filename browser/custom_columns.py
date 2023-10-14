@@ -52,7 +52,7 @@ class TargetRetrievabilityColumn(CustomColumn):
         key="target_retrievability",
         cards_mode_label="Target R",
         notes_mode_label="Target R",
-        sorting=BrowserColumns.SORTING_DESCENDING,
+        sorting_cards=BrowserColumns.SORTING_DESCENDING,
         uses_cell_font=False,
         alignment=BrowserColumns.ALIGNMENT_CENTER,
     )
