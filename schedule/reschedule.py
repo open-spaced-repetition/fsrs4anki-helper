@@ -108,7 +108,7 @@ class FSRS:
                 * (math.exp((1 - requestretention) * self.w[8]) - 1)
             )
         elif self.version[0] == 4:
-            stability = interval * math.log(0.9) / math.log(requestretention)
+            stability = interval / (9 * (1 / requestretention - 1))
             difficulty = 11.0 - (ease_factor - 1.0) / (
                 math.exp(self.w[8])
                 * math.pow(stability, -self.w[9])
