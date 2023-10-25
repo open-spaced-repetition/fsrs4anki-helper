@@ -108,7 +108,7 @@ def get_fsrs_stats(self: CollectionStats):
         note_cnt,
     ) = retention_stability_burden(lim)
     i = []
-    _line_now(i, "Average retention", f"{retention * 100: .2f}%")
+    _line_now(i, "Average predicted retention", f"{retention * 100: .2f}%")
     _line_now(i, "Average stability", f"{round(stability)} days")
     _line_now(i, "Burden", f"{round(burden)} reviews/day")
     i.append(
@@ -136,9 +136,9 @@ def get_fsrs_stats(self: CollectionStats):
     )
     stats_data = _lineTbl_now(i)
     interpretation = (
-        "<details><summary>Interpretation</summary>"
-        + "<ul>"
-        + "<li><b>Average retention</b>: the average probability of recalling a card today. In most cases, it is higher than requested retention because requested retention refers to retention at the time of a review, whereas average retention is calculated based on all cards, including undue cards. <b>This is calculated using FSRS formulas and depends on your parameters</b>.</li>"
+        "<p>In most cases, the average predicted retention is higher than your requested retention. For details, read the interpretation section.</p>"
+        + "<details><summary>Interpretation</summary><ul>"
+        + "<li><b>Average predicted retention</b>: the average probability of recalling a card today. In most cases, it is higher than requested retention because requested retention refers to retention at the time of a review, whereas average retention is calculated based on all cards, including undue cards. Not all cards are due, that's why these two values are different. <b>The average predicted retention is calculated using FSRS formulas and depends on your parameters.</b> True retention is not an algorithmic prediction, so changing FSRS parameters won't affect it.</li>"
         + "<li><b>Stability</b>: the number of days it takes for the retention to decay from 100% to 90%.</li>"
         + "<li><b>Burden</b>: an estimate of the average number of cards that have to be reviewed daily (assuming review at the scheduled time without advancing or postponing). Burden = 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub> where I<sub>n</sub> - current interval of the n-th card.</li>"
         + "<li><b>Count</b>: the number of cards with custom data, in other words, cards that are affected by FSRS (this does not include cards in the (re)learning stage).</li> "
