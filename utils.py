@@ -52,18 +52,18 @@ def filter_revlogs(
     return list(filter(lambda x: x.review_kind != REVLOG_CRAM or x.ease != 0, revlogs))
 
 
-def get_last_review_date(last_revlog: CardStatsResponse.StatsRevlogEntry):
+def get_last_review_date(card: Card):
+    revlogs = mw.col.card_stats_data(card.id).revlog
+    last_revlog = list(filter(lambda x: x.button_chosen >= 1, revlogs))[0]
     return (
         math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400)
         + mw.col.sched.today
     )
 
 
-def update_card_due_ivl(
-    card: Card, last_revlog: CardStatsResponse.StatsRevlogEntry, new_ivl: int
-):
+def update_card_due_ivl(card: Card, new_ivl: int):
     card.ivl = new_ivl
-    last_review_date = get_last_review_date(last_revlog)
+    last_review_date = get_last_review_date(card)
     if card.odid:
         card.odue = max(last_review_date + new_ivl, 1)
     else:

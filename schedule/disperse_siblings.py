@@ -94,14 +94,15 @@ def get_siblings_when_review(card: Card):
 
 
 def get_due_range(cid, stability, due, desired_retention, maximum_interval):
-    revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
-    last_review = get_last_review_date(revlogs[0])
+    card = mw.col.get_card(cid)
+    last_review = get_last_review_date(card)
     new_ivl = int(round(9 * stability * (1 / desired_retention - 1)))
     new_ivl = min(new_ivl, maximum_interval)
 
     if new_ivl <= 2.5:
         return (due, due, cid), last_review
 
+    revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_elapsed_days = (
         int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     )
@@ -188,8 +189,8 @@ def disperse_siblings_backgroud(
             last_revlog = mw.col.card_stats_data(cid).revlog[0]
             if last_revlog.review_kind == REVLOG_RESCHED:
                 continue
-            last_review = get_last_review_date(last_revlog)
-            card = update_card_due_ivl(card, last_revlog, due - last_review)
+            last_review = get_last_review_date(card)
+            card = update_card_due_ivl(card, due - last_review)
             write_custom_data(card, "v", "disperse")
             mw.col.update_card(card)
             mw.col.merge_undo_entries(undo_entry)
@@ -358,9 +359,8 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     for cid, due in best_due_dates.items():
         card = mw.col.get_card(cid)
         old_due = card.odue if card.odid else card.due
-        last_revlog = mw.col.card_stats_data(cid).revlog[0]
-        last_review = get_last_review_date(last_revlog)
-        card = update_card_due_ivl(card, last_revlog, due - last_review)
+        last_review = get_last_review_date(card)
+        card = update_card_due_ivl(card, due - last_review)
         write_custom_data(card, "v", "disperse")
         mw.col.update_card(card)
         mw.col.merge_undo_entries(undo_entry)

@@ -270,7 +270,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         fsrs.set_card(card)
         new_ivl = fsrs.next_interval(s, fsrs.dr, fsrs.max_ivl)
         due_before = max(card.odue if card.odid else card.due, mw.col.sched.today)
-        card = update_card_due_ivl(card, revlog, new_ivl)
+        card = update_card_due_ivl(card, new_ivl)
         due_after = max(card.odue if card.odid else card.due, mw.col.sched.today)
         if fsrs.enable_load_balance:
             fsrs.due_cnt_perday_from_first_day[due_before] -= 1

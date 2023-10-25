@@ -97,20 +97,14 @@ def postpone(did):
             break
 
         card = mw.col.get_card(cid)
-
-        try:
-            revlog = filter_revlogs(mw.col.card_stats_data(cid).revlog)[0]
-        except IndexError:
-            continue
-
         random.seed(cid + ivl)
-        last_review = get_last_review_date(revlog)
+        last_review = get_last_review_date(card)
         elapsed_days = mw.col.sched.today - last_review
         delay = elapsed_days - ivl
         new_ivl = min(
             max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay), max_ivl
         )
-        card = update_card_due_ivl(card, revlog, new_ivl)
+        card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "postpone")
         mw.col.update_card(card)
         mw.col.merge_undo_entries(undo_entry)
