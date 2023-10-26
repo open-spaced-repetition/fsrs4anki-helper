@@ -266,7 +266,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
     except IndexError:
         return card
 
-    if card.type == CARD_TYPE_REV and revlog.review_kind != REVLOG_RESCHED:
+    if card.type == CARD_TYPE_REV:
         fsrs.set_card(card)
         new_ivl = fsrs.next_interval(s, fsrs.dr, fsrs.max_ivl)
         due_before = max(card.odue if card.odid else card.due, mw.col.sched.today)
