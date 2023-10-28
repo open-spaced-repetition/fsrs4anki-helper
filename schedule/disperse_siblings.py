@@ -227,11 +227,6 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     card_cnt = 0
     undo_entry = mw.col.undo_status().last_step
     best_due_dates, due_ranges, min_gap = disperse(siblings)
-    if min_gap == 0:
-        text = ""
-        for cid, due_range in due_ranges.items():
-            text += f"Card {cid} due range: {due_to_date(due_range[0])} - {due_to_date(due_range[1])}<br/>"
-        tooltip("Due dates are too close to disperse:}<br/>" + text)
     for cid, due in best_due_dates.items():
         card = mw.col.get_card(cid)
         old_due = card.odue if card.odid else card.due
@@ -245,7 +240,12 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
         messages.append(message)
 
     if config.debug_notify:
-        tooltip("<br/>".join(messages))
+        text = ""
+        if min_gap == 0:
+            for cid, due_range in due_ranges.items():
+                text += f"Card {cid} due range: {due_to_date(due_range[0])} - {due_to_date(due_range[1])}<br/>"
+            text = "Due dates are too close to disperse:}<br/>" + text
+        tooltip(text + "<br/>".join(messages))
 
 
 # Modifying the algorithm to accept a dictionary as input and return a dictionary as output
