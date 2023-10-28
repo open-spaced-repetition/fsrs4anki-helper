@@ -96,7 +96,7 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     new_ivl = min(new_ivl, maximum_interval)
 
     if new_ivl <= 2.5:
-        return (due, due + 1), last_review
+        return (due, due), last_review
 
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_elapsed_days = (
@@ -111,7 +111,7 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     elif last_review + max_ivl > mw.col.sched.today:
         due_range = (mw.col.sched.today, last_review + max_ivl)
     else:
-        due_range = (due, due + 1)
+        due_range = (due, due)
     return due_range, last_review
 
 
@@ -236,12 +236,12 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
         card = mw.col.get_card(cid)
         old_due = card.odue if card.odid else card.due
         last_review = get_last_review_date(card)
-        card = update_card_due_ivl(card, due - last_review)
+        card = update_card_due_ivl(card, due - last_review + 1)
         write_custom_data(card, "v", "disperse")
         mw.col.update_card(card)
         mw.col.merge_undo_entries(undo_entry)
         card_cnt += 1
-        message = f"Dispersed card {card.id} from {due_to_date(old_due)} to {due_to_date(due)}"
+        message = f"Dispersed card {card.id} from {due_to_date(old_due)} to {due_to_date(due + 1)}"
         messages.append(message)
 
     if config.debug_notify:
