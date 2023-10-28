@@ -1,10 +1,6 @@
 from ..utils import *
 from ..configuration import Config
 from anki.utils import ids2str, html_to_text_line
-from anki.decks import DeckManager
-from collections import defaultdict
-from datetime import datetime, timedelta
-import copy
 
 enable_load_balance = None
 free_days = None
@@ -100,7 +96,7 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     new_ivl = min(new_ivl, maximum_interval)
 
     if new_ivl <= 2.5:
-        return (due, due, cid), last_review
+        return (due, due), last_review
 
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_elapsed_days = (
@@ -111,12 +107,11 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
         due_range = (
             max(last_review + min_ivl, mw.col.sched.today),
             max(last_review + max_ivl, mw.col.sched.today),
-            cid,
         )
     elif last_review + max_ivl > mw.col.sched.today:
-        due_range = (mw.col.sched.today, last_review + max_ivl, cid)
+        due_range = (mw.col.sched.today, last_review + max_ivl)
     else:
-        due_range = (due, due, cid)
+        due_range = (due, due)
     return due_range, last_review
 
 
@@ -132,10 +127,10 @@ def disperse(siblings):
         cid: last_review for cid, (_, last_review) in due_ranges_last_review.items()
     }
     latest_review = max(last_review.values())
-    due_ranges[-1] = (latest_review, latest_review, -1)
-    best_due_dates = maximize_siblings_due_gap(due_ranges)
+    due_ranges[-1] = (latest_review, latest_review)
+    min_gap, best_due_dates = maximize_siblings_due_gap(due_ranges)
     best_due_dates.pop(-1)
-    return best_due_dates
+    return best_due_dates, due_ranges, min_gap
 
 
 def disperse_siblings(
@@ -183,12 +178,9 @@ def disperse_siblings_backgroud(
     )
 
     for nid, siblings in nid_siblings.items():
-        best_due_dates = disperse(siblings)
+        best_due_dates, _, _ = disperse(siblings)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
-            last_revlog = mw.col.card_stats_data(cid).revlog[0]
-            if last_revlog.review_kind == REVLOG_RESCHED:
-                continue
             last_review = get_last_review_date(card)
             card = update_card_due_ivl(card, due - last_review)
             write_custom_data(card, "v", "disperse")
@@ -209,127 +201,6 @@ def disperse_siblings_backgroud(
                 break
 
     return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed"
-
-
-# https://stackoverflow.com/questions/68180974/given-n-points-where-each-point-has-its-own-range-adjust-all-points-to-maximize
-def maximize_siblings_due_gap(cid_to_due_ranges: Dict[int, tuple]):
-    max_attempts = 10
-    allocation = allocate_ranges(list(cid_to_due_ranges.values()), max_attempts)
-    return {
-        item[2]: due_date
-        for due_date, due_ranges in allocation.items()
-        for item in due_ranges
-    }
-
-
-def get_dues_bordering_min_gap(due_to_ranges, min_gap):
-    dues_bordering_min_gap = set()
-    if min_gap == 0:
-        for due, ranges in due_to_ranges.items():
-            if len(ranges) > 1:
-                dues_bordering_min_gap.add(due)
-    else:
-        sorted_dues = sorted(due_to_ranges.keys())
-        prior_due = sorted_dues[0]
-        for cur_due in sorted_dues[1:]:
-            cur_gap = cur_due - prior_due
-            if cur_gap == min_gap:
-                dues_bordering_min_gap.add(cur_due)
-                dues_bordering_min_gap.add(prior_due)
-            prior_due = cur_due
-    return list(dues_bordering_min_gap)
-
-
-def get_min_gap(due_to_ranges, input_ranges):
-    if len(due_to_ranges) < len(input_ranges):
-        return 0
-
-    sorted_dues = sorted(due_to_ranges.keys())
-    prior_due = sorted_dues[0]
-    min_gap = None
-    for cur_due in sorted_dues[1:]:
-        if min_gap is None or cur_due - prior_due < min_gap:
-            min_gap = cur_due - prior_due
-        prior_due = cur_due
-        if min_gap == 1:
-            return min_gap
-    return min_gap
-
-
-def attempt_to_achieve_min_gap(due_to_ranges, target_min_gap):
-    new_due_to_ranges = defaultdict(list)
-
-    leftmost_due = min(due_to_ranges.keys())
-    leftmost_range = due_to_ranges[leftmost_due][0]
-    new_due_to_ranges[leftmost_range[0]].append(leftmost_range)
-
-    sorted_dues = sorted(due_to_ranges.keys())
-    prior_due = leftmost_due
-    for cur_due in sorted_dues[1:]:
-        cur_range = due_to_ranges[cur_due][0]
-        target_due = prior_due + target_min_gap
-        if target_due <= cur_range[0]:
-            new_due_to_ranges[cur_range[0]].append(cur_range)
-            prior_due = cur_range[0]
-        elif target_due <= cur_range[1]:
-            new_due_to_ranges[target_due].append(cur_range)
-            prior_due = target_due
-        else:
-            return False
-    return new_due_to_ranges
-
-
-def allocate_ranges(input_ranges, max_attempts):
-    due_to_ranges = defaultdict(list)
-    for due_range in input_ranges:
-        due = due_sampler(due_range[0], due_range[1])
-        due_to_ranges[due].append(due_range)
-
-    best_min_gap = -1
-    best_allocation = None
-    attempts = 0
-    while attempts < max_attempts:
-        attempts += 1
-        min_gap = get_min_gap(due_to_ranges, input_ranges)
-        if min_gap > 0:
-            found_improvement = True
-            while found_improvement:
-                found_improvement = False
-                trial_min_gap = max(min_gap, best_min_gap) + 1
-                improved_results = attempt_to_achieve_min_gap(
-                    due_to_ranges, trial_min_gap
-                )
-                if improved_results:
-                    found_improvement = True
-                    min_gap = trial_min_gap
-                    # print(f"found improvement!: {min_gap}")
-                    due_to_ranges = improved_results
-        if min_gap > best_min_gap:
-            best_min_gap = min_gap
-            best_allocation = copy.deepcopy(due_to_ranges)
-            # print(f"found new gap after {attempts} tries: {best_min_gap}")
-            attempts = 0
-        dues_to_adjust = get_dues_bordering_min_gap(due_to_ranges, min_gap)
-        ranges_to_reallocate = []
-        for due in dues_to_adjust:
-            ranges_to_reallocate += due_to_ranges.pop(due, [])
-        for due_range in ranges_to_reallocate:
-            new_due = due_sampler(due_range[0], due_range[1])
-            due_to_ranges[new_due].append(due_range)
-    return best_allocation
-
-
-def due_sampler(min_due, max_due):
-    if enable_load_balance and len(free_days) > 0:
-        due_list = list(range(min_due, max_due + 1))
-        for due in range(min_due, max_due + 1):
-            day_offset = due - mw.col.sched.today
-            due_date = datetime.now() + timedelta(days=day_offset)
-            if due_date.weekday() in free_days and len(due_list) > 1:
-                due_list.remove(due)
-        return random.choice(due_list)
-    else:
-        return random.randint(min_due, max_due)
 
 
 def disperse_siblings_when_review(reviewer, card: Card, ease):
@@ -355,7 +226,9 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
 
     card_cnt = 0
     undo_entry = mw.col.undo_status().last_step
-    best_due_dates = disperse(siblings)
+    best_due_dates, due_ranges, min_gap = disperse(siblings)
+    if min_gap == 0:
+        tooltip("Due dates are too close to disperse: ", str(due_ranges))
     for cid, due in best_due_dates.items():
         card = mw.col.get_card(cid)
         old_due = card.odue if card.odid else card.due
@@ -370,3 +243,93 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
 
     if config.debug_notify:
         tooltip("<br/>".join(messages))
+
+
+# Modifying the algorithm to accept a dictionary as input and return a dictionary as output
+def maximize_siblings_due_gap(points_dict: Dict[int, Tuple[int, int]]):
+    """
+    Function to find the arrangement that maximizes the gaps between adjacent points
+    while maintaining the maximum minimum gap. Accepts and returns dictionaries.
+    """
+    # Convert the dictionary to a list of tuples and also keep track of the original keys
+    points_list = [(k, v) for k, v in points_dict.items()]
+
+    # Sort the list based on the right endpoints of the intervals
+    points_list.sort(key=lambda x: x[1][1])
+
+    # First, find the maximum minimum gap and the arrangement that achieves it
+    intervals_only = [interval for _, interval in points_list]
+    max_min_gap, initial_arrangement = find_max_min_gap_and_arrangement(intervals_only)
+
+    # Initialize the optimized arrangement with the initial arrangement
+    optimized_arrangement = initial_arrangement.copy()
+
+    # Go through each point to try to maximize the gap with its adjacent points
+    for i in range(len(points_list)):
+        left_limit, right_limit = points_list[i][1]
+
+        # Set initial boundaries based on the previous and next points in the arrangement
+        if i > 0:
+            left_limit = max(left_limit, optimized_arrangement[i - 1] + max_min_gap)
+        if i < len(points_list) - 1:
+            right_limit = min(right_limit, optimized_arrangement[i + 1] - max_min_gap)
+
+        # Move the point as far to the right as possible within the adjusted limits
+        optimized_arrangement[i] = right_limit
+
+    # Convert the list back to a dictionary
+    optimized_arrangement_dict = {
+        points_list[i][0]: optimized_arrangement[i] for i in range(len(points_list))
+    }
+
+    return max_min_gap, optimized_arrangement_dict
+
+
+def find_max_min_gap_and_arrangement(points):
+    """
+    Find the maximum minimum gap between adjacent points and also return the arrangement that achieves it.
+    """
+    # Sort the points based on their right endpoints
+    points.sort(key=lambda x: x[1])
+
+    # Initialize binary search parameters
+    min_gap = 0  # Minimum possible gap
+    max_gap = points[-1][1] - points[0][0]  # Maximum possible gap
+    best_gap = 0  # To store the result
+
+    arrangement = []  # To store the best arrangement of points
+
+    def can_place_points_with_arrangement(points, min_gap):
+        """
+        A greedy algorithm to check if we can place all points with a minimum gap of `min_gap`.
+        Also returns the arrangement if possible.
+        """
+        last_point_position = points[0][
+            0
+        ]  # Place the first point at its leftmost position
+        temp_arrangement = [last_point_position]
+        for i in range(1, len(points)):
+            next_possible_point = last_point_position + min_gap
+            # Find the rightmost position in the current point's range where it can be placed
+            if next_possible_point > points[i][1]:
+                return (
+                    False,
+                    [],
+                )  # Can't place the point while maintaining the minimum gap
+            last_point_position = max(next_possible_point, points[i][0])
+            temp_arrangement.append(last_point_position)
+        return True, temp_arrangement
+
+    while min_gap <= max_gap:
+        mid_gap = (min_gap + max_gap) // 2  # Compute the middle gap
+        can_place, temp_arrangement = can_place_points_with_arrangement(points, mid_gap)
+        if can_place:
+            # If we can place all points with this gap, it means we can try to increase it
+            best_gap = mid_gap
+            arrangement = temp_arrangement  # Update the best arrangement
+            min_gap = mid_gap + 1
+        else:
+            # If we can't place all points with this gap, it means we need to try a smaller gap
+            max_gap = mid_gap - 1
+
+    return best_gap, arrangement
