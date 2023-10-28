@@ -96,7 +96,7 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     new_ivl = min(new_ivl, maximum_interval)
 
     if new_ivl <= 2.5:
-        return (due, due), last_review
+        return (due, due + 1), last_review
 
     revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
     last_elapsed_days = (
@@ -111,7 +111,7 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     elif last_review + max_ivl > mw.col.sched.today:
         due_range = (mw.col.sched.today, last_review + max_ivl)
     else:
-        due_range = (due, due)
+        due_range = (due, due + 1)
     return due_range, last_review
 
 
@@ -228,7 +228,10 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     undo_entry = mw.col.undo_status().last_step
     best_due_dates, due_ranges, min_gap = disperse(siblings)
     if min_gap == 0:
-        tooltip("Due dates are too close to disperse: " + str(due_ranges))
+        text = ""
+        for cid, due_range in due_ranges.items():
+            text += f"Card {cid} due range: {due_to_date(due_range[0])} - {due_to_date(due_range[1])}<br/>"
+        tooltip("Due dates are too close to disperse:}<br/>" + text)
     for cid, due in best_due_dates.items():
         card = mw.col.get_card(cid)
         old_due = card.odue if card.odid else card.due
