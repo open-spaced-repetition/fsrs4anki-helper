@@ -134,7 +134,7 @@ def disperse(siblings):
     if min_gap == 0:
         for due in best_due_dates.items():
             if due <= mw.col.sched.today:
-                due = due + 1
+                due = mw.col.sched.today + 1
 
     return best_due_dates, due_ranges, min_gap
 
