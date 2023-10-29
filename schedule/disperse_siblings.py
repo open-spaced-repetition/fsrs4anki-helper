@@ -228,11 +228,8 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     undo_entry = mw.col.undo_status().last_step
     best_due_dates, due_ranges, min_gap = disperse(siblings)
 
-    if min_gap == 0:
-        for due in best_due_dates.items():
-            due = max(due, mw.col.sched.today + 1)
-    
     for cid, due in best_due_dates.items():
+        due = max(due, mw.col.sched.today + 1)
         card = mw.col.get_card(cid)
         old_due = card.odue if card.odid else card.due
         last_review = get_last_review_date(card)
