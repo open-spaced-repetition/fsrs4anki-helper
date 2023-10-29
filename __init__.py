@@ -57,22 +57,32 @@ def add_action_to_gear(fun, text):
     deck_browser_will_show_options_menu.append(aux)
 
 
-def set_auto_reschedule(checked):
+def set_auto_reschedule_after_sync(checked):
     config.auto_reschedule_after_sync = checked
 
 
-menu_auto_reschedule = checkable(
+menu_auto_reschedule_after_sync = checkable(
     title="Auto reschedule cards reviewed on other devices after sync",
-    on_click=set_auto_reschedule,
+    on_click=set_auto_reschedule_after_sync,
 )
 
 
-def set_auto_disperse(checked):
+def set_auto_disperse_after_sync(checked):
+    config.auto_disperse_after_sync = checked
+
+
+menu_auto_disperse_after_sync = checkable(
+    title="Auto disperse siblings reviewed on other devices after sync",
+    on_click=set_auto_disperse_after_sync,
+)
+
+
+def set_auto_disperse_when_review(checked):
     config.auto_disperse = checked
 
 
 menu_auto_disperse = checkable(
-    title="Auto disperse siblings", on_click=set_auto_disperse
+    title="Auto disperse siblings when review", on_click=set_auto_disperse_when_review
 )
 
 
@@ -110,7 +120,8 @@ menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings"
 
 
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
-menu_for_helper.addAction(menu_auto_reschedule)
+menu_for_helper.addAction(menu_auto_reschedule_after_sync)
+menu_for_helper.addAction(menu_auto_disperse_after_sync)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_load_balance)
 menu_for_free_days = menu_for_helper.addMenu(
@@ -150,7 +161,8 @@ def adjust_menu():
         menu_reschedule_recent.setText(
             f"Reschedule cards reviewed in the last {config.days_to_reschedule} days"
         )
-        menu_auto_reschedule.setChecked(config.auto_reschedule_after_sync)
+        menu_auto_reschedule_after_sync.setChecked(config.auto_reschedule_after_sync)
+        menu_auto_disperse_after_sync.setChecked(config.auto_disperse_after_sync)
         menu_auto_disperse.setChecked(config.auto_disperse)
         menu_load_balance.setChecked(config.load_balance)
         menu_for_free_0.setChecked(0 in config.free_days)
