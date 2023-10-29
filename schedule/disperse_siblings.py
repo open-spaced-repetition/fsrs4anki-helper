@@ -227,16 +227,18 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     card_cnt = 0
     undo_entry = mw.col.undo_status().last_step
     best_due_dates, due_ranges, min_gap = disperse(siblings)
+
     for cid, due in best_due_dates.items():
+        due = max(due, mw.col.sched.today + 1)
         card = mw.col.get_card(cid)
         old_due = card.odue if card.odid else card.due
         last_review = get_last_review_date(card)
-        card = update_card_due_ivl(card, due - last_review + 1)
+        card = update_card_due_ivl(card, due - last_review)
         write_custom_data(card, "v", "disperse")
         mw.col.update_card(card)
         mw.col.merge_undo_entries(undo_entry)
         card_cnt += 1
-        message = f"Dispersed card {card.id} from {due_to_date(old_due)} to {due_to_date(due + 1)}"
+        message = f"Dispersed card {card.id} from {due_to_date(old_due)} to {due_to_date(due)}"
         messages.append(message)
 
     if config.debug_notify:
