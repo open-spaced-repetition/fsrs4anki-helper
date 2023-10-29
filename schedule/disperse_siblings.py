@@ -148,12 +148,14 @@ def disperse_siblings(
         mw.col.reset()
         mw.reset()
 
-    mw.taskman.run_in_background(
+    fut = mw.taskman.run_in_background(
         lambda: disperse_siblings_backgroud(
             did, filter_flag, filtered_nid_string, text_from_reschedule
         ),
         on_done,
     )
+
+    return fut
 
 
 def disperse_siblings_backgroud(

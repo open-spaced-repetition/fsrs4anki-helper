@@ -117,9 +117,7 @@ class FSRS:
         return stability, difficulty
 
 
-def reschedule(
-    did, recent=False, filter_flag=False, filtered_cids={}, filtered_nid_string=""
-):
+def reschedule(did, recent=False, filter_flag=False, filtered_cids={}):
     if not mw.col.get_config("fsrs"):
         tooltip("Please enable FSRS first")
         return
@@ -132,26 +130,10 @@ def reschedule(
         mw.col.reset()
         mw.reset()
 
-    if filter_flag and len(filtered_cids) > 0:
-        fut = mw.taskman.run_in_background(
-            lambda: reschedule_background(did, recent, filter_flag, filtered_cids),
-            on_done,
-        )
-        config = Config()
-        config.load()
-        if config.auto_disperse:
-            text = fut.result()
-            fut = mw.taskman.run_in_background(
-                lambda: disperse_siblings_backgroud(
-                    did, filter_flag, filtered_nid_string, text_from_reschedule=text
-                ),
-                on_done,
-            )
-    else:
-        fut = mw.taskman.run_in_background(
-            lambda: reschedule_background(did, recent, filter_flag, filtered_cids),
-            on_done,
-        )
+    fut = mw.taskman.run_in_background(
+        lambda: reschedule_background(did, recent, filter_flag, filtered_cids),
+        on_done,
+    )
 
     return fut
 
