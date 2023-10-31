@@ -54,11 +54,16 @@ def filter_revlogs(
 
 def get_last_review_date(card: Card):
     revlogs = mw.col.card_stats_data(card.id).revlog
-    last_revlog = list(filter(lambda x: x.button_chosen >= 1, revlogs))[0]
-    return (
+    try:
+        last_revlog = list(filter(lambda x: x.button_chosen >= 1, revlogs))[0]
+        last_review_date = (
         math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400)
         + mw.col.sched.today
     )
+    except IndexError:
+        due = card.odue if card.odid else card.due
+        last_review_date = due - card.ivl
+    return last_review_date
 
 
 def update_card_due_ivl(card: Card, new_ivl: int):
