@@ -120,7 +120,7 @@ class FSRS:
 def reschedule(did, recent=False, filter_flag=False, filtered_cids={}):
     if not mw.col.get_config("fsrs"):
         tooltip("Please enable FSRS first")
-        return
+        return None
 
     start_time = time.time()
 
