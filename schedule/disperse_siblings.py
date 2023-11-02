@@ -138,7 +138,7 @@ def disperse_siblings(
 ):
     if not mw.col.get_config("fsrs"):
         tooltip("Please enable FSRS first")
-        return
+        return None
 
     start_time = time.time()
 

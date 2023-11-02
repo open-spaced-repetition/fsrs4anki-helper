@@ -38,8 +38,9 @@ def auto_reschedule(local_rids: List[int], texts: List[str]):
         filtered_cids=set(remote_reviewed_cids),
     )
 
-    # wait for reschedule to finish
-    texts.append(fut.result())
+    if fut:
+        # wait for reschedule to finish
+        texts.append(fut.result())
 
 
 def auto_disperse(local_rids: List[int], texts: List[str]):
@@ -70,8 +71,9 @@ def auto_disperse(local_rids: List[int], texts: List[str]):
         text_from_reschedule="<br>".join(texts),
     )
 
-    # wait for disperse to finish
-    return fut.result()
+    if fut:
+        # wait for disperse to finish
+        return fut.result()
 
 
 def init_sync_hook():
