@@ -7,7 +7,7 @@ from .sync_hook import init_sync_hook
 from .schedule.reschedule import reschedule
 from .schedule.postpone import postpone
 from .schedule.advance import advance
-from .schedule.reset import reset
+from .schedule.reset import clear_custom_data
 from .schedule.disperse_siblings import disperse_siblings
 from .schedule import init_review_hook
 from .stats import init_stats
@@ -114,7 +114,7 @@ add_action_to_gear(postpone, "Postpone cards")
 menu_advance = build_action(advance, "Advance cards in all decks")
 add_action_to_gear(advance, "Advance cards")
 
-menu_reset = build_action(reset, "Undo reschedulings in all cards")
+menu_reset = build_action(clear_custom_data, "Clear custom data in all cards")
 
 menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings")
 

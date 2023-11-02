@@ -1,50 +1,36 @@
 from ..utils import *
 
 
-def reset(did):
+def clear_custom_data(did):
     if not askUser(
-        """Undo all changes made by rescheduling. 
-    It will set the interval and due of all cards to the original value set when ratings (not the previous rescheduling).
+        """Clear custom data in all cards?
+    The custom scheduling of FSRS4Anki stored memory state in custom data.
+    It is unused when you enable the built-in FSRS.
     Are you sure?"""
     ):
         return
 
-    undo_entry = mw.col.add_custom_undo_entry("Reset")
+    undo_entry = mw.col.add_custom_undo_entry("Clear custom data")
 
     start_time = time.time()
+    cnt = 0
     mw.progress.start()
 
-    cnt = 0
-    reseted_cards = set()
-    decks = sorted(mw.col.decks.all(), key=lambda item: item["name"], reverse=True)
-    for deck in decks:
-        if did is not None:
-            deck_name = mw.col.decks.get(did)["name"]
-            if not deck["name"].startswith(deck_name):
-                continue
-        for cid in mw.col.find_cards(
-            f"\"deck:{deck['name']}\" \"is:review\" -\"is:learn\" -\"is:suspended\"".replace(
-                "\\", "\\\\"
-            )
-        ):
-            if cid not in reseted_cards:
-                reseted_cards.add(cid)
-            else:
-                continue
-            card = mw.col.get_card(cid)
-            if card.custom_data == "":
-                continue
-            revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
-            if len(revlogs) == 0:
-                continue
-            reset_ivl_and_due(cid, revlogs)
-            card = mw.col.get_card(cid)
-            card.custom_data = json.dumps({})
-            mw.col.update_card(card)
-            mw.col.merge_undo_entries(undo_entry)
-            cnt += 1
+    cards = mw.col.db.list(
+        """
+            SELECT id
+            FROM cards
+            WHERE json_extract(data, '$.cd') IS NOT NULL"""
+    )
 
-    tooltip(f"""{cnt} cards reset in {time.time() - start_time:.2f} seconds.""")
+    for cid in cards:
+        card = mw.col.get_card(cid)
+        card.custom_data = ""
+        mw.col.update_card(card)
+        mw.col.merge_undo_entries(undo_entry)
+        cnt += 1
+
+    tooltip(f"""{cnt} cards cleared in {time.time() - start_time:.2f} seconds.""")
     mw.progress.finish()
     mw.col.reset()
     mw.reset()
