@@ -32,11 +32,13 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
         FROM cards
         WHERE type = 2
         AND queue != -1
+        AND data != ''
         AND json_extract(data, '$.s') IS NOT NULL
         {nid_query if filter_flag else ""}
         GROUP BY nid
         HAVING count(*) > 1
     )
+    AND data != ''
     AND json_extract(data, '$.s') IS NOT NULL
     AND type = 2
     AND queue != -1
@@ -73,6 +75,7 @@ def get_siblings_when_review(card: Card):
         CASE WHEN odid==0 THEN due ELSE odue END
     FROM cards
     WHERE nid = {card.nid}
+    AND data != ''
     AND json_extract(data, '$.s') IS NOT NULL
     AND type = 2
     AND queue != -1

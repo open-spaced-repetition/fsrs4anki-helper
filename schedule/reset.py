@@ -20,7 +20,8 @@ def clear_custom_data(did):
         """
             SELECT id
             FROM cards
-            WHERE json_extract(data, '$.cd') IS NOT NULL"""
+            WHERE data != '' 
+            AND json_extract(data, '$.cd') IS NOT NULL"""
     )
 
     for cid in cards:

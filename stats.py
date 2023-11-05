@@ -36,6 +36,7 @@ def retention_stability_burden(lim) -> float:
         ,nid
     FROM cards c1
     WHERE queue >= 1 
+    AND data != ''
     AND json_extract(data, '$.s') IS NOT NULL
     """
         + lim

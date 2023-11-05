@@ -43,7 +43,8 @@ def postpone(did):
             END,
             json_extract(data, '$.dr')
         FROM cards
-        WHERE json_extract(data, '$.s') IS NOT NULL
+        WHERE data != ''
+        AND json_extract(data, '$.s') IS NOT NULL
         AND json_extract(data, '$.dr') IS NOT NULL
         AND due <= {mw.col.sched.today}
         AND queue = {QUEUE_TYPE_REV}
