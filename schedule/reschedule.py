@@ -1,9 +1,8 @@
 from ..utils import *
 from ..configuration import Config
 from anki.cards import Card, FSRSMemoryState
-from .disperse_siblings import disperse_siblings_backgroud
 from anki.decks import DeckManager
-from anki.utils import ids2str
+from anki.utils import ids2str, int_version
 
 
 class FSRS:
@@ -56,7 +55,6 @@ class FSRS:
     def set_fuzz_factor(self, cid: int, reps: int):
         random.seed(rotate_number_by_k(cid, 8) + reps)
         self.fuzz_factor = random.random()
-        return round(self.fuzz_factor * 10000, 0)
 
     def apply_fuzz(self, ivl):
         if ivl < 2.5:
@@ -65,7 +63,10 @@ class FSRS:
         min_ivl, max_ivl = get_fuzz_range(ivl, self.elapsed_days)
         self.elapsed_days = 0
         if not self.enable_load_balance:
-            return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
+            if int_version() >= 231001:
+                return ivl + mw.col.fuzz_delta(self.card.id, ivl)
+            else:
+                return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
         else:
             min_num_cards = 18446744073709551616
             best_ivl = ivl
@@ -235,16 +236,11 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         return None
 
     new_custom_data = {"v": "reschedule"}
-    old_custom_data = json.loads(card.custom_data) if card.custom_data != "" else ""
-    if "seed" in old_custom_data:
-        new_custom_data["seed"] = old_custom_data["seed"]
-    else:
-        new_custom_data["seed"] = fsrs.set_fuzz_factor(cid, card.reps)
-    fsrs.fuzz_factor = new_custom_data["seed"] / 10000
     card.custom_data = json.dumps(new_custom_data)
 
     if card.type == CARD_TYPE_REV:
         fsrs.set_card(card)
+        fsrs.set_fuzz_factor(cid, card.reps)
         new_ivl = fsrs.next_interval(s, fsrs.dr, fsrs.max_ivl)
         due_before = max(card.odue if card.odid else card.due, mw.col.sched.today)
         card = update_card_due_ivl(card, new_ivl)
