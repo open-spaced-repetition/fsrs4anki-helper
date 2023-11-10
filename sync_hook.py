@@ -6,6 +6,7 @@ from .utils import *
 
 
 def create_comparelog(local_rids: List[int]) -> None:
+    local_rids.clear()
     local_rids.extend([id for id in mw.col.db.list("SELECT id FROM revlog")])
 
 
@@ -28,6 +29,7 @@ def review_cid_remote(local_rids: List[int]):
 def auto_reschedule(local_rids: List[int], texts: List[str]):
     if len(local_rids) == 0:
         return
+    texts.clear()
     config = Config()
     config.load()
     if not config.auto_reschedule_after_sync:
