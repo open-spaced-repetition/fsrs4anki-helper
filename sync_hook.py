@@ -3,6 +3,7 @@ from .schedule.reschedule import reschedule
 from .schedule.disperse_siblings import disperse_siblings
 from .configuration import Config
 from .utils import *
+from anki.utils import ids2str
 
 
 def create_comparelog(local_rids: List[int]) -> None:
@@ -11,14 +12,14 @@ def create_comparelog(local_rids: List[int]) -> None:
 
 
 def review_cid_remote(local_rids: List[int]):
-    local_rid_string = ",".join([str(local_rid) for local_rid in local_rids])
+    local_rid_string = ids2str(local_rids)
     # exclude entries where ivl == lastIvl: they indicate a dynamic deck without rescheduling
     remote_reviewed_cids = [
         cid
         for cid in mw.col.db.list(
             f"""SELECT DISTINCT cid
             FROM revlog
-            WHERE id NOT IN ({local_rid_string})
+            WHERE id NOT IN {local_rid_string}
             AND type < 3
             """
         )  # type: 0=Learning, 1=Review, 2=relearn, 3=Relearning, 4=Manual
@@ -58,17 +59,17 @@ def auto_disperse(local_rids: List[int], texts: List[str]):
         return
 
     remote_reviewed_cids = review_cid_remote(local_rids)
-    remote_reviewed_cid_string = ",".join([str(cid) for cid in remote_reviewed_cids])
+    remote_reviewed_cid_string = ids2str(remote_reviewed_cids)
     remote_reviewed_nids = [
         nid
         for nid in mw.col.db.list(
             f"""SELECT DISTINCT nid 
             FROM cards 
-            WHERE id IN ({remote_reviewed_cid_string})
+            WHERE id IN {remote_reviewed_cid_string}
         """
         )
     ]
-    remote_reviewed_nid_string = ",".join([str(nid) for nid in remote_reviewed_nids])
+    remote_reviewed_nid_string = ids2str(remote_reviewed_nids)
 
     fut = disperse_siblings(
         None,

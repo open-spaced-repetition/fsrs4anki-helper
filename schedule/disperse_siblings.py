@@ -13,7 +13,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
         did_query = f"AND did IN {did_list}"
 
     if filter_flag:
-        nid_query = f"AND nid IN ({filtered_nid_string})"
+        nid_query = f"AND nid IN {filtered_nid_string}"
 
     siblings = mw.col.db.all(
         f"""

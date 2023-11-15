@@ -57,9 +57,9 @@ def get_last_review_date(card: Card):
     try:
         last_revlog = list(filter(lambda x: x.button_chosen >= 1, revlogs))[0]
         last_review_date = (
-        math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400)
-        + mw.col.sched.today
-    )
+            math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400)
+            + mw.col.sched.today
+        )
     except IndexError:
         due = card.odue if card.odid else card.due
         last_review_date = due - card.ivl

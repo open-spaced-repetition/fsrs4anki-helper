@@ -9,6 +9,7 @@ from .schedule.postpone import postpone
 from .schedule.advance import advance
 from .schedule.reset import clear_custom_data
 from .schedule.disperse_siblings import disperse_siblings
+from .schedule.free_days import free_days
 from .schedule import init_review_hook
 from .stats import init_stats
 from .browser.browser import init_browser
@@ -136,6 +137,8 @@ menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
 
 
+menu_apply_free_days = build_action(free_days, "Apply free days now")
+
 def set_free_days(day, checked):
     config.free_days = (day, checked)
 
@@ -147,6 +150,8 @@ menu_for_free_3 = checkable(title="Free Thu", on_click=lambda x: set_free_days(3
 menu_for_free_4 = checkable(title="Free Fri", on_click=lambda x: set_free_days(4, x))
 menu_for_free_5 = checkable(title="Free Sat", on_click=lambda x: set_free_days(5, x))
 menu_for_free_6 = checkable(title="Free Sun", on_click=lambda x: set_free_days(6, x))
+menu_for_free_days.addAction(menu_apply_free_days)
+menu_for_free_days.addSeparator()
 menu_for_free_days.addAction(menu_for_free_0)
 menu_for_free_days.addAction(menu_for_free_1)
 menu_for_free_days.addAction(menu_for_free_2)
