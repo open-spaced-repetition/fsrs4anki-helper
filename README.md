@@ -15,8 +15,8 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
   - Enable V3 Scheduler
   - FSRS4Anki scheduler version >= 3.0.0
 - For Anki version >= 23.10
-  - Enable FSRS
-  - Remove FSRS4Anki scheduler code
+  - Enable built-in FSRS
+  - Remove FSRS4Anki scheduler code if you used it before
 
 # Installation
 
@@ -67,7 +67,7 @@ Here's a comparison, the first graph is rescheduling before enabling it, and the
 
 ## Free days
 
-You can choose any day or days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid these days when rescheduling. Note: Free days only works for review cards. Due to technical limitations, FSRS doesn't modify the interval and due date of (re)learning cards.
+You can choose any day or days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid these days when rescheduling. Note: Free days only works for review cards. Due to technical limitations, FSRS doesn't modify the interval and due date of (re)learning cards. And it also doesn't reschedule cards whose interval is less than 3 days to respect the desired retention.
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/798dc25c-f06c-40fe-8866-ac28c8392273)
 

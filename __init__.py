@@ -137,7 +137,7 @@ menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
 
 
-menu_apply_free_days = build_action(free_days, "Apply free days immediately")
+menu_apply_free_days = build_action(free_days, "Apply free days now")
 
 def set_free_days(day, checked):
     config.free_days = (day, checked)
