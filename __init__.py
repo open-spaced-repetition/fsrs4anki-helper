@@ -9,7 +9,7 @@ from .schedule.postpone import postpone
 from .schedule.advance import advance
 from .schedule.reset import clear_custom_data
 from .schedule.disperse_siblings import disperse_siblings
-from .schedule.free_days import free_days
+from .schedule.half_days import half_days
 from .schedule import init_review_hook
 from .stats import init_stats
 from .browser.browser import init_browser
@@ -125,8 +125,8 @@ menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_load_balance)
-menu_for_free_days = menu_for_helper.addMenu(
-    "No Anki on Free Days (requires Load Balancing)"
+menu_for_half_days = menu_for_helper.addMenu(
+    "Less Anki on Half Days (requires Load Balancing)"
 )
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
@@ -137,28 +137,28 @@ menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
 
 
-menu_apply_free_days = build_action(free_days, "Apply free days now")
+menu_apply_half_days = build_action(half_days, "Apply half days now")
 
-def set_free_days(day, checked):
-    config.free_days = (day, checked)
+def set_half_days(day, checked):
+    config.half_days = (day, checked)
 
 
-menu_for_free_0 = checkable(title="Free Mon", on_click=lambda x: set_free_days(0, x))
-menu_for_free_1 = checkable(title="Free Tue", on_click=lambda x: set_free_days(1, x))
-menu_for_free_2 = checkable(title="Free Wed", on_click=lambda x: set_free_days(2, x))
-menu_for_free_3 = checkable(title="Free Thu", on_click=lambda x: set_free_days(3, x))
-menu_for_free_4 = checkable(title="Free Fri", on_click=lambda x: set_free_days(4, x))
-menu_for_free_5 = checkable(title="Free Sat", on_click=lambda x: set_free_days(5, x))
-menu_for_free_6 = checkable(title="Free Sun", on_click=lambda x: set_free_days(6, x))
-menu_for_free_days.addAction(menu_apply_free_days)
-menu_for_free_days.addSeparator()
-menu_for_free_days.addAction(menu_for_free_0)
-menu_for_free_days.addAction(menu_for_free_1)
-menu_for_free_days.addAction(menu_for_free_2)
-menu_for_free_days.addAction(menu_for_free_3)
-menu_for_free_days.addAction(menu_for_free_4)
-menu_for_free_days.addAction(menu_for_free_5)
-menu_for_free_days.addAction(menu_for_free_6)
+menu_for_half_0 = checkable(title="Half Mon", on_click=lambda x: set_half_days(0, x))
+menu_for_half_1 = checkable(title="Half Tue", on_click=lambda x: set_half_days(1, x))
+menu_for_half_2 = checkable(title="Half Wed", on_click=lambda x: set_half_days(2, x))
+menu_for_half_3 = checkable(title="Half Thu", on_click=lambda x: set_half_days(3, x))
+menu_for_half_4 = checkable(title="Half Fri", on_click=lambda x: set_half_days(4, x))
+menu_for_half_5 = checkable(title="Half Sat", on_click=lambda x: set_half_days(5, x))
+menu_for_half_6 = checkable(title="Half Sun", on_click=lambda x: set_half_days(6, x))
+menu_for_half_days.addAction(menu_apply_half_days)
+menu_for_half_days.addSeparator()
+menu_for_half_days.addAction(menu_for_half_0)
+menu_for_half_days.addAction(menu_for_half_1)
+menu_for_half_days.addAction(menu_for_half_2)
+menu_for_half_days.addAction(menu_for_half_3)
+menu_for_half_days.addAction(menu_for_half_4)
+menu_for_half_days.addAction(menu_for_half_5)
+menu_for_half_days.addAction(menu_for_half_6)
 
 
 def adjust_menu():
@@ -170,13 +170,13 @@ def adjust_menu():
         menu_auto_disperse_after_sync.setChecked(config.auto_disperse_after_sync)
         menu_auto_disperse.setChecked(config.auto_disperse)
         menu_load_balance.setChecked(config.load_balance)
-        menu_for_free_0.setChecked(0 in config.free_days)
-        menu_for_free_1.setChecked(1 in config.free_days)
-        menu_for_free_2.setChecked(2 in config.free_days)
-        menu_for_free_3.setChecked(3 in config.free_days)
-        menu_for_free_4.setChecked(4 in config.free_days)
-        menu_for_free_5.setChecked(5 in config.free_days)
-        menu_for_free_6.setChecked(6 in config.free_days)
+        menu_for_half_0.setChecked(0 in config.half_days)
+        menu_for_half_1.setChecked(1 in config.half_days)
+        menu_for_half_2.setChecked(2 in config.half_days)
+        menu_for_half_3.setChecked(3 in config.half_days)
+        menu_for_half_4.setChecked(4 in config.half_days)
+        menu_for_half_5.setChecked(5 in config.half_days)
+        menu_for_half_6.setChecked(6 in config.half_days)
 
 
 @state_did_change.append

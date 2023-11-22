@@ -3,7 +3,7 @@ from ..configuration import Config
 from anki.utils import ids2str, html_to_text_line
 
 enable_load_balance = None
-free_days = None
+half_days = None
 version = None
 
 
@@ -166,9 +166,9 @@ def disperse_siblings_backgroud(
 ):
     config = Config()
     config.load()
-    global enable_load_balance, free_days
+    global enable_load_balance, half_days
     enable_load_balance = config.load_balance
-    free_days = config.free_days
+    half_days = config.half_days
 
     card_cnt = 0
     note_cnt = 0
@@ -218,9 +218,9 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     if not config.auto_disperse:
         return
 
-    global enable_load_balance, free_days
+    global enable_load_balance, half_days
     enable_load_balance = config.load_balance
-    free_days = config.free_days
+    half_days = config.half_days
 
     siblings = get_siblings_when_review(card)
 

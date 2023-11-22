@@ -4,23 +4,23 @@ from .reschedule import reschedule
 from anki.utils import ids2str
 
 
-def free_days(did):
+def half_days(did):
     config = Config()
     config.load()
     if not config.load_balance:
         tooltip("Please enable load balance first")
         return
-    if len(config.free_days) == 0:
-        tooltip("Please select free days first")
+    if len(config.half_days) == 0:
+        tooltip("Please select half days first")
         return
     today = mw.col.sched.today
     due_days = []
     for day_offset in range(365):
-        if (datetime.now() + timedelta(days=day_offset)).weekday() in config.free_days:
+        if (datetime.now() + timedelta(days=day_offset)).weekday() in config.half_days:
             due_days.append(today + day_offset)
 
-    # find cards that are due in free days in the next 365 days
-    due_in_free_days_cids = mw.col.db.list(
+    # find cards that are due in half days in the next 365 days
+    due_in_half_days_cids = mw.col.db.list(
         f"""SELECT id
         FROM cards
         WHERE data != '' 
@@ -33,5 +33,5 @@ def free_days(did):
         None,
         recent=False,
         filter_flag=True,
-        filtered_cids=set(due_in_free_days_cids),
+        filtered_cids=set(due_in_half_days_cids),
     )
