@@ -9,7 +9,7 @@ class FSRS:
     max_ivl: int
     dr: float
     enable_load_balance: bool
-    free_days: List[int]
+    half_days: List[int]
     due_cnt_perday_from_first_day: Dict[int, int]
     learned_cnt_perday_from_today: Dict[int, int]
     card: Card
@@ -19,7 +19,7 @@ class FSRS:
         self.max_ivl = 36500
         self.dr = 0.9
         self.enable_load_balance = False
-        self.free_days = []
+        self.half_days = []
         self.elapsed_days = 0
 
     def set_load_balance(self):
@@ -87,7 +87,7 @@ class FSRS:
                 num_cards = due_cards + rated_cards
                 if (
                     num_cards < min_num_cards
-                    and due_date.weekday() not in self.free_days
+                    and due_date.weekday() not in self.half_days
                 ):
                     best_ivl = check_ivl
                     min_num_cards = num_cards
@@ -152,7 +152,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     fsrs = FSRS()
     if config.load_balance:
         fsrs.set_load_balance()
-        fsrs.free_days = config.free_days
+        fsrs.half_days = config.half_days
     cancelled = False
     DM = DeckManager(mw.col)
     if did is not None:

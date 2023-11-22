@@ -6,9 +6,9 @@ This sets the number of days in "Reschedule cards reviewed in the last n days"; 
 
 ## Configure via menu bar: Tools > FSRS4Anki Helper
 
-### `free_days`
+### `half_days`
 
-Load Balancing must be enabled for this. Select any day of the week (e.g., Sunday) that you do not want to study on. It will keep the selected day(s) free of reviews and instead select another day when rescheduling.
+Load Balancing must be enabled for this. Select any day of the week (e.g., Sunday) when you want to spend less time on Anki. It will reduce reviews on the selected day(s) and instead select another day when rescheduling.
 
 ### `load_balance`
 

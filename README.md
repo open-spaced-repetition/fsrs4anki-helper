@@ -6,7 +6,7 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 - **Postpone** a selected number of due cards.
 - **Advance** a selected number of undue cards.
 - **Balance** the load during rescheduling (based on fuzz).
-- **No Anki** on Free Days (such as weekends) during rescheduling (based on load balance).
+- **Less Anki** on Half Days (such as weekends) during rescheduling (based on load balance).
 - **Disperse** Siblings (cards with the same note) to avoid interference & reminder.
 
 # Requirements
@@ -34,7 +34,7 @@ Installation link: https://ankiweb.net/shared/info/759844606
 | Advance           | Decreases the intervals of undue cards based on current and requested R, and interval length to minimize damage to long-term learning. | When you want to review your material ahead of time, for example, before a test. |
 | Postpone          | Increases the intervals of cards that are due today based on current and requested R, and interval length in a way that minimizes damage to long-term learning. | When you are dealing with a large number of reviews after taking a break from Anki or after rescheduling. |
 | Load Balancing    | After the optimal interval is calculated, it is adjusted by a random amount to make the distribution of reviews over time more uniform. | Always. This feature makes your workload (reviews per day) more consistent. |
-| Free Days         | After the optimal interval is calculated, it is slightly adjusted to change the due date. | If you don't want to study on some days of the week, for example, Sundays. |
+| Half Days         | After the optimal interval is calculated, it is slightly adjusted to change the due date. | If you want to spend less time on Anki on some days of the week, for example, Sundays. |
 | Disperse Siblings | Siblings are cards generated from the same note. Their intervals are adjusted to spread them further apart from each other. | Always. This feature alleviates the interference; disabling it will only decrease the efficiency of spaced repetition. |
 
 ## Reschedule
@@ -65,9 +65,20 @@ Here's a comparison, the first graph is rescheduling before enabling it, and the
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/1c4f430d-824b-4145-801e-68fc0329fbbd)
 
-## Free days
+## Half Days
 
-You can choose any day or days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid these days when rescheduling. Note: Free days only works for review cards. Due to technical limitations, FSRS doesn't modify the interval and due date of (re)learning cards. And it also doesn't reschedule cards whose interval is less than 3 days to respect the desired retention.
+You can choose any day or days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid these days when rescheduling. Note: Half Days only works for review cards. Due to technical limitations, FSRS doesn't modify the interval and due date of (re)learning cards. And it also doesn't reschedule cards whose interval is less than 3 days to respect the desired retention.
+
+Fuzz example:
+- Review less than 3 days: will not choose another day.
+- Review in 3 days: Choose between days 2 and 4.
+- Review in 7 days: Choose between days 5 and 9.
+- Review in 90 days: Choose between days 86 and 94.
+- Cards you forgot, and return within 2 days it does not choose another day.
+
+Exceptions:
+
+If the fuzz range is too narrow or does not exist (review less than 3 days) to satisfy the selected half days, the day of the week may be selected for review of the card.
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/798dc25c-f06c-40fe-8866-ac28c8392273)
 
@@ -113,7 +124,7 @@ Interpretation:
 ## Other features
 - **Auto reschedule cards reviewed on other devices after sync:** This option is useful if you do some (or all) of your reviews on platforms that don't support FSRS such as AnkiDroid or AnkiWeb. If this option is enabled, the reviews synced from the other devices will be automatically rescheduled according to the FSRS algorithm. If you are relying on this feature, it is recommended to sync the reviews daily for the best results.
 - **Auto reschedule the card you just reviewed (<=2.1.66):** If you enable this option, every card that you review will be rescheduled. Enabling this option is not essential for using FSRS. It is mainly intended for gradually transitioning your old cards to FSRS when starting to use FSRS. The other option for transitioning old cards to FSRS is to reschedule all cards, but this tends to induce a huge backlog for many people. Other advantages of enabling the "Auto reschedule the card you just reviewed" option include:
-    - Load balance and free days are applied when rescheduling.
+    - Load balance and half days are applied when rescheduling.
     - It allows you to use learning or relearning steps longer than or equal to 1 day without breaking the scheduling. However, for best results, it is not recommended to use such steps even with this option enabled because FSRS can determine the next intervals more accurately.
 
     However, this option also has some disadvantages, which include:
