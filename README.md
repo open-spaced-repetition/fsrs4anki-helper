@@ -43,13 +43,13 @@ Rescheduling can calculate the memory states and intervals based on each card's 
 
 **Note**: For cards that have been reviewed multiple times using Anki's default algorithm, rescheduling may give different intervals than the Scheduler because the Scheduler can't access the full review history when running. In this case, the intervals given by rescheduling will be more accurate. But after rescheduling once, there will be no difference between the two.
 
-![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/711cbccf-08de-4b31-8315-f3fcd34242a4)
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/7ec8710f-66ac-47bf-b498-13917944ec9a)
 
 ## Advance/Postpone
 
 These two functions are very similar, so I'll talk about them together. You can set the number of cards to advance/postpone, and the Helper add-on will sort your cards and perform the advance/postpone in such a way that the deviation from the original review schedule is minimal while meeting the number of cards you set.
 
-![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/51e103e5-0bfb-4a5c-9b5a-11dc97ee0877)
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/303912eb-2645-4c75-a554-2c76024744f2)
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/f9838010-cb00-44ce-aefc-10300f2a586e)
 
@@ -57,7 +57,7 @@ These two functions are very similar, so I'll talk about them together. You can 
 
 Once the load balance option is enabled, rescheduling will make the daily review load as consistent and smooth as possible.
 
-![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/42cb445b-7700-4612-8ccd-4bae29fa679c)
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/4ac4f5aa-e4c6-4f50-b30c-1595f930d2f3)
 
 Here's a comparison, the first graph is rescheduling before enabling it, and the second graph is after enabling:
 
@@ -80,7 +80,7 @@ Exceptions:
 
 If the fuzz range is too narrow or does not exist (review less than 3 days) to satisfy the selected easy days, the day of the week may be selected for review of the card.
 
-![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/39738aa5-ab5e-4610-a8b1-c0de6ea4a79f)
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/4df36a3c-6c5e-4f1f-81ac-1740c7fe15bb)
 
 **Effect**:
 
@@ -90,7 +90,7 @@ If the fuzz range is too narrow or does not exist (review less than 3 days) to s
 
 In Anki, some templates will generate multiple cards related in content from the same note, such as reversed cards (Front->Back, Back->Front) and cloze cards (when you make multiple clozes on the same note). If the review dates of these cards are too close, they may interfere with or remind you of each other. Dispersing siblings can spread the review dates of these cards out as much as possible.
 
-![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/cacfb6a0-00cd-43b4-9c09-003788cc2bc9)
+![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/b33460f4-d7db-4c8f-b9d0-d0193f2d1f54)
 
 ## Advanced Search (<=2.1.66)
 
