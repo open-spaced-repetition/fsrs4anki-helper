@@ -3,7 +3,7 @@ from aqt import mw
 tag = mw.addonManager.addonFromModule(__name__)
 
 LOAD_BALANCE = "load_balance"
-HALF_DAYS = "half_days"
+EASY_DAYS = "easy_days"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 AUTO_DISPERSE_AFTER_SYNC = "auto_disperse_after_sync"
@@ -42,17 +42,17 @@ class Config:
         self.save()
 
     @property
-    def half_days(self):
-        return self.data[HALF_DAYS]
+    def easy_days(self):
+        return self.data[EASY_DAYS]
 
-    @half_days.setter
-    def half_days(self, day_enable):
+    @easy_days.setter
+    def easy_days(self, day_enable):
         day, enable = day_enable
         if enable:
-            self.data[HALF_DAYS] = sorted(set(self.data[HALF_DAYS] + [day]))
+            self.data[EASY_DAYS] = sorted(set(self.data[EASY_DAYS] + [day]))
         else:
-            if day in self.data[HALF_DAYS]:
-                self.data[HALF_DAYS].remove(day)
+            if day in self.data[EASY_DAYS]:
+                self.data[EASY_DAYS].remove(day)
         self.save()
 
     @property
