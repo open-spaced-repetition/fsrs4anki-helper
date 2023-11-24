@@ -2,10 +2,6 @@ from ..utils import *
 from ..configuration import Config
 from anki.utils import ids2str, html_to_text_line
 
-enable_load_balance = None
-easy_days = None
-version = None
-
 
 def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if did is not None:
@@ -164,12 +160,6 @@ def disperse_siblings(
 def disperse_siblings_backgroud(
     did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""
 ):
-    config = Config()
-    config.load()
-    global enable_load_balance, easy_days
-    enable_load_balance = config.load_balance
-    easy_days = config.easy_days
-
     card_cnt = 0
     note_cnt = 0
     nid_siblings = get_siblings(did, filter_flag, filtered_nid_string)
@@ -217,10 +207,6 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     config.load()
     if not config.auto_disperse:
         return
-
-    global enable_load_balance, easy_days
-    enable_load_balance = config.load_balance
-    easy_days = config.easy_days
 
     siblings = get_siblings_when_review(card)
 
