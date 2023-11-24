@@ -49,13 +49,19 @@ def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry
 def filter_revlogs(
     revlogs: List[CardStatsResponse.StatsRevlogEntry],
 ) -> List[CardStatsResponse.StatsRevlogEntry]:
-    return list(filter(lambda x: x.review_kind != REVLOG_CRAM or x.ease != 0, revlogs))
+    return list(
+        filter(
+            lambda x: x.button_chosen >= 1
+            and (x.review_kind != REVLOG_CRAM or x.ease != 0),
+            revlogs,
+        )
+    )
 
 
 def get_last_review_date(card: Card):
     revlogs = mw.col.card_stats_data(card.id).revlog
     try:
-        last_revlog = list(filter(lambda x: x.button_chosen >= 1, revlogs))[0]
+        last_revlog = filter_revlogs(revlogs)[0]
         last_review_date = (
             math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400)
             + mw.col.sched.today
