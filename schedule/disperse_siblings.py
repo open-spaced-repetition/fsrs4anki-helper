@@ -92,7 +92,6 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     card = mw.col.get_card(cid)
     last_review = get_last_review_date(card)
     new_ivl = int(round(9 * stability * (1 / desired_retention - 1)))
-    new_ivl = min(new_ivl, maximum_interval)
 
     if new_ivl <= 2.5:
         return (due, due), last_review
@@ -101,7 +100,7 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     last_elapsed_days = (
         int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     )
-    min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days)
+    min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days, maximum_interval)
     if due >= mw.col.sched.today:
         due_range = (
             max(last_review + min_ivl, mw.col.sched.today),
