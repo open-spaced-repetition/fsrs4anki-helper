@@ -11,6 +11,7 @@ AUTO_DISPERSE = "auto_disperse"
 MATURE_IVL = "mature_ivl"
 DEBUG_NOTIFY = "debug_notify"
 FSRS_STATS = "fsrs_stats"
+DISPLAY_MEMORY_STATE = "display_memory_state"
 
 
 def load_config():
@@ -116,4 +117,13 @@ class Config:
     @fsrs_stats.setter
     def fsrs_stats(self, value):
         self.data[FSRS_STATS] = value
+        self.save()
+
+    @property
+    def display_memory_state(self):
+        return self.data[DISPLAY_MEMORY_STATE]
+    
+    @display_memory_state.setter
+    def display_memory_state(self, value):
+        self.data[DISPLAY_MEMORY_STATE] = value
         self.save()

@@ -7,5 +7,6 @@
     "auto_disperse": true,
     "mature_ivl": 21,
     "debug_notify": false,
-    "fsrs_stats": true
+    "fsrs_stats": true,
+    "display_memory_state": false
 }
