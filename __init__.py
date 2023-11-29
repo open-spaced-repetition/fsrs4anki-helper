@@ -3,6 +3,7 @@ from aqt import mw
 from aqt.qt import QAction
 from typing import Callable
 
+from .dsr_state import init_dsr_status_hook
 from .sync_hook import init_sync_hook
 from .schedule.reschedule import reschedule
 from .schedule.postpone import postpone
@@ -87,6 +88,15 @@ menu_auto_disperse = checkable(
 )
 
 
+def set_display_memory_state(checked):
+    config.display_memory_state = checked
+
+
+menu_display_memory_state = checkable(
+    title="Display memory state after answer", on_click=set_display_memory_state
+)
+
+
 def set_load_balance(checked):
     config.load_balance = checked
 
@@ -124,6 +134,7 @@ menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
 menu_for_helper.addAction(menu_auto_disperse)
+menu_for_helper.addAction(menu_display_memory_state)
 menu_for_helper.addAction(menu_load_balance)
 menu_for_easy_days = menu_for_helper.addMenu(
     "Less Anki on Easy Days (requires Load Balancing)"
@@ -138,6 +149,7 @@ menu_for_helper.addAction(menu_disperse_siblings)
 
 
 menu_apply_easy_days = build_action(easy_days, "Apply easy days now")
+
 
 def set_easy_days(day, checked):
     config.easy_days = (day, checked)
@@ -169,6 +181,7 @@ def adjust_menu():
         menu_auto_reschedule_after_sync.setChecked(config.auto_reschedule_after_sync)
         menu_auto_disperse_after_sync.setChecked(config.auto_disperse_after_sync)
         menu_auto_disperse.setChecked(config.auto_disperse)
+        menu_display_memory_state.setChecked(config.display_memory_state)
         menu_load_balance.setChecked(config.load_balance)
         menu_for_easy_0.setChecked(0 in config.easy_days)
         menu_for_easy_1.setChecked(1 in config.easy_days)
@@ -194,3 +207,4 @@ init_sync_hook()
 init_stats()
 init_browser()
 init_review_hook()
+init_dsr_status_hook()
