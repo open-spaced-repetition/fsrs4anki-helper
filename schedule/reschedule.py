@@ -6,8 +6,8 @@ from anki.utils import ids2str, int_version
 
 
 class FSRS:
-    max_ivl: int
-    dr: float
+    maximum_interval: int
+    desired_retention: float
     enable_load_balance: bool
     easy_days: List[int]
     due_cnt_perday_from_first_day: Dict[int, int]
@@ -16,8 +16,8 @@ class FSRS:
     elapsed_days: int
 
     def __init__(self) -> None:
-        self.max_ivl = 36500
-        self.dr = 0.9
+        self.maximum_interval = 36500
+        self.desired_retention = 0.9
         self.enable_load_balance = False
         self.easy_days = []
         self.elapsed_days = 0
@@ -60,7 +60,7 @@ class FSRS:
         if ivl < 2.5:
             return ivl
         ivl = int(round(ivl))
-        min_ivl, max_ivl = get_fuzz_range(ivl, self.elapsed_days)
+        min_ivl, max_ivl = get_fuzz_range(ivl, self.elapsed_days, self.maximum_interval)
         self.elapsed_days = 0
         if not self.enable_load_balance:
             if int_version() >= 231001:
@@ -69,7 +69,7 @@ class FSRS:
                 return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
         else:
             min_num_cards = 18446744073709551616
-            best_ivl = ivl
+            best_ivl = (max_ivl + min_ivl) // 2
             step = (max_ivl - min_ivl) // 100 + 1
             due = self.card.due if self.card.odid == 0 else self.card.odue
             for check_ivl in reversed(range(min_ivl, max_ivl + step, step)):
@@ -93,29 +93,12 @@ class FSRS:
                     min_num_cards = num_cards
             return best_ivl
 
-    def next_interval(self, stability, retention, max_ivl):
-        new_interval = self.apply_fuzz(9 * stability * (1 / retention - 1))
-        return min(max(int(round(new_interval)), 1), max_ivl)
+    def next_interval(self, stability):
+        new_interval = self.apply_fuzz(9 * stability * (1 / self.desired_retention - 1))
+        return max(int(round(new_interval)), 1)
 
     def set_card(self, card: Card):
         self.card = card
-
-    def memory_state_from_sm2(self, ease_factor, interval, requestretention):
-        if self.version[0] == 3:
-            stability = interval * math.log(0.9) / math.log(requestretention)
-            difficulty = 11.0 - (ease_factor - 1.0) / (
-                math.exp(self.w[6])
-                * math.pow(stability, self.w[7])
-                * (math.exp((1 - requestretention) * self.w[8]) - 1)
-            )
-        elif self.version[0] == 4:
-            stability = interval / (9 * (1 / requestretention - 1))
-            difficulty = 11.0 - (ease_factor - 1.0) / (
-                math.exp(self.w[8])
-                * math.pow(stability, -self.w[9])
-                * (math.exp((1 - requestretention) * self.w[10]) - 1)
-            )
-        return stability, difficulty
 
 
 def reschedule(did, recent=False, filter_flag=False, filtered_cids={}):
@@ -200,11 +183,11 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
         cards,
     )
 
-    for cid, _, desired_retention, max_interval in cards:
+    for cid, _, desired_retention, maximum_interval in cards:
         if cancelled:
             break
-        fsrs.dr = desired_retention
-        fsrs.max_ivl = max_interval
+        fsrs.desired_retention = desired_retention
+        fsrs.maximum_interval = maximum_interval
         card = reschedule_card(cid, fsrs, filter_flag)
         if card is None:
             continue
@@ -241,7 +224,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
     if card.type == CARD_TYPE_REV:
         fsrs.set_card(card)
         fsrs.set_fuzz_factor(cid, card.reps)
-        new_ivl = fsrs.next_interval(s, fsrs.dr, fsrs.max_ivl)
+        new_ivl = fsrs.next_interval(s)
         due_before = max(card.odue if card.odid else card.due, mw.col.sched.today)
         card = update_card_due_ivl(card, new_ivl)
         due_after = max(card.odue if card.odid else card.due, mw.col.sched.today)

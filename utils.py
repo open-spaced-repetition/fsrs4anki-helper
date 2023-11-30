@@ -104,11 +104,12 @@ def has_manual_reset(revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     return False
 
 
-def get_fuzz_range(interval, elapsed_days):
-    min_ivl = max(2, int(round(interval * 0.95 - 1)))
-    max_ivl = int(round(interval * 1.05 + 1))
+def get_fuzz_range(interval, elapsed_days, maximum_interval):
+    min_ivl = max(2, int(round(min(interval, maximum_interval) * 0.95 - 1)))
+    max_ivl = min(int(round(interval * 1.05 + 1)), maximum_interval)
     if interval > elapsed_days:
         min_ivl = max(min_ivl, elapsed_days + 1)
+    min_ivl = min(min_ivl, max_ivl)
     return min_ivl, max_ivl
 
 
