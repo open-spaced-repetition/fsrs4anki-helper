@@ -24,7 +24,7 @@ def easy_days(did):
         f"""SELECT id
         FROM cards
         WHERE data != '' 
-        AND json_extract(data, '$.cd') IS NOT NULL
+        AND json_extract(data, '$.s') IS NOT NULL
         AND due IN {ids2str(due_days)}
         """
     )
