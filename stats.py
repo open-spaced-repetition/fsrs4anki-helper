@@ -133,7 +133,7 @@ def get_fsrs_stats(self: CollectionStats):
     title = CollectionStats._title(
         self,
         "FSRS Stats",
-        "Only calculated for cards with custom data (affected by FSRS)",
+        "Only calculated for cards with FSRS memory states",
     )
     stats_data = _lineTbl_now(i)
     interpretation = (
