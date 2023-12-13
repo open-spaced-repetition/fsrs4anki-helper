@@ -4,7 +4,7 @@
     "days_to_reschedule": 7,
     "auto_reschedule_after_sync": false,
     "auto_disperse_after_sync": false,
-    "auto_disperse": true,
+    "auto_disperse": false,
     "mature_ivl": 21,
     "debug_notify": false,
     "fsrs_stats": true,
