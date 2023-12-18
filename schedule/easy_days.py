@@ -2,6 +2,7 @@ from ..utils import *
 from ..configuration import Config
 from .reschedule import reschedule
 from anki.utils import ids2str
+from aqt.gui_hooks import collection_did_load
 
 
 def easy_days(did):
@@ -35,3 +36,11 @@ def easy_days(did):
         filter_flag=True,
         filtered_cids=set(due_in_easy_days_cids),
     )
+
+
+@collection_did_load.append
+def auto_easy_days(col):
+    config = Config()
+    config.load()
+    if config.auto_easy_days:
+        easy_days(None)
