@@ -110,6 +110,9 @@ def reschedule_recent(did):
     reschedule(did, recent=True)
 
 
+menu_reschedule = build_action(reschedule, "Reschedule all cards")
+add_action_to_gear(reschedule, "Reschedule all cards")
+
 menu_reschedule_recent = build_action(
     reschedule_recent,
     f"Reschedule cards reviewed in the last {config.days_to_reschedule} days",
@@ -137,6 +140,7 @@ menu_for_easy_days = menu_for_helper.addMenu(
     "Less Anki on Easy Days (requires Load Balancing)"
 )
 menu_for_helper.addSeparator()
+menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_reschedule_recent)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
