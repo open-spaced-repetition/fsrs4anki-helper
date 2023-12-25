@@ -26,7 +26,10 @@ def easy_days(did):
         FROM cards
         WHERE data != '' 
         AND json_extract(data, '$.s') IS NOT NULL
-        AND due IN {ids2str(due_days)}
+        AND CASE WHEN odid==0
+        THEN due
+        ELSE odue
+        END IN {ids2str(due_days)}
         """
     )
 
