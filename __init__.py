@@ -154,8 +154,10 @@ menu_apply_easy_days = build_action(easy_days, "Apply easy days now")
 def set_easy_days(day, checked):
     config.easy_days = (day, checked)
 
+
 def set_auto_easy_days(checked):
     config.auto_easy_days = checked
+
 
 menu_for_easy_0 = checkable(title="Easy Mon", on_click=lambda x: set_easy_days(0, x))
 menu_for_easy_1 = checkable(title="Easy Tue", on_click=lambda x: set_easy_days(1, x))
@@ -165,7 +167,8 @@ menu_for_easy_4 = checkable(title="Easy Fri", on_click=lambda x: set_easy_days(4
 menu_for_easy_5 = checkable(title="Easy Sat", on_click=lambda x: set_easy_days(5, x))
 menu_for_easy_6 = checkable(title="Easy Sun", on_click=lambda x: set_easy_days(6, x))
 menu_for_auto_easy_days = checkable(
-    title="Auto apply easy days on opening collection", on_click=lambda x: set_auto_easy_days(x)
+    title="Auto apply easy days on opening collection",
+    on_click=lambda x: set_auto_easy_days(x),
 )
 menu_for_easy_days.addAction(menu_apply_easy_days)
 menu_for_easy_days.addAction(menu_for_auto_easy_days)
