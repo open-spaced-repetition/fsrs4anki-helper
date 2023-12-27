@@ -123,16 +123,16 @@ class Config:
     @property
     def display_memory_state(self):
         return self.data[DISPLAY_MEMORY_STATE]
-    
+
     @display_memory_state.setter
     def display_memory_state(self, value):
         self.data[DISPLAY_MEMORY_STATE] = value
         self.save()
-    
+
     @property
     def auto_easy_days(self):
         return self.data[AUTO_EASY_DAYS]
-    
+
     @auto_easy_days.setter
     def auto_easy_days(self, value):
         self.data[AUTO_EASY_DAYS] = value

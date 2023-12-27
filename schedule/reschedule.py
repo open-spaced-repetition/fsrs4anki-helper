@@ -2,7 +2,7 @@ from ..utils import *
 from ..configuration import Config
 from anki.cards import Card, FSRSMemoryState
 from anki.decks import DeckManager
-from anki.utils import ids2str, int_version
+from anki.utils import ids2str
 
 
 class FSRS:
@@ -59,7 +59,6 @@ class FSRS:
     def apply_fuzz(self, ivl):
         if ivl < 2.5:
             return ivl
-        ivl = int(round(ivl))
         min_ivl, max_ivl = get_fuzz_range(ivl, self.elapsed_days, self.maximum_interval)
         self.elapsed_days = 0
         if not self.enable_load_balance:
@@ -94,8 +93,8 @@ class FSRS:
             return best_ivl
 
     def next_interval(self, stability):
-        new_interval = self.apply_fuzz(9 * stability * (1 / self.desired_retention - 1))
-        return max(int(round(new_interval)), 1)
+        new_interval = next_interval(stability, self.desired_retention)
+        return self.apply_fuzz(new_interval)
 
     def set_card(self, card: Card):
         self.card = card

@@ -21,6 +21,7 @@ import math
 import random
 import time
 from datetime import datetime, timedelta
+from anki.utils import int_version
 
 
 def RepresentsInt(s):
@@ -125,8 +126,20 @@ def due_to_date(due: int) -> str:
     return (today_date + timedelta(days=offset)).strftime("%Y-%m-%d")
 
 
-def power_forgetting_curve(elapsed_days, stability):
-    return (1 + elapsed_days / (9 * stability)) ** -1
+if int_version() < 231200:
+    DECAY = -1
+else:
+    DECAY = -0.5  # FSRS-4.5
+FACTOR = 0.9 ** (1 / DECAY) - 1
+
+
+def power_forgetting_curve(t, s):
+    return (1 + FACTOR * t / s) ** DECAY
+
+
+def next_interval(s, r):
+    ivl = s / FACTOR * (r ** (1 / DECAY) - 1)
+    return max(1, int(round(ivl)))
 
 
 def write_custom_data(card: Card, key, value):
