@@ -10,7 +10,7 @@ from .schedule.postpone import postpone
 from .schedule.advance import advance
 from .schedule.reset import clear_custom_data
 from .schedule.disperse_siblings import disperse_siblings
-from .schedule.easy_days import easy_days
+from .schedule.easy_days import easy_days, easy_day_for_sepcific_date
 from .schedule import init_review_hook
 from .stats import init_stats
 from .browser.browser import init_browser
@@ -149,6 +149,9 @@ menu_for_helper.addAction(menu_disperse_siblings)
 
 
 menu_apply_easy_days = build_action(easy_days, "Apply easy days now")
+menu_apply_easy_days_for_specific_date = build_action(
+    easy_day_for_sepcific_date, "Apply easy day for a specific date"
+)
 
 
 def set_easy_days(day, checked):
@@ -170,6 +173,7 @@ menu_for_auto_easy_days = checkable(
     title="Auto apply easy days on opening collection",
     on_click=lambda x: set_auto_easy_days(x),
 )
+menu_for_easy_days.addAction(menu_apply_easy_days_for_specific_date)
 menu_for_easy_days.addAction(menu_apply_easy_days)
 menu_for_easy_days.addAction(menu_for_auto_easy_days)
 menu_for_easy_days.addSeparator()

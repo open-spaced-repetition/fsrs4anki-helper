@@ -10,6 +10,7 @@ class FSRS:
     desired_retention: float
     enable_load_balance: bool
     easy_days: List[int]
+    easy_specific_due_dates: List[int]
     due_cnt_perday_from_first_day: Dict[int, int]
     learned_cnt_perday_from_today: Dict[int, int]
     card: Card
@@ -21,6 +22,7 @@ class FSRS:
         self.enable_load_balance = False
         self.easy_days = []
         self.elapsed_days = 0
+        self.easy_specific_due_dates = []
 
     def set_load_balance(self):
         self.enable_load_balance = True
@@ -87,6 +89,7 @@ class FSRS:
                 if (
                     num_cards < min_num_cards
                     and due_date.weekday() not in self.easy_days
+                    and check_due not in self.easy_specific_due_dates
                 ):
                     best_ivl = check_ivl
                     min_num_cards = num_cards
@@ -100,7 +103,9 @@ class FSRS:
         self.card = card
 
 
-def reschedule(did, recent=False, filter_flag=False, filtered_cids={}):
+def reschedule(
+    did, recent=False, filter_flag=False, filtered_cids={}, easy_specific_due_dates=[]
+):
     if not mw.col.get_config("fsrs"):
         tooltip("Please enable FSRS first")
         return None
@@ -114,14 +119,18 @@ def reschedule(did, recent=False, filter_flag=False, filtered_cids={}):
         mw.reset()
 
     fut = mw.taskman.run_in_background(
-        lambda: reschedule_background(did, recent, filter_flag, filtered_cids),
+        lambda: reschedule_background(
+            did, recent, filter_flag, filtered_cids, easy_specific_due_dates
+        ),
         on_done,
     )
 
     return fut
 
 
-def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}):
+def reschedule_background(
+    did, recent=False, filter_flag=False, filtered_cids={}, easy_specific_due_dates=[]
+):
     config = Config()
     config.load()
 
@@ -135,6 +144,7 @@ def reschedule_background(did, recent=False, filter_flag=False, filtered_cids={}
     if config.load_balance:
         fsrs.set_load_balance()
         fsrs.easy_days = config.easy_days
+        fsrs.easy_specific_due_dates = easy_specific_due_dates
     cancelled = False
     DM = DeckManager(mw.col)
     if did is not None:
