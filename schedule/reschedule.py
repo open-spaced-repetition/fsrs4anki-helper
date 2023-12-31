@@ -115,7 +115,8 @@ def reschedule(
     def on_done(future):
         mw.progress.finish()
         tooltip(f"{future.result()} in {time.time() - start_time:.2f} seconds")
-        mw.col.reset()
+        if mw.col:
+            mw.col.reset()
         mw.reset()
 
     fut = mw.taskman.run_in_background(

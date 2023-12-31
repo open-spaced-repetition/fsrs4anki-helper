@@ -11,7 +11,7 @@ from ..utils import *
 from ..configuration import Config
 from .reschedule import reschedule
 from anki.utils import ids2str
-from aqt.gui_hooks import collection_did_load
+from aqt.gui_hooks import profile_will_close
 
 
 def easy_days(did):
@@ -25,11 +25,11 @@ def easy_days(did):
         return
     today = mw.col.sched.today
     due_days = []
-    for day_offset in range(365):
+    for day_offset in range(30):
         if (datetime.now() + timedelta(days=day_offset)).weekday() in config.easy_days:
             due_days.append(today + day_offset)
 
-    # find cards that are due in easy days in the next 365 days
+    # find cards that are due in easy days in the next 90 days
     due_in_easy_days_cids = mw.col.db.list(
         f"""SELECT id
         FROM cards
@@ -42,16 +42,18 @@ def easy_days(did):
         """
     )
 
-    reschedule(
+    fut = reschedule(
         None,
         recent=False,
         filter_flag=True,
         filtered_cids=set(due_in_easy_days_cids),
     )
+    if fut:
+        return fut.result()
 
 
-@collection_did_load.append
-def auto_easy_days(col):
+@profile_will_close.append
+def auto_easy_days():
     config = Config()
     config.load()
     if config.auto_easy_days:

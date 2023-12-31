@@ -170,7 +170,7 @@ menu_for_easy_4 = checkable(title="Easy Fri", on_click=lambda x: set_easy_days(4
 menu_for_easy_5 = checkable(title="Easy Sat", on_click=lambda x: set_easy_days(5, x))
 menu_for_easy_6 = checkable(title="Easy Sun", on_click=lambda x: set_easy_days(6, x))
 menu_for_auto_easy_days = checkable(
-    title="Auto apply easy days on opening collection",
+    title="Auto apply easy days on closing collection",
     on_click=lambda x: set_auto_easy_days(x),
 )
 menu_for_easy_days.addAction(menu_apply_easy_days_for_specific_date)
