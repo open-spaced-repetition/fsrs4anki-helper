@@ -25,7 +25,7 @@ def easy_days(did):
         return
     today = mw.col.sched.today
     due_days = []
-    for day_offset in range(90):
+    for day_offset in range(30):
         if (datetime.now() + timedelta(days=day_offset)).weekday() in config.easy_days:
             due_days.append(today + day_offset)
 
