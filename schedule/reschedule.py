@@ -1,8 +1,10 @@
+from aqt import QAction, browser
 from ..utils import *
 from ..configuration import Config
 from anki.cards import Card, FSRSMemoryState
 from anki.decks import DeckManager
 from anki.utils import ids2str
+from aqt.gui_hooks import browser_menus_did_init
 
 
 class FSRS:
@@ -244,3 +246,16 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
                 fsrs.due_cnt_perday_from_first_day.get(due_after, 0) + 1
             )
     return card
+
+
+def reschedule_browser_selected_cards(browser: browser.Browser):
+    cids = browser.selected_cards()
+    reschedule(None, False, True, cids)
+
+
+@browser_menus_did_init.append
+def on_browser_menus_did_init(browser: browser.Browser):
+    action = QAction("FSRS: Update memory state and reschedule", browser)
+    action.triggered.connect(lambda: reschedule_browser_selected_cards(browser))
+    browser.form.menu_Cards.addSeparator()
+    browser.form.menu_Cards.addAction(action)
