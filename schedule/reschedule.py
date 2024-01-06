@@ -255,7 +255,7 @@ def reschedule_browser_selected_cards(browser: browser.Browser):
 
 @browser_menus_did_init.append
 def on_browser_menus_did_init(browser: browser.Browser):
-    action = QAction("FSRS: update memory state & reschedule", browser)
+    action = QAction("FSRS: Update memory state and reschedule", browser)
     action.triggered.connect(lambda: reschedule_browser_selected_cards(browser))
     browser.form.menu_Cards.addSeparator()
     browser.form.menu_Cards.addAction(action)
