@@ -139,11 +139,11 @@ def get_fsrs_stats(self: CollectionStats):
     interpretation = (
         "<p>Note: Unless you have a huge backlog, the average predicted retention will be higher than your desired retention. For details, read the interpretation section.</p>"
         + "<details><summary>Interpretation</summary><ul>"
-        + "<li><b>Average predicted retention</b>: the average probability of recalling a card today. Desired retention refers to the retention when the card is due, whereas average retention is the current retention of all the cards, including those which are not yet due. Most cards are not due, which causes these two values to be different. <b>The average predicted retention is calculated using FSRS formulas and depends on your parameters.</b> True retention is a measured value, not an algorithmic prediction. So, it doesn't change after changing the FSRS parameters.</li>"
-        + "<li><b>Stability</b>: the number of days it takes for the retention to decay from 100% to 90%.</li>"
-        + "<li><b>Burden</b>: an estimate of the average number of cards that have to be reviewed daily (assuming review at the scheduled time without advancing or postponing). Burden = 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub> where I<sub>n</sub> - current interval of the n-th card.</li>"
-        + "<li><b>Count</b>: the number of cards with custom data, in other words, cards that are affected by FSRS (this does not include cards in the (re)learning stage).</li> "
-        + "<li><b>Estimated total knowledge</b>: the number of cards that the user is expected to know today, calculated as the product of average retention and count.</li>"
+        + "<li><b>Average predicted retention</b>: the average probability of recalling a card today. Desired retention is the retention when the card is due. Average retention is the current retention of all cards, including those that are not yet due. These two values are different because most cards are not usually due. <b>The average predicted retention is calculated using FSRS formulas and depends on your parameters.</b> True retention is a measured value, not an algorithmic prediction. So, it doesn't change after changing the FSRS parameters.</li>"
+        + "<li><b>Stability</b>: the time required for the retention to fall from 100% to 90%.</li>"
+        + "<li><b>Burden</b>: an estimate of the average number of cards to be reviewed daily (assuming review at the scheduled time without advancing or postponing). Burden = 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub>, where I<sub>n</sub> is the current interval of the n-th card.</li>"
+        + "<li><b>Count</b>: the number of cards with FSRS memory states, excluding cards in the (re)learning stage.</li> "
+        + "<li><b>Estimated total knowledge</b>: the number of cards the user is expected to know today, calculated as the product of average retention and count.</li>"
         + "</ul></details>"
     )
     return self._section(
