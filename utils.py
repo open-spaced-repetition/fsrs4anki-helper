@@ -24,6 +24,8 @@ from datetime import datetime, timedelta
 from anki.utils import int_version
 
 
+FSRS_ENABLE_WARNING = "Please either enable FSRS in your deck options, or disable the FSRS helper add-on."
+
 def RepresentsInt(s):
     try:
         return int(s)

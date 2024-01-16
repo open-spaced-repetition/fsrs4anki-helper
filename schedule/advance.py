@@ -20,7 +20,7 @@ def get_desired_advance_cnt_with_response(safe_cnt, did):
 
 def advance(did):
     if not mw.col.get_config("fsrs"):
-        tooltip("Please enable FSRS first")
+        tooltip(FSRS_ENABLE_WARNING)
         return
 
     DM = DeckManager(mw.col)

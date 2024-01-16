@@ -109,7 +109,7 @@ def reschedule(
     did, recent=False, filter_flag=False, filtered_cids={}, easy_specific_due_dates=[]
 ):
     if not mw.col.get_config("fsrs"):
-        tooltip("Please enable FSRS first")
+        tooltip(FSRS_ENABLE_WARNING)
         return None
 
     start_time = time.time()

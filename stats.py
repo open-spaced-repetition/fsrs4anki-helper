@@ -84,7 +84,7 @@ def retention_stability_burden(lim) -> float:
 
 def todayStats_new(self):
     if not mw.col.get_config("fsrs"):
-        tooltip("Please enable FSRS first")
+        tooltip(FSRS_ENABLE_WARNING)
         return todayStats_old(self)
     return (
         todayStats_old(self)
