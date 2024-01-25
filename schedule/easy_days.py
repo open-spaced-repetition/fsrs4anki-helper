@@ -109,7 +109,7 @@ class EasySpecificDateManagerWidget(QWidget):
             tooltip("Please enable load balance first")
             return
         if len(self.specific_dates) == 0:
-            tooltip("Please add specific dates first")
+            tooltip("Please add the dates first.")
             return
         specific_dues = []
         for specific_date in self.specific_dates:
