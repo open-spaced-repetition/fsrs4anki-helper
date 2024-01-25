@@ -72,7 +72,7 @@ class EasySpecificDateManagerWidget(QWidget):
         self.layout = QVBoxLayout()
 
         self.dateLabel = QLabel()
-        self.dateLabel.setText("Select The Specific Date")
+        self.dateLabel.setText("Select the Specific Date")
         self.dateEdit = QDateEdit()
         self.dateEdit.setDateTime(QDateTime.currentDateTime())
 
