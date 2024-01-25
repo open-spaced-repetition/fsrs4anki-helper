@@ -150,7 +150,7 @@ menu_for_helper.addAction(menu_disperse_siblings)
 
 menu_apply_easy_days = build_action(easy_days, "Apply easy days now")
 menu_apply_easy_days_for_specific_date = build_action(
-    easy_day_for_sepcific_date, "Apply easy day for a specific date"
+    easy_day_for_sepcific_date, "Apply easy days for specific dates"
 )
 
 

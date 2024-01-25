@@ -75,7 +75,6 @@ class EasySpecificDateManagerWidget(QWidget):
         self.dateLabel.setText("Select The Specific Date")
         self.dateEdit = QDateEdit()
         self.dateEdit.setDateTime(QDateTime.currentDateTime())
-        self.dateEdit.setMinimumDate(QDate.currentDate())
 
         self.addDateBtn = QPushButton("Add the Selected Specific Date")
         self.addDateBtn.clicked.connect(self.addEventFunc)
@@ -91,7 +90,7 @@ class EasySpecificDateManagerWidget(QWidget):
         self.layout.addStretch()
 
         self.setLayout(self.layout)
-        self.setWindowTitle("Easy Day for Specific Dates")
+        self.setWindowTitle("Easy Days for Specific Dates")
 
     def addEventFunc(self):
         specific_date = self.dateEdit.date().toPyDate()
