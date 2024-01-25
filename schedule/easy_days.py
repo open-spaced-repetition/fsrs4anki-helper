@@ -97,6 +97,9 @@ class EasySpecificDateManagerWidget(QWidget):
         if specific_date in self.specific_dates:
             tooltip("This date has already been added")
             return
+        if specific_date < datetime.now().date():
+            tooltip("Easy days can't be applied on past dates.")
+            return
         self.specific_dates.append(specific_date)
         deckWidget = DateLabelWidget(specific_date, self)
         self.layout.insertWidget(self.layout.count() - 2, deckWidget)
