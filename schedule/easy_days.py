@@ -76,7 +76,7 @@ class EasySpecificDateManagerWidget(QWidget):
         self.dateEdit = QDateEdit()
         self.dateEdit.setDateTime(QDateTime.currentDateTime())
 
-        self.addDateBtn = QPushButton("Add the Selected Specific Date")
+        self.addDateBtn = QPushButton("Add the Selected Date")
         self.addDateBtn.clicked.connect(self.addEventFunc)
 
         self.applyEasyDayBtn = QPushButton("Apply Easy Days")
