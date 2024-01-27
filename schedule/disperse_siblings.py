@@ -176,16 +176,26 @@ def disperse_siblings_backgroud(
         )
     )
 
+    postpone = 0
+    advance = 0
+
     for nid, siblings in nid_siblings.items():
         best_due_dates, _, _ = disperse(siblings)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
+            old_due = card.odue if card.odid else card.due
             last_review = get_last_review_date(card)
             card = update_card_due_ivl(card, due - last_review)
             write_custom_data(card, "v", "disperse")
             mw.col.update_card(card)
             mw.col.merge_undo_entries(undo_entry)
             card_cnt += 1
+            new_due = card.odue if card.odid else card.due
+            if new_due > old_due:
+                postpone += 1
+            elif new_due < old_due:
+                advance += 1
+
         note_cnt += 1
 
         if note_cnt % 500 == 0:
@@ -199,7 +209,7 @@ def disperse_siblings_backgroud(
             if mw.progress.want_cancel():
                 break
 
-    return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed"
+    return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed<br>{postpone} cards postponed, {advance} cards advanced"
 
 
 def disperse_siblings_when_review(reviewer, card: Card, ease):
