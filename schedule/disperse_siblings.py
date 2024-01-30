@@ -1,7 +1,10 @@
 from ..utils import *
 from ..configuration import Config
 from anki.utils import ids2str, html_to_text_line
+import os
+from ..log import get_logger
 
+logger = get_logger(__name__)
 
 def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if did is not None:
@@ -132,7 +135,10 @@ def disperse(siblings):
     latest_review = max(last_review.values())
     due_ranges[-1] = (latest_review, latest_review)
     min_gap, best_due_dates = maximize_siblings_due_gap(due_ranges)
+    logger.debug(f"min_gap: {min_gap}, latest_last_review: {latest_review}, today: {mw.col.sched.today}")
     best_due_dates.pop(-1)
+    for cid, _, stability, due, _, _ in siblings:
+        logger.debug(f"cid: {cid:>13}\tstability: {stability:>7}\told_due: {due:>5}\tnew_due: {best_due_dates[cid]:>5}\tdue_range: [{due_ranges[cid][0]:>5}, {due_ranges[cid][1]:>5}]\tlast_review: {last_review[cid]:>5}")
     return best_due_dates, due_ranges, min_gap
 
 
