@@ -33,5 +33,4 @@ def clear_custom_data(did):
 
     tooltip(f"""{cnt} cards cleared in {time.time() - start_time:.2f} seconds.""")
     mw.progress.finish()
-    mw.col.reset()
     mw.reset()

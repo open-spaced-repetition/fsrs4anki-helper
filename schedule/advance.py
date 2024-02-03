@@ -112,5 +112,4 @@ def advance(did):
         f"""{cnt} cards advanced in {time.time() - start_time:.2f} seconds. max retention: {max_retention:.2%}"""
     )
     mw.progress.finish()
-    mw.col.reset()
     mw.reset()
