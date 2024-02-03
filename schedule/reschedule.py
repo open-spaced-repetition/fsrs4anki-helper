@@ -17,6 +17,7 @@ class FSRS:
     learned_cnt_perday_from_today: Dict[int, int]
     card: Card
     elapsed_days: int
+    allow_to_past: bool
 
     def __init__(self) -> None:
         self.maximum_interval = 36500
@@ -25,6 +26,7 @@ class FSRS:
         self.easy_days = []
         self.elapsed_days = 0
         self.easy_specific_due_dates = []
+        self.allow_to_past = True
 
     def set_load_balance(self):
         self.enable_load_balance = True
@@ -72,12 +74,14 @@ class FSRS:
                 return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
         else:
             min_num_cards = 18446744073709551616
-            best_ivl = (max_ivl + min_ivl) // 2
+            best_ivl = (max_ivl + min_ivl) // 2 if self.allow_to_past else max_ivl
             step = (max_ivl - min_ivl) // 100 + 1
             due = self.card.due if self.card.odid == 0 else self.card.odue
             for check_ivl in reversed(range(min_ivl, max_ivl + step, step)):
                 check_due = due + check_ivl - self.card.ivl
                 day_offset = check_due - mw.col.sched.today
+                if not self.allow_to_past and day_offset < 0:
+                    break
                 due_date = datetime.now() + timedelta(days=day_offset)
                 due_cards = self.due_cnt_perday_from_first_day.get(
                     max(check_due, mw.col.sched.today), 0
@@ -117,8 +121,6 @@ def reschedule(
     def on_done(future):
         mw.progress.finish()
         tooltip(f"{future.result()} in {time.time() - start_time:.2f} seconds")
-        if mw.col:
-            mw.col.reset()
         mw.reset()
 
     fut = mw.taskman.run_in_background(
@@ -148,6 +150,8 @@ def reschedule_background(
         fsrs.set_load_balance()
         fsrs.easy_days = config.easy_days
         fsrs.easy_specific_due_dates = easy_specific_due_dates
+        if len(easy_specific_due_dates) > 0:
+            fsrs.allow_to_past = False
     cancelled = False
     DM = DeckManager(mw.col)
     if did is not None:

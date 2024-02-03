@@ -118,5 +118,4 @@ def postpone(did):
         f"""{cnt} cards postponed in {time.time() - start_time:.2f} seconds. min retention: {min_retention:.2%}"""
     )
     mw.progress.finish()
-    mw.col.reset()
     mw.reset()
