@@ -110,24 +110,26 @@ def has_manual_reset(revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     return False
 
 
+FUZZ_RANGES = [
+    {
+        "start": 2.5,
+        "end": 7.0,
+        "factor": 0.15,
+    },
+    {
+        "start": 7.0,
+        "end": 20.0,
+        "factor": 0.1,
+    },
+    {
+        "start": 20.0,
+        "end": math.inf,
+        "factor": 0.05,
+    },
+]
+
+
 def get_fuzz_range(interval, elapsed_days, maximum_interval):
-    FUZZ_RANGES = [
-        {
-            "start": 2.5,
-            "end": 7.0,
-            "factor": 0.15,
-        },
-        {
-            "start": 7.0,
-            "end": 20.0,
-            "factor": 0.1,
-        },
-        {
-            "start": 20.0,
-            "end": math.inf,
-            "factor": 0.05,
-        },
-    ]
     delta = 1.0
     for range in FUZZ_RANGES:
         delta += range["factor"] * max(
