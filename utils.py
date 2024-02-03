@@ -24,7 +24,10 @@ from datetime import datetime, timedelta
 from anki.utils import int_version
 
 
-FSRS_ENABLE_WARNING = "Please either enable FSRS in your deck options, or disable the FSRS helper add-on."
+FSRS_ENABLE_WARNING = (
+    "Please either enable FSRS in your deck options, or disable the FSRS helper add-on."
+)
+
 
 def RepresentsInt(s):
     try:
@@ -107,15 +110,36 @@ def has_manual_reset(revlogs: List[CardStatsResponse.StatsRevlogEntry]):
     return False
 
 
+FUZZ_RANGES = [
+    {
+        "start": 2.5,
+        "end": 7.0,
+        "factor": 0.15,
+    },
+    {
+        "start": 7.0,
+        "end": 20.0,
+        "factor": 0.1,
+    },
+    {
+        "start": 20.0,
+        "end": math.inf,
+        "factor": 0.05,
+    },
+]
+
+
 def get_fuzz_range(interval, elapsed_days, maximum_interval):
-    if interval <= 7:
-        factor = 0.15
-    elif interval <= 20:
-        factor = 0.1
-    else:
-        factor = 0.05
-    min_ivl = max(2, int(round(min(interval, maximum_interval) * (1 - factor) - 1)))
-    max_ivl = min(int(round(interval * (1 + factor) + 1)), maximum_interval)
+    delta = 1.0
+    for range in FUZZ_RANGES:
+        delta += range["factor"] * max(
+            min(interval, range["end"]) - range["start"], 0.0
+        )
+
+    min_ivl = int(round(interval - delta))
+    max_ivl = int(round(interval + delta))
+    min_ivl = max(2, min_ivl)
+    max_ivl = min(max_ivl, maximum_interval)
     if interval > elapsed_days:
         min_ivl = max(min_ivl, elapsed_days + 1)
     min_ivl = min(min_ivl, max_ivl)
