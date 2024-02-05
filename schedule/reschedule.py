@@ -73,7 +73,7 @@ class FSRS:
             else:
                 return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
         else:
-            min_num_cards = 18446744073709551616
+            min_num_cards = math.inf
             best_ivl = (max_ivl + min_ivl) // 2 if self.allow_to_past else max_ivl
             step = (max_ivl - min_ivl) // 100 + 1
             due = self.card.due if self.card.odid == 0 else self.card.odue
