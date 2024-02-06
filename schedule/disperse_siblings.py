@@ -101,7 +101,9 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
         int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     )
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days, maximum_interval)
-    if due > last_review + max_ivl + 2: # +2 is just a safeguard to exclude cards that go beyond the fuzz range due to rounding 
+    if (
+        due > last_review + max_ivl + 2
+    ):  # +2 is just a safeguard to exclude cards that go beyond the fuzz range due to rounding
         # don't reschedule the card to bring it within the fuzz range. Rather, create another fuzz range around the original due date.
         current_ivl = due - last_review
         # set maximum_interval = current_ivl to prevent a further increase in ivl

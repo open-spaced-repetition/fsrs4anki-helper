@@ -183,3 +183,9 @@ def rotate_number_by_k(N, K):
     K = K % length
     rotated = num[K:] + num[:K]
     return int(rotated)
+
+
+def p_obey_easy_days(num_of_easy_days, easy_days_review_ratio):
+    return (7 - num_of_easy_days) / (
+        easy_days_review_ratio * num_of_easy_days + 7 - num_of_easy_days
+    )
