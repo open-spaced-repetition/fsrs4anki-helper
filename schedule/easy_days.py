@@ -176,11 +176,10 @@ def easy_day_for_sepcific_date(did):
 
 
 class EasyDaysReviewRatioSlider(QWidget):
-    def __init__(self):
+    def __init__(self, config: Config):
         super().__init__()
+        self.config = config
         self.layout = QVBoxLayout()
-        self.config = Config()
-        self.config.load()
         self.slider = QSlider(orientation=Qt.Orientation.Horizontal)
         self.slider.setMinimum(0)
         self.slider.setMaximum(99)
@@ -219,11 +218,12 @@ class EasyDaysReviewRatioSlider(QWidget):
         self.config.easy_days_review_ratio = value
 
     def save_ratio(self):
-        self.config.save()
-        tooltip("Easy Days Review Percentage saved successfully")
+        value = max(0, min(round(self.slider.value() / 100, 2), 0.99))
+        self.config.easy_days_review_ratio = value
+        tooltip(f"Easy Days Review Percentage: {int(value * 100)}% saved successfully")
         self.close()
 
 
-def easy_days_review_ratio(did):
-    mw.easyDaysReviewRatioSlider = EasyDaysReviewRatioSlider()
+def easy_days_review_ratio(did, config: Config):
+    mw.easyDaysReviewRatioSlider = EasyDaysReviewRatioSlider(config)
     mw.easyDaysReviewRatioSlider.show()

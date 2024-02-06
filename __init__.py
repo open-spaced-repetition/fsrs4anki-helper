@@ -153,7 +153,7 @@ menu_apply_easy_days_for_specific_date = build_action(
     easy_day_for_sepcific_date, "Apply easy days for specific dates"
 )
 menu_easy_days_review_ratio = build_action(
-    easy_days_review_ratio, "Set Easy Days Review Percentage"
+    lambda did: easy_days_review_ratio(did, config), "Set Easy Days Review Percentage"
 )
 
 def set_easy_days(day, checked):

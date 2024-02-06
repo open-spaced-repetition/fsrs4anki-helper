@@ -60,11 +60,11 @@ class Config:
 
     @property
     def easy_days_review_ratio(self):
-        return self.data[EASY_DAYS_REVIEW_RATIO]
+        return max(0, min(self.data[EASY_DAYS_REVIEW_RATIO], 0.99))
 
     @easy_days_review_ratio.setter
     def easy_days_review_ratio(self, value):
-        self.data[EASY_DAYS_REVIEW_RATIO] = value
+        self.data[EASY_DAYS_REVIEW_RATIO] = max(0, min(value, 0.99))
         self.save()
 
     @property
