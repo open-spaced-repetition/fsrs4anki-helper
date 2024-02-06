@@ -187,13 +187,21 @@ class EasyDaysReviewRatioSlider(QWidget):
         self.labelEnd = QLabel('100%')
         self.labelValue = QLabel(f'current percentage: {int(self.config.easy_days_review_ratio * 100)}%')
 
+
+        self.saveBtn = QPushButton("Save")
+        self.saveBtn.clicked.connect(self.save_ratio)
+
         sliderLayout = QHBoxLayout()
         sliderLayout.addWidget(self.labelStart)
         sliderLayout.addWidget(self.slider)
         sliderLayout.addWidget(self.labelEnd)
         
+        saveBtnLayout = QHBoxLayout()
+        saveBtnLayout.addWidget(self.labelValue)
+        saveBtnLayout.addWidget(self.saveBtn)
+
         self.layout.addLayout(sliderLayout)
-        self.layout.addWidget(self.labelValue)
+        self.layout.addLayout(saveBtnLayout)
 
         self.layout.addStretch()
 
@@ -204,7 +212,11 @@ class EasyDaysReviewRatioSlider(QWidget):
         value = round(self.slider.value() / 100, 2)
         self.labelValue.setText(f'current percentage: {int(value * 100)}%')
         self.config.easy_days_review_ratio = value
+    
+    def save_ratio(self):
         self.config.save()
+        tooltip("Easy Days Review Percentage saved successfully")
+        self.close()
 
 def easy_days_review_ratio(did):
     mw.easyDaysReviewRatioSlider = EasyDaysReviewRatioSlider()

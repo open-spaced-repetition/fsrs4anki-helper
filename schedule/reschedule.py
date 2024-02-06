@@ -13,6 +13,7 @@ class FSRS:
     enable_load_balance: bool
     easy_days: List[int]
     easy_days_review_ratio: float
+    p_obey_easy_days: float
     easy_specific_due_dates: List[int]
     due_cnt_perday_from_first_day: Dict[int, int]
     learned_cnt_perday_from_today: Dict[int, int]
@@ -26,8 +27,9 @@ class FSRS:
         self.enable_load_balance = False
         self.easy_days = []
         self.easy_days_review_ratio = 0
-        self.elapsed_days = 0
+        self.p_obey_easy_days = 1
         self.easy_specific_due_dates = []
+        self.elapsed_days = 0
         self.allow_to_past = True
 
     def set_load_balance(self):
@@ -79,12 +81,14 @@ class FSRS:
             best_ivl = (max_ivl + min_ivl) // 2 if self.allow_to_past else max_ivl
             step = (max_ivl - min_ivl) // 100 + 1
             due = self.card.due if self.card.odid == 0 else self.card.odue
-            obey_easy_days = random.random() < p_obey_easy_days(
-                len(self.easy_days), self.easy_days_review_ratio
-            )
+            obey_easy_days = random.random() < self.p_obey_easy_days
+            obey_specific_due_dates = random.random() < 1 - self.easy_days_review_ratio
             for check_ivl in reversed(range(min_ivl, max_ivl + step, step)):
                 check_due = due + check_ivl - self.card.ivl
-                if check_due in self.easy_specific_due_dates:
+                if (
+                    obey_specific_due_dates
+                    and check_due in self.easy_specific_due_dates
+                ):
                     continue
 
                 day_offset = check_due - mw.col.sched.today
@@ -158,6 +162,11 @@ def reschedule_background(
         fsrs.set_load_balance()
         fsrs.easy_days = config.easy_days
         fsrs.easy_days_review_ratio = config.easy_days_review_ratio
+        fsrs.p_obey_easy_days = (
+            p_obey_easy_days(len(fsrs.easy_days), fsrs.easy_days_review_ratio) # when reschedule
+            if len(filtered_cids) == 0
+            else 1 - fsrs.easy_days_review_ratio # when apply easy days now
+        )
         fsrs.easy_specific_due_dates = easy_specific_due_dates
         if len(easy_specific_due_dates) > 0:
             fsrs.allow_to_past = False
