@@ -81,8 +81,18 @@ class FSRS:
             best_ivl = (max_ivl + min_ivl) // 2 if self.allow_to_past else max_ivl
             step = (max_ivl - min_ivl) // 100 + 1
             due = self.card.due if self.card.odid == 0 else self.card.odue
-            obey_easy_days = random.random() < self.p_obey_easy_days
-            obey_specific_due_dates = random.random() < 1 - self.easy_days_review_ratio
+
+            if self.easy_days_review_ratio == 0:
+                obey_easy_days = True
+                obey_specific_due_dates = True
+            elif self.easy_days_review_ratio == 1:
+                obey_easy_days = False
+                obey_specific_due_dates = False
+            else:
+                obey_easy_days = random.random() < self.p_obey_easy_days
+                obey_specific_due_dates = (
+                    random.random() < 1 - self.easy_days_review_ratio
+                )
             for check_ivl in reversed(range(min_ivl, max_ivl + step, step)):
                 check_due = due + check_ivl - self.card.ivl
                 if (
@@ -163,9 +173,11 @@ def reschedule_background(
         fsrs.easy_days = config.easy_days
         fsrs.easy_days_review_ratio = config.easy_days_review_ratio
         fsrs.p_obey_easy_days = (
-            p_obey_easy_days(len(fsrs.easy_days), fsrs.easy_days_review_ratio) # when reschedule
+            p_obey_easy_days(
+                len(fsrs.easy_days), fsrs.easy_days_review_ratio
+            )  # when reschedule
             if len(filtered_cids) == 0
-            else 1 - fsrs.easy_days_review_ratio # when apply easy days now
+            else 1 - fsrs.easy_days_review_ratio  # when apply easy days now
         )
         fsrs.easy_specific_due_dates = easy_specific_due_dates
         if len(easy_specific_due_dates) > 0:
