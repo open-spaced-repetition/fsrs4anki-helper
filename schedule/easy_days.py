@@ -28,7 +28,7 @@ def easy_days(did):
         return
     today = mw.col.sched.today
     due_days = []
-    for day_offset in range(30):
+    for day_offset in range(35):
         if (
             config.easy_days_review_ratio > 0
             or (datetime.now() + timedelta(days=day_offset)).weekday()
@@ -182,12 +182,12 @@ class EasyDaysReviewRatioSlider(QWidget):
         self.layout = QVBoxLayout()
         self.slider = QSlider(orientation=Qt.Orientation.Horizontal)
         self.slider.setMinimum(0)
-        self.slider.setMaximum(99)
-        self.slider.setValue(self.config.easy_days_review_ratio * 100)
+        self.slider.setMaximum(9)
+        self.slider.setValue(self.config.easy_days_review_ratio * 10)
         self.slider.valueChanged.connect(self.slider_value_changed)
 
         self.labelStart = QLabel("0%")
-        self.labelEnd = QLabel("99%")
+        self.labelEnd = QLabel("90%")
         self.labelValue = QLabel(
             f"current percentage: {int(self.config.easy_days_review_ratio * 100)}%"
         )
@@ -213,12 +213,12 @@ class EasyDaysReviewRatioSlider(QWidget):
         self.setWindowTitle("Set Easy Days Review Percentage")
 
     def slider_value_changed(self):
-        value = max(0, min(round(self.slider.value() / 100, 2), 0.99))
+        value = max(0, min(round(self.slider.value() / 10, 1), 0.9))
         self.labelValue.setText(f"current percentage: {int(value * 100)}%")
         self.config.easy_days_review_ratio = value
 
     def save_ratio(self):
-        value = max(0, min(round(self.slider.value() / 100, 2), 0.99))
+        value = max(0, min(round(self.slider.value() / 10, 1), 0.9))
         self.config.easy_days_review_ratio = value
         tooltip(f"Easy Days Review Percentage: {int(value * 100)}% saved successfully")
         self.close()
