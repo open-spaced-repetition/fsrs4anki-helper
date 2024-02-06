@@ -15,6 +15,7 @@ class FSRS:
     easy_days_review_ratio: float
     p_obey_easy_days: float
     easy_specific_due_dates: List[int]
+    p_obey_specific_due_dates: float
     due_cnt_perday_from_first_day: Dict[int, int]
     learned_cnt_perday_from_today: Dict[int, int]
     card: Card
@@ -29,6 +30,7 @@ class FSRS:
         self.easy_days_review_ratio = 0
         self.p_obey_easy_days = 1
         self.easy_specific_due_dates = []
+        self.p_obey_specific_due_dates = 1
         self.elapsed_days = 0
         self.allow_to_past = True
 
@@ -88,7 +90,7 @@ class FSRS:
             else:
                 obey_easy_days = random.random() < self.p_obey_easy_days
                 obey_specific_due_dates = (
-                    random.random() < 1 - self.easy_days_review_ratio
+                    random.random() < self.p_obey_specific_due_dates
                 )
             for check_ivl in reversed(range(min_ivl, max_ivl + step, step)):
                 check_due = due + check_ivl - self.card.ivl
@@ -178,6 +180,9 @@ def reschedule_background(
             ),
         )
         fsrs.easy_specific_due_dates = easy_specific_due_dates
+        fsrs.p_obey_specific_due_dates = obey_specific_due_dates(
+            len(fsrs.easy_specific_due_dates), fsrs.easy_days_review_ratio * 1.25
+        )
         if len(easy_specific_due_dates) > 0:
             fsrs.allow_to_past = False
     cancelled = False
@@ -209,6 +214,7 @@ def reschedule_background(
         {did_query if did is not None else ""}
         {recent_query if recent else ""}
         {filter_query if filter_flag else ""}
+        ORDER BY ivl
     """
     )
     # x[0]: cid

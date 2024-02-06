@@ -121,14 +121,19 @@ class EasySpecificDateManagerWidget(QWidget):
             tooltip("Please add the dates first.")
             return
         specific_dues = []
+        filtered_dues = []
+        current_date = datetime.now().date()
         for specific_date in self.specific_dates:
-            current_date = datetime.now().date()
             day_offset = (specific_date - current_date).days
             today = mw.col.sched.today
             specific_due = today + day_offset
             specific_dues.append(specific_due)
+            filtered_dues.extend(
+                [specific_due + i + max(0, 4 - day_offset) for i in range(-4, 5)]
+            )
+        filtered_dues = list(set(filtered_dues))
 
-        due_in_specific_date_cids = mw.col.db.list(
+        filtered_dues_cids = mw.col.db.list(
             f"""SELECT id
             FROM cards
             WHERE data != '' 
@@ -136,7 +141,7 @@ class EasySpecificDateManagerWidget(QWidget):
             AND CASE WHEN odid==0
             THEN due
             ELSE odue
-            END IN {ids2str(specific_dues)}
+            END IN {ids2str(filtered_dues)}
             """
         )
 
@@ -144,7 +149,7 @@ class EasySpecificDateManagerWidget(QWidget):
             None,
             recent=False,
             filter_flag=True,
-            filtered_cids=set(due_in_specific_date_cids),
+            filtered_cids=set(filtered_dues_cids),
             easy_specific_due_dates=specific_dues,
         )
 
