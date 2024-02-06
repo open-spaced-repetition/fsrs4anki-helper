@@ -10,7 +10,7 @@ from .schedule.postpone import postpone
 from .schedule.advance import advance
 from .schedule.reset import clear_custom_data
 from .schedule.disperse_siblings import disperse_siblings
-from .schedule.easy_days import easy_days, easy_day_for_sepcific_date
+from .schedule.easy_days import easy_days, easy_day_for_sepcific_date, easy_days_review_ratio
 from .schedule import init_review_hook
 from .stats import init_stats
 from .browser.browser import init_browser
@@ -152,7 +152,9 @@ menu_apply_easy_days = build_action(easy_days, "Apply easy days now")
 menu_apply_easy_days_for_specific_date = build_action(
     easy_day_for_sepcific_date, "Apply easy days for specific dates"
 )
-
+menu_easy_days_review_ratio = build_action(
+    easy_days_review_ratio, "Set Easy Days Review Percentage"
+)
 
 def set_easy_days(day, checked):
     config.easy_days = (day, checked)
@@ -184,6 +186,7 @@ menu_for_easy_days.addAction(menu_for_easy_3)
 menu_for_easy_days.addAction(menu_for_easy_4)
 menu_for_easy_days.addAction(menu_for_easy_5)
 menu_for_easy_days.addAction(menu_for_easy_6)
+menu_for_easy_days.addAction(menu_easy_days_review_ratio)
 
 
 def adjust_menu():

@@ -7,7 +7,9 @@ from aqt import (
     QPushButton,
     QVBoxLayout,
     QWidget,
+    QSlider,
 )
+from aqt.qt import Qt
 from ..utils import *
 from ..configuration import Config
 from .reschedule import reschedule
@@ -165,5 +167,45 @@ class DateLabelWidget(QWidget):
 
 
 def easy_day_for_sepcific_date(did):
-    mw.addEventWidget = EasySpecificDateManagerWidget()
-    mw.addEventWidget.show()
+    mw.EasySpecificDateManagerWidget = EasySpecificDateManagerWidget()
+    mw.EasySpecificDateManagerWidget.show()
+
+
+class EasyDaysReviewRatioSlider(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.layout = QVBoxLayout()
+        self.config = Config()
+        self.config.load()
+        self.slider = QSlider(orientation=Qt.Orientation.Horizontal)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(100) 
+        self.slider.setValue(self.config.easy_days_review_ratio * 100)
+        self.slider.valueChanged.connect(self.slider_value_changed)
+
+        self.labelStart = QLabel('0%')
+        self.labelEnd = QLabel('100%')
+        self.labelValue = QLabel(f'current percentage: {int(self.config.easy_days_review_ratio * 100)}%')
+
+        sliderLayout = QHBoxLayout()
+        sliderLayout.addWidget(self.labelStart)
+        sliderLayout.addWidget(self.slider)
+        sliderLayout.addWidget(self.labelEnd)
+        
+        self.layout.addLayout(sliderLayout)
+        self.layout.addWidget(self.labelValue)
+
+        self.layout.addStretch()
+
+        self.setLayout(self.layout)
+        self.setWindowTitle("Set Easy Days Review Percentage")
+
+    def slider_value_changed(self):
+        value = round(self.slider.value() / 100, 2)
+        self.labelValue.setText(f'current percentage: {int(value * 100)}%')
+        self.config.easy_days_review_ratio = value
+        self.config.save()
+
+def easy_days_review_ratio(did):
+    mw.easyDaysReviewRatioSlider = EasyDaysReviewRatioSlider()
+    mw.easyDaysReviewRatioSlider.show()
