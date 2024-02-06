@@ -85,9 +85,6 @@ class FSRS:
             if self.easy_days_review_ratio == 0:
                 obey_easy_days = True
                 obey_specific_due_dates = True
-            elif self.easy_days_review_ratio == 1:
-                obey_easy_days = False
-                obey_specific_due_dates = False
             else:
                 obey_easy_days = random.random() < self.p_obey_easy_days
                 obey_specific_due_dates = (
@@ -172,12 +169,8 @@ def reschedule_background(
         fsrs.set_load_balance()
         fsrs.easy_days = config.easy_days
         fsrs.easy_days_review_ratio = config.easy_days_review_ratio
-        fsrs.p_obey_easy_days = (
-            p_obey_easy_days(
-                len(fsrs.easy_days), fsrs.easy_days_review_ratio
-            )  # when reschedule
-            if len(filtered_cids) == 0
-            else 1 - fsrs.easy_days_review_ratio  # when apply easy days now
+        fsrs.p_obey_easy_days = p_obey_easy_days(
+            len(fsrs.easy_days), fsrs.easy_days_review_ratio
         )
         fsrs.easy_specific_due_dates = easy_specific_due_dates
         if len(easy_specific_due_dates) > 0:
