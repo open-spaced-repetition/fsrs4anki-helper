@@ -172,16 +172,11 @@ def reschedule_background(
         fsrs.easy_days = config.easy_days
         fsrs.easy_days_review_ratio = config.easy_days_review_ratio
         fsrs.p_obey_easy_days = p_obey_easy_days(
-            len(fsrs.easy_days),
-            (
-                fsrs.easy_days_review_ratio
-                if not filter_flag
-                else fsrs.easy_days_review_ratio * 1.25
-            ),
+            len(fsrs.easy_days), fsrs.easy_days_review_ratio
         )
         fsrs.easy_specific_due_dates = easy_specific_due_dates
         fsrs.p_obey_specific_due_dates = obey_specific_due_dates(
-            len(fsrs.easy_specific_due_dates), fsrs.easy_days_review_ratio * 1.25
+            len(fsrs.easy_specific_due_dates), fsrs.easy_days_review_ratio
         )
         if len(easy_specific_due_dates) > 0:
             fsrs.allow_to_past = False
