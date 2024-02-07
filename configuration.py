@@ -4,6 +4,7 @@ tag = mw.addonManager.addonFromModule(__name__)
 
 LOAD_BALANCE = "load_balance"
 EASY_DAYS = "easy_days"
+EASY_DAYS_REVIEW_RATIO = "easy_days_review_ratio"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 AUTO_DISPERSE_AFTER_SYNC = "auto_disperse_after_sync"
@@ -55,6 +56,15 @@ class Config:
         else:
             if day in self.data[EASY_DAYS]:
                 self.data[EASY_DAYS].remove(day)
+        self.save()
+
+    @property
+    def easy_days_review_ratio(self):
+        return max(0, min(self.data[EASY_DAYS_REVIEW_RATIO], 0.9))
+
+    @easy_days_review_ratio.setter
+    def easy_days_review_ratio(self, value):
+        self.data[EASY_DAYS_REVIEW_RATIO] = max(0, min(value, 0.9))
         self.save()
 
     @property

@@ -7,7 +7,9 @@ from aqt import (
     QPushButton,
     QVBoxLayout,
     QWidget,
+    QSlider,
 )
+from aqt.qt import Qt
 from ..utils import *
 from ..configuration import Config
 from .reschedule import reschedule
@@ -26,8 +28,12 @@ def easy_days(did):
         return
     today = mw.col.sched.today
     due_days = []
-    for day_offset in range(30):
-        if (datetime.now() + timedelta(days=day_offset)).weekday() in config.easy_days:
+    for day_offset in range(35):
+        if (
+            config.easy_days_review_ratio > 0
+            or (datetime.now() + timedelta(days=day_offset)).weekday()
+            in config.easy_days
+        ):
             due_days.append(today + day_offset)
 
     # find cards that are due in easy days in the next 90 days
@@ -115,14 +121,19 @@ class EasySpecificDateManagerWidget(QWidget):
             tooltip("Please add the dates first.")
             return
         specific_dues = []
+        filtered_dues = []
+        current_date = datetime.now().date()
         for specific_date in self.specific_dates:
-            current_date = datetime.now().date()
             day_offset = (specific_date - current_date).days
             today = mw.col.sched.today
             specific_due = today + day_offset
             specific_dues.append(specific_due)
+            filtered_dues.extend(
+                [specific_due + i + max(0, 4 - day_offset) for i in range(-4, 5)]
+            )
+        filtered_dues = list(set(filtered_dues))
 
-        due_in_specific_date_cids = mw.col.db.list(
+        filtered_dues_cids = mw.col.db.list(
             f"""SELECT id
             FROM cards
             WHERE data != '' 
@@ -130,7 +141,7 @@ class EasySpecificDateManagerWidget(QWidget):
             AND CASE WHEN odid==0
             THEN due
             ELSE odue
-            END IN {ids2str(specific_dues)}
+            END IN {ids2str(filtered_dues)}
             """
         )
 
@@ -138,7 +149,7 @@ class EasySpecificDateManagerWidget(QWidget):
             None,
             recent=False,
             filter_flag=True,
-            filtered_cids=set(due_in_specific_date_cids),
+            filtered_cids=set(filtered_dues_cids),
             easy_specific_due_dates=specific_dues,
         )
 
@@ -165,5 +176,59 @@ class DateLabelWidget(QWidget):
 
 
 def easy_day_for_sepcific_date(did):
-    mw.addEventWidget = EasySpecificDateManagerWidget()
-    mw.addEventWidget.show()
+    mw.EasySpecificDateManagerWidget = EasySpecificDateManagerWidget()
+    mw.EasySpecificDateManagerWidget.show()
+
+
+class EasyDaysReviewRatioSlider(QWidget):
+    def __init__(self, config: Config):
+        super().__init__()
+        self.config = config
+        self.layout = QVBoxLayout()
+        self.slider = QSlider(orientation=Qt.Orientation.Horizontal)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(9)
+        self.slider.setValue(self.config.easy_days_review_ratio * 10)
+        self.slider.valueChanged.connect(self.slider_value_changed)
+
+        self.labelStart = QLabel("0%")
+        self.labelEnd = QLabel("90%")
+        self.labelValue = QLabel(
+            f"current percentage: {int(self.config.easy_days_review_ratio * 100)}%"
+        )
+
+        self.saveBtn = QPushButton("Save")
+        self.saveBtn.clicked.connect(self.save_ratio)
+
+        sliderLayout = QHBoxLayout()
+        sliderLayout.addWidget(self.labelStart)
+        sliderLayout.addWidget(self.slider)
+        sliderLayout.addWidget(self.labelEnd)
+
+        saveBtnLayout = QHBoxLayout()
+        saveBtnLayout.addWidget(self.labelValue)
+        saveBtnLayout.addWidget(self.saveBtn)
+
+        self.layout.addLayout(sliderLayout)
+        self.layout.addLayout(saveBtnLayout)
+
+        self.layout.addStretch()
+
+        self.setLayout(self.layout)
+        self.setWindowTitle("Set Easy Days Review Percentage")
+
+    def slider_value_changed(self):
+        value = max(0, min(round(self.slider.value() / 10, 1), 0.9))
+        self.labelValue.setText(f"current percentage: {int(value * 100)}%")
+        self.config.easy_days_review_ratio = value
+
+    def save_ratio(self):
+        value = max(0, min(round(self.slider.value() / 10, 1), 0.9))
+        self.config.easy_days_review_ratio = value
+        tooltip(f"Easy Days Review Percentage: {int(value * 100)}% saved successfully")
+        self.close()
+
+
+def easy_days_review_ratio(did, config: Config):
+    mw.easyDaysReviewRatioSlider = EasyDaysReviewRatioSlider(config)
+    mw.easyDaysReviewRatioSlider.show()

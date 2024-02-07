@@ -12,7 +12,10 @@ class FSRS:
     desired_retention: float
     enable_load_balance: bool
     easy_days: List[int]
+    easy_days_review_ratio: float
+    p_obey_easy_days: float
     easy_specific_due_dates: List[int]
+    p_obey_specific_due_dates: float
     due_cnt_perday_from_first_day: Dict[int, int]
     learned_cnt_perday_from_today: Dict[int, int]
     card: Card
@@ -24,8 +27,11 @@ class FSRS:
         self.desired_retention = 0.9
         self.enable_load_balance = False
         self.easy_days = []
-        self.elapsed_days = 0
+        self.easy_days_review_ratio = 0
+        self.p_obey_easy_days = 1
         self.easy_specific_due_dates = []
+        self.p_obey_specific_due_dates = 1
+        self.elapsed_days = 0
         self.allow_to_past = True
 
     def set_load_balance(self):
@@ -77,12 +83,31 @@ class FSRS:
             best_ivl = (max_ivl + min_ivl) // 2 if self.allow_to_past else max_ivl
             step = (max_ivl - min_ivl) // 100 + 1
             due = self.card.due if self.card.odid == 0 else self.card.odue
+
+            if self.easy_days_review_ratio == 0:
+                obey_easy_days = True
+                obey_specific_due_dates = True
+            else:
+                obey_easy_days = random.random() < self.p_obey_easy_days
+                obey_specific_due_dates = (
+                    random.random() < self.p_obey_specific_due_dates
+                )
             for check_ivl in reversed(range(min_ivl, max_ivl + step, step)):
                 check_due = due + check_ivl - self.card.ivl
+                if (
+                    obey_specific_due_dates
+                    and check_due in self.easy_specific_due_dates
+                ):
+                    continue
+
                 day_offset = check_due - mw.col.sched.today
                 if not self.allow_to_past and day_offset < 0:
                     break
+
                 due_date = datetime.now() + timedelta(days=day_offset)
+                if obey_easy_days and due_date.weekday() in self.easy_days:
+                    continue
+
                 due_cards = self.due_cnt_perday_from_first_day.get(
                     max(check_due, mw.col.sched.today), 0
                 )
@@ -92,11 +117,7 @@ class FSRS:
                     else 0
                 )
                 num_cards = due_cards + rated_cards
-                if (
-                    num_cards < min_num_cards
-                    and due_date.weekday() not in self.easy_days
-                    and check_due not in self.easy_specific_due_dates
-                ):
+                if num_cards < min_num_cards:
                     best_ivl = check_ivl
                     min_num_cards = num_cards
             return best_ivl
@@ -149,7 +170,14 @@ def reschedule_background(
     if config.load_balance:
         fsrs.set_load_balance()
         fsrs.easy_days = config.easy_days
+        fsrs.easy_days_review_ratio = config.easy_days_review_ratio
+        fsrs.p_obey_easy_days = p_obey_easy_days(
+            len(fsrs.easy_days), fsrs.easy_days_review_ratio
+        )
         fsrs.easy_specific_due_dates = easy_specific_due_dates
+        fsrs.p_obey_specific_due_dates = obey_specific_due_dates(
+            len(fsrs.easy_specific_due_dates), fsrs.easy_days_review_ratio
+        )
         if len(easy_specific_due_dates) > 0:
             fsrs.allow_to_past = False
     cancelled = False
@@ -181,6 +209,7 @@ def reschedule_background(
         {did_query if did is not None else ""}
         {recent_query if recent else ""}
         {filter_query if filter_flag else ""}
+        ORDER BY ivl
     """
     )
     # x[0]: cid
