@@ -130,6 +130,8 @@ class EasySpecificDateManagerWidget(QWidget):
             specific_dues.append(specific_due)
             filtered_dues.extend(
                 [specific_due + i + max(0, 4 - day_offset) for i in range(-4, 5)]
+                if config.easy_days_review_ratio > 0
+                else [specific_due]
             )
         filtered_dues = list(set(filtered_dues))
 
