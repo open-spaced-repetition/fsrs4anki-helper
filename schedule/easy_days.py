@@ -28,15 +28,19 @@ def easy_days(did):
         return
     today = mw.col.sched.today
     due_days = []
-    for day_offset in range(35):
+    if config.easy_days_review_ratio > 0 and config.auto_easy_days:
+        reschedule_range = 7
+    else:
+        reschedule_range = 35
+    for day_offset in range(reschedule_range):
         if (
-            config.easy_days_review_ratio > 0
+            config.easy_days_review_ratio > 0 # if ratio > 0, reschedule all cards due in the reschedule_range
             or (datetime.now() + timedelta(days=day_offset)).weekday()
-            in config.easy_days
+            in config.easy_days # if ratio = 0, reschedule only those due on Easy days
         ):
             due_days.append(today + day_offset)
 
-    # find cards that are due in easy days in the next 90 days
+    # find cards that are due in easy days in the next 35 days
     due_in_easy_days_cids = mw.col.db.list(
         f"""SELECT id
         FROM cards
