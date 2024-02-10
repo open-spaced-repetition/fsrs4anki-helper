@@ -1,6 +1,7 @@
 from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
 from aqt import mw
 from aqt.qt import QAction
+from aqt.utils import tooltip
 from typing import Callable
 
 from .dsr_state import init_dsr_status_hook
@@ -10,7 +11,11 @@ from .schedule.postpone import postpone
 from .schedule.advance import advance
 from .schedule.reset import clear_custom_data
 from .schedule.disperse_siblings import disperse_siblings
-from .schedule.easy_days import easy_days, easy_day_for_sepcific_date, easy_days_review_ratio
+from .schedule.easy_days import (
+    easy_days,
+    easy_day_for_sepcific_date,
+    easy_days_review_ratio,
+)
 from .schedule import init_review_hook
 from .stats import init_stats
 from .browser.browser import init_browser
@@ -31,9 +36,13 @@ config.load()
 
 
 # A tiny helper for menu items, since type checking is broken there
-def checkable(title: str, on_click: Callable[[bool], None]) -> QAction:
-    action = QAction(title, mw, checkable=True)  # noqa
-    action.triggered.connect(on_click)  # noqa
+def checkable(title: str, on_click: Callable[[bool, QAction], None]) -> QAction:
+    action = QAction(title, mw, checkable=True)
+
+    def on_triggered(checked):
+        on_click(checked, action)
+
+    action.triggered.connect(on_triggered)
     return action
 
 
@@ -59,7 +68,7 @@ def add_action_to_gear(fun, text):
     deck_browser_will_show_options_menu.append(aux)
 
 
-def set_auto_reschedule_after_sync(checked):
+def set_auto_reschedule_after_sync(checked, _):
     config.auto_reschedule_after_sync = checked
 
 
@@ -69,7 +78,7 @@ menu_auto_reschedule_after_sync = checkable(
 )
 
 
-def set_auto_disperse_after_sync(checked):
+def set_auto_disperse_after_sync(checked, _):
     config.auto_disperse_after_sync = checked
 
 
@@ -79,7 +88,7 @@ menu_auto_disperse_after_sync = checkable(
 )
 
 
-def set_auto_disperse_when_review(checked):
+def set_auto_disperse_when_review(checked, _):
     config.auto_disperse = checked
 
 
@@ -88,7 +97,7 @@ menu_auto_disperse = checkable(
 )
 
 
-def set_display_memory_state(checked):
+def set_display_memory_state(checked, _):
     config.display_memory_state = checked
 
 
@@ -97,7 +106,7 @@ menu_display_memory_state = checkable(
 )
 
 
-def set_load_balance(checked):
+def set_load_balance(checked, _):
     config.load_balance = checked
 
 
@@ -156,21 +165,24 @@ menu_easy_days_review_ratio = build_action(
     lambda did: easy_days_review_ratio(did, config), "Set Easy Days Review Percentage"
 )
 
-def set_easy_days(day, checked):
-    config.easy_days = (day, checked)
+
+def set_easy_days(day, checked, action):
+    if len(config.easy_days) >= 6 and checked:
+        tooltip("You can only select up to 6 days as easy days.")
+        action.setChecked(False)
+    else:
+        config.easy_days = (day, checked)
 
 
-def set_auto_easy_days(checked):
+def set_auto_easy_days(checked, _):
     config.auto_easy_days = checked
 
 
-menu_for_easy_0 = checkable(title="Easy Mon", on_click=lambda x: set_easy_days(0, x))
-menu_for_easy_1 = checkable(title="Easy Tue", on_click=lambda x: set_easy_days(1, x))
-menu_for_easy_2 = checkable(title="Easy Wed", on_click=lambda x: set_easy_days(2, x))
-menu_for_easy_3 = checkable(title="Easy Thu", on_click=lambda x: set_easy_days(3, x))
-menu_for_easy_4 = checkable(title="Easy Fri", on_click=lambda x: set_easy_days(4, x))
-menu_for_easy_5 = checkable(title="Easy Sat", on_click=lambda x: set_easy_days(5, x))
-menu_for_easy_6 = checkable(title="Easy Sun", on_click=lambda x: set_easy_days(6, x))
+weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+menu_for_easy = [
+    checkable(title=f"Easy {day}", on_click=lambda x, a: set_easy_days(i, x, a))
+    for i, day in enumerate(weekdays)
+]
 menu_for_auto_easy_days = checkable(
     title="Auto apply easy days on closing collection",
     on_click=lambda x: set_auto_easy_days(x),
@@ -179,13 +191,9 @@ menu_for_easy_days.addAction(menu_apply_easy_days_for_specific_date)
 menu_for_easy_days.addAction(menu_apply_easy_days)
 menu_for_easy_days.addAction(menu_for_auto_easy_days)
 menu_for_easy_days.addSeparator()
-menu_for_easy_days.addAction(menu_for_easy_0)
-menu_for_easy_days.addAction(menu_for_easy_1)
-menu_for_easy_days.addAction(menu_for_easy_2)
-menu_for_easy_days.addAction(menu_for_easy_3)
-menu_for_easy_days.addAction(menu_for_easy_4)
-menu_for_easy_days.addAction(menu_for_easy_5)
-menu_for_easy_days.addAction(menu_for_easy_6)
+for action in menu_for_easy:
+    menu_for_easy_days.addAction(action)
+menu_for_easy_days.addSeparator()
 menu_for_easy_days.addAction(menu_easy_days_review_ratio)
 
 
@@ -200,13 +208,8 @@ def adjust_menu():
         menu_display_memory_state.setChecked(config.display_memory_state)
         menu_load_balance.setChecked(config.load_balance)
         menu_for_auto_easy_days.setChecked(config.auto_easy_days)
-        menu_for_easy_0.setChecked(0 in config.easy_days)
-        menu_for_easy_1.setChecked(1 in config.easy_days)
-        menu_for_easy_2.setChecked(2 in config.easy_days)
-        menu_for_easy_3.setChecked(3 in config.easy_days)
-        menu_for_easy_4.setChecked(4 in config.easy_days)
-        menu_for_easy_5.setChecked(5 in config.easy_days)
-        menu_for_easy_6.setChecked(6 in config.easy_days)
+        for i, action in enumerate(menu_for_easy):
+            action.setChecked(i in config.easy_days)
 
 
 @state_did_change.append
