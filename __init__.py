@@ -174,19 +174,22 @@ def set_easy_days(day, checked, action):
         config.easy_days = (day, checked)
 
 
-def set_auto_easy_days(checked, _):
-    config.auto_easy_days = checked
-
-
 weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 menu_for_easy = [
     checkable(title=f"Easy {day}", on_click=lambda x, a: set_easy_days(i, x, a))
     for i, day in enumerate(weekdays)
 ]
+
+
+def set_auto_easy_days(checked, _):
+    config.auto_easy_days = checked
+
+
 menu_for_auto_easy_days = checkable(
     title="Auto apply easy days on closing collection",
-    on_click=lambda x: set_auto_easy_days(x),
+    on_click=set_auto_easy_days,
 )
+
 menu_for_easy_days.addAction(menu_apply_easy_days_for_specific_date)
 menu_for_easy_days.addAction(menu_apply_easy_days)
 menu_for_easy_days.addAction(menu_for_auto_easy_days)
