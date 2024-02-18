@@ -174,11 +174,13 @@ def set_easy_days(day, checked, action):
         config.easy_days = (day, checked)
 
 
-weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-menu_for_easy = [
-    checkable(title=f"Easy {day}", on_click=lambda x, a: set_easy_days(i, x, a))
-    for i, day in enumerate(weekdays)
-]
+menu_for_easy_0 = checkable(title="Easy Monday", on_click=lambda x, a: set_easy_days(0, x, a))
+menu_for_easy_1 = checkable(title="Easy Tuesday", on_click=lambda x, a: set_easy_days(1, x, a))
+menu_for_easy_2 = checkable(title="Easy Wednesday", on_click=lambda x, a: set_easy_days(2, x, a))
+menu_for_easy_3 = checkable(title="Easy Thursday", on_click=lambda x, a: set_easy_days(3, x, a))
+menu_for_easy_4 = checkable(title="Easy Friday", on_click=lambda x, a: set_easy_days(4, x, a))
+menu_for_easy_5 = checkable(title="Easy Saturday", on_click=lambda x, a: set_easy_days(5, x, a))
+menu_for_easy_6 = checkable(title="Easy Sunday", on_click=lambda x, a: set_easy_days(6, x, a))
 
 
 def set_auto_easy_days(checked, _):
@@ -194,8 +196,13 @@ menu_for_easy_days.addAction(menu_apply_easy_days_for_specific_date)
 menu_for_easy_days.addAction(menu_apply_easy_days)
 menu_for_easy_days.addAction(menu_for_auto_easy_days)
 menu_for_easy_days.addSeparator()
-for action in menu_for_easy:
-    menu_for_easy_days.addAction(action)
+menu_for_easy_days.addAction(menu_for_easy_0)
+menu_for_easy_days.addAction(menu_for_easy_1)
+menu_for_easy_days.addAction(menu_for_easy_2)
+menu_for_easy_days.addAction(menu_for_easy_3)
+menu_for_easy_days.addAction(menu_for_easy_4)
+menu_for_easy_days.addAction(menu_for_easy_5)
+menu_for_easy_days.addAction(menu_for_easy_6)
 menu_for_easy_days.addSeparator()
 menu_for_easy_days.addAction(menu_easy_days_review_ratio)
 
@@ -211,8 +218,13 @@ def adjust_menu():
         menu_display_memory_state.setChecked(config.display_memory_state)
         menu_load_balance.setChecked(config.load_balance)
         menu_for_auto_easy_days.setChecked(config.auto_easy_days)
-        for i, action in enumerate(menu_for_easy):
-            action.setChecked(i in config.easy_days)
+        menu_for_easy_0.setChecked(0 in config.easy_days)
+        menu_for_easy_1.setChecked(1 in config.easy_days)
+        menu_for_easy_2.setChecked(2 in config.easy_days)
+        menu_for_easy_3.setChecked(3 in config.easy_days)
+        menu_for_easy_4.setChecked(4 in config.easy_days)
+        menu_for_easy_5.setChecked(5 in config.easy_days)
+        menu_for_easy_6.setChecked(6 in config.easy_days)
 
 
 @state_did_change.append
