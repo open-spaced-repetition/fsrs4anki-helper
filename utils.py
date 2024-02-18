@@ -135,7 +135,7 @@ def get_fuzz_range(interval, elapsed_days, maximum_interval):
         delta += range["factor"] * max(
             min(interval, range["end"]) - range["start"], 0.0
         )
-
+    interval = min(interval, maximum_interval)
     min_ivl = int(round(interval - delta))
     max_ivl = int(round(interval + delta))
     min_ivl = max(2, min_ivl)
@@ -193,5 +193,7 @@ def p_obey_easy_days(num_of_easy_days, easy_days_review_ratio):
 
 def obey_specific_due_dates(num_of_specific_due_dates, easy_days_review_ratio):
     return (8 + num_of_specific_due_dates) / (
-        easy_days_review_ratio * num_of_specific_due_dates + 8 + num_of_specific_due_dates
+        easy_days_review_ratio * num_of_specific_due_dates
+        + 8
+        + num_of_specific_due_dates
     )
