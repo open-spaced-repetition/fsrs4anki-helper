@@ -35,7 +35,7 @@ def retention_stability_load(lim) -> float:
         ,(SELECT COUNT(*) FROM cards c2 WHERE c1.nid = c2.nid)
         ,nid
     FROM cards c1
-    WHERE queue >= 1 
+    WHERE queue != 0 AND queue != -1
     AND data != ''
     AND json_extract(data, '$.s') IS NOT NULL
     """
