@@ -62,7 +62,7 @@ def advance(did):
         lambda x: (
             x
             + [
-                power_forgetting_curve(x[4], x[3]),
+                power_forgetting_curve(max(x[4], 0), x[3]),
             ]
         ),
         cards,
