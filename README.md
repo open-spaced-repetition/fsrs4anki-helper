@@ -114,7 +114,7 @@ The FSRS Stats are based on all cards in your deck or collection (whichever is s
 
 Interpretation:
 
-- Total **burden**, as defined by Piotr Woźniak here: https://supermemo.guru/wiki/Burden
+- **Daily Load** is an estimate of the average review count required per day. It is influenced by the [Burden](https://supermemo.guru/wiki/Burden) statistic in SuperMemo. 
 - The [three component of the memory model](https://supermemo.guru/wiki/Three_component_model_of_memory) used by FSRS:
 	- Average predicted **retention** reflects the percentage of cards that you would recall correctly if you were tested today.
 	- Average (memory) **stability** reflects how fast you forget (forgetting rate). The greater the stability, the slower the forgetting rate.
