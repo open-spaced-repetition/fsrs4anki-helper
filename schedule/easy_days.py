@@ -194,7 +194,7 @@ class EasyDaysReviewRatioSlider(QWidget):
         self.slider = QSlider(orientation=Qt.Orientation.Horizontal)
         self.slider.setMinimum(0)
         self.slider.setMaximum(9)
-        self.slider.setValue(self.config.easy_days_review_ratio * 10)
+        self.slider.setValue(int(self.config.easy_days_review_ratio * 10))
         self.slider.valueChanged.connect(self.slider_value_changed)
 
         self.labelStart = QLabel("0%")
