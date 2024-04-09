@@ -154,7 +154,7 @@ def due_to_date_str(due: int) -> str:
 
 def sched_current_date() -> date:
     now = datetime.now()
-    next_day_start_at = mw.col.all_config()["rollover"]
+    next_day_start_at = mw.col.get_config("rollover")
     return (now - timedelta(hours=next_day_start_at)).date()
 
 
