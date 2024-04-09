@@ -104,7 +104,7 @@ class FSRS:
                 if not self.allow_to_past and day_offset < 0:
                     break
 
-                due_date = datetime.now() + timedelta(days=day_offset)
+                due_date = sched_current_date() + timedelta(days=day_offset)
                 if obey_easy_days and due_date.weekday() in self.easy_days:
                     continue
 

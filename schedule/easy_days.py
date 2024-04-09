@@ -35,7 +35,7 @@ def easy_days(did):
     for day_offset in range(reschedule_range):
         if (
             config.easy_days_review_ratio > 0 # if ratio > 0, reschedule all cards due in the reschedule_range
-            or (datetime.now() + timedelta(days=day_offset)).weekday()
+            or (sched_current_date() + timedelta(days=day_offset)).weekday()
             in config.easy_days # if ratio = 0, reschedule only those due on Easy days
         ):
             due_days.append(today + day_offset)
@@ -107,7 +107,7 @@ class EasySpecificDateManagerWidget(QWidget):
         if specific_date in self.specific_dates:
             tooltip("This date has already been added")
             return
-        if specific_date < datetime.now().date():
+        if specific_date < sched_current_date():
             tooltip("Easy days can't be applied on past dates.")
             return
         self.specific_dates.append(specific_date)
@@ -126,7 +126,7 @@ class EasySpecificDateManagerWidget(QWidget):
             return
         specific_dues = []
         filtered_dues = []
-        current_date = datetime.now().date()
+        current_date = sched_current_date()
         for specific_date in self.specific_dates:
             day_offset = (specific_date - current_date).days
             today = mw.col.sched.today

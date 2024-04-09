@@ -20,7 +20,7 @@ import json
 import math
 import random
 import time
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from anki.utils import int_version
 
 
@@ -146,10 +146,16 @@ def get_fuzz_range(interval, elapsed_days, maximum_interval):
     return min_ivl, max_ivl
 
 
-def due_to_date(due: int) -> str:
+def due_to_date_str(due: int) -> str:
     offset = due - mw.col.sched.today
-    today_date = datetime.today()
+    today_date = sched_current_date()
     return (today_date + timedelta(days=offset)).strftime("%Y-%m-%d")
+
+
+def sched_current_date() -> date:
+    now = datetime.now()
+    next_day_start_at = mw.col.all_config()["rollover"]
+    return (now - timedelta(hours=next_day_start_at)).date()
 
 
 if int_version() < 231200:
