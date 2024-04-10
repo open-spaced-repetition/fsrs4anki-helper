@@ -234,14 +234,14 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
         mw.col.update_card(card)
         mw.col.merge_undo_entries(undo_entry)
         card_cnt += 1
-        message = f"Dispersed card {card.id} from {due_to_date(old_due)} to {due_to_date(due)}"
+        message = f"Dispersed card {card.id} from {due_to_date_str(old_due)} to {due_to_date_str(due)}"
         messages.append(message)
 
     if config.debug_notify:
         text = ""
         if min_gap == 0:
             for cid, due_range in due_ranges.items():
-                text += f"Card {cid} due range: {due_to_date(due_range[0])} - {due_to_date(due_range[1])}<br/>"
+                text += f"Card {cid} due range: {due_to_date_str(due_range[0])} - {due_to_date_str(due_range[1])}<br/>"
             text = "Due dates are too close to disperse:}<br/>" + text
         tooltip(text + "<br/>".join(messages))
 
