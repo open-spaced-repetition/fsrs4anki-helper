@@ -22,7 +22,7 @@ def _lineTbl_now(i):
     return "<table>" + "".join(i) + "</table>"
 
 
-def retention_stability_load(lim) -> float:
+def retention_stability_load(lim) -> tuple:
     elapse_stability_ivl_list = mw.col.db.all(
         f"""
     SELECT 
@@ -64,13 +64,29 @@ def retention_stability_load(lim) -> float:
     card_cnt = len(retention_stability_load_list)
     note_cnt = len(set(x[4] for x in retention_stability_load_list))
     if card_cnt == 0:
-        return 0, 0, 0, 0, 0, 0, 0
+        return 0, 0, 0, 0, 0, 0, 0, 0
     recall_sum = sum(item[0] for item in retention_stability_load_list)
     stability_sum = sum(item[1] for item in retention_stability_load_list)
     load_sum = sum(item[2] for item in retention_stability_load_list)
     estimated_total_knowledge_notes = sum(
         item[0] / item[3] for item in retention_stability_load_list
     )
+
+    time_sum = mw.col.db.scalar(
+        f"""
+    SELECT SUM(time)/1000
+    FROM revlog
+    WHERE cid IN (
+        SELECT id
+        FROM cards
+        WHERE queue != 0 AND queue != -1
+        AND data != ''
+        AND json_extract(data, '$.s') IS NOT NULL
+        {lim}
+    )
+    """
+    )
+    print(time_sum)
     return (
         recall_sum / card_cnt,
         stability_sum / card_cnt,
@@ -79,6 +95,7 @@ def retention_stability_load(lim) -> float:
         round(recall_sum),
         estimated_total_knowledge_notes,
         note_cnt,
+        time_sum,
     )
 
 
@@ -107,6 +124,7 @@ def get_fsrs_stats(self: CollectionStats):
         estimated_total_knowledge,
         estimated_total_knowledge_notes,
         note_cnt,
+        time_sum,
     ) = retention_stability_load(lim)
     i = []
     _line_now(i, "Average predicted retention", f"{retention * 100: .2f}%")
@@ -121,6 +139,13 @@ def get_fsrs_stats(self: CollectionStats):
         "Estimated total knowledge",
         f"{estimated_total_knowledge} cards ({retention * 100:.2f}%)",
     )
+    _line_now(i, "Total Time", f"{time_sum/3600:.2f} hours")
+    if time_sum > 0:
+        _line_now(
+            i,
+            "Knowledge acquisition per hour",
+            f"{estimated_total_knowledge / (time_sum/3600):.1f} cards",
+        )
     i.append(
         "<tr><td align=left style='padding: 5px'><b>Retention by Notes:</b></td></tr>"
     )
@@ -144,6 +169,8 @@ def get_fsrs_stats(self: CollectionStats):
         + "<li><b>Load</b>: an estimate of the average number of cards to be reviewed daily (assuming review at the scheduled time without advancing or postponing). Load = 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub>, where I<sub>n</sub> is the current interval of the n-th card.</li>"
         + "<li><b>Count</b>: the number of cards with FSRS memory states, excluding cards in the (re)learning stage.</li> "
         + "<li><b>Estimated total knowledge</b>: the number of cards the user is expected to know today, calculated as the product of average retention and count.</li>"
+        + "<li><b>Total time</b>: the amount of time spent doing reviews in Anki. This does not include time spent on making/editing cards.</li>"
+        + "<li><b>Knowledge acquisition rate</b>: the number of cards memorized per hour of actively doing reviews in Anki, calculated as the ratio of total knowledge and total time. Larger values indicate efficient learning. This metric can be used to compare different learners. If your collection is very young, this number may initially be very low or very high.</li>"
         + "</ul></details>"
     )
     return self._section(
