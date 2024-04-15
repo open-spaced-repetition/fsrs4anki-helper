@@ -143,8 +143,8 @@ def get_fsrs_stats(self: CollectionStats):
     if time_sum > 0:
         _line_now(
             i,
-            "Knowledge acquisition per hour",
-            f"{estimated_total_knowledge / (time_sum/3600):.1f} cards",
+            "Knowledge acquisition rate",
+            f"{estimated_total_knowledge / (time_sum/3600):.1f} cards/hour",
         )
     i.append(
         "<tr><td align=left style='padding: 5px'><b>Retention by Notes:</b></td></tr>"
