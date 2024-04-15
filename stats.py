@@ -139,7 +139,7 @@ def get_fsrs_stats(self: CollectionStats):
         "Estimated total knowledge",
         f"{estimated_total_knowledge} cards ({retention * 100:.2f}%)",
     )
-    _line_now(i, "Total Time", f"{time_sum/3600:.2f} hours")
+    _line_now(i, "Total Time", f"{time_sum/3600:.1f} hours")
     if time_sum > 0:
         _line_now(
             i,
@@ -168,7 +168,7 @@ def get_fsrs_stats(self: CollectionStats):
         + "<li><b>Stability</b>: the time required for the retention to fall from 100% to 90%.</li>"
         + "<li><b>Load</b>: an estimate of the average number of cards to be reviewed daily (assuming review at the scheduled time without advancing or postponing). Load = 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub>, where I<sub>n</sub> is the current interval of the n-th card.</li>"
         + "<li><b>Count</b>: the number of cards with FSRS memory states, excluding cards in the (re)learning stage.</li> "
-        + "<li><b>Estimated total knowledge</b>: the number of cards the user is expected to know today, calculated as the product of average retention and count.</li>"
+        + "<li><b>Estimated total knowledge</b>: the number of cards the user is expected to know today, calculated as the product of average predicted retention and count.</li>"
         + "<li><b>Total time</b>: the amount of time spent doing reviews in Anki. This does not include time spent on making/editing cards.</li>"
         + "<li><b>Knowledge acquisition rate</b>: the number of cards memorized per hour of actively doing reviews in Anki, calculated as the ratio of total knowledge and total time. Larger values indicate efficient learning. This metric can be used to compare different learners. If your collection is very young, this number may initially be very low or very high.</li>"
         + "</ul></details>"
