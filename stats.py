@@ -139,7 +139,7 @@ def get_fsrs_stats(self: CollectionStats):
         "Estimated total knowledge",
         f"{estimated_total_knowledge} cards ({retention * 100:.2f}%)",
     )
-    _line_now(i, "Total Time", f"{time_sum/3600:.2f} hours")
+    _line_now(i, "Total Time", f"{time_sum/3600:.1f} hours")
     if time_sum > 0:
         _line_now(
             i,
