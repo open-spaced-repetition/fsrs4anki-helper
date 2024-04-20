@@ -160,12 +160,6 @@ def reschedule_background(
     config = Config()
     config.load()
 
-    undo_entry = mw.col.add_custom_undo_entry("Reschedule")
-    mw.taskman.run_on_main(
-        lambda: mw.progress.start(label="Rescheduling", immediate=False)
-    )
-
-    cnt = 0
     fsrs = FSRS()
     if config.load_balance:
         fsrs.set_load_balance()
@@ -180,7 +174,6 @@ def reschedule_background(
         )
         if len(easy_specific_due_dates) > 0:
             fsrs.allow_to_past = False
-    cancelled = False
     DM = DeckManager(mw.col)
     if did is not None:
         did_list = ids2str(DM.deck_and_child_ids(did))
@@ -212,6 +205,11 @@ def reschedule_background(
         ORDER BY ivl
     """
     )
+    total_cnt = len(cards)
+    undo_entry = mw.col.add_custom_undo_entry("Reschedule")
+    mw.taskman.run_on_main(
+        lambda: mw.progress.start(label="Rescheduling", max=total_cnt, immediate=False)
+    )
     # x[0]: cid
     # x[1]: did
     # x[2]: desired retention
@@ -227,7 +225,8 @@ def reschedule_background(
         ),
         cards,
     )
-
+    cnt = 0
+    cancelled = False
     for cid, _, desired_retention, maximum_interval in cards:
         if cancelled:
             break
@@ -241,7 +240,11 @@ def reschedule_background(
         cnt += 1
         if cnt % 500 == 0:
             mw.taskman.run_on_main(
-                lambda: mw.progress.update(value=cnt, label=f"{cnt} cards rescheduled")
+                lambda: mw.progress.update(
+                    label=f"{cnt}/{total_cnt} cards rescheduled",
+                    value=cnt,
+                    max=total_cnt,
+                )
             )
             if mw.progress.want_cancel():
                 cancelled = True
