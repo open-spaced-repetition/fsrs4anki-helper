@@ -174,13 +174,27 @@ def set_easy_days(day, checked, action):
         config.easy_days = (day, checked)
 
 
-menu_for_easy_0 = checkable(title="Easy Monday", on_click=lambda x, a: set_easy_days(0, x, a))
-menu_for_easy_1 = checkable(title="Easy Tuesday", on_click=lambda x, a: set_easy_days(1, x, a))
-menu_for_easy_2 = checkable(title="Easy Wednesday", on_click=lambda x, a: set_easy_days(2, x, a))
-menu_for_easy_3 = checkable(title="Easy Thursday", on_click=lambda x, a: set_easy_days(3, x, a))
-menu_for_easy_4 = checkable(title="Easy Friday", on_click=lambda x, a: set_easy_days(4, x, a))
-menu_for_easy_5 = checkable(title="Easy Saturday", on_click=lambda x, a: set_easy_days(5, x, a))
-menu_for_easy_6 = checkable(title="Easy Sunday", on_click=lambda x, a: set_easy_days(6, x, a))
+menu_for_easy_0 = checkable(
+    title="Easy Monday", on_click=lambda x, a: set_easy_days(0, x, a)
+)
+menu_for_easy_1 = checkable(
+    title="Easy Tuesday", on_click=lambda x, a: set_easy_days(1, x, a)
+)
+menu_for_easy_2 = checkable(
+    title="Easy Wednesday", on_click=lambda x, a: set_easy_days(2, x, a)
+)
+menu_for_easy_3 = checkable(
+    title="Easy Thursday", on_click=lambda x, a: set_easy_days(3, x, a)
+)
+menu_for_easy_4 = checkable(
+    title="Easy Friday", on_click=lambda x, a: set_easy_days(4, x, a)
+)
+menu_for_easy_5 = checkable(
+    title="Easy Saturday", on_click=lambda x, a: set_easy_days(5, x, a)
+)
+menu_for_easy_6 = checkable(
+    title="Easy Sunday", on_click=lambda x, a: set_easy_days(6, x, a)
+)
 
 
 def set_auto_easy_days(checked, _):

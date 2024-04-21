@@ -34,9 +34,10 @@ def easy_days(did):
         reschedule_range = 35
     for day_offset in range(reschedule_range):
         if (
-            config.easy_days_review_ratio > 0 # if ratio > 0, reschedule all cards due in the reschedule_range
+            config.easy_days_review_ratio
+            > 0  # if ratio > 0, reschedule all cards due in the reschedule_range
             or (sched_current_date() + timedelta(days=day_offset)).weekday()
-            in config.easy_days # if ratio = 0, reschedule only those due on Easy days
+            in config.easy_days  # if ratio = 0, reschedule only those due on Easy days
         ):
             due_days.append(today + day_offset)
 
