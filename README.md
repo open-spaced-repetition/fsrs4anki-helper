@@ -1,5 +1,7 @@
 # FSRS4Anki Helper
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) scheduler. It has six main features:
 
 - **Reschedule** cards based on their entire review histories.
