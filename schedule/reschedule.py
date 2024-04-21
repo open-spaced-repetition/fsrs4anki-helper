@@ -200,7 +200,7 @@ def reschedule_background(
     if filter_flag:
         filter_query = f"AND id IN {ids2str(filtered_cids)}"
 
-    cid_nid_did = mw.col.db.all(
+    cid_did_nid = mw.col.db.all(
         f"""
         SELECT 
             id,
@@ -217,7 +217,7 @@ def reschedule_background(
         ORDER BY ivl
     """
     )
-    total_cnt = len(cid_nid_did)
+    total_cnt = len(cid_did_nid)
     undo_entry = mw.col.add_custom_undo_entry("Reschedule")
     mw.taskman.run_on_main(
         lambda: mw.progress.start(label="Rescheduling", max=total_cnt, immediate=False)
@@ -235,7 +235,7 @@ def reschedule_background(
                 DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
             ]
         ),
-        cid_nid_did,
+        cid_did_nid,
     )
     cnt = 0
     cancelled = False
@@ -264,7 +264,7 @@ def reschedule_background(
     finish_text = f"{cnt} cards rescheduled"
 
     if config.auto_disperse_after_reschedule:
-        filtered_nid_string = ids2str(set(map(lambda x: x[1], cid_nid_did)))
+        filtered_nid_string = ids2str(set(map(lambda x: x[2], cid_did_nid)))
         return (finish_text, filtered_nid_string)
 
     return finish_text
