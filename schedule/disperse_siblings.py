@@ -210,7 +210,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
 
     config = Config()
     config.load()
-    if not config.auto_disperse:
+    if not config.auto_disperse_when_review:
         return
 
     siblings = get_siblings_when_review(card)

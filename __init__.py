@@ -89,7 +89,7 @@ menu_auto_disperse_after_sync = checkable(
 
 
 def set_auto_disperse_when_review(checked, _):
-    config.auto_disperse = checked
+    config.auto_disperse_when_review = checked
 
 
 menu_auto_disperse = checkable(
@@ -228,7 +228,7 @@ def adjust_menu():
         )
         menu_auto_reschedule_after_sync.setChecked(config.auto_reschedule_after_sync)
         menu_auto_disperse_after_sync.setChecked(config.auto_disperse_after_sync)
-        menu_auto_disperse.setChecked(config.auto_disperse)
+        menu_auto_disperse.setChecked(config.auto_disperse_when_review)
         menu_display_memory_state.setChecked(config.display_memory_state)
         menu_load_balance.setChecked(config.load_balance)
         menu_for_auto_easy_days.setChecked(config.auto_easy_days)
