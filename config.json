@@ -6,6 +6,7 @@
     "auto_reschedule_after_sync": false,
     "auto_disperse_after_sync": false,
     "auto_disperse_when_review": false,
+    "auto_disperse_after_reschedule": true,
     "mature_ivl": 21,
     "debug_notify": false,
     "fsrs_stats": true,

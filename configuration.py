@@ -9,6 +9,7 @@ DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 AUTO_DISPERSE_AFTER_SYNC = "auto_disperse_after_sync"
 AUTO_DISPERSE_WHEN_REVIEW = "auto_disperse_when_review"
+AUTO_DISPERSE_AFTER_RESCHEDULE = "auto_disperse_after_reschedule"
 MATURE_IVL = "mature_ivl"
 DEBUG_NOTIFY = "debug_notify"
 FSRS_STATS = "fsrs_stats"
@@ -101,6 +102,15 @@ class Config:
     @auto_disperse_when_review.setter
     def auto_disperse_when_review(self, value):
         self.data[AUTO_DISPERSE_WHEN_REVIEW] = value
+        self.save()
+
+    @property
+    def auto_disperse_after_reschedule(self):
+        return self.data[AUTO_DISPERSE_AFTER_RESCHEDULE]
+
+    @auto_disperse_after_reschedule.setter
+    def auto_disperse_after_reschedule(self, value):
+        self.data[AUTO_DISPERSE_AFTER_RESCHEDULE] = value
         self.save()
 
     @property

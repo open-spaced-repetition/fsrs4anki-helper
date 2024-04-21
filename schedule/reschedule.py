@@ -1,4 +1,6 @@
 from aqt import QAction, browser
+
+from .disperse_siblings import disperse_siblings
 from ..utils import *
 from ..configuration import Config
 from anki.cards import Card, FSRSMemoryState
@@ -140,9 +142,18 @@ def reschedule(
     start_time = time.time()
 
     def on_done(future):
-        mw.progress.finish()
-        tooltip(f"{future.result()} in {time.time() - start_time:.2f} seconds")
-        mw.reset()
+        config = Config()
+        config.load()
+        if config.auto_disperse_after_reschedule:
+            finish_text, filtered_nid_string = future.result()
+            mw.progress.finish()
+            mw.reset()
+            disperse_siblings(did, True, filtered_nid_string, finish_text)
+        else:
+            finish_text = future.result()
+            mw.progress.finish()
+            tooltip(f"{finish_text} in {time.time() - start_time:.2f} seconds")
+            mw.reset()
 
     fut = mw.taskman.run_in_background(
         lambda: reschedule_background(
@@ -189,14 +200,15 @@ def reschedule_background(
     if filter_flag:
         filter_query = f"AND id IN {ids2str(filtered_cids)}"
 
-    cards = mw.col.db.all(
+    cid_nid_did = mw.col.db.all(
         f"""
         SELECT 
             id,
             CASE WHEN odid==0
             THEN did
             ELSE odid
-            END
+            END,
+            nid
         FROM cards
         WHERE queue IN ({QUEUE_TYPE_LRN}, {QUEUE_TYPE_REV}, {QUEUE_TYPE_DAY_LEARN_RELEARN})
         {did_query if did is not None else ""}
@@ -205,16 +217,16 @@ def reschedule_background(
         ORDER BY ivl
     """
     )
-    total_cnt = len(cards)
+    total_cnt = len(cid_nid_did)
     undo_entry = mw.col.add_custom_undo_entry("Reschedule")
     mw.taskman.run_on_main(
         lambda: mw.progress.start(label="Rescheduling", max=total_cnt, immediate=False)
     )
     # x[0]: cid
     # x[1]: did
-    # x[2]: desired retention
-    # x[3]: max interval
-    # x[4]: weights
+    # x[2]: nid
+    # x[3]: desired retention
+    # x[4]: max interval
     cards = map(
         lambda x: (
             x
@@ -223,11 +235,11 @@ def reschedule_background(
                 DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
             ]
         ),
-        cards,
+        cid_nid_did,
     )
     cnt = 0
     cancelled = False
-    for cid, _, desired_retention, maximum_interval in cards:
+    for cid, _, _, desired_retention, maximum_interval in cards:
         if cancelled:
             break
         fsrs.desired_retention = desired_retention
@@ -249,7 +261,13 @@ def reschedule_background(
             if mw.progress.want_cancel():
                 cancelled = True
 
-    return f"{cnt} cards rescheduled"
+    finish_text = f"{cnt} cards rescheduled"
+
+    if config.auto_disperse_after_reschedule:
+        filtered_nid_string = ids2str(set(map(lambda x: x[1], cid_nid_did)))
+        return (finish_text, filtered_nid_string)
+
+    return finish_text
 
 
 def reschedule_card(cid, fsrs: FSRS, recompute=False):
