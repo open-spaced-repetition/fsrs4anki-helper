@@ -102,7 +102,7 @@ def set_auto_disperse_after_reschedule(checked, _):
 
 
 menu_auto_disperse_after_reschedule = checkable(
-    title="Disperse sibling after rescheduling (it breaks Load Balance)",
+    title="Disperse siblings after rescheduling (breaks Load Balance)",
     on_click=set_auto_disperse_after_reschedule,
 )
 
