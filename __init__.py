@@ -89,11 +89,21 @@ menu_auto_disperse_after_sync = checkable(
 
 
 def set_auto_disperse_when_review(checked, _):
-    config.auto_disperse = checked
+    config.auto_disperse_when_review = checked
 
 
 menu_auto_disperse = checkable(
     title="Auto disperse siblings when review", on_click=set_auto_disperse_when_review
+)
+
+
+def set_auto_disperse_after_reschedule(checked, _):
+    config.auto_disperse_after_reschedule = checked
+
+
+menu_auto_disperse_after_reschedule = checkable(
+    title="Disperse siblings after rescheduling (breaks Load Balance)",
+    on_click=set_auto_disperse_after_reschedule,
 )
 
 
@@ -145,6 +155,7 @@ menu_for_helper.addAction(menu_auto_disperse_after_sync)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_display_memory_state)
 menu_for_helper.addAction(menu_load_balance)
+menu_for_helper.addAction(menu_auto_disperse_after_reschedule)
 menu_for_easy_days = menu_for_helper.addMenu(
     "Less Anki on Easy Days (requires Load Balancing)"
 )
@@ -228,9 +239,12 @@ def adjust_menu():
         )
         menu_auto_reschedule_after_sync.setChecked(config.auto_reschedule_after_sync)
         menu_auto_disperse_after_sync.setChecked(config.auto_disperse_after_sync)
-        menu_auto_disperse.setChecked(config.auto_disperse)
+        menu_auto_disperse.setChecked(config.auto_disperse_when_review)
         menu_display_memory_state.setChecked(config.display_memory_state)
         menu_load_balance.setChecked(config.load_balance)
+        menu_auto_disperse_after_reschedule.setChecked(
+            config.auto_disperse_after_reschedule
+        )
         menu_for_auto_easy_days.setChecked(config.auto_easy_days)
         menu_for_easy_0.setChecked(0 in config.easy_days)
         menu_for_easy_1.setChecked(1 in config.easy_days)
