@@ -59,6 +59,9 @@ def auto_disperse(local_rids: List[int], texts: List[str]):
     if not config.auto_disperse_after_sync:
         return
 
+    if config.auto_reschedule_after_sync and config.auto_disperse_after_reschedule:
+        return
+
     remote_reviewed_cids = review_cid_remote(local_rids)
     remote_reviewed_cid_string = ids2str(remote_reviewed_cids)
     remote_reviewed_nids = [
