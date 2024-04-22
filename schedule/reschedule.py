@@ -208,7 +208,7 @@ def reschedule_background(
     total_cnt = len(cards)
     undo_entry = mw.col.add_custom_undo_entry("Reschedule")
     mw.taskman.run_on_main(
-        lambda: mw.progress.start(label="Rescheduling", max=total_cnt, immediate=False)
+        lambda: mw.progress.start(label="Rescheduling", max=total_cnt, immediate=True)
     )
     # x[0]: cid
     # x[1]: did
