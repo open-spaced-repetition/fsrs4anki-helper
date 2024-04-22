@@ -173,7 +173,7 @@ def disperse_siblings_backgroud(
     undo_entry = mw.col.add_custom_undo_entry("Disperse Siblings")
     mw.taskman.run_on_main(
         lambda: mw.progress.start(
-            label="Siblings Dispersing", max=sibilings_cnt, immediate=True
+            label="Dispersing Siblings", max=sibilings_cnt, immediate=True
         )
     )
 
