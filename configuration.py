@@ -15,6 +15,7 @@ DEBUG_NOTIFY = "debug_notify"
 FSRS_STATS = "fsrs_stats"
 DISPLAY_MEMORY_STATE = "display_memory_state"
 AUTO_EASY_DAYS = "auto_easy_days"
+HAS_RATED = "has_rated"
 
 
 def load_config():
@@ -156,4 +157,13 @@ class Config:
     @auto_easy_days.setter
     def auto_easy_days(self, value):
         self.data[AUTO_EASY_DAYS] = value
+        self.save()
+
+    @property
+    def has_rated(self):
+        return self.data[HAS_RATED]
+
+    @has_rated.setter
+    def has_rated(self, value):
+        self.data[HAS_RATED] = value
         self.save()

@@ -1,7 +1,7 @@
 from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
 from aqt import mw
 from aqt.qt import QAction
-from aqt.utils import tooltip
+from aqt.utils import tooltip, openLink
 from typing import Callable
 
 from .dsr_state import init_dsr_status_hook
@@ -20,7 +20,6 @@ from .schedule import init_review_hook
 from .stats import init_stats
 from .browser.browser import init_browser
 from .configuration import Config, run_on_configuration_change
-
 
 """
 Acknowledgement to Arthur Milchior, Carlos Duarte and oakkitten.
@@ -149,6 +148,20 @@ menu_reset = build_action(clear_custom_data, "Clear custom data in all cards")
 menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings")
 
 
+def contact_author(did=None):
+    openLink("https://github.com/open-spaced-repetition/fsrs4anki-helper")
+
+
+menu_contact = build_action(contact_author, "Contact Author on GitHub")
+
+
+def rate_on_ankiweb(did=None):
+    openLink("https://ankiweb.net/shared/review/759844606")
+    config.has_rated = True
+
+
+menu_rate = build_action(rate_on_ankiweb, "Rate Add-on on AnkiWeb")
+
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
@@ -166,6 +179,10 @@ menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
 menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
+menu_for_helper.addSeparator()
+menu_for_helper.addAction(menu_contact)
+if not config.has_rated:
+    menu_for_helper.addAction(menu_rate)
 
 
 menu_apply_easy_days = build_action(easy_days, "Apply easy days now")
