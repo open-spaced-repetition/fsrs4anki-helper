@@ -23,6 +23,7 @@ class FSRS:
     card: Card
     elapsed_days: int
     allow_to_past: bool
+    apply_easy_days: bool
 
     def __init__(self) -> None:
         self.maximum_interval = 36500
@@ -35,6 +36,7 @@ class FSRS:
         self.p_obey_specific_due_dates = 1
         self.elapsed_days = 0
         self.allow_to_past = True
+        self.apply_easy_days = False
 
     def set_load_balance(self):
         self.enable_load_balance = True
@@ -81,7 +83,7 @@ class FSRS:
             else:
                 return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
         else:
-            if not self.allow_to_past:
+            if self.apply_easy_days:
                 last_review = get_last_review_date(self.card)
                 due = self.card.odue if self.card.odid else self.card.due
                 if due > last_review + max_ivl + 2:
@@ -141,7 +143,12 @@ class FSRS:
 
 
 def reschedule(
-    did, recent=False, filter_flag=False, filtered_cids={}, easy_specific_due_dates=[]
+    did,
+    recent=False,
+    filter_flag=False,
+    filtered_cids={},
+    easy_specific_due_dates=[],
+    apply_easy_days=False,
 ):
     if not mw.col.get_config("fsrs"):
         tooltip(FSRS_ENABLE_WARNING)
@@ -165,7 +172,12 @@ def reschedule(
 
     fut = mw.taskman.run_in_background(
         lambda: reschedule_background(
-            did, recent, filter_flag, filtered_cids, easy_specific_due_dates
+            did,
+            recent,
+            filter_flag,
+            filtered_cids,
+            easy_specific_due_dates,
+            apply_easy_days,
         ),
         on_done,
     )
@@ -174,7 +186,12 @@ def reschedule(
 
 
 def reschedule_background(
-    did, recent=False, filter_flag=False, filtered_cids={}, easy_specific_due_dates=[]
+    did,
+    recent=False,
+    filter_flag=False,
+    filtered_cids={},
+    easy_specific_due_dates=[],
+    apply_easy_days=False,
 ):
     config = Config()
     config.load()
@@ -193,6 +210,7 @@ def reschedule_background(
         )
         if len(easy_specific_due_dates) > 0:
             fsrs.allow_to_past = False
+        fsrs.apply_easy_days = apply_easy_days
     DM = DeckManager(mw.col)
     if did is not None:
         did_list = ids2str(DM.deck_and_child_ids(did))
