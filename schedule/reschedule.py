@@ -81,6 +81,13 @@ class FSRS:
             else:
                 return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
         else:
+            last_review = get_last_review_date(self.card)
+            due = self.card.odue if self.card.odid else self.card.due
+            if due > last_review + max_ivl + 2:
+                current_ivl = due - last_review
+                min_ivl, max_ivl = get_fuzz_range(
+                    current_ivl, self.elapsed_days, current_ivl
+                )
             min_num_cards = math.inf
             best_ivl = (max_ivl + min_ivl) // 2 if self.allow_to_past else max_ivl
             step = (max_ivl - min_ivl) // 100 + 1
