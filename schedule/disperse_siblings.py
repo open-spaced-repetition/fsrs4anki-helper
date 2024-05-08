@@ -141,6 +141,8 @@ def disperse(siblings):
 def disperse_siblings(
     did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""
 ):
+    if not mw.col:
+        return None
     if not mw.col.get_config("fsrs"):
         tooltip(FSRS_ENABLE_WARNING)
         return None
