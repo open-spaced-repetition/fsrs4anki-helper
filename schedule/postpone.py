@@ -38,8 +38,8 @@ def postpone(did):
             ivl,
             json_extract(data, '$.s'),
             CASE WHEN odid==0
-            THEN {mw.col.sched.today} - (due - ivl)
-            ELSE {mw.col.sched.today} - (odue - ivl)
+            THEN {mw.col.sched.today} - (due - ivl) + ivl * 0.075
+            ELSE {mw.col.sched.today} - (odue - ivl) + ivl * 0.075
             END,
             json_extract(data, '$.dr')
         FROM cards
@@ -55,9 +55,9 @@ def postpone(did):
     # x[1]: did
     # x[2]: interval
     # x[3]: stability
-    # x[4]: elapsed days
+    # x[4]: approx elapsed days after postpone
     # x[5]: desired retention
-    # x[6]: current retention
+    # x[6]: approx retention after postpone
     # x[7]: max interval
     cards = map(
         lambda x: (
@@ -70,8 +70,8 @@ def postpone(did):
         cards,
     )
     # sort by (elapsed_days / scheduled_days - 1)
-    # = ln(current retention)/ln(requested retention)-1, -interval (ascending)
-    cards = sorted(cards, key=lambda x: ((1 / x[6] - 1) / (1 / x[5] - 1) - 1, -x[2]))
+    # = ln(current retention)/ln(requested retention)-1, -stability (ascending)
+    cards = sorted(cards, key=lambda x: ((1 / x[6] - 1) / (1 / x[5] - 1) - 1, -x[3]))
     safe_cnt = len(
         list(filter(lambda x: (1 / x[6] - 1) / (1 / x[5] - 1) - 1 < 0.15, cards))
     )
