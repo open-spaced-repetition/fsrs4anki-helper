@@ -69,8 +69,8 @@ def advance(did):
     )
 
     # sort by (1 - elapsed_day / scheduled_day)
-    # = 1-ln(current retention)/ln(requested retention), -interval (ascending)
-    cards = sorted(cards, key=lambda x: (1 - (1 / x[6] - 1) / (1 / x[5] - 1), -x[2]))
+    # = 1-ln(current retention)/ln(requested retention), -stability (ascending)
+    cards = sorted(cards, key=lambda x: (1 - (1 / x[6] - 1) / (1 / x[5] - 1), -x[3]))
     safe_cnt = len(
         list(filter(lambda x: 1 - (1 / x[6] - 1) / (1 / x[5] - 1) < 0.13, cards))
     )
