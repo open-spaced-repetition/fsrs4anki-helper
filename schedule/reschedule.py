@@ -38,7 +38,7 @@ class FSRS:
         self.allow_to_past = True
         self.apply_easy_days = False
 
-    def set_load_balance(self):
+    def set_load_balance(self, did_query=None):
         self.enable_load_balance = True
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
         self.due_cnt_perday_from_first_day = {
@@ -48,6 +48,7 @@ class FSRS:
                 FROM cards 
                 WHERE type = 2  
                 AND queue != -1
+                {did_query if did_query is not None else ""}
                 GROUP BY {true_due}"""
             )
         }
@@ -197,8 +198,14 @@ def reschedule_background(
     config.load()
 
     fsrs = FSRS()
+    DM = DeckManager(mw.col)
+    did_query = None
+    if did is not None:
+        did_list = ids2str(DM.deck_and_child_ids(did))
+        did_query = f"AND did IN {did_list}"
+
     if config.load_balance:
-        fsrs.set_load_balance()
+        fsrs.set_load_balance(did_query=did_query)
         fsrs.easy_days = config.easy_days
         fsrs.easy_days_review_ratio = config.easy_days_review_ratio
         fsrs.p_obey_easy_days = p_obey_easy_days(
@@ -211,10 +218,6 @@ def reschedule_background(
         if len(easy_specific_due_dates) > 0:
             fsrs.allow_to_past = False
         fsrs.apply_easy_days = apply_easy_days
-    DM = DeckManager(mw.col)
-    if did is not None:
-        did_list = ids2str(DM.deck_and_child_ids(did))
-        did_query = f"AND did IN {did_list}"
 
     if recent:
         today_cutoff = mw.col.sched.day_cutoff
@@ -237,7 +240,7 @@ def reschedule_background(
             nid
         FROM cards
         WHERE queue IN ({QUEUE_TYPE_LRN}, {QUEUE_TYPE_REV}, {QUEUE_TYPE_DAY_LEARN_RELEARN})
-        {did_query if did is not None else ""}
+        {did_query if did_query is not None else ""}
         {recent_query if recent else ""}
         {filter_query if filter_flag else ""}
         ORDER BY ivl
