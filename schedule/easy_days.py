@@ -78,7 +78,21 @@ class EasySpecificDateManagerWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.initUi()
-        self.specific_dates = []
+        self.config = Config()
+        self.config.load()
+        today = datetime.today().date()
+        self.config.easy_dates = [
+            date
+            for date in self.config.easy_dates
+            if datetime.strptime(date, "%Y-%m-%d").date() >= today
+        ]
+        self.specific_dates = [
+            datetime.strptime(date, "%Y-%m-%d").date()
+            for date in self.config.easy_dates
+        ]
+        for specific_date in self.specific_dates:
+            deckWidget = DateLabelWidget(specific_date, self)
+            self.layout.insertWidget(self.layout.count() - 2, deckWidget)
 
     def initUi(self):
         self.layout = QVBoxLayout()
@@ -113,6 +127,9 @@ class EasySpecificDateManagerWidget(QWidget):
             tooltip("Easy days can't be applied on past dates.")
             return
         self.specific_dates.append(specific_date)
+        self.config.easy_dates = [
+            date.strftime("%Y-%m-%d") for date in self.specific_dates
+        ]
         deckWidget = DateLabelWidget(specific_date, self)
         self.layout.insertWidget(self.layout.count() - 2, deckWidget)
         mw.deckBrowser.refresh()
@@ -179,6 +196,11 @@ class DateLabelWidget(QWidget):
         layout.addWidget(self.deleteButton)
 
     def deleteEvent(self):
+        config = Config()
+        config.load()
+        config.easy_dates = list(
+            filter(lambda x: x != self.date.strftime("%Y-%m-%d"), config.easy_dates)
+        )
         self.manager.specific_dates.remove(self.date)
         self.setParent(None)
         mw.deckBrowser.refresh()

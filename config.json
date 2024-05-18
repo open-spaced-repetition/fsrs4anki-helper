@@ -1,6 +1,7 @@
 {
     "load_balance": false,
     "easy_days": [],
+    "easy_dates": [],
     "easy_days_review_ratio": 0,
     "days_to_reschedule": 7,
     "auto_reschedule_after_sync": false,
