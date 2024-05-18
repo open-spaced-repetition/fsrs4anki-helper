@@ -80,11 +80,11 @@ class EasySpecificDateManagerWidget(QWidget):
         self.initUi()
         self.config = Config()
         self.config.load()
-        today = datetime.today().date()
+        current_date = sched_current_date()
         self.config.easy_dates = [
             date
             for date in self.config.easy_dates
-            if datetime.strptime(date, "%Y-%m-%d").date() >= today
+            if datetime.strptime(date, "%Y-%m-%d").date() >= current_date
         ]
         self.specific_dates = [
             datetime.strptime(date, "%Y-%m-%d").date()
