@@ -305,6 +305,8 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         memory_state = mw.col.compute_memory_state(cid)
         s = memory_state.stability
         d = memory_state.difficulty
+        if s is None or d is None:
+            return None
         card.memory_state = FSRSMemoryState(stability=s, difficulty=d)
     elif card.memory_state:
         memory_state = card.memory_state
