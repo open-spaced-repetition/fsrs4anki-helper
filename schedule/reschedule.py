@@ -1,3 +1,4 @@
+from typing import Set
 from aqt import QAction, browser
 
 from .disperse_siblings import disperse_siblings
@@ -212,6 +213,15 @@ def reschedule_background(
             len(fsrs.easy_days), fsrs.easy_days_review_ratio
         )
         fsrs.easy_specific_due_dates = easy_specific_due_dates
+
+        current_date = sched_current_date()
+        today = mw.col.sched.today
+        for easy_date_str in config.easy_dates:
+            easy_date = datetime.strptime(easy_date_str, "%Y-%m-%d").date()
+            specific_due = today + (easy_date - current_date).days
+            if specific_due not in fsrs.easy_specific_due_dates:
+                fsrs.easy_specific_due_dates.append(specific_due)
+
         fsrs.p_obey_specific_due_dates = obey_specific_due_dates(
             len(fsrs.easy_specific_due_dates), fsrs.easy_days_review_ratio
         )

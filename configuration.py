@@ -4,6 +4,7 @@ tag = mw.addonManager.addonFromModule(__name__)
 
 LOAD_BALANCE = "load_balance"
 EASY_DAYS = "easy_days"
+EASY_DATES = "easy_dates"
 EASY_DAYS_REVIEW_RATIO = "easy_days_review_ratio"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
@@ -47,7 +48,7 @@ class Config:
         self.save()
 
     @property
-    def easy_days(self):
+    def easy_days(self) -> list[int]:
         return self.data[EASY_DAYS]
 
     @easy_days.setter
@@ -58,6 +59,15 @@ class Config:
         else:
             if day in self.data[EASY_DAYS]:
                 self.data[EASY_DAYS].remove(day)
+        self.save()
+
+    @property
+    def easy_dates(self) -> list[str]:
+        return self.data[EASY_DATES]
+
+    @easy_dates.setter
+    def easy_dates(self, value):
+        self.data[EASY_DATES] = value
         self.save()
 
     @property
