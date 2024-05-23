@@ -32,7 +32,7 @@ Installation link: https://ankiweb.net/shared/info/759844606
 
 | Feature name      | How does it work?                                            | When should I use it?                                        |
 | ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| Reschedule        | Calculates stability, difficulty, and the optimum interval from the entire review history for each card using FSRS parameters. Then, it changes the due dates of cards. | When you update the weights or other parameters of FSRS. However, this is not necessary anymore, as Anki has a built-in feature "Reschedule cards on change". |
+| Reschedule        | Calculates stability, difficulty, and the optimum interval from the entire review history for each card using FSRS parameters. Then, it changes the due dates of cards. | When you update the parameters or desired retention of FSRS. However, this is not necessary anymore, as Anki has a built-in feature "Reschedule cards on change". |
 | Advance           | Decreases the intervals of undue cards based on current and requested R, and interval length to minimize damage to long-term learning. | When you want to review your material ahead of time, for example, before a test. |
 | Postpone          | Increases the intervals of cards that are due today based on current and requested R, and interval length in a way that minimizes damage to long-term learning. | When you are dealing with a large number of reviews after taking a break from Anki or after rescheduling. |
 | Load Balancing    | After the optimal interval is calculated, it is adjusted by a random amount to make the distribution of reviews over time more uniform. | Always. This feature makes your workload (reviews per day) more consistent. |
@@ -100,11 +100,13 @@ In the card browser, you can right-click on the header and click on Difficulty, 
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/7fb2b357-19d0-45fb-9cc0-f925258a6280)
 
-The Helper also adds [search syntax](https://docs.ankiweb.net/searching.html) for these three attributes, here are some examples:
+The Helper also adds [search syntax](https://docs.ankiweb.net/searching.html) for these three properties, here are some examples:
 
 - s<10: Cards with memory stability less than 10 days
 - d=5: Cards with difficulty equal to 5
 - r<0.6: Cards with memory retrievability (recall probability) less than 60%
+
+In Anki 23.10+, you can use the built-in search syntax to search for them as [card properties](https://docs.ankiweb.net/searching.html#card-properties).
 
 ## Advanced Statistics
 
