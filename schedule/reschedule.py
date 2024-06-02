@@ -25,6 +25,7 @@ class FSRS:
     elapsed_days: int
     allow_to_past: bool
     apply_easy_days: bool
+    reschedule_threshold: float
 
     def __init__(self) -> None:
         self.maximum_interval = 36500
@@ -38,6 +39,9 @@ class FSRS:
         self.elapsed_days = 0
         self.allow_to_past = True
         self.apply_easy_days = False
+        config = Config()
+        config.load()
+        self.reschedule_threshold = config.reschedule_threshold
 
     def set_load_balance(self, did_query=None):
         self.enable_load_balance = True
@@ -332,6 +336,8 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         fsrs.set_card(card)
         fsrs.set_fuzz_factor(cid, card.reps)
         new_ivl = fsrs.next_interval(s)
+        if (new_ivl - card.ivl) / card.ivl < fsrs.reschedule_threshold:
+            return None
         due_before = max(card.odue if card.odid else card.due, mw.col.sched.today)
         card = update_card_due_ivl(card, new_ivl)
         due_after = max(card.odue if card.odid else card.due, mw.col.sched.today)

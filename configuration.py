@@ -17,6 +17,7 @@ FSRS_STATS = "fsrs_stats"
 DISPLAY_MEMORY_STATE = "display_memory_state"
 AUTO_EASY_DAYS = "auto_easy_days"
 HAS_RATED = "has_rated"
+RESCHEDULE_THRESHOLD = "reschedule_threshold"
 
 
 def load_config():
@@ -176,4 +177,13 @@ class Config:
     @has_rated.setter
     def has_rated(self, value):
         self.data[HAS_RATED] = value
+        self.save()
+
+    @property
+    def reschedule_threshold(self):
+        return self.data[RESCHEDULE_THRESHOLD]
+    
+    @reschedule_threshold.setter
+    def reschedule_threshold(self, value):
+        self.data[RESCHEDULE_THRESHOLD] = value
         self.save()
