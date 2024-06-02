@@ -182,7 +182,7 @@ class Config:
     @property
     def reschedule_threshold(self):
         return self.data[RESCHEDULE_THRESHOLD]
-    
+
     @reschedule_threshold.setter
     def reschedule_threshold(self, value):
         self.data[RESCHEDULE_THRESHOLD] = value
