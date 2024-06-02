@@ -336,7 +336,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         fsrs.set_card(card)
         fsrs.set_fuzz_factor(cid, card.reps)
         new_ivl = fsrs.next_interval(s)
-        if (new_ivl - card.ivl) / card.ivl < fsrs.reschedule_threshold:
+        if abs(new_ivl - card.ivl) / card.ivl < fsrs.reschedule_threshold:
             return None
         due_before = max(card.odue if card.odid else card.due, mw.col.sched.today)
         card = update_card_due_ivl(card, new_ivl)
