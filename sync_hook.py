@@ -12,17 +12,21 @@ def create_comparelog(local_rids: List[int]) -> None:
 
 
 def review_cid_remote(local_rids: List[int]):
+    config = Config()
+    config.load()
     local_rid_string = ids2str(local_rids)
-    # exclude entries where ivl == lastIvl: they indicate a dynamic deck without rescheduling
+    # get cids of revlog entries that were not present in the collection before sync
+    # exclude manual entries and reviews done in filtered decks with rescheduling disabled
     remote_reviewed_cids = [
         cid
         for cid in mw.col.db.list(
             f"""SELECT DISTINCT cid
             FROM revlog
             WHERE id NOT IN {local_rid_string}
-            AND type < 3
+            {"" if config.auto_disperse_after_reschedule else "AND ease > 0"}
+            AND (type < 3 OR factor != 0)
             """
-        )  # type: 0=Learning, 1=Review, 2=relearn, 3=Relearning, 4=Manual
+        )  # type: 0=learn, 1=review, 2=relearn, 3=filtered, 4=manual
     ]
     return remote_reviewed_cids
 
