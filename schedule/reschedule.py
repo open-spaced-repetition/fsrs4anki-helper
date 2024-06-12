@@ -233,8 +233,7 @@ def reschedule_background(
     if recent:
         today_cutoff = mw.col.sched.day_cutoff
         day_before_cutoff = today_cutoff - (config.days_to_reschedule + 1) * 86400
-        recent_query = (
-            f"""AND id IN 
+        recent_query = f"""AND id IN 
             (
                 SELECT cid 
                 FROM revlog 
@@ -243,7 +242,6 @@ def reschedule_background(
                 AND (type < 3 OR factor != 0)
             )
             """
-        )
 
     if filter_flag:
         filter_query = f"AND id IN {ids2str(filtered_cids)}"
