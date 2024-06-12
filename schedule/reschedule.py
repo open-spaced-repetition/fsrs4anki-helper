@@ -66,6 +66,7 @@ class FSRS:
                 f"""SELECT (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid)
                 FROM revlog
                 WHERE ease > 0
+                AND (type < 3 OR factor != 0)
                 GROUP BY (id/1000-{mw.col.sched.day_cutoff})/86400"""
             )
         }
@@ -233,7 +234,15 @@ def reschedule_background(
         today_cutoff = mw.col.sched.day_cutoff
         day_before_cutoff = today_cutoff - (config.days_to_reschedule + 1) * 86400
         recent_query = (
-            f"AND id IN (SELECT cid FROM revlog WHERE id >= {day_before_cutoff * 1000})"
+            f"""AND id IN 
+            (
+                SELECT cid 
+                FROM revlog 
+                WHERE id >= {day_before_cutoff * 1000}
+                AND ease > 0
+                AND (type < 3 OR factor != 0)
+            )
+            """
         )
 
     if filter_flag:
