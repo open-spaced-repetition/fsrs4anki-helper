@@ -8,6 +8,7 @@ from anki.cards import Card, FSRSMemoryState
 from anki.decks import DeckManager
 from anki.utils import ids2str
 from aqt.gui_hooks import browser_menus_did_init
+from collections import defaultdict
 
 
 class FSRS:
@@ -20,7 +21,8 @@ class FSRS:
     easy_specific_due_dates: List[int]
     p_obey_specific_due_dates: float
     due_cnt_perday_from_first_day: Dict[int, int]
-    learned_cnt_perday_from_today: Dict[int, int]
+    backlog: int
+    learned_cnt_today: int
     card: Card
     elapsed_days: int
     allow_to_past: bool
@@ -42,34 +44,32 @@ class FSRS:
     def set_load_balance(self, did_query=None):
         self.enable_load_balance = True
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
-        self.due_cnt_perday_from_first_day = {
-            day: cnt
-            for day, cnt in mw.col.db.all(
-                f"""SELECT {true_due}, count() 
-                FROM cards 
-                WHERE type = 2  
-                AND queue != -1
-                {did_query if did_query is not None else ""}
-                GROUP BY {true_due}"""
-            )
-        }
-        for day in list(self.due_cnt_perday_from_first_day.keys()):
-            if day < mw.col.sched.today:
-                self.due_cnt_perday_from_first_day[mw.col.sched.today] = (
-                    self.due_cnt_perday_from_first_day.get(mw.col.sched.today, 0)
-                    + self.due_cnt_perday_from_first_day[day]
+        self.due_cnt_perday_from_first_day = defaultdict(
+            int,
+            {
+                day: cnt
+                for day, cnt in mw.col.db.all(
+                    f"""SELECT {true_due}, count() 
+                        FROM cards 
+                        WHERE type = 2  
+                        AND queue != -1
+                        {did_query if did_query is not None else ""}
+                        GROUP BY {true_due}"""
                 )
-                self.due_cnt_perday_from_first_day.pop(day)
-        self.learned_cnt_perday_from_today = {
-            day: cnt
-            for day, cnt in mw.col.db.all(
-                f"""SELECT (id/1000-{mw.col.sched.day_cutoff})/86400, count(distinct cid)
-                FROM revlog
-                WHERE ease > 0
-                AND (type < 3 OR factor != 0)
-                GROUP BY (id/1000-{mw.col.sched.day_cutoff})/86400"""
-            )
-        }
+            },
+        )
+        self.backlog = sum(
+            due_cnt
+            for due, due_cnt in self.due_cnt_perday_from_first_day.items()
+            if due <= mw.col.sched.today
+        )
+        self.learned_cnt_today = mw.col.db.scalar(
+            f"""SELECT count(distinct cid)
+            FROM revlog
+            WHERE ease > 0
+            AND (type < 3 OR factor != 0)
+            AND id >= {mw.col.sched.day_cutoff * 1000}"""
+        )
 
     def set_fuzz_factor(self, cid: int, reps: int):
         random.seed(rotate_number_by_k(cid, 8) + reps)
@@ -86,18 +86,23 @@ class FSRS:
             else:
                 return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
         else:
+            # Load balance
+            due = self.card.odue if self.card.odid else self.card.due
+            if due - self.card.ivl + max_ivl < mw.col.sched.today:
+                # If the latest possible due date is in the past, don't load balance
+                return ivl
+
             if self.apply_easy_days:
                 last_review = get_last_review_date(self.card)
-                due = self.card.odue if self.card.odid else self.card.due
                 if due > last_review + max_ivl + 2:
                     current_ivl = due - last_review
                     min_ivl, max_ivl = get_fuzz_range(
                         current_ivl, self.elapsed_days, current_ivl
                     )
-            min_num_cards = math.inf
+
+            min_workload = math.inf
             best_ivl = (max_ivl + min_ivl) // 2 if self.allow_to_past else max_ivl
             step = (max_ivl - min_ivl) // 100 + 1
-            due = self.card.due if self.card.odid == 0 else self.card.odue
 
             if self.easy_days_review_ratio == 0:
                 obey_easy_days = True
@@ -107,8 +112,9 @@ class FSRS:
                 obey_specific_due_dates = (
                     random.random() < self.p_obey_specific_due_dates
                 )
+
             for check_ivl in reversed(range(min_ivl, max_ivl + step, step)):
-                check_due = due + check_ivl - self.card.ivl
+                check_due = due - self.card.ivl + check_ivl
                 if (
                     obey_specific_due_dates
                     and check_due in self.easy_specific_due_dates
@@ -123,18 +129,15 @@ class FSRS:
                 if obey_easy_days and due_date.weekday() in self.easy_days:
                     continue
 
-                due_cards = self.due_cnt_perday_from_first_day.get(
-                    max(check_due, mw.col.sched.today), 0
-                )
-                rated_cards = (
-                    self.learned_cnt_perday_from_today.get(0, 0)
-                    if day_offset <= 0
-                    else 0
-                )
-                num_cards = due_cards + rated_cards
-                if num_cards < min_num_cards:
+                if check_due > mw.col.sched.today:
+                    # If the due date is in the future, the workload is the number of cards due on that day
+                    workload = self.due_cnt_perday_from_first_day[check_due]
+                else:
+                    # If the due date is in the past or today, the workload is the number of cards due today plus the number of cards learned today
+                    workload = self.backlog + self.learned_cnt_today
+                if workload < min_workload:
                     best_ivl = check_ivl
-                    min_num_cards = num_cards
+                    min_workload = workload
             return best_ivl
 
     def next_interval(self, stability):
@@ -339,14 +342,16 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         fsrs.set_card(card)
         fsrs.set_fuzz_factor(cid, card.reps)
         new_ivl = fsrs.next_interval(s)
-        due_before = max(card.odue if card.odid else card.due, mw.col.sched.today)
+        due_before = card.odue if card.odid else card.due
         card = update_card_due_ivl(card, new_ivl)
-        due_after = max(card.odue if card.odid else card.due, mw.col.sched.today)
+        due_after = card.odue if card.odid else card.due
         if fsrs.enable_load_balance:
             fsrs.due_cnt_perday_from_first_day[due_before] -= 1
-            fsrs.due_cnt_perday_from_first_day[due_after] = (
-                fsrs.due_cnt_perday_from_first_day.get(due_after, 0) + 1
-            )
+            fsrs.due_cnt_perday_from_first_day[due_after] += 1
+            if due_before <= mw.col.sched.today and due_after > mw.col.sched.today:
+                fsrs.backlog -= 1
+            if due_before > mw.col.sched.today and due_after <= mw.col.sched.today:
+                fsrs.backlog += 1
     return card
 
 
