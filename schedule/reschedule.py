@@ -89,7 +89,7 @@ class FSRS:
             # Load balance
             due = self.card.odue if self.card.odid else self.card.due
             if due - self.card.ivl + max_ivl <= mw.col.sched.today:
-                # If the latest possible due date is in the past, don't load balance
+                # If the latest possible due date is in the past, skip load balance
                 return ivl
 
             if self.apply_easy_days:
@@ -127,6 +127,7 @@ class FSRS:
 
                 due_date = sched_current_date() + timedelta(days=day_offset)
                 if obey_easy_days and due_date.weekday() in self.easy_days:
+                    # If the due date is on an easy day, skip
                     continue
 
                 if check_due > mw.col.sched.today:
@@ -226,7 +227,7 @@ def reschedule_background(
             if specific_due not in fsrs.easy_specific_due_dates:
                 fsrs.easy_specific_due_dates.append(specific_due)
 
-        fsrs.p_obey_specific_due_dates = obey_specific_due_dates(
+        fsrs.p_obey_specific_due_dates = p_obey_specific_due_dates(
             len(fsrs.easy_specific_due_dates), fsrs.easy_days_review_ratio
         )
         if len(easy_specific_due_dates) > 0:
