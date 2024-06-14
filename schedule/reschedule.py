@@ -20,9 +20,9 @@ class FSRS:
     p_obey_easy_days: float
     easy_specific_due_dates: List[int]
     p_obey_specific_due_dates: float
-    due_cnt_perday_from_first_day: Dict[int, int]
-    backlog: int
-    learned_cnt_today: int
+    due_cnt_per_day: Dict[int, int]
+    due_today: int
+    reviewed_today: int
     card: Card
     elapsed_days: int
     allow_to_past: bool
@@ -44,7 +44,7 @@ class FSRS:
     def set_load_balance(self, did_query=None):
         self.enable_load_balance = True
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
-        self.due_cnt_perday_from_first_day = defaultdict(
+        self.due_cnt_per_day = defaultdict(
             int,
             {
                 day: cnt
@@ -58,12 +58,12 @@ class FSRS:
                 )
             },
         )
-        self.backlog = sum(
+        self.due_today = sum(
             due_cnt
-            for due, due_cnt in self.due_cnt_perday_from_first_day.items()
+            for due, due_cnt in self.due_cnt_per_day.items()
             if due <= mw.col.sched.today
         )
-        self.learned_cnt_today = mw.col.db.scalar(
+        self.reviewed_today = mw.col.db.scalar(
             f"""SELECT count(distinct cid)
             FROM revlog
             WHERE ease > 0
@@ -132,10 +132,10 @@ class FSRS:
 
                 if check_due > mw.col.sched.today:
                     # If the due date is in the future, the workload is the number of cards due on that day
-                    workload = self.due_cnt_perday_from_first_day[check_due]
+                    workload = self.due_cnt_per_day[check_due]
                 else:
                     # If the due date is in the past or today, the workload is the number of cards due today plus the number of cards learned today
-                    workload = self.backlog + self.learned_cnt_today
+                    workload = self.due_today + self.reviewed_today
                 if workload < min_workload:
                     best_ivl = check_ivl
                     min_workload = workload
@@ -347,12 +347,12 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         card = update_card_due_ivl(card, new_ivl)
         due_after = card.odue if card.odid else card.due
         if fsrs.enable_load_balance:
-            fsrs.due_cnt_perday_from_first_day[due_before] -= 1
-            fsrs.due_cnt_perday_from_first_day[due_after] += 1
+            fsrs.due_cnt_per_day[due_before] -= 1
+            fsrs.due_cnt_per_day[due_after] += 1
             if due_before <= mw.col.sched.today and due_after > mw.col.sched.today:
-                fsrs.backlog -= 1
+                fsrs.due_today -= 1
             if due_before > mw.col.sched.today and due_after <= mw.col.sched.today:
-                fsrs.backlog += 1
+                fsrs.due_today += 1
     return card
 
 
