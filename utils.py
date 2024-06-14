@@ -192,14 +192,36 @@ def rotate_number_by_k(N, K):
 
 
 def p_obey_easy_days(num_of_easy_days, easy_days_review_ratio):
+    """
+    Calculate the probability of obeying easy days to ensure the review ratio.
+    Parameters:
+    - num_of_easy_days: the number of easy days
+    - easy_days_review_ratio: the ratio of reviews on easy days
+    Math:
+    - A week has 7 days, n easy days, 7 - n non-easy days
+    - Assume we have y reviews per non-easy day, the number of reviews per easy day is a * y
+    - The total number of reviews in a week is y * (7 - n) + a * y * n
+    - The probability of a review on an easy day is the number of reviews on easy days divided by the total number of reviews
+    - (a * y * n) / (y * (7 - n) + a * y * n) = (a * n) / (a * n + 7 - n)
+    - The probability of skipping a review on an easy day is 1 - (a * n) / (a * n + 7 - n) = (7 - n) / (a * n + 7 - n)
+    """
     return (7 - num_of_easy_days) / (
         easy_days_review_ratio * num_of_easy_days + 7 - num_of_easy_days
     )
 
 
-def obey_specific_due_dates(num_of_specific_due_dates, easy_days_review_ratio):
-    return (8 + num_of_specific_due_dates) / (
-        easy_days_review_ratio * num_of_specific_due_dates
-        + 8
-        + num_of_specific_due_dates
-    )
+def p_obey_specific_due_dates(num_of_specific_due_dates, easy_days_review_ratio):
+    """
+    Calculate the probability of obeying specific due dates to ensure the review ratio.
+    Parameters:
+    - num_of_specific_due_dates: the number of specific due dates
+    - easy_days_review_ratio: the ratio of reviews on easy days
+    Math:
+    - When we have n specific due dates, the number of days to reschedule is 8 + n
+    - Assume we have y reviews per non-easy day, the number of reviews per easy day is a * y
+    - The total number of reviews in the days to reschedule is y * 8 + a * y * n
+    - The probability of a review on a specific due date is the number of reviews on specific due dates divided by the total number of reviews
+    - (a * y * n) / (y * 8 + a * y * n) = (a * n) / (a * n + 8)
+    - The probability of skipping a review on a specific due date is 1 - (a * n) / (a * n + 8) = 8 / (a * n + 8)
+    """
+    return 8 / (easy_days_review_ratio * num_of_specific_due_dates + 8)
