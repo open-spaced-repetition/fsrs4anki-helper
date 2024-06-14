@@ -68,7 +68,7 @@ class FSRS:
             FROM revlog
             WHERE ease > 0
             AND (type < 3 OR factor != 0)
-            AND id >= {mw.col.sched.day_cutoff * 1000}"""
+            AND id/1000 >= {mw.col.sched.day_cutoff - 86400}"""
         )
 
     def set_fuzz_factor(self, cid: int, reps: int):
