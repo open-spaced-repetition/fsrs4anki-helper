@@ -88,7 +88,7 @@ class FSRS:
         else:
             # Load balance
             due = self.card.odue if self.card.odid else self.card.due
-            if due - self.card.ivl + max_ivl < mw.col.sched.today:
+            if due - self.card.ivl + max_ivl <= mw.col.sched.today:
                 # If the latest possible due date is in the past, don't load balance
                 return ivl
 
