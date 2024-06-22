@@ -162,6 +162,21 @@ def rate_on_ankiweb(did=None):
 
 menu_rate = build_action(rate_on_ankiweb, "Rate Add-on on AnkiWeb")
 
+
+def visualize_schedule(did=None):
+    openLink("https://open-spaced-repetition.github.io/anki_fsrs_visualizer/")
+
+
+menu_visualize = build_action(visualize_schedule, "Visualize Your FSRS Schedule")
+
+
+def sponsor(did=None):
+    openLink("https://github.com/sponsors/L-M-Sherlock")
+    config.has_sponsored = True
+
+
+menu_sponsor = build_action(sponsor, "Sponsor the Author")
+
 menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
 menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
@@ -181,8 +196,11 @@ menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_contact)
+menu_for_helper.addAction(menu_visualize)
 if not config.has_rated:
     menu_for_helper.addAction(menu_rate)
+if not config.has_sponsored:
+    menu_for_helper.addAction(menu_sponsor)
 
 
 menu_apply_easy_days = build_action(easy_days, "Apply easy days now")

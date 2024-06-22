@@ -17,6 +17,7 @@ FSRS_STATS = "fsrs_stats"
 DISPLAY_MEMORY_STATE = "display_memory_state"
 AUTO_EASY_DAYS = "auto_easy_days"
 HAS_RATED = "has_rated"
+HAS_SPONSORED = "has_sponsored"
 
 
 def load_config():
@@ -176,4 +177,13 @@ class Config:
     @has_rated.setter
     def has_rated(self, value):
         self.data[HAS_RATED] = value
+        self.save()
+
+    @property
+    def has_sponsored(self):
+        return self.data[HAS_SPONSORED]
+
+    @has_sponsored.setter
+    def has_sponsored(self, value):
+        self.data[HAS_SPONSORED] = value
         self.save()
