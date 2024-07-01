@@ -177,7 +177,7 @@ def sponsor(did=None):
 
 menu_sponsor = build_action(sponsor, "Sponsor the Author")
 
-menu_for_helper = mw.form.menuTools.addMenu("FSRS4Anki Helper")
+menu_for_helper = mw.form.menuTools.addMenu("FSRS Helper")
 menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
 menu_for_helper.addAction(menu_auto_disperse)

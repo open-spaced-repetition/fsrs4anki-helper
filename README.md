@@ -1,8 +1,8 @@
-# FSRS4Anki Helper
+# FSRS Helper
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) scheduler. It has six main features:
+FSRS Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) scheduler. It has six main features:
 
 - **Reschedule** cards based on their entire review histories.
 - **Postpone** a selected number of due cards.
@@ -22,7 +22,7 @@ FSRS4Anki Helper is an Anki add-on that supports [FSRS4Anki](https://github.com/
 
 # Installation
 
-The FSRS4Anki Helper add-on is purely an added bonus and is not recommended for extensive use.
+The FSRS Helper add-on is purely an added bonus and is not recommended for extensive use.
 
 Installation link: https://ankiweb.net/shared/info/759844606
 
@@ -142,4 +142,4 @@ Interpretation:
 
 # Mechanism
 
-Please see this wiki page: [FSRS4Anki Helper WIKI](https://github.com/open-spaced-repetition/fsrs4anki-helper/wiki)
+Please see this wiki page: [FSRS Helper WIKI](https://github.com/open-spaced-repetition/fsrs4anki-helper/wiki)

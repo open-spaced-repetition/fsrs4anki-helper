@@ -4,7 +4,7 @@
 
 This sets the number of days in "Reschedule cards reviewed in the last n days"; the current day included(!). Works like [searching for "rated:" in the browser](https://docs.ankiweb.net/searching.html?highlight=rated#answered).
 
-## Configure via menu bar: Tools > FSRS4Anki Helper
+## Configure via menu bar: Tools > FSRS Helper
 
 ### `easy_days`
 
