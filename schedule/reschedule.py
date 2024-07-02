@@ -230,7 +230,7 @@ def reschedule_background(
         fsrs.p_obey_specific_due_dates = p_obey_specific_due_dates(
             len(fsrs.easy_specific_due_dates), fsrs.easy_days_review_ratio
         )
-        if len(easy_specific_due_dates) > 0:
+        if len(easy_specific_due_dates) > 0 or current_date.weekday() in fsrs.easy_days:
             fsrs.allow_to_past = False
         fsrs.apply_easy_days = apply_easy_days
 
