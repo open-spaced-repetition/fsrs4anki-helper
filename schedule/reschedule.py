@@ -25,7 +25,6 @@ class FSRS:
     reviewed_today: int
     card: Card
     elapsed_days: int
-    allow_to_past: bool
     apply_easy_days: bool
 
     def __init__(self) -> None:
@@ -38,7 +37,6 @@ class FSRS:
         self.easy_specific_due_dates = []
         self.p_obey_specific_due_dates = 1
         self.elapsed_days = 0
-        self.allow_to_past = True
         self.apply_easy_days = False
 
     def set_load_balance(self, did_query=None):
@@ -88,20 +86,23 @@ class FSRS:
         else:
             # Load balance
             due = self.card.odue if self.card.odid else self.card.due
+            last_review = get_last_review_date(self.card)
             if due - self.card.ivl + max_ivl <= mw.col.sched.today:
                 # If the latest possible due date is in the past, skip load balance
                 return ivl
 
             if self.apply_easy_days:
-                last_review = get_last_review_date(self.card)
                 if due > last_review + max_ivl + 2:
                     current_ivl = due - last_review
                     min_ivl, max_ivl = get_fuzz_range(
                         current_ivl, self.elapsed_days, current_ivl
                     )
 
+            # Don't schedule the card in the past
+            min_ivl = max(min_ivl, mw.col.sched.today - last_review)
+
             min_workload = math.inf
-            best_ivl = (max_ivl + min_ivl) // 2 if self.allow_to_past else max_ivl
+            best_ivl = max_ivl
             step = (max_ivl - min_ivl) // 100 + 1
 
             if self.easy_days_review_ratio == 0:
@@ -114,16 +115,12 @@ class FSRS:
                 )
 
             for check_ivl in reversed(range(min_ivl, max_ivl + step, step)):
-                check_due = due - self.card.ivl + check_ivl
+                check_due = last_review + check_ivl
                 if (
                     obey_specific_due_dates
                     and check_due in self.easy_specific_due_dates
                 ):
                     continue
-
-                day_offset = check_due - mw.col.sched.today
-                if not self.allow_to_past and day_offset < 0:
-                    break
 
                 due_date = sched_current_date() + timedelta(days=day_offset)
                 if obey_easy_days and due_date.weekday() in self.easy_days:
@@ -134,7 +131,7 @@ class FSRS:
                     # If the due date is in the future, the workload is the number of cards due on that day
                     workload = self.due_cnt_per_day[check_due]
                 else:
-                    # If the due date is in the past or today, the workload is the number of cards due today plus the number of cards learned today
+                    # If the due date is today, the workload is the number of cards due today plus the number of cards learned today
                     workload = self.due_today + self.reviewed_today
                 if workload < min_workload:
                     best_ivl = check_ivl
@@ -230,8 +227,6 @@ def reschedule_background(
         fsrs.p_obey_specific_due_dates = p_obey_specific_due_dates(
             len(fsrs.easy_specific_due_dates), fsrs.easy_days_review_ratio
         )
-        if len(easy_specific_due_dates) > 0 or current_date.weekday() in fsrs.easy_days:
-            fsrs.allow_to_past = False
         fsrs.apply_easy_days = apply_easy_days
 
     if recent:
