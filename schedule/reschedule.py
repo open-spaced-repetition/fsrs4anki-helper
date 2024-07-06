@@ -122,6 +122,7 @@ class FSRS:
                 ):
                     continue
 
+                day_offset = check_due - mw.col.sched.today
                 due_date = sched_current_date() + timedelta(days=day_offset)
                 if obey_easy_days and due_date.weekday() in self.easy_days:
                     # If the due date is on an easy day, skip
