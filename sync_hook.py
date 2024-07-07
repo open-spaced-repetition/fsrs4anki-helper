@@ -23,7 +23,7 @@ def review_cid_remote(local_rids: List[int]):
             f"""SELECT DISTINCT cid
             FROM revlog
             WHERE id NOT IN {local_rid_string}
-            {"" if config.auto_disperse_after_reschedule else "AND ease > 0"}
+            AND ease > 0
             AND (type < 3 OR factor != 0)
             """
         )  # type: 0=learn, 1=review, 2=relearn, 3=filtered, 4=manual
