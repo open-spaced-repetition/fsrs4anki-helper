@@ -87,16 +87,17 @@ class FSRS:
             # Load balance
             due = self.card.odue if self.card.odid else self.card.due
             last_review = get_last_review_date(self.card)
-            if last_review + max_ivl < mw.col.sched.today:
-                # If the latest possible due date is in the past, skip load balance
-                return ivl
-
+            
             if self.apply_easy_days:
                 if due > last_review + max_ivl + 2:
                     current_ivl = due - last_review
                     min_ivl, max_ivl = get_fuzz_range(
                         current_ivl, self.elapsed_days, current_ivl
                     )
+            
+            if last_review + max_ivl < mw.col.sched.today:
+                # If the latest possible due date is in the past, skip load balance
+                return ivl
 
             # Don't schedule the card in the past
             min_ivl = max(min_ivl, mw.col.sched.today - last_review)
