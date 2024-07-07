@@ -87,7 +87,7 @@ class FSRS:
             # Load balance
             due = self.card.odue if self.card.odid else self.card.due
             last_review = get_last_review_date(self.card)
-            if last_review + max_ivl <= mw.col.sched.today:
+            if last_review + max_ivl < mw.col.sched.today:
                 # If the latest possible due date is in the past, skip load balance
                 return ivl
 
@@ -103,7 +103,7 @@ class FSRS:
 
             min_workload = math.inf
             best_ivl = max_ivl
-            step = (max_ivl - min_ivl) // 100 + 1
+            step = 1 + (max_ivl - min_ivl) // 100
 
             if self.easy_days_review_ratio == 0:
                 obey_easy_days = True
