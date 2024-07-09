@@ -97,7 +97,7 @@ class FSRS:
 
             if last_review + max_ivl < mw.col.sched.today:
                 # If the latest possible due date is in the past, skip load balance
-                return ivl
+                return min(ivl, max_ivl)
 
             # Don't schedule the card in the past
             min_ivl = max(min_ivl, mw.col.sched.today - last_review)
