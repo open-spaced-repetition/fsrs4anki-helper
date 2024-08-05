@@ -1,4 +1,5 @@
 from collections import defaultdict
+from ..configuration import Config
 from ..utils import *
 from anki.decks import DeckManager
 from anki.utils import ids2str
@@ -46,11 +47,19 @@ def flatten(did):
 
 
 def flatten_background(did, desired_flatten_limit):
+    config = Config()
+    config.load()
+
+    easy_days = []
+    if config.load_balance:
+        easy_days = config.easy_days
+
     DM = DeckManager(mw.col)
     if did is not None:
         did_list = ids2str(DM.deck_and_child_ids(did))
 
     today = mw.col.sched.today
+    current_date = sched_current_date()
     true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
 
     cards_exceed_future = mw.col.db.all(
@@ -143,6 +152,9 @@ def flatten_background(did, desired_flatten_limit):
         rest_cnt = len(cards_to_flatten) - cnt
         if rest_cnt <= 0:
             break
+        due_date = current_date + timedelta(days=new_due - today)
+        if config.load_balance and due_date.weekday() in easy_days:
+            continue
         due_cnt = due_cnt_per_day[new_due]
         if due_cnt > desired_flatten_limit:
             continue
