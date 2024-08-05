@@ -6,7 +6,9 @@ from anki.utils import ids2str
 
 def get_desired_flatten_limit_with_response(did):
     inquire_text = "Enter the maximum number of reviews you want in the future.\n"
-    info_text = "This feature only affects the cards that have been scheduled by FSRS.\n"
+    info_text = (
+        "This feature only affects the cards that have been scheduled by FSRS.\n"
+    )
     warning_text = "This feature doesn't respect maximum interval settings.\n"
     (s, r) = getText(inquire_text + info_text + warning_text, default="100")
     if r:
@@ -56,17 +58,19 @@ def flatten_background(did, desired_flatten_limit):
     WITH ranked_cards AS (
         SELECT id,
             true_due,
-            ivl,
+            stability,
             ROW_NUMBER() OVER (
                 PARTITION BY true_due
-                ORDER BY ivl / cast({ today } - true_due + 0.001 as real)
+                ORDER BY stability
             ) AS rank
         FROM (
                 SELECT id,
                     {true_due} AS true_due,
-                    ivl
+                    json_extract(data, '$.s') AS stability
                 FROM cards
                 WHERE true_due >= { today }
+                AND data != ''
+                AND json_extract(data, '$.s') IS NOT NULL
                 AND queue = {QUEUE_TYPE_REV}
                 {"AND did IN %s" % did_list if did is not None else ""}
             )
@@ -76,36 +80,41 @@ def flatten_background(did, desired_flatten_limit):
         FROM cards
         WHERE true_due >= { today }
         AND queue = {QUEUE_TYPE_REV}
+        AND data != ''
+        AND json_extract(data, '$.s') IS NOT NULL
         {"AND did IN %s" % did_list if did is not None else ""}
         GROUP BY true_due
         HAVING COUNT(*) > { desired_flatten_limit }
     )
     SELECT id
         , true_due
-        , ivl
+        , stability
     FROM ranked_cards
     WHERE true_due IN (
             SELECT true_due
             FROM overdue
         )
-        AND rank > { desired_flatten_limit }
-    ORDER BY ivl / cast({ today } - true_due + 0.001 as real)
+    AND rank > { desired_flatten_limit }
+    ORDER BY true_due
         """
     )
+
     cards_backlog = mw.col.db.all(
         f"""
     SELECT id,
         {true_due} AS true_due,
-        ivl
+        json_extract(data, '$.s') AS stability
     FROM cards
     WHERE true_due < { today }
+    AND data != '' 
+    AND json_extract(data, '$.s') IS NOT NULL
     AND queue = {QUEUE_TYPE_REV}
     {"AND did IN %s" % did_list if did is not None else ""}
-    ORDER BY ivl / cast({ today } - true_due + 0.001 as real)
+    ORDER BY stability
     """
     )
 
-    cards_to_flatten = cards_exceed_future + cards_backlog
+    cards_to_flatten = cards_backlog + cards_exceed_future
 
     due_cnt_per_day = defaultdict(
         int,
