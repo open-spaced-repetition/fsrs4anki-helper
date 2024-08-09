@@ -9,6 +9,7 @@ from .sync_hook import init_sync_hook
 from .schedule.reschedule import reschedule
 from .schedule.postpone import postpone
 from .schedule.advance import advance
+from .schedule.flatten import flatten
 from .schedule.reset import clear_custom_data
 from .schedule.disperse_siblings import disperse_siblings
 from .schedule.easy_days import (
@@ -143,6 +144,9 @@ add_action_to_gear(postpone, "Postpone cards")
 menu_advance = build_action(advance, "Advance cards in all decks")
 add_action_to_gear(advance, "Advance cards")
 
+menu_flatten = build_action(flatten, "Flatten cards in all decks")
+add_action_to_gear(flatten, "Flatten cards")
+
 menu_reset = build_action(clear_custom_data, "Clear custom data in all cards")
 
 menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings")
@@ -192,6 +196,7 @@ menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_reschedule_recent)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
+menu_for_helper.addAction(menu_flatten)
 menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
 menu_for_helper.addSeparator()
