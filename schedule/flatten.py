@@ -64,7 +64,8 @@ def flatten_background(did, desired_flatten_limit):
 
     cards_exceed_future = mw.col.db.all(
         f"""
-    WITH ranked_cards AS (
+    SELECT rc.id, rc.true_due, rc.stability
+    FROM (
         SELECT id,
             true_due,
             stability,
@@ -73,38 +74,30 @@ def flatten_background(did, desired_flatten_limit):
                 ORDER BY stability
             ) AS rank
         FROM (
-                SELECT id,
-                    {true_due} AS true_due,
-                    json_extract(data, '$.s') AS stability
-                FROM cards
-                WHERE true_due >= { today }
-                AND data != ''
-                AND json_extract(data, '$.s') IS NOT NULL
-                AND queue = {QUEUE_TYPE_REV}
-                {"AND did IN %s" % did_list if did is not None else ""}
-            )
-    ),
-    overdue AS (
+            SELECT id,
+                {true_due} AS true_due,
+                json_extract(data, '$.s') AS stability
+            FROM cards
+            WHERE true_due >= {today}
+            AND data != ''
+            AND json_extract(data, '$.s') IS NOT NULL
+            AND queue = {QUEUE_TYPE_REV}
+            {"AND did IN %s" % did_list if did is not None else ""}
+        ) AS subquery
+    ) AS rc
+    JOIN (
         SELECT {true_due} AS true_due
         FROM cards
-        WHERE true_due >= { today }
+        WHERE true_due >= {today}
         AND queue = {QUEUE_TYPE_REV}
         AND data != ''
         AND json_extract(data, '$.s') IS NOT NULL
         {"AND did IN %s" % did_list if did is not None else ""}
         GROUP BY true_due
-        HAVING COUNT(*) > { desired_flatten_limit }
-    )
-    SELECT id
-        , true_due
-        , stability
-    FROM ranked_cards
-    WHERE true_due IN (
-            SELECT true_due
-            FROM overdue
-        )
-    AND rank > { desired_flatten_limit }
-    ORDER BY true_due
+        HAVING COUNT(*) > {desired_flatten_limit}
+    ) AS overdue ON rc.true_due = overdue.true_due
+    WHERE rc.rank > {desired_flatten_limit}
+    ORDER BY rc.true_due
         """
     )
 
@@ -124,6 +117,7 @@ def flatten_background(did, desired_flatten_limit):
     )
 
     cards_to_flatten = cards_backlog + cards_exceed_future
+    total_cnt = len(cards_to_flatten)
 
     due_cnt_per_day = defaultdict(
         int,
@@ -141,10 +135,12 @@ def flatten_background(did, desired_flatten_limit):
     )
 
     undo_entry = mw.col.add_custom_undo_entry("flatten")
-    mw.progress.start()
+    mw.taskman.run_on_main(
+        lambda: mw.progress.start(label="Flattening", max=total_cnt, immediate=True)
+    )
     cnt = 0
     cancelled = False
-    total_cnt = len(cards_to_flatten)
+    flattened_cards = []
 
     for new_due in range(today, today + 36500):
         if cancelled:
@@ -167,8 +163,7 @@ def flatten_background(did, desired_flatten_limit):
             new_ivl = new_due - last_review
             card = update_card_due_ivl(card, new_ivl)
             write_custom_data(card, "v", "flatten")
-            mw.col.update_card(card)
-            mw.col.merge_undo_entries(undo_entry)
+            flattened_cards.append(card)
             cnt += 1
             if cnt % 500 == 0:
                 mw.taskman.run_on_main(
@@ -181,5 +176,7 @@ def flatten_background(did, desired_flatten_limit):
                 if mw.progress.want_cancel():
                     cancelled = True
 
+    mw.col.update_cards(flattened_cards)
+    mw.col.merge_undo_entries(undo_entry)
     finish_text = f"{cnt} cards flattened"
     return finish_text

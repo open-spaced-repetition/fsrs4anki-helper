@@ -286,6 +286,7 @@ def reschedule_background(
     )
     cnt = 0
     cancelled = False
+    rescheduled_cards = []
     for cid, _, _, desired_retention, maximum_interval in cards:
         if cancelled:
             break
@@ -294,8 +295,7 @@ def reschedule_background(
         card = reschedule_card(cid, fsrs, filter_flag)
         if card is None:
             continue
-        mw.col.update_card(card)
-        mw.col.merge_undo_entries(undo_entry)
+        rescheduled_cards.append(card)
         cnt += 1
         if cnt % 500 == 0:
             mw.taskman.run_on_main(
@@ -308,6 +308,8 @@ def reschedule_background(
             if mw.progress.want_cancel():
                 cancelled = True
 
+    mw.col.update_cards(rescheduled_cards)
+    mw.col.merge_undo_entries(undo_entry)
     finish_text = f"{cnt} cards rescheduled"
 
     if config.auto_disperse_after_reschedule:
