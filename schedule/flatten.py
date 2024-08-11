@@ -10,7 +10,7 @@ def get_desired_flatten_limit_with_response(did):
     info_text = (
         "This feature only affects the cards that have been scheduled by FSRS.\n"
     )
-    warning_text = "This feature doesn't respect maximum interval settings.\n"
+    warning_text = "This feature doesn't respect maximum interval settings, and may reduce your true retention significantly.\n"
     (s, r) = getText(inquire_text + info_text + warning_text, default="100")
     if r:
         return (RepresentsInt(s), r)
