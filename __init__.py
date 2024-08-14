@@ -116,7 +116,7 @@ def set_skip_manual_resched_cards(checked, _):
             + "- Set due date\n"
             + "- Reset (earlier called Forget)\n"
             + "- 'Reschedule cards on change' in FSRS section of Deck Options\n\n"
-            + 'When you enable this option, all cards whose the latest review log\'s type is marked as "Manual" will be skipped during rescheduling.'
+            + 'When you enable this option, cards that were last modified by any of the above will be skipped during rescheduling.'
         )
         checked = askUser(
             warning,
