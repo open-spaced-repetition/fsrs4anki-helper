@@ -112,7 +112,7 @@ def set_skip_manual_resched_cards(checked, _):
         config.skip_manual_resched_cards = checked
     else:
         warning = (
-            "Due to technical limitations, FSRS Helper cannot distinguish among cards rescheduled by following operations:\n"
+            "Due to the nature of Anki's database, FSRS Helper cannot distinguish among cards rescheduled by following operations:\n"
             + "- Set due date\n"
             + "- Reset (original Forget)\n"
             + "- Reschedule cards on change\n\n"
