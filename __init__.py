@@ -114,7 +114,7 @@ def set_skip_manual_resched_cards(checked, _):
         warning = (
             "Due to the nature of Anki's database, FSRS Helper cannot distinguish among cards rescheduled by following operations:\n"
             + "- Set due date\n"
-            + "- Reset (original Forget)\n"
+            + "- Reset (earlier called Forget)\n"
             + "- Reschedule cards on change\n\n"
             + 'When you enable this option, all cards whose the latest review log\'s type is marked as "Manual" will be skipped during rescheduling.'
         )
