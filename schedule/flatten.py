@@ -35,9 +35,10 @@ def flatten(did):
     start_time = time.time()
 
     def on_done(future):
-        finish_text = future.result()
+        cnt, mean_prev_target_r, mean_new_target_r = future.result()
         mw.progress.finish()
-        tooltip(f"{finish_text} in {time.time() - start_time:.2f} seconds")
+        tooltip(f"""{cnt} cards flattened in {time.time() - start_time:.2f} seconds.<br>
+        mean target retention of flattened cards: {mean_prev_target_r:.2%} -> {mean_new_target_r:.2%}""")
         mw.reset()
 
     fut = mw.taskman.run_in_background(
@@ -134,14 +135,15 @@ def flatten_background(did, desired_flatten_limit):
         },
     )
 
-    undo_entry = mw.col.add_custom_undo_entry("flatten")
     mw.taskman.run_on_main(
         lambda: mw.progress.start(label="Flattening", max=total_cnt, immediate=True)
     )
     cnt = 0
     cancelled = False
+    new_target_rs = []
+    prev_target_rs = []
     flattened_cards = []
-
+    undo_entry = mw.col.add_custom_undo_entry("flatten")
     for new_due in range(today, today + 36500):
         if cancelled:
             break
@@ -157,13 +159,16 @@ def flatten_background(did, desired_flatten_limit):
         quota = desired_flatten_limit - due_cnt
         start_index = cnt
         end_index = cnt + min(quota, rest_cnt)
-        for cid, due, ivl in cards_to_flatten[start_index:end_index]:
+        for cid, _, ivl in cards_to_flatten[start_index:end_index]:
             card = mw.col.get_card(cid)
             last_review = get_last_review_date(card)
             new_ivl = new_due - last_review
             card = update_card_due_ivl(card, new_ivl)
             write_custom_data(card, "v", "flatten")
             flattened_cards.append(card)
+            stability = card.memory_state.stability
+            prev_target_rs.append(power_forgetting_curve(ivl, stability))
+            new_target_rs.append(power_forgetting_curve(new_ivl, stability))
             cnt += 1
             if cnt % 500 == 0:
                 mw.taskman.run_on_main(
@@ -178,5 +183,6 @@ def flatten_background(did, desired_flatten_limit):
 
     mw.col.update_cards(flattened_cards)
     mw.col.merge_undo_entries(undo_entry)
-    finish_text = f"{cnt} cards flattened"
-    return finish_text
+    mean_prev_target_r = sum(prev_target_rs) / len(prev_target_rs)
+    mean_new_target_r = sum(new_target_rs) / len(new_target_rs)
+    return cnt, mean_prev_target_r, mean_new_target_r

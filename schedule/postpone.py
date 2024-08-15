@@ -85,7 +85,8 @@ def postpone(did):
             return
 
     cnt = 0
-    min_retention = 1
+    new_target_rs = []
+    prev_target_rs = []
     postponed_cards = []
     start_time = time.time()
     undo_entry = mw.col.add_custom_undo_entry("Postpone")
@@ -104,14 +105,16 @@ def postpone(did):
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "postpone")
         postponed_cards.append(card)
+        prev_target_rs.append(power_forgetting_curve(ivl, stability))
+        new_target_rs.append(power_forgetting_curve(new_ivl, stability))
         cnt += 1
-
-        new_retention = power_forgetting_curve(new_ivl, stability)
-        min_retention = min(min_retention, new_retention)
 
     mw.col.update_cards(postponed_cards)
     mw.col.merge_undo_entries(undo_entry)
+    mean_prev_target_r = sum(prev_target_rs) / len(prev_target_rs)
+    mean_new_target_r = sum(new_target_rs) / len(new_target_rs)
     tooltip(
-        f"""{cnt} cards postponed in {time.time() - start_time:.2f} seconds. min retention: {min_retention:.2%}"""
+        f"""{cnt} cards postponed in {time.time() - start_time:.2f} seconds.<br>
+        mean target retention of postponed cards: {mean_prev_target_r:.2%} -> {mean_new_target_r:.2%}"""
     )
     mw.reset()

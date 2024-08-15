@@ -84,11 +84,12 @@ def advance(did):
             return
 
     cnt = 0
-    max_retention = 0
+    new_target_rs = []
+    prev_target_rs = []
     advanced_cards = []
     start_time = time.time()
     undo_entry = mw.col.add_custom_undo_entry("Advance")
-    for cid, did, _, stability, _, _, _ in cards:
+    for cid, did, ivl, stability, _, _, _ in cards:
         if cnt >= desired_advance_cnt:
             break
 
@@ -98,14 +99,16 @@ def advance(did):
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "advance")
         advanced_cards.append(card)
+        prev_target_rs.append(power_forgetting_curve(ivl, stability))
+        new_target_rs.append(power_forgetting_curve(new_ivl, stability))
         cnt += 1
-
-        new_retention = power_forgetting_curve(new_ivl, stability)
-        max_retention = max(max_retention, new_retention)
 
     mw.col.update_cards(advanced_cards)
     mw.col.merge_undo_entries(undo_entry)
+    mean_prev_target_r = sum(prev_target_rs) / len(prev_target_rs)
+    mean_new_target_r = sum(new_target_rs) / len(new_target_rs)
     tooltip(
-        f"""{cnt} cards advanced in {time.time() - start_time:.2f} seconds. max retention: {max_retention:.2%}"""
+        f"""{cnt} cards advanced in {time.time() - start_time:.2f} seconds.<br>
+        mean target retention of advanced cards: {mean_prev_target_r:.2%} -> {mean_new_target_r:.2%}"""
     )
     mw.reset()
