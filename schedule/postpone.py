@@ -84,13 +84,11 @@ def postpone(did):
             showWarning("Please enter a positive integer.")
             return
 
-    undo_entry = mw.col.add_custom_undo_entry("Postpone")
-
-    mw.progress.start()
-    start_time = time.time()
-
     cnt = 0
     min_retention = 1
+    postponed_cards = []
+    start_time = time.time()
+    undo_entry = mw.col.add_custom_undo_entry("Postpone")
     for cid, did, ivl, stability, elapsed_days, _, _, max_ivl in cards:
         if cnt >= desired_postpone_cnt:
             break
@@ -105,15 +103,15 @@ def postpone(did):
         )
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "postpone")
-        mw.col.update_card(card)
-        mw.col.merge_undo_entries(undo_entry)
+        postponed_cards.append(card)
         cnt += 1
 
         new_retention = power_forgetting_curve(new_ivl, stability)
         min_retention = min(min_retention, new_retention)
 
+    mw.col.update_cards(postponed_cards)
+    mw.col.merge_undo_entries(undo_entry)
     tooltip(
         f"""{cnt} cards postponed in {time.time() - start_time:.2f} seconds. min retention: {min_retention:.2%}"""
     )
-    mw.progress.finish()
     mw.reset()

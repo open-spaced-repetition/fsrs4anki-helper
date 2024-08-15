@@ -167,18 +167,19 @@ def disperse_siblings(
 def disperse_siblings_backgroud(
     did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""
 ):
-    card_cnt = 0
-    note_cnt = 0
     nid_siblings = get_siblings(did, filter_flag, filtered_nid_string)
     sibilings_cnt = len(nid_siblings)
 
-    undo_entry = mw.col.add_custom_undo_entry("Disperse Siblings")
     mw.taskman.run_on_main(
         lambda: mw.progress.start(
             label="Dispersing Siblings", max=sibilings_cnt, immediate=True
         )
     )
 
+    card_cnt = 0
+    note_cnt = 0
+    dispersed_cards = []
+    undo_entry = mw.col.add_custom_undo_entry("Disperse Siblings")
     for nid, siblings in nid_siblings.items():
         best_due_dates, _, _ = disperse(siblings)
         for cid, due in best_due_dates.items():
@@ -186,8 +187,7 @@ def disperse_siblings_backgroud(
             last_review = get_last_review_date(card)
             card = update_card_due_ivl(card, due - last_review)
             write_custom_data(card, "v", "disperse")
-            mw.col.update_card(card)
-            mw.col.merge_undo_entries(undo_entry)
+            dispersed_cards.append(card)
             card_cnt += 1
         note_cnt += 1
 
@@ -202,6 +202,8 @@ def disperse_siblings_backgroud(
             if mw.progress.want_cancel():
                 break
 
+    mw.col.update_cards(dispersed_cards)
+    mw.col.merge_undo_entries(undo_entry)
     return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed"
 
 
@@ -223,6 +225,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     messages = []
 
     card_cnt = 0
+    dispersed_cards = []
     undo_entry = mw.col.undo_status().last_step
     best_due_dates, due_ranges, min_gap = disperse(siblings)
 
@@ -233,11 +236,13 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
         last_review = get_last_review_date(card)
         card = update_card_due_ivl(card, due - last_review)
         write_custom_data(card, "v", "disperse")
-        mw.col.update_card(card)
-        mw.col.merge_undo_entries(undo_entry)
+        dispersed_cards.append(card)
         card_cnt += 1
         message = f"Dispersed card {card.id} from {due_to_date_str(old_due)} to {due_to_date_str(due)}"
         messages.append(message)
+
+    mw.col.update_cards(dispersed_cards)
+    mw.col.merge_undo_entries(undo_entry)
 
     if config.debug_notify:
         text = ""

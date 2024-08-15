@@ -83,13 +83,11 @@ def advance(did):
             showWarning("Please enter a positive integer.")
             return
 
-    undo_entry = mw.col.add_custom_undo_entry("Advance")
-
-    mw.progress.start()
-    start_time = time.time()
-
     cnt = 0
     max_retention = 0
+    advanced_cards = []
+    start_time = time.time()
+    undo_entry = mw.col.add_custom_undo_entry("Advance")
     for cid, did, _, stability, _, _, _ in cards:
         if cnt >= desired_advance_cnt:
             break
@@ -99,15 +97,15 @@ def advance(did):
         new_ivl = mw.col.sched.today - last_review
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "advance")
-        mw.col.update_card(card)
-        mw.col.merge_undo_entries(undo_entry)
+        advanced_cards.append(card)
         cnt += 1
 
         new_retention = power_forgetting_curve(new_ivl, stability)
         max_retention = max(max_retention, new_retention)
 
+    mw.col.update_cards(advanced_cards)
+    mw.col.merge_undo_entries(undo_entry)
     tooltip(
         f"""{cnt} cards advanced in {time.time() - start_time:.2f} seconds. max retention: {max_retention:.2%}"""
     )
-    mw.progress.finish()
     mw.reset()
