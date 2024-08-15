@@ -37,8 +37,10 @@ def flatten(did):
     def on_done(future):
         cnt, mean_prev_target_r, mean_new_target_r = future.result()
         mw.progress.finish()
-        tooltip(f"""{cnt} cards flattened in {time.time() - start_time:.2f} seconds.<br>
-        mean target retention of flattened cards: {mean_prev_target_r:.2%} -> {mean_new_target_r:.2%}""")
+        tooltip(
+            f"""{cnt} cards flattened in {time.time() - start_time:.2f} seconds.<br>
+        mean target retention of flattened cards: {mean_prev_target_r:.2%} -> {mean_new_target_r:.2%}"""
+        )
         mw.reset()
 
     fut = mw.taskman.run_in_background(
