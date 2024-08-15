@@ -276,7 +276,6 @@ def reschedule_background(
     """
     )
     total_cnt = len(cid_did_nid)
-    undo_entry = mw.col.add_custom_undo_entry("Reschedule")
     mw.taskman.run_on_main(
         lambda: mw.progress.start(label="Rescheduling", max=total_cnt, immediate=True)
     )
@@ -298,6 +297,7 @@ def reschedule_background(
     cnt = 0
     cancelled = False
     rescheduled_cards = []
+    undo_entry = mw.col.add_custom_undo_entry("Reschedule")
     for cid, _, _, desired_retention, maximum_interval in cards:
         if cancelled:
             break

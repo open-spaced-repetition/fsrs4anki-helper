@@ -10,27 +10,24 @@ def clear_custom_data(did):
     ):
         return
 
-    undo_entry = mw.col.add_custom_undo_entry("Clear custom data")
-
-    start_time = time.time()
-    cnt = 0
-    mw.progress.start()
-
     cards = mw.col.db.list(
         """
             SELECT id
             FROM cards
             WHERE data != '' 
-            AND json_extract(data, '$.cd') IS NOT NULL"""
+            AND json_extract(data, '$.cd') IS NOT NULL
+        """
     )
 
+    cnt = 0
+    start_time = time.time()
+    undo_entry = mw.col.add_custom_undo_entry("Clear custom data")
     for cid in cards:
         card = mw.col.get_card(cid)
         card.custom_data = ""
-        mw.col.update_card(card)
-        mw.col.merge_undo_entries(undo_entry)
         cnt += 1
 
+    mw.col.update_cards(cards)
+    mw.col.merge_undo_entries(undo_entry)
     tooltip(f"""{cnt} cards cleared in {time.time() - start_time:.2f} seconds.""")
-    mw.progress.finish()
     mw.reset()
