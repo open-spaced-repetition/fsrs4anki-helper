@@ -1,7 +1,7 @@
 from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
 from aqt import mw
 from aqt.qt import QAction
-from aqt.utils import tooltip, openLink
+from aqt.utils import tooltip, openLink, askUser
 from typing import Callable
 
 from .dsr_state import init_dsr_status_hook
@@ -107,6 +107,31 @@ menu_auto_disperse_after_reschedule = checkable(
 )
 
 
+def set_skip_manual_resched_cards(checked, _):
+    if config.skip_manual_resched_cards:
+        config.skip_manual_resched_cards = checked
+    else:
+        warning = (
+            "Due to the nature of Anki's database, FSRS Helper cannot distinguish among cards rescheduled by following operations:\n"
+            + "- Set due date\n"
+            + "- Reset (earlier called Forget)\n"
+            + "- 'Reschedule cards on change' in FSRS section of Deck Options\n\n"
+            + "When you enable this option, cards that were last modified by any of the above will be skipped during rescheduling."
+        )
+        checked = askUser(
+            warning,
+            title="Warning",
+        )
+        config.skip_manual_resched_cards = checked
+        menu_skip_manual_resched_cards.setChecked(checked)
+
+
+menu_skip_manual_resched_cards = checkable(
+    title="Skip manually rescheduled cards when rescheduling",
+    on_click=set_skip_manual_resched_cards,
+)
+
+
 def set_display_memory_state(checked, _):
     config.display_memory_state = checked
 
@@ -191,6 +216,7 @@ menu_for_helper.addAction(menu_auto_disperse_after_reschedule)
 menu_for_easy_days = menu_for_helper.addMenu(
     "Less Anki on Easy Days (requires Load Balancing)"
 )
+menu_for_helper.addAction(menu_skip_manual_resched_cards)
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_reschedule_recent)
@@ -285,6 +311,7 @@ def adjust_menu():
         menu_auto_disperse_after_reschedule.setChecked(
             config.auto_disperse_after_reschedule
         )
+        menu_skip_manual_resched_cards.setChecked(config.skip_manual_resched_cards)
         menu_for_auto_easy_days.setChecked(config.auto_easy_days)
         menu_for_easy_0.setChecked(0 in config.easy_days)
         menu_for_easy_1.setChecked(1 in config.easy_days)
