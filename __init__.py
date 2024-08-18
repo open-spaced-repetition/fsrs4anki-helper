@@ -169,8 +169,10 @@ add_action_to_gear(postpone, "Postpone cards")
 menu_advance = build_action(advance, "Advance cards in all decks")
 add_action_to_gear(advance, "Advance cards")
 
-menu_flatten = build_action(flatten, "Flatten reviews in all decks (experimental)")
-add_action_to_gear(flatten, "Flatten cards")
+menu_flatten = build_action(
+    flatten, "Flatten future due cards in all decks (experimental)"
+)
+add_action_to_gear(flatten, "Flatten future due cards")
 
 menu_reset = build_action(clear_custom_data, "Clear custom data in all cards")
 
