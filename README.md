@@ -98,7 +98,7 @@ In Anki, some templates will generate multiple cards related in content from the
 
 ## Flatten
 
-You can the maximum number of reviews per day for future due cards. The Helper will find out the cards that exceed the limit and postpone them to the future.
+You can set the maximum number of reviews per day for future days. The Helper add-on will find out the days that exceed the limit and postpone the extra cards to the future.
 
 ## Advanced Search (<=2.1.66)
 
