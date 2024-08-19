@@ -14,12 +14,12 @@ FSRS Helper is an Anki add-on that supports [FSRS](https://github.com/open-space
 
 # Requirements
 
-- For Anki version in 2.1.55 - 2.1.66 (no longer maintained)
-  - Enable V3 Scheduler
-  - FSRS4Anki version >= 3.0.0
 - For Anki version >= 23.10
   - Enable built-in FSRS (follow this [tutorial](https://github.com/open-spaced-repetition/fsrs4anki/blob/main/docs/tutorial.md))
   - Remove FSRS4Anki custom scheduling code if you are already using it
+- For Anki version in 2.1.55 - 2.1.66 (no longer maintained)
+  - Enable V3 Scheduler
+  - FSRS4Anki version >= 3.0.0
 
 # Installation
 
