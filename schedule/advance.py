@@ -105,10 +105,9 @@ def advance(did):
 
     mw.col.update_cards(advanced_cards)
     mw.col.merge_undo_entries(undo_entry)
-    mean_prev_target_r = sum(prev_target_rs) / len(prev_target_rs)
-    mean_new_target_r = sum(new_target_rs) / len(new_target_rs)
-    tooltip(
-        f"""{cnt} cards advanced in {time.time() - start_time:.2f} seconds.<br>
-        mean target retention of advanced cards: {mean_prev_target_r:.2%} -> {mean_new_target_r:.2%}"""
-    )
+    result_text = f"{cnt} cards have been advanced."
+    if len(new_target_rs) > 0 and len(prev_target_rs) > 0:
+        result_text += f"<br>Mean target retention of advanced cards: {sum(prev_target_rs) / len(prev_target_rs):.2%} -> {sum(new_target_rs) / len(new_target_rs):.2%}"
+
+    tooltip(result_text)
     mw.reset()
