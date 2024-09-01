@@ -111,10 +111,8 @@ def postpone(did):
 
     mw.col.update_cards(postponed_cards)
     mw.col.merge_undo_entries(undo_entry)
-    mean_prev_target_r = sum(prev_target_rs) / len(prev_target_rs)
-    mean_new_target_r = sum(new_target_rs) / len(new_target_rs)
-    tooltip(
-        f"""{cnt} cards postponed in {time.time() - start_time:.2f} seconds.<br>
-        mean target retention of postponed cards: {mean_prev_target_r:.2%} -> {mean_new_target_r:.2%}"""
-    )
+    result_text = f"{cnt} cards postponed in {time.time() - start_time:.2f} seconds."
+    if len(prev_target_rs) > 0 and len(new_target_rs) > 0:
+        result_text += f"<br>Mean target retention of postponed cards: {sum(prev_target_rs) / len(prev_target_rs):.2%} -> {sum(new_target_rs) / len(new_target_rs):.2%}"
+    tooltip(result_text)
     mw.reset()

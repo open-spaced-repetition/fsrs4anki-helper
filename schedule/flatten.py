@@ -32,15 +32,10 @@ def flatten(did):
             showWarning("Please enter a positive integer.")
             return
 
-    start_time = time.time()
-
     def on_done(future):
-        cnt, mean_prev_target_r, mean_new_target_r = future.result()
+        result_text = future.result()
         mw.progress.finish()
-        tooltip(
-            f"""{cnt} cards flattened in {time.time() - start_time:.2f} seconds.<br>
-        mean target retention of flattened cards: {mean_prev_target_r:.2%} -> {mean_new_target_r:.2%}"""
-        )
+        tooltip(result_text)
         mw.reset()
 
     fut = mw.taskman.run_in_background(
@@ -50,6 +45,7 @@ def flatten(did):
 
 
 def flatten_background(did, desired_flatten_limit):
+    start_time = time.time()
     config = Config()
     config.load()
 
@@ -185,6 +181,7 @@ def flatten_background(did, desired_flatten_limit):
 
     mw.col.update_cards(flattened_cards)
     mw.col.merge_undo_entries(undo_entry)
-    mean_prev_target_r = sum(prev_target_rs) / len(prev_target_rs)
-    mean_new_target_r = sum(new_target_rs) / len(new_target_rs)
-    return cnt, mean_prev_target_r, mean_new_target_r
+    result_text = f"{cnt} cards flattened in {time.time() - start_time:.2f} seconds."
+    if len(prev_target_rs) > 0 and len(new_target_rs) > 0:
+        result_text += f"<br>Mean target retention of flattened cards: {sum(prev_target_rs) / len(prev_target_rs):.2%} -> {sum(new_target_rs) / len(new_target_rs):.2%}"
+    return result_text
