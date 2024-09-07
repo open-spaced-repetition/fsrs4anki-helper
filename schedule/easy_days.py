@@ -39,7 +39,7 @@ def easy_days(did):
             or (sched_current_date() + timedelta(days=day_offset)).weekday()
             in config.easy_days  # if ratio = 0, reschedule only those due on Easy days
             or (sched_current_date() + timedelta(days=day_offset)).strftime("%Y-%m-%d")
-            in config.easy_dates # if ratio = 0, reschedule only those due on specific dates
+            in config.easy_dates  # if ratio = 0, reschedule only those due on specific dates
         ):
             due_days.append(today + day_offset)
 
