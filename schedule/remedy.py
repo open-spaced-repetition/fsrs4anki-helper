@@ -4,36 +4,56 @@ from ..utils import *
 from anki.utils import ids2str
 
 
+def RepresentsDatetime(s):
+    try:
+        return datetime.strptime(s, "%Y%m%d")
+    except ValueError:
+        tooltip("Invalid date format")
+        return None
+
+
 def ask_date_range():
     (s, r) = getText("Enter the start date in the format YYYYMMDD")
     if not r:
         return None, None
-    start_date = datetime.strptime(s, "%Y%m%d").timestamp() * 1000
+    start_date = RepresentsDatetime(s)
+    if not start_date:
+        return None, None
     (s, r) = getText("Enter the end date in the format YYYYMMDD")
     if not r:
         return None, None
-    end_date = datetime.strptime(s, "%Y%m%d").timestamp() * 1000
-    return int(start_date), int(end_date)
+    end_date = RepresentsDatetime(s)
+    if not end_date:
+        return None, None
+    return start_date, end_date
 
 
 def remedy_hard_misuse(did):
     start_date, end_date = ask_date_range()
     if not start_date or not end_date:
-        tooltip("Invalid date range")
         return
 
-    print(start_date, end_date)
     revlog_ids = mw.col.db.list(
         f"""SELECT id
         FROM revlog
         WHERE ease = 2
-        AND id > {start_date}
-        AND id < {end_date}
+        AND id > {start_date.timestamp() * 1000}
+        AND id < {end_date.timestamp() * 1000}
         """
     )
 
     if len(revlog_ids) == 0:
         tooltip("No reviews in the date range")
+        return
+
+    yes = askUser(
+        f"""There are {len(revlog_ids)} reviews from {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")} that are rated as hard.
+Those affected reviews will be rated as again. Are you sure?
+Note: The reviews will be stored in a CSV file in the addon folder for undo.
+    """
+    )
+
+    if not yes:
         return
 
     mw.col.db.execute(
