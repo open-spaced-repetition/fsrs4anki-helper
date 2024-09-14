@@ -43,13 +43,13 @@ def remedy_hard_misuse(did):
     )
 
     if len(revlog_ids) == 0:
-        tooltip("No reviews in the date range")
+        tooltip("There are no reviews with a Hard rating in the selected range of dates.")
         return
 
     yes = askUser(
-        f"""There are {len(revlog_ids)} reviews from {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")} that are rated as hard.
-Those affected reviews will be rated as again. Are you sure?
-Note: The reviews will be stored in a CSV file in the addon folder for undo.
+        f"""Between {start_date.strftime("%Y-%m-%d")} and {end_date.strftime("%Y-%m-%d")}, {len(revlog_ids)} reviews had a Hard rating.
+These ratings will be replaced with Again. A copy of the unmodified revlogs will be stored in a CSV file in the addon folder to allow undoing the changes.
+Do you want to proceed?
     """
     )
 
