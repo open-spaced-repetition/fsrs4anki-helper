@@ -66,7 +66,7 @@ Note: The reviews will be stored in a CSV file in the addon folder for undo.
     addon = mw.addonManager.addonFromModule(__name__)
     user_files = Path(mw.addonManager.addonsFolder(addon)) / "user_files"
     user_files.mkdir(parents=True, exist_ok=True)
-    revlog_id_csv = os.path.join(user_files, "hard_misuse_remedy.csv")
+    revlog_id_csv = os.path.join(user_files, f"{mw.pm.name}_hard_misuse_remedy.csv")
     with open(revlog_id_csv, "a") as f:
         f.write("\n".join(map(str, revlog_ids)))
 
@@ -78,7 +78,7 @@ def undo_remedy(did):
     addon = mw.addonManager.addonFromModule(__name__)
     user_files = Path(mw.addonManager.addonsFolder(addon)) / "user_files"
     user_files.mkdir(parents=True, exist_ok=True)
-    revlog_id_csv = os.path.join(user_files, "hard_misuse_remedy.csv")
+    revlog_id_csv = os.path.join(user_files, f"{mw.pm.name}_hard_misuse_remedy.csv")
     if not os.path.exists(revlog_id_csv):
         tooltip("No remedied reviews found")
         return
