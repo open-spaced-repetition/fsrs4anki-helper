@@ -225,3 +225,15 @@ def p_obey_specific_due_dates(num_of_specific_due_dates, easy_days_review_ratio)
     - The probability of skipping a review on a specific due date is 1 - (a * n) / (a * n + 8) = 8 / (a * n + 8)
     """
     return 8 / (easy_days_review_ratio * num_of_specific_due_dates + 8)
+
+
+def col_set_modified():
+    mw.col.db.execute(f"UPDATE col set mod = {int(time.time() * 1000)}")
+
+
+def ask_one_way_sync():
+    return askUser(
+        "The requested change will require a one-way sync. If you have made changes on another device, "
+        + "and not synced them to this device yet, please do so before you proceed.\n"
+        + "Do you want to proceed?"
+    )
