@@ -67,7 +67,7 @@ Do you want to proceed?
             """
         )
         col_set_modified()
-
+        mw.col.set_schema_modified()
         addon = mw.addonManager.addonFromModule(__name__)
         user_files = Path(mw.addonManager.addonsFolder(addon)) / "user_files"
         user_files.mkdir(parents=True, exist_ok=True)
@@ -104,7 +104,7 @@ def undo_remedy(did):
         """
     )
     col_set_modified()
-
+    mw.col.set_schema_modified()
     os.remove(revlog_id_csv)
     tooltip(f"{len(revlog_ids)} reviews restored")
     mw.reset()
