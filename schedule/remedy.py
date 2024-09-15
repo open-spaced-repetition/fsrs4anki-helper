@@ -48,7 +48,7 @@ def remedy_hard_misuse(did):
 
     yes = askUser(
         f"""Between {start_date.strftime("%Y-%m-%d")} and {end_date.strftime("%Y-%m-%d")}, {len(revlog_ids)} reviews had a Hard rating.
-These ratings will be replaced with Again. A copy of the unmodified revlogs will be stored in a CSV file in the addon folder to allow undoing the changes.
+These ratings will be replaced with Again. The IDs of these revlogs will be stored in a CSV file in the addon folder to allow undoing the changes.
 Do you want to proceed?
     """
     )
