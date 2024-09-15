@@ -229,3 +229,11 @@ def p_obey_specific_due_dates(num_of_specific_due_dates, easy_days_review_ratio)
 
 def col_set_modified():
     mw.col.db.execute(f"UPDATE col set mod = {int(time.time() * 1000)}")
+
+
+def ask_one_way_sync():
+    return askUser(
+        "The requested change will require a one-way sync. If you have made changes on another device, "
+        + "and not synced them to this device yet, please do so before you proceed.\n"
+        + "Do you want to proceed?"
+    )

@@ -114,11 +114,3 @@ def undo_remedy(did):
     os.remove(revlog_id_csv)
     tooltip(f"{len(revlog_ids)} reviews restored")
     mw.reset()
-
-
-def ask_one_way_sync():
-    return askUser(
-        "The requested change will require a one-way sync. If you have made changes on another device, "
-        + "and not synced them to this device yet, please do so before you proceed.\n"
-        + "Do you want to proceed?"
-    )
