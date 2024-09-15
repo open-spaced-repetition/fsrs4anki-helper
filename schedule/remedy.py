@@ -52,7 +52,8 @@ class RemedyDateRangeWidget(QWidget):
         end_date = self.end_date_edit.date().toString("yyyy-MM-dd")
         yes = askUser(
             f"""Between {start_date} and {end_date}, {len(revlog_ids)} reviews had a Hard rating.
-These ratings will be replaced with Again. The IDs of these revlogs will be stored in a CSV file in the addon folder to allow undoing the changes.
+These ratings will be replaced with Again. The requested change will require a one-way sync. If you have made changes on another device, and not synced them to this device yet, please do so before you proceed.
+The IDs of these revlogs will be stored in a CSV file in the addon folder to allow undoing the changes.
 Do you want to proceed?
         """
         )
