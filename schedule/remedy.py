@@ -77,6 +77,7 @@ Do you want to proceed?
 
         tooltip(f"{len(revlog_ids)} reviews remedied")
         mw.reset()
+        self.close()
 
 
 def remedy_hard_misuse(did):
