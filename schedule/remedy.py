@@ -43,7 +43,9 @@ def remedy_hard_misuse(did):
     )
 
     if len(revlog_ids) == 0:
-        tooltip("There are no reviews with a Hard rating in the selected range of dates.")
+        tooltip(
+            "There are no reviews with a Hard rating in the selected range of dates."
+        )
         return
 
     yes = askUser(
@@ -58,10 +60,11 @@ Do you want to proceed?
 
     mw.col.db.execute(
         f"""UPDATE revlog
-        SET ease = 1
+        SET ease = 1, usn = -1
         WHERE id IN {ids2str(revlog_ids)}
         """
     )
+    col_set_modified()
 
     addon = mw.addonManager.addonFromModule(__name__)
     user_files = Path(mw.addonManager.addonsFolder(addon)) / "user_files"
@@ -88,10 +91,11 @@ def undo_remedy(did):
 
     mw.col.db.execute(
         f"""UPDATE revlog
-        SET ease = 2
+        SET ease = 2, usn = -1
         WHERE id IN {ids2str(revlog_ids)}
         """
     )
+    col_set_modified()
 
     os.remove(revlog_id_csv)
     tooltip(f"{len(revlog_ids)} reviews restored")
