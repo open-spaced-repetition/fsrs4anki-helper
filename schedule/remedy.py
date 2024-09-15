@@ -51,11 +51,10 @@ class RemedyDateRangeWidget(QWidget):
         start_date = self.start_date_edit.date().toString("yyyy-MM-dd")
         end_date = self.end_date_edit.date().toString("yyyy-MM-dd")
         yes = askUser(
-            f"Between {start_date} and {end_date}, {len(revlog_ids)} reviews had a Hard rating.\n" +
-            "These ratings will be replaced with Again. The requested change will require a one-way sync. " +
-            "If you have made changes on another device, and not synced them to this device yet, please do so before you proceed.\n" +
-            "The IDs of these revlogs will be stored in a CSV file in the addon folder to allow undoing the changes.\n" +
-            "Do you want to proceed?"
+            f"Between {start_date} and {end_date}, {len(revlog_ids)} reviews had a Hard rating.\n"
+            + "These ratings will be replaced with Again.\n"
+            + "The IDs of these revlogs will be stored in a CSV file in the addon folder to allow undoing the changes.\n"
+            + "Do you want to proceed?"
         )
 
         if not yes:
@@ -82,6 +81,9 @@ class RemedyDateRangeWidget(QWidget):
 
 
 def remedy_hard_misuse(did):
+    if not ask_one_way_sync():
+        return
+
     mw.date_range_widget = RemedyDateRangeWidget()
     mw.date_range_widget.show()
 
@@ -95,12 +97,7 @@ def undo_remedy(did):
         tooltip("No remedied reviews found")
         return
 
-    yes = askUser(
-        "The requested change will require a one-way sync. If you have made changes on another device, " +
-        "and not synced them to this device yet, please do so before you proceed.\n" +
-        "Do you want to proceed?"
-    )
-    if not yes:
+    if not ask_one_way_sync():
         return
 
     with open(revlog_id_csv, "r") as f:
@@ -117,3 +114,11 @@ def undo_remedy(did):
     os.remove(revlog_id_csv)
     tooltip(f"{len(revlog_ids)} reviews restored")
     mw.reset()
+
+
+def ask_one_way_sync():
+    return askUser(
+        "The requested change will require a one-way sync. If you have made changes on another device, "
+        + "and not synced them to this device yet, please do so before you proceed.\n"
+        + "Do you want to proceed?"
+    )
