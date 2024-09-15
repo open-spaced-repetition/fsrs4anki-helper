@@ -95,6 +95,12 @@ def undo_remedy(did):
         tooltip("No remedied reviews found")
         return
 
+    yes = askUser(
+        "The requested change will require a one-way sync. If you have made changes on another device, and not synced them to this device yet, please do so before you proceed."
+    )
+    if not yes:
+        return
+
     with open(revlog_id_csv, "r") as f:
         revlog_ids = list(map(int, f.read().splitlines()))
 
