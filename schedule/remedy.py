@@ -51,7 +51,7 @@ class RemedyDateRangeWidget(QWidget):
         start_date = self.start_date_edit.date().toString("yyyy-MM-dd")
         end_date = self.end_date_edit.date().toString("yyyy-MM-dd")
         yes = askUser(
-            f"Between {start_date} and {end_date}, {len(revlog_ids)} reviews had a Hard rating.\n"
+            f"{len(revlog_ids)} reviews had a Hard rating between {start_date} and {end_date}.\n"
             + "These ratings will be replaced with Again.\n"
             + "The IDs of these revlogs will be stored in a CSV file in the addon folder to allow undoing the changes.\n"
             + "Do you want to proceed?"
