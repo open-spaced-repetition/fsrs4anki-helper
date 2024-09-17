@@ -75,7 +75,10 @@ class RemedyDateRangeWidget(QWidget):
         with open(revlog_id_csv, "a") as f:
             f.write("\n".join(map(str, revlog_ids)))
 
-        tooltip(f"{len(revlog_ids)} reviews remedied")
+        showInfo(
+            f"{len(revlog_ids)} reviews were remedied.\n"
+            + "Please re-optimize your FSRS parameters to incorporate the changes."
+        )
         mw.reset()
         self.close()
 
@@ -113,4 +116,8 @@ def undo_remedy(did):
     mw.col.set_schema_modified()
     os.remove(revlog_id_csv)
     tooltip(f"{len(revlog_ids)} reviews restored")
+    showInfo(
+        f"{len(revlog_ids)} reviews were restored.\n"
+        + "Please re-optimize your FSRS parameters to incorporate the changes."
+    )
     mw.reset()
