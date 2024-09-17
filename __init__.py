@@ -63,7 +63,9 @@ def add_action_to_gear(fun, text):
     text -- what's written in the gear."""
 
     def aux(m, did):
-        a = m.addAction(text)
+        if not hasattr(m, "fsrs_helper_submenu"):
+            m.fsrs_helper_submenu = m.addMenu("FSRS Helper")
+        a = m.fsrs_helper_submenu.addAction(text)
         a.triggered.connect(lambda b, did=did: fun(did))
 
     deck_browser_will_show_options_menu.append(aux)
