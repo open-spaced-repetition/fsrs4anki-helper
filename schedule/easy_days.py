@@ -257,6 +257,7 @@ class EasyDaysReviewRatioSelector(QWidget):
 
         self.setLayout(self.layout)
         self.setWindowTitle("Set the review ratio for each day of the week")
+        self.resize(400, 250)
 
     def save_settings(self):
         settings = []
