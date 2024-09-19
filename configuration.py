@@ -6,6 +6,7 @@ LOAD_BALANCE = "load_balance"
 EASY_DAYS = "easy_days"
 EASY_DATES = "easy_dates"
 EASY_DAYS_REVIEW_RATIO = "easy_days_review_ratio"
+EASY_DAYS_REVIEW_RATIO_LIST = "easy_days_review_ratio_list"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 AUTO_DISPERSE_AFTER_SYNC = "auto_disperse_after_sync"
@@ -79,6 +80,15 @@ class Config:
     @easy_days_review_ratio.setter
     def easy_days_review_ratio(self, value):
         self.data[EASY_DAYS_REVIEW_RATIO] = max(0, min(value, 0.9))
+        self.save()
+
+    @property
+    def easy_days_review_ratio_list(self):
+        return self.data[EASY_DAYS_REVIEW_RATIO_LIST]
+
+    @easy_days_review_ratio_list.setter
+    def easy_days_review_ratio_list(self, value):
+        self.data[EASY_DAYS_REVIEW_RATIO_LIST] = value
         self.save()
 
     @property
