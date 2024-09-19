@@ -15,7 +15,7 @@ def check_review_distribution(actual_reviews: List[int], percentages: List[float
         return [1] * len(actual_reviews)
     total_actual = sum(actual_reviews)
     expected_distribution = [p * (total_actual / sum(percentages)) for p in percentages]
-    return [a <= e for a, e in zip(actual_reviews, expected_distribution)]
+    return [max(e - a, 0) for a, e in zip(actual_reviews, expected_distribution)]
 
 
 def load_balance(
