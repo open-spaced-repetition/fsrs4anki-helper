@@ -25,21 +25,30 @@ def easy_days(did):
     if not config.load_balance:
         tooltip("Please enable load balance first")
         return
-    if len(config.easy_days) == 0 and len(config.easy_dates) == 0:
+    if (
+        all([r == 1 for r in config.easy_days_review_ratio_list])
+        and len(config.easy_dates) == 0
+    ):
         tooltip("Please select easy days or specific dates first")
         return
     today = mw.col.sched.today
     due_days = []
-    if config.easy_days_review_ratio > 0 and config.auto_easy_days:
+    if (
+        any([r > 0 for r in config.easy_days_review_ratio_list])
+        and config.auto_easy_days
+    ):
         reschedule_range = 7
     else:
         reschedule_range = 35
     for day_offset in range(reschedule_range):
         if (
-            config.easy_days_review_ratio
-            > 0  # if ratio > 0, reschedule all cards due in the reschedule_range
-            or (sched_current_date() + timedelta(days=day_offset)).weekday()
-            in config.easy_days  # if ratio = 0, reschedule only those due on Easy days
+            any(
+                [r > 0 for r in config.easy_days_review_ratio_list]
+            )  # if ratio > 0, reschedule all cards due in the reschedule_range
+            or config.easy_days_review_ratio_list[
+                (sched_current_date() + timedelta(days=day_offset)).weekday()
+            ]
+            < 1  # if ratio = 0, reschedule only those due on Easy days
             or (sched_current_date() + timedelta(days=day_offset)).strftime("%Y-%m-%d")
             in config.easy_dates  # if ratio = 0, reschedule only those due on specific dates
         ):
