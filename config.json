@@ -3,6 +3,7 @@
     "easy_days": [],
     "easy_dates": [],
     "easy_days_review_ratio": 0,
+    "easy_days_review_ratio_list": [1, 1, 1, 1, 1, 1, 1],
     "days_to_reschedule": 7,
     "auto_reschedule_after_sync": false,
     "auto_disperse_after_sync": false,

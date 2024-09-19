@@ -1,4 +1,3 @@
-from typing import Set
 from aqt import QAction, browser
 
 from .disperse_siblings import disperse_siblings
@@ -11,15 +10,56 @@ from aqt.gui_hooks import browser_menus_did_init
 from collections import defaultdict
 
 
+def check_review_distribution(actual_reviews: List[int], percentages: List[float]):
+    total_actual = sum(actual_reviews)
+    expected_distribution = [p * (total_actual / sum(percentages)) for p in percentages]
+    return [a <= e for a, e in zip(actual_reviews, expected_distribution)]
+
+
+def load_balance(
+    possible_intervals: List[int],
+    review_cnts: List[int],
+    easy_days_percentages: List[float],
+    last_review: int,
+    today: int,
+    easy_specific_due_dates: List[int],
+):
+    if all(p == 1 for p in easy_days_percentages):
+        return possible_intervals[review_cnts.index(min(review_cnts))]
+
+    weights = []
+    for r, delta_t in zip(review_cnts, possible_intervals):
+        if r == 0:
+            weights.append(1)
+        else:
+            weights.append((1 / (r**2)) * (1 / delta_t))
+
+    possible_dates = [
+        sched_current_date() + timedelta(days=(last_review + i - today))
+        for i in possible_intervals
+    ]
+    weekdays = [date.weekday() for date in possible_dates]
+
+    mask = check_review_distribution(
+        review_cnts, [easy_days_percentages[wd] for wd in weekdays]
+    )
+    for idx, ivl in enumerate(possible_intervals):
+        if last_review + ivl in easy_specific_due_dates:
+            mask[idx] = False
+    final_weights = [w * m for w, m in zip(weights, mask)]
+
+    if sum(final_weights) > 0:
+        return random.choices(possible_intervals, weights=final_weights)[0]
+    else:
+        return random.choices(possible_intervals, weights=weights)[0]
+
+
 class FSRS:
     maximum_interval: int
     desired_retention: float
     enable_load_balance: bool
-    easy_days: List[int]
-    easy_days_review_ratio: float
-    p_obey_easy_days: float
+    easy_days_review_ratio_list: List[float]
     easy_specific_due_dates: List[int]
-    p_obey_specific_due_dates: float
     due_cnt_per_day: Dict[int, int]
     due_today: int
     reviewed_today: int
@@ -31,11 +71,8 @@ class FSRS:
         self.maximum_interval = 36500
         self.desired_retention = 0.9
         self.enable_load_balance = False
-        self.easy_days = []
-        self.easy_days_review_ratio = 0
-        self.p_obey_easy_days = 1
+        self.easy_days_review_ratio_list = [1] * 7
         self.easy_specific_due_dates = []
-        self.p_obey_specific_due_dates = 1
         self.elapsed_days = 0
         self.apply_easy_days = False
 
@@ -96,48 +133,27 @@ class FSRS:
                     )
 
             if last_review + max_ivl < mw.col.sched.today:
-                # If the latest possible due date is in the past, skip load balance
                 return min(ivl, max_ivl)
 
-            # Don't schedule the card in the past
             min_ivl = max(min_ivl, mw.col.sched.today - last_review)
 
-            min_workload = math.inf
-            best_ivl = max_ivl
-            step = 1 + (max_ivl - min_ivl) // 100
-
-            if self.easy_days_review_ratio == 0:
-                obey_easy_days = True
-                obey_specific_due_dates = True
-            else:
-                obey_easy_days = random.random() < self.p_obey_easy_days
-                obey_specific_due_dates = (
-                    random.random() < self.p_obey_specific_due_dates
-                )
-
-            for check_ivl in reversed(range(min_ivl, max_ivl + step, step)):
-                check_due = last_review + check_ivl
-                if (
-                    obey_specific_due_dates
-                    and check_due in self.easy_specific_due_dates
-                ):
-                    continue
-
-                day_offset = check_due - mw.col.sched.today
-                due_date = sched_current_date() + timedelta(days=day_offset)
-                if obey_easy_days and due_date.weekday() in self.easy_days:
-                    # If the due date is on an easy day, skip
-                    continue
-
+            possible_intervals = list(range(min_ivl, max_ivl + 1))
+            review_cnts = []
+            for i in possible_intervals:
+                check_due = last_review + i
                 if check_due > mw.col.sched.today:
-                    # If the due date is in the future, the workload is the number of cards due on that day
-                    workload = self.due_cnt_per_day[check_due]
+                    review_cnts.append(self.due_cnt_per_day[check_due])
                 else:
-                    # If the due date is today, the workload is the number of cards due today plus the number of cards learned today
-                    workload = self.due_today + self.reviewed_today
-                if workload < min_workload:
-                    best_ivl = check_ivl
-                    min_workload = workload
+                    review_cnts.append(self.due_today + self.reviewed_today)
+
+            best_ivl = load_balance(
+                possible_intervals,
+                review_cnts,
+                self.easy_days_review_ratio_list,
+                last_review,
+                mw.col.sched.today,
+                self.easy_specific_due_dates,
+            )
             return best_ivl
 
     def next_interval(self, stability):
@@ -211,11 +227,7 @@ def reschedule_background(
 
     if config.load_balance:
         fsrs.set_load_balance(did_query=did_query)
-        fsrs.easy_days = config.easy_days
-        fsrs.easy_days_review_ratio = config.easy_days_review_ratio
-        fsrs.p_obey_easy_days = p_obey_easy_days(
-            len(fsrs.easy_days), fsrs.easy_days_review_ratio
-        )
+        fsrs.easy_days_review_ratio_list = config.easy_days_review_ratio_list
         fsrs.easy_specific_due_dates = easy_specific_due_dates
 
         current_date = sched_current_date()
@@ -226,9 +238,6 @@ def reschedule_background(
             if specific_due not in fsrs.easy_specific_due_dates:
                 fsrs.easy_specific_due_dates.append(specific_due)
 
-        fsrs.p_obey_specific_due_dates = p_obey_specific_due_dates(
-            len(fsrs.easy_specific_due_dates), fsrs.easy_days_review_ratio
-        )
         fsrs.apply_easy_days = apply_easy_days
 
     if recent:

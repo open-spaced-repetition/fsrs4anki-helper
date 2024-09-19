@@ -1,10 +1,12 @@
 from aqt import (
+    QButtonGroup,
     QDate,
     QDateEdit,
     QDateTime,
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QRadioButton,
     QVBoxLayout,
     QWidget,
     QSlider,
@@ -213,55 +215,63 @@ def easy_day_for_sepcific_date(did):
     mw.EasySpecificDateManagerWidget.show()
 
 
-class EasyDaysReviewRatioSlider(QWidget):
+class EasyDaysReviewRatioSelector(QWidget):
     def __init__(self, config: Config):
         super().__init__()
         self.config = config
         self.layout = QVBoxLayout()
-        self.slider = QSlider(orientation=Qt.Orientation.Horizontal)
-        self.slider.setMinimum(0)
-        self.slider.setMaximum(9)
-        self.slider.setValue(int(self.config.easy_days_review_ratio * 10))
-        self.slider.valueChanged.connect(self.slider_value_changed)
 
-        self.labelStart = QLabel("0%")
-        self.labelEnd = QLabel("90%")
-        self.labelValue = QLabel(
-            f"current percentage: {int(self.config.easy_days_review_ratio * 100)}%"
-        )
+        self.weekdays = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ]
+        self.modes = ["Normal", "Reduce", "Minimize"]
+        self.mode_values = {"Normal": 1.0, "Reduce": 0.5, "Minimize": 0.0}
+
+        self.radio_buttons = {}
+
+        for i, day in enumerate(self.weekdays):
+            day_layout = QHBoxLayout()
+            day_label = QLabel(day)
+            day_layout.addWidget(day_label)
+
+            button_group = QButtonGroup(self)
+            for mode in self.modes:
+                radio_button = QRadioButton(mode)
+                button_group.addButton(radio_button)
+                day_layout.addWidget(radio_button)
+                current_value = self.config.easy_days_review_ratio_list[i]
+                if self.mode_values[mode] == current_value:
+                    radio_button.setChecked(True)
+                self.radio_buttons[f"{day}_{mode}"] = radio_button
+
+            self.layout.addLayout(day_layout)
 
         self.saveBtn = QPushButton("Save")
-        self.saveBtn.clicked.connect(self.save_ratio)
-
-        sliderLayout = QHBoxLayout()
-        sliderLayout.addWidget(self.labelStart)
-        sliderLayout.addWidget(self.slider)
-        sliderLayout.addWidget(self.labelEnd)
-
-        saveBtnLayout = QHBoxLayout()
-        saveBtnLayout.addWidget(self.labelValue)
-        saveBtnLayout.addWidget(self.saveBtn)
-
-        self.layout.addLayout(sliderLayout)
-        self.layout.addLayout(saveBtnLayout)
-
-        self.layout.addStretch()
+        self.saveBtn.clicked.connect(self.save_settings)
+        self.layout.addWidget(self.saveBtn)
 
         self.setLayout(self.layout)
-        self.setWindowTitle("Set Easy Days Review Percentage")
+        self.setWindowTitle("Set the review ratio for each day of the week")
 
-    def slider_value_changed(self):
-        value = max(0, min(round(self.slider.value() / 10, 1), 0.9))
-        self.labelValue.setText(f"current percentage: {int(value * 100)}%")
-        self.config.easy_days_review_ratio = value
+    def save_settings(self):
+        settings = []
+        for day in self.weekdays:
+            for mode in self.modes:
+                if self.radio_buttons[f"{day}_{mode}"].isChecked():
+                    settings.append(self.mode_values[mode])
+                    break
 
-    def save_ratio(self):
-        value = max(0, min(round(self.slider.value() / 10, 1), 0.9))
-        self.config.easy_days_review_ratio = value
-        tooltip(f"Easy Days Review Percentage: {int(value * 100)}% saved successfully")
+        self.config.easy_days_review_ratio_list = settings
+        self.config.save()
         self.close()
 
 
 def easy_days_review_ratio(did, config: Config):
-    mw.easyDaysReviewRatioSlider = EasyDaysReviewRatioSlider(config)
-    mw.easyDaysReviewRatioSlider.show()
+    mw.easyDaysReviewRatioSelector = EasyDaysReviewRatioSelector(config)
+    mw.easyDaysReviewRatioSelector.show()
