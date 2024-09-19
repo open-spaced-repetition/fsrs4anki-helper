@@ -265,6 +265,8 @@ class EasyDaysReviewRatioSelector(QWidget):
                 if self.radio_buttons[f"{day}_{mode}"].isChecked():
                     settings.append(self.mode_values[mode])
                     break
+            else:
+                settings.append(0.5)  # Default value if no mode is selected
 
         self.config.easy_days_review_ratio_list = settings
         self.config.save()
