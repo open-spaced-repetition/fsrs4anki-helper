@@ -3,9 +3,7 @@ from aqt import mw
 tag = mw.addonManager.addonFromModule(__name__)
 
 LOAD_BALANCE = "load_balance"
-EASY_DAYS = "easy_days"
 EASY_DATES = "easy_dates"
-EASY_DAYS_REVIEW_RATIO = "easy_days_review_ratio"
 EASY_DAYS_REVIEW_RATIO_LIST = "easy_days_review_ratio_list"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
@@ -51,35 +49,12 @@ class Config:
         self.save()
 
     @property
-    def easy_days(self) -> list[int]:
-        return self.data[EASY_DAYS]
-
-    @easy_days.setter
-    def easy_days(self, day_enable):
-        day, enable = day_enable
-        if enable:
-            self.data[EASY_DAYS] = sorted(set(self.data[EASY_DAYS] + [day]))
-        else:
-            if day in self.data[EASY_DAYS]:
-                self.data[EASY_DAYS].remove(day)
-        self.save()
-
-    @property
     def easy_dates(self) -> list[str]:
         return self.data[EASY_DATES]
 
     @easy_dates.setter
     def easy_dates(self, value):
         self.data[EASY_DATES] = value
-        self.save()
-
-    @property
-    def easy_days_review_ratio(self):
-        return max(0, min(self.data[EASY_DAYS_REVIEW_RATIO], 0.9))
-
-    @easy_days_review_ratio.setter
-    def easy_days_review_ratio(self, value):
-        self.data[EASY_DAYS_REVIEW_RATIO] = max(0, min(value, 0.9))
         self.save()
 
     @property
