@@ -49,9 +49,9 @@ def flatten_background(did, desired_flatten_limit):
     config = Config()
     config.load()
 
-    easy_days = []
+    easy_days_review_ratio_list = []
     if config.load_balance:
-        easy_days = config.easy_days
+        easy_days_review_ratio_list = config.easy_days_review_ratio_list
 
     DM = DeckManager(mw.col)
     if did is not None:
@@ -149,8 +149,9 @@ def flatten_background(did, desired_flatten_limit):
         if rest_cnt <= 0:
             break
         due_date = current_date + timedelta(days=new_due - today)
-        if config.load_balance and due_date.weekday() in easy_days:
-            continue
+        if config.load_balance:
+            if random.random() < easy_days_review_ratio_list[due_date.weekday()]:
+                continue
         due_cnt = due_cnt_per_day[new_due]
         if due_cnt > desired_flatten_limit:
             continue
