@@ -26,7 +26,7 @@ def load_balance(
     today: int,
     easy_specific_due_dates: List[int],
 ):
-    if all(p == 1 for p in easy_days_percentages):
+    if len(set(easy_days_percentages)) == 1 and len(easy_specific_due_dates) == 0:
         return possible_intervals[review_cnts.index(min(review_cnts))]
 
     weights = []
