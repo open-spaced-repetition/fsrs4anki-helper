@@ -38,9 +38,9 @@ def easy_days(did):
             config.easy_days_review_ratio_list[
                 (sched_current_date() + timedelta(days=day_offset)).weekday()
             ]
-            < 1  # if ratio = 0, reschedule only those due on Easy days
+            < 1
             or (sched_current_date() + timedelta(days=day_offset)).strftime("%Y-%m-%d")
-            in config.easy_dates  # if ratio = 0, reschedule only those due on specific dates
+            in config.easy_dates
         ):
             due_days.append(today + day_offset)
 
