@@ -71,9 +71,9 @@ Here's a comparison, the first graph is rescheduling before enabling it, and the
 
 ## Easy Days
 
-You can choose any day or days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid these days when rescheduling. In "Reduced" days, you only have ~50% of your usual reviews. In "Minimum" days, there is ~0% reviews.
+You can select any day or days from Monday through Sunday to take off. Once enabled, the Helper add-on will try to avoid these days when rescheduling. On "Reduced" days, you will only have ~50% the usual amount of reviews. On "Minimum" days, there will be ~0% reviews.
 
-Note: Easy Days only works for review cards. Due to technical limitations, FSRS doesn't modify the interval and due date of (re)learning cards. And it also doesn't reschedule cards whose interval is less than 3 days to respect the desired retention.
+Note: Easy Days only works for cards in the "review" stage. Due to technical limitations, FSRS doesn't modify the interval and due date of cards in the "(re)learning" stage. And it also doesn't reschedule cards whose interval is less than 3 days.
 
 Fuzz example:
 - Review less than 3 days: will not choose another day.
