@@ -249,7 +249,8 @@ if not config.has_sponsored:
 
 menu_apply_easy_days = build_action(easy_days, "Apply easy days now")
 menu_apply_easy_days_for_specific_date = build_action(
-    easy_day_for_sepcific_date, "Apply easy days for specific dates"
+    lambda did: easy_day_for_sepcific_date(did, config),
+    "Apply easy days for specific dates",
 )
 menu_easy_days = build_action(
     lambda did: easy_days_review_ratio(did, config), "Configure easy days"

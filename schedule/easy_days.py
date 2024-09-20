@@ -78,11 +78,10 @@ def auto_easy_days():
 
 # Modified from https://github.com/sam1penny/countdown-to-events/blob/main/src/__init__.py#L86-L169
 class EasySpecificDateManagerWidget(QWidget):
-    def __init__(self):
+    def __init__(self, config: Config):
         super().__init__()
         self.initUi()
-        self.config = Config()
-        self.config.load()
+        self.config = config
         current_date = sched_current_date()
         self.config.easy_dates = [
             date
@@ -138,9 +137,7 @@ class EasySpecificDateManagerWidget(QWidget):
         mw.deckBrowser.refresh()
 
     def apply_easy_day_for_specific_date(self):
-        config = Config()
-        config.load()
-        if not config.load_balance:
+        if not self.config.load_balance:
             tooltip("Please enable load balance first")
             return
         if len(self.specific_dates) == 0:
@@ -179,8 +176,9 @@ class EasySpecificDateManagerWidget(QWidget):
 class DateLabelWidget(QWidget):
     def __init__(self, date, manager):
         super().__init__()
-        self.manager = manager
         self.date = date
+        self.manager = manager
+        self.config = manager.config
         layout = QHBoxLayout()
         self.setLayout(layout)
         self.eventDate = QLabel(date.strftime("%Y-%m-%d"))
@@ -192,19 +190,18 @@ class DateLabelWidget(QWidget):
         layout.addWidget(self.deleteButton)
 
     def deleteEvent(self):
-        config = Config()
-        config.load()
-        config.easy_dates = list(
-            filter(lambda x: x != self.date.strftime("%Y-%m-%d"), config.easy_dates)
+        self.config.easy_dates = list(
+            filter(
+                lambda x: x != self.date.strftime("%Y-%m-%d"), self.config.easy_dates
+            )
         )
-        config.save()
         self.manager.specific_dates.remove(self.date)
         self.setParent(None)
         mw.deckBrowser.refresh()
 
 
-def easy_day_for_sepcific_date(did):
-    mw.EasySpecificDateManagerWidget = EasySpecificDateManagerWidget()
+def easy_day_for_sepcific_date(did, config: Config):
+    mw.EasySpecificDateManagerWidget = EasySpecificDateManagerWidget(config)
     mw.EasySpecificDateManagerWidget.show()
 
 
@@ -264,7 +261,6 @@ class EasyDaysReviewRatioSelector(QWidget):
                 settings.append(0.5)  # Default value if no mode is selected
 
         self.config.easy_days_review_ratio_list = settings
-        self.config.save()
         self.close()
 
 
