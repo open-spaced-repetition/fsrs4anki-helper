@@ -229,8 +229,8 @@ class EasyDaysReviewRatioSelector(QWidget):
             "Saturday",
             "Sunday",
         ]
-        self.modes = ["Normal", "Reduce", "Minimize"]
-        self.mode_values = {"Normal": 1.0, "Reduce": 0.5, "Minimize": 0.0}
+        self.modes = ["Normal", "Reduced", "Minimum"]
+        self.mode_values = {"Normal": 1.0, "Reduced": 0.5, "Minimum": 0.0}
 
         self.radio_buttons = {}
 
@@ -256,7 +256,7 @@ class EasyDaysReviewRatioSelector(QWidget):
         self.layout.addWidget(self.saveBtn)
 
         self.setLayout(self.layout)
-        self.setWindowTitle("Set the review ratio for each day of the week")
+        self.setWindowTitle("Set the review amount for each day of the week")
         self.resize(400, 250)
 
     def save_settings(self):
