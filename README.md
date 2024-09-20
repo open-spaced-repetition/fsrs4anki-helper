@@ -71,7 +71,9 @@ Here's a comparison, the first graph is rescheduling before enabling it, and the
 
 ## Easy Days
 
-You can choose any day or days from Monday to Sunday to take off. Once enabled, the Helper will try to avoid these days when rescheduling. Note: Easy Days only works for review cards. Due to technical limitations, FSRS doesn't modify the interval and due date of (re)learning cards. And it also doesn't reschedule cards whose interval is less than 3 days to respect the desired retention.
+You can select any day or days from Monday through Sunday to take off. Once enabled, the Helper add-on will try to avoid these days when rescheduling. On "Reduced" days, you will only have ~50% the usual amount of reviews. On "Minimum" days, there will be ~0% reviews.
+
+Note: Easy Days only works for cards in the "review" stage. Due to technical limitations, FSRS doesn't modify the interval and due date of cards in the "(re)learning" stage. And it also doesn't reschedule cards whose interval is less than 3 days.
 
 Fuzz example:
 - Review less than 3 days: will not choose another day.
@@ -84,11 +86,15 @@ Exceptions:
 
 If the fuzz range is too narrow or does not exist (review less than 3 days) to satisfy the selected easy days, the day of the week may be selected for review of the card.
 
-![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/4df36a3c-6c5e-4f1f-81ac-1740c7fe15bb)
+![image](https://github.com/user-attachments/assets/666fec7f-32ee-4ace-9923-35ee4538695a)
+
+![image](https://github.com/user-attachments/assets/9f742d98-5df2-4765-b61b-cfe9d68b1010)
+
 
 **Effect**:
 
-![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/7fe6b4d0-ae99-40f8-8bd9-0f7c3ff1c638)
+![image](https://github.com/user-attachments/assets/79c5eda3-b4c8-4694-95c4-f88a6cd84118)
+
 
 ## Disperse Siblings
 
