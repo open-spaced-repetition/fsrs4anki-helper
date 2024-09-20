@@ -364,6 +364,24 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         fsrs.set_card(card)
         fsrs.set_fuzz_factor(cid, card.reps)
         new_ivl = fsrs.next_interval(s)
+
+        dr = fsrs.desired_retention
+        odds = dr / (1 - dr)
+
+        reduced_odds = 0.75 * odds
+        fsrs.desired_retention = reduced_odds / (reduced_odds + 1)
+        adjusted_ivl = fsrs.next_interval(s)
+
+        if card.ivl <= adjusted_ivl:
+            return None
+        
+        incresed_odds = 1.25 * odds
+        fsrs.desired_retention = incresed_odds / (incresed_odds + 1)
+        adjusted_ivl = fsrs.next_interval(s)
+
+        if card.ivl >= adjusted_ivl:
+            return None
+
         due_before = card.odue if card.odid else card.due
         card = update_card_due_ivl(card, new_ivl)
         due_after = card.odue if card.odid else card.due
