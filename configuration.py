@@ -11,6 +11,7 @@ AUTO_DISPERSE_AFTER_SYNC = "auto_disperse_after_sync"
 AUTO_DISPERSE_WHEN_REVIEW = "auto_disperse_when_review"
 AUTO_DISPERSE_AFTER_RESCHEDULE = "auto_disperse_after_reschedule"
 MATURE_IVL = "mature_ivl"
+RESCHEDULE_THRESHOLD = "reschedule_threshold"
 DEBUG_NOTIFY = "debug_notify"
 FSRS_STATS = "fsrs_stats"
 DISPLAY_MEMORY_STATE = "display_memory_state"
@@ -118,6 +119,15 @@ class Config:
     @mature_ivl.setter
     def mature_ivl(self, value):
         self.data[MATURE_IVL] = value
+        self.save()
+
+    @property
+    def reschedule_threshold(self):
+        return self.data[RESCHEDULE_THRESHOLD]
+
+    @reschedule_threshold.setter
+    def reschedule_threshold(self, value):
+        self.data[RESCHEDULE_THRESHOLD] = value
         self.save()
 
     @property

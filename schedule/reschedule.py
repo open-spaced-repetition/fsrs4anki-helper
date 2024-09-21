@@ -57,6 +57,7 @@ def load_balance(
 
 
 class FSRS:
+    reschedule_threshold: float
     maximum_interval: int
     desired_retention: float
     enable_load_balance: bool
@@ -70,6 +71,7 @@ class FSRS:
     apply_easy_days: bool
 
     def __init__(self) -> None:
+        self.reschedule_threshold = 0
         self.maximum_interval = 36500
         self.desired_retention = 0.9
         self.enable_load_balance = False
@@ -221,6 +223,7 @@ def reschedule_background(
     config.load()
 
     fsrs = FSRS()
+    fsrs.reschedule_threshold = config.reschedule_threshold
     DM = DeckManager(mw.col)
     did_query = None
     if did is not None:
@@ -368,15 +371,15 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         dr = fsrs.desired_retention
         odds = dr / (1 - dr)
 
-        reduced_odds = 0.75 * odds
+        reduced_odds = (1 - fsrs.reschedule_threshold) * odds
         fsrs.desired_retention = reduced_odds / (reduced_odds + 1)
         adjusted_ivl = fsrs.next_interval(s)
 
         if card.ivl <= adjusted_ivl:
             return None
 
-        increased_odds = 1.25 * odds
-        fsrs.desired_retention = incresed_odds / (incresed_odds + 1)
+        increased_odds = (1 + fsrs.reschedule_threshold) * odds
+        fsrs.desired_retention = increased_odds / (increased_odds + 1)
         adjusted_ivl = fsrs.next_interval(s)
 
         if card.ivl >= adjusted_ivl:
