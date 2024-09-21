@@ -373,16 +373,13 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
 
         reduced_odds = (1 - fsrs.reschedule_threshold) * odds
         fsrs.desired_retention = reduced_odds / (reduced_odds + 1)
-        adjusted_ivl = fsrs.next_interval(s)
-
-        if card.ivl <= adjusted_ivl:
-            return None
+        adjusted_ivl_upper = fsrs.next_interval(s)
 
         increased_odds = (1 + fsrs.reschedule_threshold) * odds
         fsrs.desired_retention = increased_odds / (increased_odds + 1)
-        adjusted_ivl = fsrs.next_interval(s)
+        adjusted_ivl_lower = fsrs.next_interval(s)
 
-        if card.ivl >= adjusted_ivl:
+        if card.ivl >= adjusted_ivl_lower and card.ivl <= adjusted_ivl_upper:
             return None
 
         due_before = card.odue if card.odid else card.due
