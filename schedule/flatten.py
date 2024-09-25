@@ -149,13 +149,15 @@ def flatten_background(did, desired_flatten_limit):
         if rest_cnt <= 0:
             break
         due_date = current_date + timedelta(days=new_due - today)
-        if config.load_balance:
-            if random.random() < easy_days_review_ratio_list[due_date.weekday()]:
-                continue
         due_cnt = due_cnt_per_day[new_due]
-        if due_cnt > desired_flatten_limit:
+        today_limit = (
+            int(desired_flatten_limit * easy_days_review_ratio_list[due_date.weekday()])
+            if config.load_balance
+            else desired_flatten_limit
+        )
+        quota = today_limit - due_cnt
+        if quota <= 0:
             continue
-        quota = desired_flatten_limit - due_cnt
         start_index = cnt
         end_index = cnt + min(quota, rest_cnt)
         for cid, _, ivl in cards_to_flatten[start_index:end_index]:
