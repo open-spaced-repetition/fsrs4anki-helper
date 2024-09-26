@@ -371,17 +371,17 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         if fsrs.reschedule_threshold != 0 and not self.apply_easy_days:
             dr = fsrs.desired_retention
             odds = dr / (1 - dr)
-            
+
             odds_lower = (1 - fsrs.reschedule_threshold) * odds
             fsrs.desired_retention = odds_lower / (odds_lower + 1)
             adjusted_ivl_upper = next_interval(s)
-            
+
             odds_upper = (1 + fsrs.reschedule_threshold) * odds
             fsrs.desired_retention = odds_upper / (odds_upper + 1)
             adjusted_ivl_lower = next_interval(s)
-            
+
             fsrs.desired_retention = dr
-            
+
             if card.ivl >= adjusted_ivl_lower and card.ivl <= adjusted_ivl_upper:
                 return None
 
