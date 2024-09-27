@@ -368,7 +368,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         fsrs.set_fuzz_factor(cid, card.reps)
         new_ivl = fsrs.fuzzed_next_interval(s)
 
-        if fsrs.reschedule_threshold != 0 and not self.apply_easy_days:
+        if fsrs.reschedule_threshold > 0 and not fsrs.apply_easy_days:
             dr = fsrs.desired_retention
             odds = dr / (1 - dr)
 
