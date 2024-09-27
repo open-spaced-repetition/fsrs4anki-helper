@@ -8,7 +8,7 @@
     "auto_disperse_when_review": false,
     "auto_disperse_after_reschedule": false,
     "mature_ivl": 21,
-    "reschedule_threshold": 0.25,
+    "reschedule_threshold": 0,
     "debug_notify": false,
     "fsrs_stats": true,
     "display_memory_state": false,
