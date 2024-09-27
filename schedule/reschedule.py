@@ -57,6 +57,7 @@ def load_balance(
 
 
 class FSRS:
+    reschedule_threshold: float
     maximum_interval: int
     desired_retention: float
     enable_load_balance: bool
@@ -70,6 +71,7 @@ class FSRS:
     apply_easy_days: bool
 
     def __init__(self) -> None:
+        self.reschedule_threshold = 0
         self.maximum_interval = 36500
         self.desired_retention = 0.9
         self.enable_load_balance = False
@@ -158,7 +160,7 @@ class FSRS:
             )
             return best_ivl
 
-    def next_interval(self, stability):
+    def fuzzed_next_interval(self, stability):
         new_interval = next_interval(stability, self.desired_retention)
         return self.apply_fuzz(new_interval)
 
@@ -221,6 +223,7 @@ def reschedule_background(
     config.load()
 
     fsrs = FSRS()
+    fsrs.reschedule_threshold = config.reschedule_threshold
     DM = DeckManager(mw.col)
     did_query = None
     if did is not None:
@@ -363,7 +366,25 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
     if card.type == CARD_TYPE_REV:
         fsrs.set_card(card)
         fsrs.set_fuzz_factor(cid, card.reps)
-        new_ivl = fsrs.next_interval(s)
+        new_ivl = fsrs.fuzzed_next_interval(s)
+
+        if fsrs.reschedule_threshold > 0 and not fsrs.apply_easy_days:
+            dr = fsrs.desired_retention
+            odds = dr / (1 - dr)
+
+            odds_lower = (1 - fsrs.reschedule_threshold) * odds
+            fsrs.desired_retention = odds_lower / (odds_lower + 1)
+            adjusted_ivl_upper = next_interval(s)
+
+            odds_upper = (1 + fsrs.reschedule_threshold) * odds
+            fsrs.desired_retention = odds_upper / (odds_upper + 1)
+            adjusted_ivl_lower = next_interval(s)
+
+            fsrs.desired_retention = dr
+
+            if card.ivl >= adjusted_ivl_lower and card.ivl <= adjusted_ivl_upper:
+                return None
+
         due_before = card.odue if card.odid else card.due
         card = update_card_due_ivl(card, new_ivl)
         due_after = card.odue if card.odid else card.due
