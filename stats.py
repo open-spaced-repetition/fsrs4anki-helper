@@ -86,7 +86,6 @@ def retention_stability_load(lim) -> tuple:
     )
     """
     )
-    print(time_sum)
     return (
         recall_sum / card_cnt,
         stability_sum / card_cnt,
@@ -191,7 +190,7 @@ def get_retention_graph(self: CollectionStats):
         lims.append(
             "id > %d" % ((self.col.sched.day_cutoff - (days * chunk * 86400)) * 1000)
         )
-    lim = "cid in (select id from cards where did in %s)" % self._limit()
+    lim = self._revlogLimit()
     if lim:
         lims.append(lim)
     if lims:
@@ -204,7 +203,9 @@ def get_retention_graph(self: CollectionStats):
     (COUNT(CASE WHEN ease > 1 AND lastIvl < {config.mature_ivl} AND lastIvl > {config.mature_ivl} * -86400 THEN id ELSE NULL END) + 0.0001) / (COUNT(CASE WHEN lastIvl < {config.mature_ivl} AND lastIvl > {config.mature_ivl} * -86400 THEN id ELSE NULL END) + 0.0001),
     (COUNT(CASE WHEN ease > 1 AND (lastIvl >= {config.mature_ivl} OR lastIvl <= {config.mature_ivl} * -86400) THEN id ELSE NULL END) + 0.0001) / (COUNT(CASE WHEN lastIvl >= {config.mature_ivl} OR lastIvl <= {config.mature_ivl} * -86400 THEN id ELSE NULL END) + 0.0001)
     FROM revlog
-    WHERE ease >= 1 AND (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1)
+    WHERE ease >= 1 
+    AND (type != 3 or factor != 0) 
+    AND (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1)
     {lim}
     GROUP BY day
     """
@@ -288,10 +289,11 @@ def init_stats():
 
 
 # code modified from https://ankiweb.net/shared/info/1779060522
-def get_true_retention(self):
-    lim = "cid in (select id from cards where did in %s)" % self._limit()
-    if lim:
-        lim = " AND " + lim
+def get_true_retention(self: CollectionStats):
+    if self._revlogLimit():
+        lim = " AND " + self._revlogLimit()
+    else:
+        lim = ""
     pastDay = stats_list(lim, (mw.col.sched.day_cutoff - 86400) * 1000)
 
     pastYesterday = stats_list(lim, (mw.col.sched.day_cutoff - 86400 * 2) * 1000)
@@ -322,7 +324,7 @@ def get_true_retention(self):
         period = 365
         pname = "Year"
     elif self.type == 2:
-        period = 10000
+        period = 36500
         pname = "Deck life"
     pastPeriod = stats_list(lim, (mw.col.sched.day_cutoff - 86400 * period) * 1000)
     true_retention_part = CollectionStats._title(
@@ -392,7 +394,7 @@ def stats_list(lim, span):
     sum(case when lastIvl >= %(i)d and ease > 1 and (type = 1 OR lastIvl <= -86400 OR lastIvl >= 1) then 1 else 0 end), /* passed mature */
     count(DISTINCT case when type = 0 and (ivl >= 1 OR ivl <= -86400) and cid NOT in ( SELECT id FROM cards WHERE type = 0) then cid else NULL end), /* learned */
     sum(case when type = 2 and (ivl >= 1 OR ivl <= -86400) and (lastIvl > -86400 and lastIvl <= 0) then 1 else 0 end) + sum(case when type = 0 and (lastIvl <= -86400 OR lastIvl >= 1) and ease = 1 then 1 else 0 end)/* relearned */
-    from revlog where id > ? """
+    from revlog where id > ? and ease >= 1 and (type != 3 or factor != 0)"""
         % dict(i=config.mature_ivl)
         + lim,
         span,
