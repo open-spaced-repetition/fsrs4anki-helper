@@ -86,7 +86,10 @@ class FSRS:
         review_cnts: List[int],
         last_review: int,
     ):
-        if len(set(self.easy_days_review_ratio_list)) == 1 and len(self.easy_specific_due_dates) == 0:
+        if (
+            len(set(self.easy_days_review_ratio_list)) == 1
+            and len(self.easy_specific_due_dates) == 0
+        ):
             return possible_intervals[review_cnts.index(min(review_cnts))]
 
         weights = [
