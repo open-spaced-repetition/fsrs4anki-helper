@@ -54,7 +54,7 @@ def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry
 
 def get_revlogs(cid: int):
     if int_version() >= 241000:
-        return mw.col.get_revlogs(cid)
+        return mw.col.get_review_logs(cid)
     else:
         return mw.col.card_stats_data(cid).revlog
 
