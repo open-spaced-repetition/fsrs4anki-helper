@@ -52,6 +52,13 @@ def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry
     mw.col.update_card(card)
 
 
+def get_revlogs(cid: int):
+    if int_version() >= 241000:
+        return mw.col.get_revlogs(cid)
+    else:
+        return mw.col.card_stats_data(cid).revlog
+
+
 def filter_revlogs(
     revlogs: List[CardStatsResponse.StatsRevlogEntry],
 ) -> List[CardStatsResponse.StatsRevlogEntry]:
@@ -65,7 +72,7 @@ def filter_revlogs(
 
 
 def get_last_review_date(card: Card):
-    revlogs = mw.col.card_stats_data(card.id).revlog
+    revlogs = get_revlogs(card.id)
     try:
         last_revlog = filter_revlogs(revlogs)[0]
         last_review_date = (

@@ -96,7 +96,7 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     if new_ivl <= 2.5:
         return (due, due), last_review
 
-    revlogs = filter_revlogs(mw.col.card_stats_data(cid).revlog)
+    revlogs = filter_revlogs(get_revlogs(cid))
     last_elapsed_days = (
         int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
     )
