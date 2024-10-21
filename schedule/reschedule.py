@@ -18,44 +18,6 @@ def check_review_distribution(actual_reviews: List[int], percentages: List[float
     return [max(e - a, 0) for a, e in zip(actual_reviews, expected_distribution)]
 
 
-def load_balance(
-    possible_intervals: List[int],
-    review_cnts: List[int],
-    easy_days_percentages: List[float],
-    last_review: int,
-    today: int,
-    easy_specific_due_dates: List[int],
-):
-    if len(set(easy_days_percentages)) == 1 and len(easy_specific_due_dates) == 0:
-        return possible_intervals[review_cnts.index(min(review_cnts))]
-
-    weights = []
-    for r, delta_t in zip(review_cnts, possible_intervals):
-        if r == 0:
-            weights.append(1)
-        else:
-            weights.append((1 / (r**2)) * (1 / delta_t))
-
-    possible_dates = [
-        sched_current_date() + timedelta(days=(last_review + i - today))
-        for i in possible_intervals
-    ]
-    weekdays = [date.weekday() for date in possible_dates]
-
-    mask = check_review_distribution(
-        review_cnts, [easy_days_percentages[wd] for wd in weekdays]
-    )
-    for idx, ivl in enumerate(possible_intervals):
-        if last_review + ivl in easy_specific_due_dates:
-            mask[idx] = False
-    final_weights = [w * m for w, m in zip(weights, mask)]
-
-    if sum(final_weights) > 0:
-        return random.choices(possible_intervals, weights=final_weights)[0]
-    else:
-        return random.choices(possible_intervals, weights=weights)[0]
-
-
 class FSRS:
     reschedule_threshold: float
     maximum_interval: int
@@ -69,6 +31,8 @@ class FSRS:
     card: Card
     elapsed_days: int
     apply_easy_days: bool
+    current_date: date
+    today: int
 
     def __init__(self) -> None:
         self.reschedule_threshold = 0
@@ -79,6 +43,8 @@ class FSRS:
         self.easy_specific_due_dates = []
         self.elapsed_days = 0
         self.apply_easy_days = False
+        self.current_date = sched_current_date()
+        self.today = mw.col.sched.today
 
     def set_load_balance(self, did_query=None):
         self.enable_load_balance = True
@@ -114,6 +80,42 @@ class FSRS:
         random.seed(rotate_number_by_k(cid, 8) + reps)
         self.fuzz_factor = random.random()
 
+    def load_balance(
+        self,
+        possible_intervals: List[int],
+        review_cnts: List[int],
+        last_review: int,
+    ):
+        if (
+            len(set(self.easy_days_review_ratio_list)) == 1
+            and len(self.easy_specific_due_dates) == 0
+        ):
+            return possible_intervals[review_cnts.index(min(review_cnts))]
+
+        weights = [
+            1 if r == 0 else (1 / (r**2)) * (1 / delta_t)
+            for r, delta_t in zip(review_cnts, possible_intervals)
+        ]
+
+        possible_dates = [
+            self.current_date + timedelta(days=(last_review + i - self.today))
+            for i in possible_intervals
+        ]
+        weekdays = [date.weekday() for date in possible_dates]
+
+        mask = check_review_distribution(
+            review_cnts, [self.easy_days_review_ratio_list[wd] for wd in weekdays]
+        )
+        for idx, ivl in enumerate(possible_intervals):
+            if last_review + ivl in self.easy_specific_due_dates:
+                mask[idx] = False
+        final_weights = [w * m for w, m in zip(weights, mask)]
+
+        if sum(final_weights) > 0:
+            return random.choices(possible_intervals, weights=final_weights)[0]
+        else:
+            return random.choices(possible_intervals, weights=weights)[0]
+
     def apply_fuzz(self, ivl):
         if ivl < 2.5:
             return ivl
@@ -136,27 +138,24 @@ class FSRS:
                         current_ivl, self.elapsed_days, current_ivl
                     )
 
-            if last_review + max_ivl < mw.col.sched.today:
+            if last_review + max_ivl < self.today:
                 return min(ivl, max_ivl)
 
-            min_ivl = max(min_ivl, mw.col.sched.today - last_review)
+            min_ivl = max(min_ivl, self.today - last_review)
 
             possible_intervals = list(range(min_ivl, max_ivl + 1))
             review_cnts = []
             for i in possible_intervals:
                 check_due = last_review + i
-                if check_due > mw.col.sched.today:
+                if check_due > self.today:
                     review_cnts.append(self.due_cnt_per_day[check_due])
                 else:
                     review_cnts.append(self.due_today + self.reviewed_today)
 
-            best_ivl = load_balance(
+            best_ivl = self.load_balance(
                 possible_intervals,
                 review_cnts,
-                self.easy_days_review_ratio_list,
                 last_review,
-                mw.col.sched.today,
-                self.easy_specific_due_dates,
             )
             return best_ivl
 
@@ -235,11 +234,9 @@ def reschedule_background(
         fsrs.easy_days_review_ratio_list = config.easy_days_review_ratio_list
         fsrs.easy_specific_due_dates = easy_specific_due_dates
 
-        current_date = sched_current_date()
-        today = mw.col.sched.today
         for easy_date_str in config.easy_dates:
             easy_date = datetime.strptime(easy_date_str, "%Y-%m-%d").date()
-            specific_due = today + (easy_date - current_date).days
+            specific_due = fsrs.today + (easy_date - fsrs.current_date).days
             if specific_due not in fsrs.easy_specific_due_dates:
                 fsrs.easy_specific_due_dates.append(specific_due)
 
@@ -389,9 +386,9 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         if fsrs.enable_load_balance:
             fsrs.due_cnt_per_day[due_before] -= 1
             fsrs.due_cnt_per_day[due_after] += 1
-            if due_before <= mw.col.sched.today and due_after > mw.col.sched.today:
+            if due_before <= fsrs.today and due_after > fsrs.today:
                 fsrs.due_today -= 1
-            if due_before > mw.col.sched.today and due_after <= mw.col.sched.today:
+            if due_before > fsrs.today and due_after <= fsrs.today:
                 fsrs.due_today += 1
     return card
 
