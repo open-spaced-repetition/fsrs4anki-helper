@@ -32,7 +32,7 @@ def retention_stability_load(lim) -> tuple:
         END
         ,json_extract(data, '$.s')
         ,ivl 
-        ,(SELECT COUNT(*) FROM cards c2 WHERE c1.nid = c2.nid)
+        ,(SELECT COUNT(*) FROM cards c2 WHERE c1.nid = c2.nid AND queue != -1)
         ,nid
     FROM cards c1
     WHERE queue != 0 AND queue != -1
