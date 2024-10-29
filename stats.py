@@ -128,7 +128,8 @@ def get_fsrs_stats(self: CollectionStats):
     i = []
     _line_now(i, "Average predicted retention", f"{retention * 100: .2f}%")
     _line_now(i, "Average stability", f"{round(stability)} days")
-    _line_now(i, "Daily Load", f"{round(load)} reviews/day")
+    if int_version() < 241000:
+        _line_now(i, "Daily Load", f"{round(load)} reviews/day")
     i.append(
         "<tr><td align=left style='padding: 5px'><b>Retention by Cards:</b></td></tr>"
     )
