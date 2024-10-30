@@ -251,6 +251,15 @@ class EasyDaysReviewRatioSelector(QWidget):
         self.resize(400, 250)
 
     def save_settings(self):
+        # Check if there is at least one Normal day
+        normal_days = sum(
+            self.radio_buttons[f"{day}_Normal"].isChecked() for day in self.weekdays
+        )
+
+        if normal_days == 0:
+            tooltip("At least one day must be set to Normal")
+            return
+
         settings = []
         for day in self.weekdays:
             for mode in self.modes:
@@ -258,7 +267,7 @@ class EasyDaysReviewRatioSelector(QWidget):
                     settings.append(self.mode_values[mode])
                     break
             else:
-                settings.append(0.5)  # Default value if no mode is selected
+                settings.append(1.0)  # Default value if no mode is selected
 
         self.config.easy_days_review_ratio_list = settings
         self.close()
