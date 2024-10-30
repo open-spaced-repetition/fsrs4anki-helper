@@ -251,19 +251,15 @@ class EasyDaysReviewRatioSelector(QWidget):
         self.resize(400, 250)
 
     def save_settings(self):
-        # first loop, for checking whether the user has set all days to "Reduced" or as "Minimum"
-        reduced_days = 0
-        minimum_days = 0
-        for day in self.weekdays:
-            if self.radio_buttons[f"{day}_{'Reduced'}"].isChecked():
-                reduced_days += 1
-            elif self.radio_buttons[f"{day}_{'Minimum'}"].isChecked():
-                minimum_days += 1
+        # Check if there is at least one Normal day
+        normal_days = sum(
+            self.radio_buttons[f"{day}_Normal"].isChecked() for day in self.weekdays
+        )
 
-        if minimum_days == 7 or reduced_days == 7:
-            tooltip("All days cannot be set to Reduced or Minimum")
+        if normal_days == 0:
+            tooltip("At least one day must be set to Normal")
             return
-        
+
         settings = []
         for day in self.weekdays:
             for mode in self.modes:
