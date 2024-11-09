@@ -1,6 +1,7 @@
 from anki.stats import CollectionStats
 from .configuration import Config
 from .utils import *
+from .steps import steps_stats
 
 
 def _line_now(i, a, b, bold=True):
@@ -107,7 +108,73 @@ def todayStats_new(self):
         + get_true_retention(self)
         + get_fsrs_stats(self)
         + get_retention_graph(self)
+        + get_steps_stats(self)
     )
+
+
+def get_steps_stats(self: CollectionStats):
+    lim = self._revlogLimit()
+    results = steps_stats(lim)
+
+    title = CollectionStats._title(
+        self, "Steps Stats", "Statistics for different ratings during learning steps"
+    )
+
+    html = """
+        <style>
+            td.trl { border: 1px solid; text-align: left; padding: 5px  }
+            td.trr { border: 1px solid; text-align: right; padding: 5px  }
+            td.trc { border: 1px solid; text-align: center; padding: 5px }
+            span.again { color: #f00 }
+            span.hard { color: #ff8c00 }
+            span.good { color: #008000 }
+        </style>
+        <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
+            <tr>
+                <td class="trl" rowspan=2><b>Rating</b></td>
+                <td class="trc" colspan=3><b>Review Timing Distribution</b></td>
+                <td class="trc" colspan=2><b>Performance</b></td>
+            </tr>
+            <tr>
+                <td class="trc"><b>25%</b></td>
+                <td class="trc"><b>50%</b></td>
+                <td class="trc"><b>75%</b></td>
+                <td class="trc"><b>Retention</b></td>
+                <td class="trc"><b>Stability</b></td>
+            </tr>"""
+
+    ratings = {1: "again", 2: "hard", 3: "good"}
+    for rating, style in ratings.items():
+        stats = results["stats"].get(rating, {})
+        if not stats:
+            html += f"""
+            <tr>
+                <td class="trl"><span class="{style}"><b>{style.title()}</b></span></td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+            </tr>"""
+            continue
+
+        html += f"""
+            <tr>
+                <td class="trl"><span class="{style}"><b>{style.title()}</b></span></td>
+                <td class="trr">{stats['delay_q1'] / 60:.2f} min</td>
+                <td class="trr">{stats['delay_q2'] / 60:.2f} min</td>
+                <td class="trr">{stats['delay_q3'] / 60:.2f} min</td>
+                <td class="trr">{stats['retention']}</td>
+                <td class="trr">{results['stability'][rating] / 60:.2f} min</td>
+            </tr>"""
+
+    html += "</table>"
+    html += (
+        "<p>This table shows how long students typically wait before reviewing cards for each rating, "
+        "and the resulting retention and stability.</p>"
+    )
+
+    return self._section(title + html)
 
 
 def get_fsrs_stats(self: CollectionStats):

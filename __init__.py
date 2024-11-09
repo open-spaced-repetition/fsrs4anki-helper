@@ -20,7 +20,6 @@ from .schedule.easy_days import (
 from .schedule.remedy import remedy_hard_misuse, undo_remedy
 from .schedule import init_review_hook
 from .stats import init_stats
-from .steps_optimizer import steps_optimizer
 from .browser.browser import init_browser
 from .configuration import Config, run_on_configuration_change
 
@@ -182,8 +181,6 @@ menu_reset = build_action(clear_custom_data, "Clear custom data in all cards")
 
 menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings")
 
-menu_steps_optimizer = build_action(steps_optimizer, "Steps Optimizer")
-
 menu_remedy_hard_misuse = build_action(remedy_hard_misuse, "Remedy")
 
 menu_undo_remedy = build_action(undo_remedy, "Undo")
@@ -249,7 +246,6 @@ menu_for_helper.addAction(menu_advance)
 menu_for_helper.addAction(menu_flatten)
 menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
-menu_for_helper.addAction(menu_steps_optimizer)
 menu_for_helper.addSeparator()
 menu_for_remedy = menu_for_helper.addMenu("Remedy Hard Misuse")
 menu_for_remedy.addAction(menu_remedy_hard_misuse)

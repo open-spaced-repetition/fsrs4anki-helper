@@ -28,13 +28,14 @@ def binary_search(points, low=1, high=86400, tolerance=1e-6):
     return (low + high) / 2
 
 
-def steps_optimizer(did=None):
+def steps_stats(lim):
     results = mw.col.db.all(
-        """
+        f"""
     WITH first_review AS (
     SELECT cid, MIN(id) AS first_id, ease AS first_rating
     FROM revlog
     WHERE ease BETWEEN 1 AND 4
+    {"AND " + lim if lim else ""}
     GROUP BY cid
     ),
     second_review AS (
@@ -113,4 +114,4 @@ def steps_optimizer(did=None):
         points = list(filter(lambda x: LOWER <= x[0] <= UPPER, points))
         rating2stability[rating] = round(binary_search(points))
     display_dict["stability"] = rating2stability
-    showInfo(json.dumps(display_dict, indent=4))
+    return display_dict
