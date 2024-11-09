@@ -134,15 +134,20 @@ def get_steps_stats(self: CollectionStats):
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
                 <td class="trl" rowspan=2><b>First Rating</b></td>
-                <td class="trc" colspan=3><b>Learning Delay Distribution</b></td>
-                <td class="trc" colspan=2><b>Performance</b></td>
+                <td class="trc" colspan=7><b>Delay And Retention Distribution</b></td>
+                <td class="trc" colspan=3><b>Summary</b></td>
             </tr>
             <tr>
-                <td class="trc"><b>25%</b></td>
-                <td class="trc"><b>50%</b></td>
-                <td class="trc"><b>75%</b></td>
-                <td class="trc"><b>Retention</b></td>
+                <td class="trc"><b><span>R&#772;</span><sub>1</sub></b></td>
+                <td class="trc"><b>T<sub>25%</sub></b></td>
+                <td class="trc"><b><span>R&#772;</span><sub>2</sub></b></td>
+                <td class="trc"><b>T<sub>50%</sub></b></td>
+                <td class="trc"><b><span>R&#772;</span><sub>3</sub></b></td>
+                <td class="trc"><b>T<sub>75%</sub></b></td>
+                <td class="trc"><b><span>R&#772;</span><sub>4</sub></b></td>
+                <td class="trc"><b><span>R&#772;</span></b></td>
                 <td class="trc"><b>Stability</b></td>
+                <td class="trc"><b>Reviews</b></td>
             </tr>"""
 
     ratings = {1: "again", 2: "hard", 3: "good", 0: "lapse"}
@@ -157,25 +162,41 @@ def get_steps_stats(self: CollectionStats):
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
             </tr>"""
             continue
 
         html += f"""
             <tr>
                 <td class="trl"><span class="{style}"><b>{style.title()}</b></span></td>
+                <td class="trr">{stats['r1']}</td>
                 <td class="trr">{stats['delay_q1'] / 60:.2f} min</td>
+                <td class="trr">{stats['r2']}</td>
                 <td class="trr">{stats['delay_q2'] / 60:.2f} min</td>
+                <td class="trr">{stats['r3']}</td>
                 <td class="trr">{stats['delay_q3'] / 60:.2f} min</td>
+                <td class="trr">{stats['r4']}</td>
                 <td class="trr">{stats['retention']}</td>
                 <td class="trr">{results['stability'][rating] / 60:.2f} min</td>
+                <td class="trr">{stats['count']}</td>
             </tr>"""
 
     html += "</table>"
     html += (
-        "<p>This table shows how long you typically wait before (re)learning cards for each first rating, "
-        "and the resulting retention and stability.</p>"
+        "<table style='text-align: left'><tr><td style='padding: 5px'>"
+        + "<details><summary>Interpretation</summary><ul>"
+        "<li>This table shows how long you typically wait before (re)learning cards for each first rating, "
+        "and the resulting retention and stability.</li>"
+        + "<li>For each first rating, the next reviews are sorted by the delay since the first review.</li>"
+        + "<li>Then, the reviews are divided into four equal parts based on the delay, and the retention (<span>R&#772;</span><sub>1</sub>, <span>R&#772;</span><sub>2</sub>, <span>R&#772;</span><sub>3</sub>, <span>R&#772;</span><sub>4</sub>) is calculated for each part.</li>"
+        + "<li>T<sub>25%</sub>, T<sub>50%</sub>, and T<sub>75%</sub> are the first, second, and third quartiles of the delay, respectively.</li>"
+        + "</ul></details>"
+        "</td></tr></table>"
     )
-
     return self._section(title + html)
 
 

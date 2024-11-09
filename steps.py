@@ -98,23 +98,23 @@ def steps_stats(lim):
     stats_dict = {}
     for first_rating, delta_t, recall in learning_revlogs:
         if first_rating not in stats_dict:
-            stats_dict[first_rating] = {"delta_t": [], "recall": []}
-        stats_dict[first_rating]["delta_t"].append(delta_t)
-        stats_dict[first_rating]["recall"].append(recall)
+            stats_dict[first_rating] = []
+        stats_dict[first_rating].append((delta_t, recall))
 
     if len(relearning_revlogs) > 0:
-        stats_dict[0] = {"delta_t": [], "recall": []}
+        stats_dict[0] = []
         for delta_t, recall in relearning_revlogs:
-            stats_dict[0]["delta_t"].append(delta_t)
-            stats_dict[0]["recall"].append(recall)
+            stats_dict[0].append((delta_t, recall))
 
     display_dict = {}
 
     # Calculate median delta_t and mean recall for each first_rating
     results_dict = {}
     for rating in stats_dict:
-        delta_t_list = sorted(stats_dict[rating]["delta_t"])
-        n = len(delta_t_list)
+        points = stats_dict[rating]
+        n = len(points)
+        delta_t_list = [x[0] for x in points]
+        recall_list = [x[1] for x in points]
         q1_index = n // 4
         q2_index = n // 2
         q3_index = 3 * n // 4
@@ -133,26 +133,40 @@ def steps_stats(lim):
             if n % 4
             else (delta_t_list[q3_index - 1] + delta_t_list[q3_index]) / 2
         )
-        mean_recall = sum(stats_dict[rating]["recall"]) / len(
-            stats_dict[rating]["recall"]
+        r1 = sum(recall_list[:q1_index]) / q1_index if q1_index > 0 else math.nan
+        r2 = (
+            sum(recall_list[q1_index:q2_index]) / (q2_index - q1_index)
+            if q2_index > q1_index
+            else math.nan
         )
+        r3 = (
+            sum(recall_list[q2_index:q3_index]) / (q3_index - q2_index)
+            if q3_index > q2_index
+            else math.nan
+        )
+        r4 = sum(recall_list[q3_index:]) / (n - q3_index) if q3_index < n else math.nan
+        retention = sum(recall_list) / n
         results_dict[rating] = {
             "delay_q1": round(delay_q1),
             "delay_q2": round(delay_q2),
             "delay_q3": round(delay_q3),
-            "retention": f"{mean_recall:.2%}",
+            "r1": f"{r1:.2%}",
+            "r2": f"{r2:.2%}",
+            "r3": f"{r3:.2%}",
+            "r4": f"{r4:.2%}",
+            "retention": f"{retention:.2%}",
+            "count": n,
         }
 
     display_dict["stats"] = results_dict
     rating2stability = {}
     for rating in stats_dict:
-        points = list(zip(stats_dict[rating]["delta_t"], stats_dict[rating]["recall"]))
         Q1 = results_dict[rating]["delay_q1"]
         Q3 = results_dict[rating]["delay_q3"]
         IQR = Q3 - Q1
         LOWER = Q1 - 1.5 * IQR
         UPPER = Q3 + 1.5 * IQR
-        points = list(filter(lambda x: LOWER <= x[0] <= UPPER, points))
+        points = list(filter(lambda x: LOWER <= x[0] <= UPPER, stats_dict[rating]))
         rating2stability[rating] = round(binary_search(points))
     display_dict["stability"] = rating2stability
     return display_dict
