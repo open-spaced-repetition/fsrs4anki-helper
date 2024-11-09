@@ -188,13 +188,13 @@ def get_steps_stats(self: CollectionStats):
     html += "</table>"
     html += (
         "<table style='text-align: left'><tr><td style='padding: 5px'>"
-        + "<details><summary>Interpretation</summary><ul>"
-        "<li>This table shows how long you typically wait before (re)learning cards for each first rating, "
-        "and the resulting retention and stability.</li>"
-        + "<li>For each first rating, the next reviews are sorted by the delay since the first review.</li>"
-        + "<li>The next reviews are divided into four equal parts based on the delay, and the retention (<span>R&#772;</span><sub>1</sub>, <span>R&#772;</span><sub>2</sub>, <span>R&#772;</span><sub>3</sub>, <span>R&#772;</span><sub>4</sub>) is calculated for each part.</li>"
-        + "<li>T<sub>25%</sub>, T<sub>50%</sub>, and T<sub>75%</sub> are the first, second, and third quartiles of the delay, respectively.</li>"
-        + "</ul></details>"
+        + "<summary>Interpretation</summary><ul>"
+        "<li>This table shows <b>the average time you usually wait before rating each card again</b> (Time Delay) based on your <b>first rating of the day for each card in the deck</b> (Again or Hard or Good or Lapse).</li>"
+        + "<li>It also shows <b>how well you remember a card after each subsequent rating (after its first rating) on average.</b></li>"
+        + "<li>The subsequent ratings after the first ratings of all cards in the deck are sorted by ascending order of the Time Delay (not shown on the table) and are then grouped into 4 groups (Time Delay 1<2<3<4). These groups are then shown based on the first rating of the card (Again or Hard or Good or Lapse). So each First Rating has 4 groups of subsequent ratings (Groups 1,2,3,4)</li>"
+        + "<li>Average Retention rates (R̅₁, R̅₂, R̅₃, R̅₄) for each group and the Average Overall Retention (R̅) for the first ratings are shown. Based on this, the average stability for cards after the first rating of the day (Again or Hard or Good or Lapse) is shown.</li>"
+        + "<li>T<sub>X%</sub> means that X% of the cards in this deck with a first rating (Again or Hard or Good or Lapse) are delayed by this amount of time or less till the next rating.</li>"
+        + "</ul>"
         "</td></tr></table>"
     )
     return self._section(title + html)
