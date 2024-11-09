@@ -117,7 +117,9 @@ def get_steps_stats(self: CollectionStats):
     results = steps_stats(lim)
 
     title = CollectionStats._title(
-        self, "Steps Stats", "Statistics for different ratings during learning steps"
+        self,
+        "Steps Stats",
+        "Statistics for different first ratings during (re)learning steps",
     )
 
     html = """
@@ -143,7 +145,7 @@ def get_steps_stats(self: CollectionStats):
                 <td class="trc"><b>Stability</b></td>
             </tr>"""
 
-    ratings = {1: "again", 2: "hard", 3: "good"}
+    ratings = {1: "again", 2: "hard", 3: "good", 0: "lapse"}
     for rating, style in ratings.items():
         stats = results["stats"].get(rating, {})
         if not stats:
@@ -170,7 +172,7 @@ def get_steps_stats(self: CollectionStats):
 
     html += "</table>"
     html += (
-        "<p>This table shows how long students typically wait before reviewing cards for each rating, "
+        "<p>This table shows how long you typically wait before (re)learning cards for each first rating, "
         "and the resulting retention and stability.</p>"
     )
 

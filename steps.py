@@ -29,7 +29,7 @@ def binary_search(points, low=1, high=86400, tolerance=1e-6):
 
 
 def steps_stats(lim):
-    results = mw.col.db.all(
+    learning_revlogs = mw.col.db.all(
         f"""
     WITH first_review AS (
     SELECT cid, MIN(id) AS first_id, ease AS first_rating
@@ -60,12 +60,53 @@ def steps_stats(lim):
     ORDER BY first_rating, delta_t
     """
     )
+    relearning_revlogs = mw.col.db.all(
+        f"""
+        WITH first_fail AS (
+            SELECT cid, id AS first_id
+            FROM revlog
+            WHERE type = 1 AND ease = 1
+            {"AND " + lim if lim else ""}
+        ),
+        next_review AS (
+            SELECT 
+                f.cid,
+                f.first_id,
+                MIN(r.id) AS next_id,
+                CASE WHEN r.ease = 1 THEN 0 ELSE 1 END AS recall
+            FROM first_fail f
+            JOIN revlog r ON f.cid = r.cid 
+                AND r.id > f.first_id
+            WHERE r.ease BETWEEN 1 AND 4
+            GROUP BY f.cid, f.first_id
+        ),
+        review_stats AS (
+            SELECT 
+                nr.cid,
+                (nr.next_id - nr.first_id) / 1000.0 AS delta_t,
+                nr.recall
+            FROM next_review nr
+            WHERE (nr.next_id - nr.first_id) <= 43200000
+        )
+        SELECT 
+            delta_t,
+            recall
+        FROM review_stats
+        ORDER BY delta_t;
+        """
+    )
     stats_dict = {}
-    for first_rating, delta_t, recall in results:
+    for first_rating, delta_t, recall in learning_revlogs:
         if first_rating not in stats_dict:
             stats_dict[first_rating] = {"delta_t": [], "recall": []}
         stats_dict[first_rating]["delta_t"].append(delta_t)
         stats_dict[first_rating]["recall"].append(recall)
+
+    if len(relearning_revlogs) > 0:
+        stats_dict[0] = {"delta_t": [], "recall": []}
+        for delta_t, recall in relearning_revlogs:
+            stats_dict[0]["delta_t"].append(delta_t)
+            stats_dict[0]["recall"].append(recall)
 
     display_dict = {}
 
