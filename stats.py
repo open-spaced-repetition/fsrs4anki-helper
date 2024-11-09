@@ -131,8 +131,8 @@ def get_steps_stats(self: CollectionStats):
         </style>
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
-                <td class="trl" rowspan=2><b>Rating</b></td>
-                <td class="trc" colspan=3><b>Review Timing Distribution</b></td>
+                <td class="trl" rowspan=2><b>First Rating</b></td>
+                <td class="trc" colspan=3><b>Learning Delay Distribution</b></td>
                 <td class="trc" colspan=2><b>Performance</b></td>
             </tr>
             <tr>
