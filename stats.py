@@ -192,7 +192,7 @@ def get_steps_stats(self: CollectionStats):
         "<li>This table shows how long you typically wait before (re)learning cards for each first rating, "
         "and the resulting retention and stability.</li>"
         + "<li>For each first rating, the next reviews are sorted by the delay since the first review.</li>"
-        + "<li>Then, the reviews are divided into four equal parts based on the delay, and the retention (<span>R&#772;</span><sub>1</sub>, <span>R&#772;</span><sub>2</sub>, <span>R&#772;</span><sub>3</sub>, <span>R&#772;</span><sub>4</sub>) is calculated for each part.</li>"
+        + "<li>The next reviews are divided into four equal parts based on the delay, and the retention (<span>R&#772;</span><sub>1</sub>, <span>R&#772;</span><sub>2</sub>, <span>R&#772;</span><sub>3</sub>, <span>R&#772;</span><sub>4</sub>) is calculated for each part.</li>"
         + "<li>T<sub>25%</sub>, T<sub>50%</sub>, and T<sub>75%</sub> are the first, second, and third quartiles of the delay, respectively.</li>"
         + "</ul></details>"
         "</td></tr></table>"
