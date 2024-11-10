@@ -1,6 +1,7 @@
 from anki.stats import CollectionStats
 from .configuration import Config
 from .utils import *
+from .steps import steps_stats
 
 
 def _line_now(i, a, b, bold=True):
@@ -107,7 +108,97 @@ def todayStats_new(self):
         + get_true_retention(self)
         + get_fsrs_stats(self)
         + get_retention_graph(self)
+        + get_steps_stats(self)
     )
+
+
+def get_steps_stats(self: CollectionStats):
+    lim = self._revlogLimit()
+    results = steps_stats(lim)
+
+    title = CollectionStats._title(
+        self,
+        "Steps Stats",
+        "Statistics for different first ratings during (re)learning steps",
+    )
+
+    html = """
+        <style>
+            td.trl { border: 1px solid; text-align: left; padding: 5px  }
+            td.trr { border: 1px solid; text-align: right; padding: 5px  }
+            td.trc { border: 1px solid; text-align: center; padding: 5px }
+            span.again { color: #f00 }
+            span.hard { color: #ff8c00 }
+            span.good { color: #008000 }
+        </style>
+        <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
+            <tr>
+                <td class="trl" rowspan=2><b>First Rating</b></td>
+                <td class="trc" colspan=7><b>Delay And Retention Distribution</b></td>
+                <td class="trc" colspan=3><b>Summary</b></td>
+            </tr>
+            <tr>
+                <td class="trc"><b><span>R&#772;</span><sub>1</sub></b></td>
+                <td class="trc"><b>T<sub>25%</sub></b></td>
+                <td class="trc"><b><span>R&#772;</span><sub>2</sub></b></td>
+                <td class="trc"><b>T<sub>50%</sub></b></td>
+                <td class="trc"><b><span>R&#772;</span><sub>3</sub></b></td>
+                <td class="trc"><b>T<sub>75%</sub></b></td>
+                <td class="trc"><b><span>R&#772;</span><sub>4</sub></b></td>
+                <td class="trc"><b><span>R&#772;</span></b></td>
+                <td class="trc"><b>Stability</b></td>
+                <td class="trc"><b>Reviews</b></td>
+            </tr>"""
+
+    ratings = {1: "again", 2: "hard", 3: "good", 0: "lapse"}
+    for rating, style in ratings.items():
+        stats = results["stats"].get(rating, {})
+        if not stats:
+            html += f"""
+            <tr>
+                <td class="trl"><span class="{style}"><b>{style.title()}</b></span></td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+                <td class="trr">N/A</td>
+            </tr>"""
+            continue
+
+        html += f"""
+            <tr>
+                <td class="trl"><span class="{style}"><b>{style.title()}</b></span></td>
+                <td class="trr">{stats['r1']}</td>
+                <td class="trr">{stats['delay_q1'] / 60:.2f} min</td>
+                <td class="trr">{stats['r2']}</td>
+                <td class="trr">{stats['delay_q2'] / 60:.2f} min</td>
+                <td class="trr">{stats['r3']}</td>
+                <td class="trr">{stats['delay_q3'] / 60:.2f} min</td>
+                <td class="trr">{stats['r4']}</td>
+                <td class="trr">{stats['retention']}</td>
+                <td class="trr">{results['stability'][rating] / 60:.2f} min</td>
+                <td class="trr">{stats['count']}</td>
+            </tr>"""
+
+    html += "</table>"
+    html += (
+        "<table style='text-align: left'><tr><td style='padding: 5px'>"
+        + "<summary>Interpretation</summary><ul>"
+        "<li>This table shows <b>the average time you wait before rating each card the next time</b> (Time Delay) based on your <b>first rating of the day for each card in the deck</b> (Again or Hard or Good or Lapse).</li>"
+        + "<li>It also shows <b>how well you remember a card after each subsequent rating (after its first rating) on average.</b></li>"
+        + "<li>The subsequent ratings after the first ratings of all cards in the deck are gathered and sorted by ascending order of the Time Delay (not shown on the table) and are then grouped into 4 groups (Time Delay 1<2<3<4).</li>"
+        + "<li>The 4 groups are further split and assigned to whatever the first rating of the cards was (Again or Hard or Good or Lapse). Therefore, each First Rating has 4 groups of subsequent ratings (Groups 1,2,3,4).</li>"
+        + "<li>Average Retention rates (R̅₁, R̅₂, R̅₃, R̅₄) for each group of subsequent ratings and the Average Overall Retention (R̅) for the first ratings are shown. Based on this, the average stability for cards after the first rating of the day (Again or Hard or Good or Lapse) is calculated.</li>"
+        + "<li>T<sub>X%</sub> means that X% of the cards in this deck with a first rating (Again or Hard or Good or Lapse) are delayed by this amount of time or less till the next rating.</li>"
+        + "</ul>"
+        "</td></tr></table>"
+    )
+    return self._section(title + html)
 
 
 def get_fsrs_stats(self: CollectionStats):
