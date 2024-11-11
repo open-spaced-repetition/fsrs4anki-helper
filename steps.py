@@ -11,7 +11,7 @@ def total_loss(points, stability):
     return sum(log_loss(y, power_forgetting_curve(x, stability)) for x, y in points)
 
 
-def binary_search(points, low=1, high=86400, tolerance=1e-6):
+def binary_search(points, low=1, high=86400 * 30, tolerance=1e-6):
     while high - low > tolerance:
         mid = (low + high) / 2
         left = mid - tolerance
@@ -43,8 +43,7 @@ def steps_stats(lim):
             ROW_NUMBER() OVER (PARTITION BY r.cid ORDER BY r.id) AS review_order
     FROM revlog r
     JOIN first_review fr ON r.cid = fr.cid AND r.id > fr.first_id
-    WHERE (r.id - fr.first_id) <= 43200000
-    AND r.ease BETWEEN 1 AND 4
+    WHERE r.ease BETWEEN 1 AND 4
     ),
     review_stats AS (
     SELECT fr.first_rating,
@@ -86,7 +85,6 @@ def steps_stats(lim):
                 (nr.next_id - nr.first_id) / 1000.0 AS delta_t,
                 nr.recall
             FROM next_review nr
-            WHERE (nr.next_id - nr.first_id) <= 43200000
         )
         SELECT 
             delta_t,

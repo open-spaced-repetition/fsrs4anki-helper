@@ -244,3 +244,14 @@ def ask_one_way_sync():
         + "and not synced them to this device yet, please do so before you proceed.\n"
         + "Do you want to proceed?"
     )
+
+
+def format_time(x, pos=None):
+    if x < 60:
+        return f"{x:.0f}s"
+    elif x < 3600:
+        return f"{x/60:.2f}m"
+    elif x < 86400:
+        return f"{x/3600:.2f}h"
+    else:
+        return f"{x/86400:.2f}d"
