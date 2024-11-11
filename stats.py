@@ -174,14 +174,14 @@ def get_steps_stats(self: CollectionStats):
             <tr>
                 <td class="trl"><span class="{style}"><b>{style.title()}</b></span></td>
                 <td class="trr">{stats['r1']}</td>
-                <td class="trr">{stats['delay_q1'] / 60:.2f} min</td>
+                <td class="trr">{format_time(stats['delay_q1'])}</td>
                 <td class="trr">{stats['r2']}</td>
-                <td class="trr">{stats['delay_q2'] / 60:.2f} min</td>
+                <td class="trr">{format_time(stats['delay_q2'])}</td>
                 <td class="trr">{stats['r3']}</td>
-                <td class="trr">{stats['delay_q3'] / 60:.2f} min</td>
+                <td class="trr">{format_time(stats['delay_q3'])}</td>
                 <td class="trr">{stats['r4']}</td>
                 <td class="trr">{stats['retention']}</td>
-                <td class="trr">{results['stability'][rating] / 60:.2f} min</td>
+                <td class="trr">{format_time(results['stability'][rating])}</td>
                 <td class="trr">{stats['count']}</td>
             </tr>"""
 
