@@ -25,14 +25,16 @@ class FSRS:
     enable_load_balance: bool
     easy_days_review_ratio_list: List[float]
     easy_specific_due_dates: List[int]
-    due_cnt_per_day: Dict[int, int]
-    due_today: int
-    reviewed_today: int
+    due_cnt_per_day_per_preset: Dict[int, Dict[int, int]]
+    due_today_per_preset: Dict[int, int]
+    reviewed_today_per_preset: Dict[int, int]
     card: Card
     elapsed_days: int
     apply_easy_days: bool
     current_date: date
     today: int
+    did: int
+    did_to_preset_id: Dict[int, int]
 
     def __init__(self) -> None:
         self.reschedule_threshold = 0
@@ -45,36 +47,79 @@ class FSRS:
         self.apply_easy_days = False
         self.current_date = sched_current_date()
         self.today = mw.col.sched.today
+        self.DM = DeckManager(mw.col)
 
     def set_load_balance(self, did_query=None):
         self.enable_load_balance = True
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
-        self.due_cnt_per_day = defaultdict(
+        original_did = "CASE WHEN odid==0 THEN did ELSE odid END"
+
+        deck_stats = mw.col.db.all(
+            f"""SELECT {original_did}, {true_due}, count() 
+                FROM cards 
+                WHERE type = 2  
+                AND queue != -1
+                {did_query if did_query is not None else ""}
+                GROUP BY {original_did}, {true_due}"""
+        )
+
+        self.due_cnt_per_day_per_preset = defaultdict(lambda: defaultdict(int))
+        self.did_to_preset_id = {}
+
+        for did, due_date, count in deck_stats:
+            preset_id = self.DM.config_dict_for_deck_id(did)["id"]
+            self.due_cnt_per_day_per_preset[preset_id][due_date] += count
+            self.did_to_preset_id[did] = preset_id
+
+        self.due_today_per_preset = defaultdict(
             int,
             {
-                day: cnt
-                for day, cnt in mw.col.db.all(
-                    f"""SELECT {true_due}, count() 
-                        FROM cards 
-                        WHERE type = 2  
-                        AND queue != -1
-                        {did_query if did_query is not None else ""}
-                        GROUP BY {true_due}"""
+                preset_id: sum(
+                    due_cnt for due, due_cnt in config_dues.items() if due <= self.today
                 )
+                for preset_id, config_dues in self.due_cnt_per_day_per_preset.items()
             },
         )
-        self.due_today = sum(
-            due_cnt
-            for due, due_cnt in self.due_cnt_per_day.items()
-            if due <= mw.col.sched.today
+
+        reviewed_stats = mw.col.db.all(
+            f"""SELECT {original_did}, count(distinct revlog.cid)
+                FROM revlog
+                JOIN cards ON revlog.cid = cards.id
+                WHERE revlog.ease > 0
+                AND (revlog.type < 3 OR revlog.factor != 0)
+                AND revlog.id/1000 >= {mw.col.sched.day_cutoff - 86400}
+                GROUP BY {original_did}
+            """
         )
-        self.reviewed_today = mw.col.db.scalar(
-            f"""SELECT count(distinct cid)
-            FROM revlog
-            WHERE ease > 0
-            AND (type < 3 OR factor != 0)
-            AND id/1000 >= {mw.col.sched.day_cutoff - 86400}"""
-        )
+
+        self.reviewed_today_per_preset = defaultdict(int)
+
+        for did, count in reviewed_stats:
+            preset_id = self.DM.config_dict_for_deck_id(did)["id"]
+            self.reviewed_today_per_preset[preset_id] += count
+
+    @property
+    def preset_id(self):
+        return self.did_to_preset_id[self.did]
+
+    @property
+    def due_cnt_per_day(self):
+        return self.due_cnt_per_day_per_preset[self.preset_id]
+
+    def due_cnt_per_day_update(self, due_date: int, count: int):
+        self.due_cnt_per_day_per_preset[self.preset_id][due_date] += count
+
+    @property
+    def due_today(self):
+        return self.due_today_per_preset[self.preset_id]
+
+    @due_today.setter
+    def due_today(self, value):
+        self.due_today_per_preset[self.preset_id] = value
+
+    @property
+    def reviewed_today(self):
+        return self.reviewed_today_per_preset[self.preset_id]
 
     def set_fuzz_factor(self, cid: int, reps: int):
         random.seed(rotate_number_by_k(cid, 8) + reps)
@@ -223,10 +268,9 @@ def reschedule_background(
 
     fsrs = FSRS()
     fsrs.reschedule_threshold = config.reschedule_threshold
-    DM = DeckManager(mw.col)
     did_query = None
     if did is not None:
-        did_list = ids2str(DM.deck_and_child_ids(did))
+        did_list = ids2str(fsrs.DM.deck_and_child_ids(did))
         did_query = f"AND did IN {did_list}"
 
     if config.load_balance:
@@ -299,8 +343,8 @@ def reschedule_background(
         lambda x: (
             x
             + [
-                DM.config_dict_for_deck_id(x[1])["desiredRetention"],
-                DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
+                fsrs.DM.config_dict_for_deck_id(x[1])["desiredRetention"],
+                fsrs.DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
             ]
         ),
         cid_did_nid,
@@ -309,11 +353,12 @@ def reschedule_background(
     cancelled = False
     rescheduled_cards = []
     undo_entry = mw.col.add_custom_undo_entry("Reschedule")
-    for cid, _, _, desired_retention, maximum_interval in cards:
+    for cid, did, _, desired_retention, maximum_interval in cards:
         if cancelled:
             break
         fsrs.desired_retention = desired_retention
         fsrs.maximum_interval = maximum_interval
+        fsrs.did = did
         card = reschedule_card(cid, fsrs, filter_flag)
         if card is None:
             continue
@@ -384,8 +429,8 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         card = update_card_due_ivl(card, new_ivl)
         due_after = card.odue if card.odid else card.due
         if fsrs.enable_load_balance:
-            fsrs.due_cnt_per_day[due_before] -= 1
-            fsrs.due_cnt_per_day[due_after] += 1
+            fsrs.due_cnt_per_day_update(due_before, -1)
+            fsrs.due_cnt_per_day_update(due_after, 1)
             if due_before <= fsrs.today and due_after > fsrs.today:
                 fsrs.due_today -= 1
             if due_before > fsrs.today and due_after <= fsrs.today:
