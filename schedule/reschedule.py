@@ -106,8 +106,13 @@ class FSRS:
     def due_cnt_per_day(self):
         return self.due_cnt_per_day_per_preset[self.preset_id]
 
-    def due_cnt_per_day_update(self, due_date: int, count: int):
-        self.due_cnt_per_day_per_preset[self.preset_id][due_date] += count
+    def update_due_cnt_per_day(self, due_before: int, due_after: int):
+        self.due_cnt_per_day_per_preset[self.preset_id][due_before] -= 1
+        self.due_cnt_per_day_per_preset[self.preset_id][due_after] += 1
+        if due_before <= self.today and due_after > self.today:
+            self.due_today -= 1
+        if due_before > self.today and due_after <= self.today:
+            self.due_today += 1
 
     @property
     def due_today(self):
@@ -429,12 +434,8 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         card = update_card_due_ivl(card, new_ivl)
         due_after = card.odue if card.odid else card.due
         if fsrs.enable_load_balance:
-            fsrs.due_cnt_per_day_update(due_before, -1)
-            fsrs.due_cnt_per_day_update(due_after, 1)
-            if due_before <= fsrs.today and due_after > fsrs.today:
-                fsrs.due_today -= 1
-            if due_before > fsrs.today and due_after <= fsrs.today:
-                fsrs.due_today += 1
+            fsrs.update_due_cnt_per_day(due_before, due_after)
+
     return card
 
 
