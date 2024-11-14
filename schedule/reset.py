@@ -68,5 +68,5 @@ def clear_manual_rescheduling(did):
     cnt = len(revlog_ids)
     mw.col.db.execute(f"DELETE FROM revlog WHERE id IN {ids2str(revlog_ids)}")
     col_set_modified()
-    tooltip(f"{cnt} review logs cleared.")
+    tooltip(f"{cnt} review logs deleted.")
     mw.reset()
