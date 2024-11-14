@@ -180,7 +180,7 @@ add_action_to_gear(flatten, "Flatten future due cards")
 menu_reset = build_action(clear_custom_data, "Clear custom data in all cards")
 
 menu_clear_manual_rescheduling = build_action(
-    clear_manual_rescheduling, "Clear manual rescheduling in all cards"
+    clear_manual_rescheduling, "Delete redundant manual revlog entries"
 )
 
 menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings")
