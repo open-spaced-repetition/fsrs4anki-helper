@@ -10,7 +10,7 @@ from .schedule.reschedule import reschedule
 from .schedule.postpone import postpone
 from .schedule.advance import advance
 from .schedule.flatten import flatten
-from .schedule.reset import clear_custom_data
+from .schedule.reset import clear_custom_data, clear_manual_rescheduling
 from .schedule.disperse_siblings import disperse_siblings
 from .schedule.easy_days import (
     easy_days,
@@ -179,6 +179,10 @@ add_action_to_gear(flatten, "Flatten future due cards")
 
 menu_reset = build_action(clear_custom_data, "Clear custom data in all cards")
 
+menu_clear_manual_rescheduling = build_action(
+    clear_manual_rescheduling, "Delete redundant manual revlog entries"
+)
+
 menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings")
 
 menu_remedy_hard_misuse = build_action(remedy_hard_misuse, "Remedy")
@@ -244,9 +248,10 @@ menu_for_helper.addAction(menu_reschedule_recent)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
 menu_for_helper.addAction(menu_flatten)
-menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_disperse_siblings)
 menu_for_helper.addSeparator()
+menu_for_helper.addAction(menu_reset)
+menu_for_helper.addAction(menu_clear_manual_rescheduling)
 menu_for_remedy = menu_for_helper.addMenu("Remedy Hard Misuse")
 menu_for_remedy.addAction(menu_remedy_hard_misuse)
 menu_for_remedy.addAction(menu_undo_remedy)
