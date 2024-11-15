@@ -19,6 +19,7 @@ AUTO_EASY_DAYS = "auto_easy_days"
 HAS_RATED = "has_rated"
 HAS_SPONSORED = "has_sponsored"
 SKIP_MANUAL_RESCHED_CARDS = "skip_manual_resched_cards"
+SHOW_STEPS_STATS = "show_steps_stats"
 
 
 def load_config():
@@ -191,4 +192,13 @@ class Config:
     @skip_manual_resched_cards.setter
     def skip_manual_resched_cards(self, value):
         self.data[SKIP_MANUAL_RESCHED_CARDS] = value
+        self.save()
+
+    @property
+    def show_steps_stats(self):
+        return self.data[SHOW_STEPS_STATS]
+
+    @show_steps_stats.setter
+    def show_steps_stats(self, value):
+        self.data[SHOW_STEPS_STATS] = value
         self.save()

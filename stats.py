@@ -113,6 +113,10 @@ def todayStats_new(self):
 
 
 def get_steps_stats(self: CollectionStats):
+    config = Config()
+    config.load()
+    if not config.show_steps_stats:
+        return ""
     lim = self._revlogLimit()
     results = steps_stats(lim)
 
