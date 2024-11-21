@@ -168,3 +168,14 @@ If you like FSRS Helper, [please Rate this!👍](https://ankiweb.net/shared/revi
 [![Buy Me a Coffee at ko-fi.com](https://storage.ko-fi.com/cdn/kofi5.png?v=3)](https://ko-fi.com/X8X6LQZM4)
 
 Or support me in GitHub: [Sponsor @L-M-Sherlock on GitHub Sponsors](https://github.com/sponsors/L-M-Sherlock)
+
+# Acknowledgements
+
+I referred to the following projects while developing FSRS Helper:
+
+- [load balancer](https://github.com/jakeprobst/anki-loadbalancer)
+- [Free Weekend](https://github.com/cjdduarte/Free_Weekend)
+- [Delay siblings](https://github.com/oakkitten/anki-delay-siblings)
+- [True Retention by Card Maturity Simplified](https://ankiweb.net/shared/info/1779060522)
+
+Thanks to all the contributors for their valuable contributions!
