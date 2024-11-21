@@ -165,7 +165,9 @@ If you like FSRS Helper, [please Rate this!👍](https://ankiweb.net/shared/revi
 
 *A kind request*: Writing, supporting, and maintaining FSRS takes considerable time and effort. If this tool has become a valuable asset in your studies, please consider showing your appreciation by clicking the button below to make a contribution on Ko-fi. Every bit of support is greatly appreciated and will go a long way in helping me maintain and improve FSRS over time!
 
-[![Buy Me a Coffee at ko-fi.com](https://storage.ko-fi.com/cdn/kofi5.png?v=3)](https://ko-fi.com/X8X6LQZM4)
+<a href='https://ko-fi.com/X8X6LQZM4' target='_blank'><img height='32' width="127"
+    style='border:0px;height:32px;' src='https://storage.ko-fi.com/cdn/kofi1.png?v=6' border='0'
+    alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 Or support me in GitHub: [Sponsor @L-M-Sherlock on GitHub Sponsors](https://github.com/sponsors/L-M-Sherlock)
 
