@@ -144,6 +144,19 @@ menu_display_memory_state = checkable(
 )
 
 
+def set_show_steps_stats(checked, _):
+    if not config.show_steps_stats and not askUser(
+        "This feature would slow down the loading of the old stats page if you have a lot of reviews. Are you sure you want to enable it?"
+    ):
+        return
+    config.show_steps_stats = checked
+
+
+menu_show_steps_stats = checkable(
+    title="Show steps stats", on_click=set_show_steps_stats
+)
+
+
 def set_load_balance(checked, _):
     config.load_balance = checked
 
@@ -236,6 +249,7 @@ menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_display_memory_state)
+menu_for_helper.addAction(menu_show_steps_stats)
 menu_for_helper.addAction(menu_load_balance)
 menu_for_helper.addAction(menu_auto_disperse_after_reschedule)
 menu_for_easy_days = menu_for_helper.addMenu(
@@ -299,6 +313,7 @@ def adjust_menu():
         menu_auto_disperse_after_sync.setChecked(config.auto_disperse_after_sync)
         menu_auto_disperse.setChecked(config.auto_disperse_when_review)
         menu_display_memory_state.setChecked(config.display_memory_state)
+        menu_show_steps_stats.setChecked(config.show_steps_stats)
         menu_load_balance.setChecked(config.load_balance)
         menu_auto_disperse_after_reschedule.setChecked(
             config.auto_disperse_after_reschedule
