@@ -244,6 +244,29 @@ def sponsor(did=None):
 
 menu_sponsor = build_action(sponsor, "Sponsor the Author")
 
+
+def pass_fail(did=None):
+    openLink("https://ankiweb.net/shared/info/876946123")
+
+
+menu_pass_fail = build_action(pass_fail, "Pass/Fail")
+
+
+def ajt_card_management(did=None):
+    openLink("https://ankiweb.net/shared/info/1021636467")
+
+
+menu_ajt_card_management = build_action(ajt_card_management, "AJT Card Management")
+
+
+def search_stats_extended(did=None):
+    openLink("https://ankiweb.net/shared/info/1613056169")
+
+
+menu_search_stats_extended = build_action(
+    search_stats_extended, "Search Stats Extended"
+)
+
 menu_for_helper = mw.form.menuTools.addMenu("FSRS Helper")
 menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
@@ -276,7 +299,11 @@ if not config.has_rated:
     menu_for_helper.addAction(menu_rate)
 if not config.has_sponsored:
     menu_for_helper.addAction(menu_sponsor)
-
+menu_for_helper.addSeparator()
+menu_for_curated_addons = menu_for_helper.addMenu("Curated Add-ons")
+menu_for_curated_addons.addAction(menu_pass_fail)
+menu_for_curated_addons.addAction(menu_ajt_card_management)
+menu_for_curated_addons.addAction(menu_search_stats_extended)
 
 menu_apply_easy_days = build_action(easy_days, "Apply easy days now")
 menu_apply_easy_days_for_specific_date = build_action(
