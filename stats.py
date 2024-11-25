@@ -117,8 +117,15 @@ def get_steps_stats(self: CollectionStats):
     config.load()
     if not config.show_steps_stats:
         return ""
-    lim = self._revlogLimit()
-    results = steps_stats(lim)
+    start, days, chunk = self.get_start_end_chunk()
+    if days is not None:
+        period_lim = "first_id > %d" % (
+            (self.col.sched.day_cutoff - (days * chunk * 86400)) * 1000
+        )
+    else:
+        period_lim = ""
+    deck_lim = self._revlogLimit()
+    results = steps_stats(deck_lim, period_lim)
 
     title = CollectionStats._title(
         self,

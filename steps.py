@@ -28,14 +28,14 @@ def binary_search(points, low=1, high=86400 * 30, tolerance=1e-6):
     return (low + high) / 2
 
 
-def steps_stats(lim):
+def steps_stats(deck_lim, period_lim):
     learning_revlogs = mw.col.db.all(
         f"""
     WITH first_review AS (
     SELECT cid, MIN(id) AS first_id, ease AS first_rating
     FROM revlog
     WHERE ease BETWEEN 1 AND 4
-    {"AND " + lim if lim else ""}
+    {"AND " + deck_lim if deck_lim else ""}
     GROUP BY cid
     ),
     second_review AS (
@@ -52,6 +52,7 @@ def steps_stats(lim):
     FROM first_review fr
     JOIN second_review sr ON fr.cid = sr.cid
     WHERE sr.review_order = 1
+    {"AND " + period_lim if period_lim else ""}
     )
     SELECT first_rating, delta_t, recall
     FROM review_stats
@@ -65,7 +66,7 @@ def steps_stats(lim):
             SELECT cid, id AS first_id
             FROM revlog
             WHERE type = 1 AND ease = 1
-            {"AND " + lim if lim else ""}
+            {"AND " + deck_lim if deck_lim else ""}
         ),
         next_review AS (
             SELECT 
@@ -85,6 +86,7 @@ def steps_stats(lim):
                 (nr.next_id - nr.first_id) / 1000.0 AS delta_t,
                 nr.recall
             FROM next_review nr
+            {"WHERE " + period_lim if period_lim else ""}
         )
         SELECT 
             delta_t,
