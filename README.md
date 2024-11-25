@@ -141,9 +141,9 @@ Interpretation:
 
 ![image](https://github.com/user-attachments/assets/7d7afafb-27f5-4986-b6eb-b5ef486c50a1)
 
-The Steps Stats are based on all cards in your deck or collection (whichever is selected) that you have ever reviewed twice and the first review should be done in last 1 month/year or deck life.
+The Steps Stats are based on all cards in your deck or collection (whichever is selected) that you have ever reviewed twice, and the first review was in the last 1 month/year or deck life.
 
-This stats is helpful if you want to fine-tune your (re)learning steps to make the short-term schedule satisify your desired retention. For the mechanism about steps, please see the *Learning Steps* section in [Deck Options - Anki Manual](https://docs.ankiweb.net/deck-options.html#learning-steps).
+These stats are helpful if you want to fine-tune your (re)learning steps to configure your short-term schedule according to your desired retention. If you want to learn more about learning steps, please read [this section of the Anki manual](https://docs.ankiweb.net/deck-options.html#learning-steps).
 
 ## Other features
 
