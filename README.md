@@ -124,6 +124,8 @@ In Anki 23.10+, you can use the built-in search syntax to search for them as [ca
 
 Hold down the Shift key and click "Stats" to enter the old version of Anki's statistics interface.
 
+### FSRS Stats
+
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/db368bcb-54a5-4ca2-bc14-acad382f643f)
 
 The FSRS Stats are based on all cards in your deck or collection (whichever is selected) that you have ever reviewed. They remain unaffected by the 1 month/year settings.
@@ -134,8 +136,10 @@ Interpretation:
 - The [three component of the memory model](https://supermemo.guru/wiki/Three_component_model_of_memory) used by FSRS:
 	- Average predicted **retention** reflects the percentage of cards that you would recall correctly if you were tested today.
 	- Average (memory) **stability** reflects how fast you forget (forgetting rate). The greater the stability, the slower the forgetting rate.
-	- **Difficulty** reflects how hard it is to increase or maintain the stability of a memory. Its relative distribution within the deck/collection can be viewed at the bottom of the statistics interface (<=2.1.66):
-	![image](https://user-images.githubusercontent.com/32575846/260213063-9b18fbaa-6b92-4392-8984-03b85f3fcedd.png)
+
+### Steps Stats
+
+TODO
 
 ## Other features
 
