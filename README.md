@@ -139,7 +139,11 @@ Interpretation:
 
 ### Steps Stats
 
-TODO
+![image](https://github.com/user-attachments/assets/7d7afafb-27f5-4986-b6eb-b5ef486c50a1)
+
+The Steps Stats are based on the cards from the selected deck or collection that were first reviewed in the last 1 month/year or deck life and have at least two reviews.
+
+These stats are helpful for fine-tuning your (re)learning steps to achieve your desired retention in the short-term reviews. To learn more about learning steps, please read [learning steps](https://docs.ankiweb.net/deck-options.html#learning-steps) in the  Anki manual.
 
 ## Other features
 
