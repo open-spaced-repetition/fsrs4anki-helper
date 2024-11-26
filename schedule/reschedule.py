@@ -441,7 +441,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
 
 def reschedule_browser_selected_cards(browser: browser.Browser):
     cids = browser.selected_cards()
-    reschedule(None, False, True, cids)
+    reschedule(did=None, recent=False, filter_flag=True, filtered_cids=cids)
 
 
 @browser_menus_did_init.append

@@ -58,7 +58,7 @@ def easy_days(did):
     )
 
     fut = reschedule(
-        None,
+        did=None,
         recent=False,
         filter_flag=True,
         filtered_cids=set(due_in_easy_days_cids),
