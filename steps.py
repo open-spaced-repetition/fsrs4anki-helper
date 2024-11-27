@@ -27,6 +27,8 @@ def fit_forgetting_curve(points, low=1, high=86400 * 30, tolerance=0.1):
         else:
             low = left_third  # Minimum is in right part
 
+    return (high + low) / 2
+
 
 def steps_stats(deck_lim, period_lim):
     sql = f"""
