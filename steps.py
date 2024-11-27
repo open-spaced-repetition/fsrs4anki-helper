@@ -11,21 +11,21 @@ def total_loss(points, stability):
     return sum(log_loss(y, power_forgetting_curve(x, stability)) for x, y in points)
 
 
-def binary_search(points, low=1, high=86400 * 30, tolerance=1e-6):
+def fit_forgetting_curve(points, low=1, high=86400 * 30, tolerance=0.1):
     while high - low > tolerance:
-        mid = (low + high) / 2
-        left = mid - tolerance
-        right = mid + tolerance
+        # Calculate two midpoints that divide range into three parts
+        left_third = low + (high - low) / 3
+        right_third = high - (high - low) / 3
 
-        loss_left = total_loss(points, left)
-        loss_right = total_loss(points, right)
+        # Calculate loss at both points
+        loss_left = total_loss(points, left_third)
+        loss_right = total_loss(points, right_third)
 
+        # Update search range based on which third contains minimum
         if loss_left < loss_right:
-            high = mid
+            high = right_third  # Minimum is in left part
         else:
-            low = mid
-
-    return (low + high) / 2
+            low = left_third  # Minimum is in right part
 
 
 def steps_stats(deck_lim, period_lim):
@@ -161,12 +161,15 @@ def steps_stats(deck_lim, period_lim):
     display_dict["stats"] = results_dict
     rating2stability = {}
     for rating in stats_dict:
-        Q1 = results_dict[rating]["delay_q1"]
-        Q3 = results_dict[rating]["delay_q3"]
-        IQR = Q3 - Q1
-        LOWER = Q1 - 1.5 * IQR
-        UPPER = Q3 + 1.5 * IQR
-        points = list(filter(lambda x: LOWER <= x[0] <= UPPER, stats_dict[rating]))
-        rating2stability[rating] = round(binary_search(points))
+        if len(stats_dict[rating]) >= 250:
+            Q1 = results_dict[rating]["delay_q1"]
+            Q3 = results_dict[rating]["delay_q3"]
+            IQR = Q3 - Q1
+            LOWER = Q1 - 1.5 * IQR
+            UPPER = Q3 + 1.5 * IQR
+            points = list(filter(lambda x: LOWER <= x[0] <= UPPER, stats_dict[rating]))
+        else:
+            points = stats_dict[rating]
+        rating2stability[rating] = round(fit_forgetting_curve(points))
     display_dict["stability"] = rating2stability
     return display_dict
