@@ -29,14 +29,14 @@ def fit_forgetting_curve(points, low=1, high=86400 * 30, tolerance=0.1):
 
 
 def steps_stats(deck_lim, period_lim):
-    learning_revlogs = mw.col.db.all(
-        f"""
+    sql = f"""
     WITH first_review AS (
     SELECT cid, MIN(id) AS first_id, ease AS first_rating
     FROM revlog
     WHERE ease BETWEEN 1 AND 4
     {"AND " + deck_lim if deck_lim else ""}
     GROUP BY cid
+    {"HAVING " + period_lim if period_lim else ""}
     ),
     second_review AS (
     SELECT r.cid, r.id AS second_id, CASE WHEN r.ease=1 THEN 0 ELSE 1 END AS recall,
@@ -52,49 +52,47 @@ def steps_stats(deck_lim, period_lim):
     FROM first_review fr
     JOIN second_review sr ON fr.cid = sr.cid
     WHERE sr.review_order = 1
-    {"AND " + period_lim if period_lim else ""}
     )
     SELECT first_rating, delta_t, recall
     FROM review_stats
     WHERE first_rating != 4
     ORDER BY first_rating, delta_t
     """
-    )
-    relearning_revlogs = mw.col.db.all(
-        f"""
-        WITH first_fail AS (
-            SELECT cid, id AS first_id
-            FROM revlog
-            WHERE type = 1 AND ease = 1
-            {"AND " + deck_lim if deck_lim else ""}
-        ),
-        next_review AS (
-            SELECT 
-                f.cid,
-                f.first_id,
-                MIN(r.id) AS next_id,
-                CASE WHEN r.ease = 1 THEN 0 ELSE 1 END AS recall
-            FROM first_fail f
-            JOIN revlog r ON f.cid = r.cid 
-                AND r.id > f.first_id
-            WHERE r.ease BETWEEN 1 AND 4
-            GROUP BY f.cid, f.first_id
-        ),
-        review_stats AS (
-            SELECT 
-                nr.cid,
-                (nr.next_id - nr.first_id) / 1000.0 AS delta_t,
-                nr.recall
-            FROM next_review nr
-            {"WHERE " + period_lim if period_lim else ""}
-        )
+    learning_revlogs = mw.col.db.all(sql)
+    sql = f"""
+    WITH first_fail AS (
+        SELECT cid, id AS first_id
+        FROM revlog
+        WHERE type = {REVLOG_REV} AND ease = 1
+        {"AND " + deck_lim if deck_lim else ""}
+        {"AND " + period_lim if period_lim else ""}
+    ),
+    next_review AS (
         SELECT 
-            delta_t,
-            recall
-        FROM review_stats
-        ORDER BY delta_t;
-        """
+            f.cid,
+            f.first_id,
+            MIN(r.id) AS next_id,
+            CASE WHEN r.ease = 1 THEN 0 ELSE 1 END AS recall
+        FROM first_fail f
+        JOIN revlog r ON f.cid = r.cid 
+            AND r.id > f.first_id
+        WHERE r.ease BETWEEN 1 AND 4
+        GROUP BY f.cid, f.first_id
+    ),
+    review_stats AS (
+        SELECT 
+            nr.cid,
+            (nr.next_id - nr.first_id) / 1000.0 AS delta_t,
+            nr.recall
+        FROM next_review nr
     )
+    SELECT 
+        delta_t,
+        recall
+    FROM review_stats
+    ORDER BY delta_t;
+    """
+    relearning_revlogs = mw.col.db.all(sql)
     stats_dict = {}
     for first_rating, delta_t, recall in learning_revlogs:
         if first_rating not in stats_dict:
