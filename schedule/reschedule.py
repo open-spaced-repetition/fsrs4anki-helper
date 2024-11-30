@@ -32,6 +32,7 @@ class FSRS:
     today: int
     did: int
     did_to_preset_id: Dict[int, int]
+    preset_id_to_easy_days_percentages: Dict[int, List[float]]
 
     def __init__(self) -> None:
         self.reschedule_threshold = 0
@@ -58,11 +59,13 @@ class FSRS:
 
         self.due_cnt_per_day_per_preset = defaultdict(lambda: defaultdict(int))
         self.did_to_preset_id = {}
+        self.preset_id_to_easy_days_percentages = {}
 
         for did, due_date, count in deck_stats:
             preset_id = self.DM.config_dict_for_deck_id(did)["id"]
             self.due_cnt_per_day_per_preset[preset_id][due_date] += count
             self.did_to_preset_id[did] = preset_id
+            self.preset_id_to_easy_days_percentages[preset_id] = self.DM.config_dict_for_deck_id(did)["easyDaysPercentages"]
 
         self.due_today_per_preset = defaultdict(
             int,
@@ -121,9 +124,7 @@ class FSRS:
 
     @property
     def easy_days_review_ratio_list(self):
-        easy_days_percentages = self.DM.config_dict_for_deck_id(self.did)[
-            "easyDaysPercentages"
-        ]
+        easy_days_percentages = self.preset_id_to_easy_days_percentages[self.preset_id]
         return easy_days_percentages if easy_days_percentages else [1] * 7
 
     def set_fuzz_factor(self, cid: int, reps: int):
