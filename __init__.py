@@ -15,7 +15,6 @@ from .schedule.disperse_siblings import disperse_siblings
 from .schedule.easy_days import (
     easy_days,
     easy_day_for_sepcific_date,
-    easy_days_review_ratio,
 )
 from .schedule.remedy import remedy_hard_misuse, undo_remedy
 from .schedule import init_review_hook
@@ -157,15 +156,6 @@ menu_show_steps_stats = checkable(
 )
 
 
-def set_load_balance(checked, _):
-    config.load_balance = checked
-
-
-menu_load_balance = checkable(
-    title="Load Balance when rescheduling", on_click=set_load_balance
-)
-
-
 def reschedule_recent(did):
     reschedule(did, recent=True)
 
@@ -273,7 +263,6 @@ menu_for_helper.addAction(menu_auto_disperse_after_sync)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_display_memory_state)
 menu_for_helper.addAction(menu_show_steps_stats)
-menu_for_helper.addAction(menu_load_balance)
 menu_for_helper.addAction(menu_auto_disperse_after_reschedule)
 menu_for_easy_days = menu_for_helper.addMenu(
     "Less Anki on Easy Days (requires Load Balancing)"
@@ -310,9 +299,6 @@ menu_apply_easy_days_for_specific_date = build_action(
     lambda did: easy_day_for_sepcific_date(did, config),
     "Apply easy days for specific dates",
 )
-menu_easy_days = build_action(
-    lambda did: easy_days_review_ratio(did, config), "Configure easy days"
-)
 
 
 def set_auto_easy_days(checked, _):
@@ -327,8 +313,6 @@ menu_for_auto_easy_days = checkable(
 menu_for_easy_days.addAction(menu_apply_easy_days_for_specific_date)
 menu_for_easy_days.addAction(menu_apply_easy_days)
 menu_for_easy_days.addAction(menu_for_auto_easy_days)
-menu_for_easy_days.addSeparator()
-menu_for_easy_days.addAction(menu_easy_days)
 
 
 def adjust_menu():
@@ -341,7 +325,6 @@ def adjust_menu():
         menu_auto_disperse.setChecked(config.auto_disperse_when_review)
         menu_display_memory_state.setChecked(config.display_memory_state)
         menu_show_steps_stats.setChecked(config.show_steps_stats)
-        menu_load_balance.setChecked(config.load_balance)
         menu_auto_disperse_after_reschedule.setChecked(
             config.auto_disperse_after_reschedule
         )

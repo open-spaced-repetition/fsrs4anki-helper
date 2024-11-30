@@ -2,9 +2,7 @@ from aqt import mw
 
 tag = mw.addonManager.addonFromModule(__name__)
 
-LOAD_BALANCE = "load_balance"
 EASY_DATES = "easy_dates"
-EASY_DAYS_REVIEW_RATIO_LIST = "easy_days_review_ratio_list"
 DAYS_TO_RESCHEDULE = "days_to_reschedule"
 AUTO_RESCHEDULE_AFTER_SYNC = "auto_reschedule_after_sync"
 AUTO_DISPERSE_AFTER_SYNC = "auto_disperse_after_sync"
@@ -42,30 +40,12 @@ class Config:
         save_config(self.data)
 
     @property
-    def load_balance(self):
-        return self.data[LOAD_BALANCE]
-
-    @load_balance.setter
-    def load_balance(self, value):
-        self.data[LOAD_BALANCE] = value
-        self.save()
-
-    @property
     def easy_dates(self) -> list[str]:
         return self.data[EASY_DATES]
 
     @easy_dates.setter
     def easy_dates(self, value):
         self.data[EASY_DATES] = value
-        self.save()
-
-    @property
-    def easy_days_review_ratio_list(self):
-        return self.data[EASY_DAYS_REVIEW_RATIO_LIST]
-
-    @easy_days_review_ratio_list.setter
-    def easy_days_review_ratio_list(self, value):
-        self.data[EASY_DAYS_REVIEW_RATIO_LIST] = value
         self.save()
 
     @property

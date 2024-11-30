@@ -22,15 +22,12 @@ class FSRS:
     reschedule_threshold: float
     maximum_interval: int
     desired_retention: float
-    enable_load_balance: bool
-    easy_days_review_ratio_list: List[float]
     easy_specific_due_dates: List[int]
     due_cnt_per_day_per_preset: Dict[int, Dict[int, int]]
     due_today_per_preset: Dict[int, int]
     reviewed_today_per_preset: Dict[int, int]
     card: Card
     elapsed_days: int
-    apply_easy_days: bool
     current_date: date
     today: int
     did: int
@@ -40,17 +37,13 @@ class FSRS:
         self.reschedule_threshold = 0
         self.maximum_interval = 36500
         self.desired_retention = 0.9
-        self.enable_load_balance = False
-        self.easy_days_review_ratio_list = [1] * 7
         self.easy_specific_due_dates = []
         self.elapsed_days = 0
-        self.apply_easy_days = False
         self.current_date = sched_current_date()
         self.today = mw.col.sched.today
         self.DM = DeckManager(mw.col)
 
     def set_load_balance(self, did_query=None):
-        self.enable_load_balance = True
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
         original_did = "CASE WHEN odid==0 THEN did ELSE odid END"
 
@@ -126,6 +119,13 @@ class FSRS:
     def reviewed_today(self):
         return self.reviewed_today_per_preset[self.preset_id]
 
+    @property
+    def easy_days_review_ratio_list(self):
+        easy_days_percentages = self.DM.config_dict_for_deck_id(self.did)[
+            "easyDaysPercentages"
+        ]
+        return easy_days_percentages if easy_days_percentages else [1] * 7
+
     def set_fuzz_factor(self, cid: int, reps: int):
         random.seed(rotate_number_by_k(cid, 8) + reps)
         self.fuzz_factor = random.random()
@@ -171,43 +171,37 @@ class FSRS:
             return ivl
         min_ivl, max_ivl = get_fuzz_range(ivl, self.elapsed_days, self.maximum_interval)
         self.elapsed_days = 0
-        if not self.enable_load_balance:
-            if int_version() >= 231001:
-                return ivl + mw.col.fuzz_delta(self.card.id, ivl)
-            else:
-                return int(self.fuzz_factor * (max_ivl - min_ivl + 1) + min_ivl)
-        else:
-            # Load balance
-            due = self.card.odue if self.card.odid else self.card.due
-            last_review = get_last_review_date(self.card)
 
-            if self.apply_easy_days:
-                if due > last_review + max_ivl + 2:
-                    current_ivl = due - last_review
-                    min_ivl, max_ivl = get_fuzz_range(
-                        current_ivl, self.elapsed_days, current_ivl
-                    )
+        # Load balance
+        due = self.card.odue if self.card.odid else self.card.due
+        last_review = get_last_review_date(self.card)
 
-            if last_review + max_ivl < self.today:
-                return min(ivl, max_ivl)
-
-            min_ivl = max(min_ivl, self.today - last_review)
-
-            possible_intervals = list(range(min_ivl, max_ivl + 1))
-            review_cnts = []
-            for i in possible_intervals:
-                check_due = last_review + i
-                if check_due > self.today:
-                    review_cnts.append(self.due_cnt_per_day[check_due])
-                else:
-                    review_cnts.append(self.due_today + self.reviewed_today)
-
-            best_ivl = self.load_balance(
-                possible_intervals,
-                review_cnts,
-                last_review,
+        if due > last_review + max_ivl + 2:
+            current_ivl = due - last_review
+            min_ivl, max_ivl = get_fuzz_range(
+                current_ivl, self.elapsed_days, current_ivl
             )
-            return best_ivl
+
+        if last_review + max_ivl < self.today:
+            return min(ivl, max_ivl)
+
+        min_ivl = max(min_ivl, self.today - last_review)
+
+        possible_intervals = list(range(min_ivl, max_ivl + 1))
+        review_cnts = []
+        for i in possible_intervals:
+            check_due = last_review + i
+            if check_due > self.today:
+                review_cnts.append(self.due_cnt_per_day[check_due])
+            else:
+                review_cnts.append(self.due_today + self.reviewed_today)
+
+        best_ivl = self.load_balance(
+            possible_intervals,
+            review_cnts,
+            last_review,
+        )
+        return best_ivl
 
     def fuzzed_next_interval(self, stability):
         new_interval = next_interval(stability, self.desired_retention)
@@ -223,7 +217,6 @@ def reschedule(
     filter_flag=False,
     filtered_cids={},
     easy_specific_due_dates=[],
-    apply_easy_days=False,
 ):
     if not mw.col.get_config("fsrs"):
         tooltip(FSRS_ENABLE_WARNING)
@@ -252,7 +245,6 @@ def reschedule(
             filter_flag,
             filtered_cids,
             easy_specific_due_dates,
-            apply_easy_days,
         ),
         on_done,
     )
@@ -266,7 +258,6 @@ def reschedule_background(
     filter_flag=False,
     filtered_cids={},
     easy_specific_due_dates=[],
-    apply_easy_days=False,
 ):
     config = Config()
     config.load()
@@ -278,18 +269,14 @@ def reschedule_background(
         did_list = ids2str(fsrs.DM.deck_and_child_ids(did))
         did_query = f"AND did IN {did_list}"
 
-    if config.load_balance:
-        fsrs.set_load_balance(did_query=did_query)
-        fsrs.easy_days_review_ratio_list = config.easy_days_review_ratio_list
-        fsrs.easy_specific_due_dates = easy_specific_due_dates
+    fsrs.set_load_balance(did_query=did_query)
+    fsrs.easy_specific_due_dates = easy_specific_due_dates
 
-        for easy_date_str in config.easy_dates:
-            easy_date = datetime.strptime(easy_date_str, "%Y-%m-%d").date()
-            specific_due = fsrs.today + (easy_date - fsrs.current_date).days
-            if specific_due not in fsrs.easy_specific_due_dates:
-                fsrs.easy_specific_due_dates.append(specific_due)
-
-        fsrs.apply_easy_days = apply_easy_days
+    for easy_date_str in config.easy_dates:
+        easy_date = datetime.strptime(easy_date_str, "%Y-%m-%d").date()
+        specific_due = fsrs.today + (easy_date - fsrs.current_date).days
+        if specific_due not in fsrs.easy_specific_due_dates:
+            fsrs.easy_specific_due_dates.append(specific_due)
 
     if recent:
         today_cutoff = mw.col.sched.day_cutoff
@@ -415,7 +402,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         fsrs.set_fuzz_factor(cid, card.reps)
         new_ivl = fsrs.fuzzed_next_interval(s)
 
-        if fsrs.reschedule_threshold > 0 and not fsrs.apply_easy_days:
+        if fsrs.reschedule_threshold > 0:
             dr = fsrs.desired_retention
             odds = dr / (1 - dr)
 
@@ -433,8 +420,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         due_before = card.odue if card.odid else card.due
         card = update_card_due_ivl(card, new_ivl)
         due_after = card.odue if card.odid else card.due
-        if fsrs.enable_load_balance:
-            fsrs.update_due_cnt_per_day(due_before, due_after)
+        fsrs.update_due_cnt_per_day(due_before, due_after)
 
     return card
 
