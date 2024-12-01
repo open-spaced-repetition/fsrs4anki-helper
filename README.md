@@ -61,6 +61,8 @@ These two functions are very similar, so I'll talk about them together. You can 
 
 Once the load balance option is enabled, rescheduling will make the daily review load as consistent and smooth as possible.
 
+**Update**: after Anki 24.11, the load balance feature is built-in. So you don't need to enable it in the add-on settings.
+
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/4ac4f5aa-e4c6-4f50-b30c-1595f930d2f3)
 
 Here's a comparison, the first graph is rescheduling before enabling it, and the second graph is after enabling:
@@ -72,6 +74,8 @@ Here's a comparison, the first graph is rescheduling before enabling it, and the
 ## Easy Days
 
 You can select any day or days from Monday through Sunday to take off. Once enabled, the Helper add-on will try to avoid these days when rescheduling. On "Reduced" days, you will only have ~50% the usual amount of reviews. On "Minimum" days, there will be ~0% reviews.
+
+**Update**: after Anki 24.11, the easy days feature is built-in. So you don't need to configure it in the add-on settings.
 
 Note: Easy Days only works for cards in the "review" stage. Due to technical limitations, FSRS doesn't modify the interval and due date of cards in the "(re)learning" stage. And it also doesn't reschedule cards whose interval is less than 3 days.
 
