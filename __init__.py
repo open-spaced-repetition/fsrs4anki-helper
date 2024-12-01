@@ -239,9 +239,7 @@ menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_display_memory_state)
 menu_for_helper.addAction(menu_show_steps_stats)
 menu_for_helper.addAction(menu_auto_disperse_after_reschedule)
-menu_for_easy_days = menu_for_helper.addMenu(
-    "Less Anki on Easy Days"
-)
+menu_for_easy_days = menu_for_helper.addMenu("Less Anki on Easy Days")
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_reschedule_recent)
