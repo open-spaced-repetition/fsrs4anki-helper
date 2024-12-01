@@ -18,7 +18,6 @@ DISPLAY_MEMORY_STATE = "display_memory_state"
 AUTO_EASY_DAYS = "auto_easy_days"
 HAS_RATED = "has_rated"
 HAS_SPONSORED = "has_sponsored"
-SKIP_MANUAL_RESCHED_CARDS = "skip_manual_resched_cards"
 SHOW_STEPS_STATS = "show_steps_stats"
 
 
@@ -183,15 +182,6 @@ class Config:
     @has_sponsored.setter
     def has_sponsored(self, value):
         self.data[HAS_SPONSORED] = value
-        self.save()
-
-    @property
-    def skip_manual_resched_cards(self):
-        return self.data[SKIP_MANUAL_RESCHED_CARDS]
-
-    @skip_manual_resched_cards.setter
-    def skip_manual_resched_cards(self, value):
-        self.data[SKIP_MANUAL_RESCHED_CARDS] = value
         self.save()
 
     @property

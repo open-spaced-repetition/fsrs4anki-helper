@@ -15,6 +15,5 @@
     "auto_easy_days": false,
     "has_rated": false,
     "has_sponsored": false,
-    "skip_manual_resched_cards": false,
     "show_steps_stats": false
 }
