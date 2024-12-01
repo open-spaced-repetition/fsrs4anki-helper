@@ -43,6 +43,7 @@ def easy_days(did):
         recent=False,
         filter_flag=True,
         filtered_cids=set(due_in_easy_days_cids),
+        apply_easy_days=True,
     )
     if fut:
         return fut.result()
@@ -146,6 +147,7 @@ class EasySpecificDateManagerWidget(QWidget):
             filter_flag=True,
             filtered_cids=set(filtered_dues_cids),
             easy_specific_due_dates=specific_dues,
+            apply_easy_days=True,
         )
 
 

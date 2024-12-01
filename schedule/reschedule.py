@@ -28,6 +28,7 @@ class FSRS:
     reviewed_today_per_preset: Dict[int, int]
     card: Card
     elapsed_days: int
+    apply_easy_days: bool
     current_date: date
     today: int
     did: int
@@ -40,6 +41,7 @@ class FSRS:
         self.desired_retention = 0.9
         self.easy_specific_due_dates = []
         self.elapsed_days = 0
+        self.apply_easy_days = False
         self.current_date = sched_current_date()
         self.today = mw.col.sched.today
         self.DM = DeckManager(mw.col)
@@ -179,11 +181,12 @@ class FSRS:
         due = self.card.odue if self.card.odid else self.card.due
         last_review = get_last_review_date(self.card)
 
-        if due > last_review + max_ivl + 2:
-            current_ivl = due - last_review
-            min_ivl, max_ivl = get_fuzz_range(
-                current_ivl, self.elapsed_days, current_ivl
-            )
+        if self.apply_easy_days:
+            if due > last_review + max_ivl + 2:
+                current_ivl = due - last_review
+                min_ivl, max_ivl = get_fuzz_range(
+                    current_ivl, self.elapsed_days, current_ivl
+                )
 
         if last_review + max_ivl < self.today:
             return min(ivl, max_ivl)
@@ -220,6 +223,7 @@ def reschedule(
     filter_flag=False,
     filtered_cids={},
     easy_specific_due_dates=[],
+    apply_easy_days=False,
 ):
     if not mw.col.get_config("fsrs"):
         tooltip(FSRS_ENABLE_WARNING)
@@ -248,6 +252,7 @@ def reschedule(
             filter_flag,
             filtered_cids,
             easy_specific_due_dates,
+            apply_easy_days,
         ),
         on_done,
     )
@@ -261,6 +266,7 @@ def reschedule_background(
     filter_flag=False,
     filtered_cids={},
     easy_specific_due_dates=[],
+    apply_easy_days=False,
 ):
     config = Config()
     config.load()
@@ -274,6 +280,7 @@ def reschedule_background(
 
     fsrs.set_load_balance(did_query=did_query)
     fsrs.easy_specific_due_dates = easy_specific_due_dates
+    fsrs.apply_easy_days = apply_easy_days
 
     for easy_date_str in config.easy_dates:
         easy_date = datetime.strptime(easy_date_str, "%Y-%m-%d").date()
@@ -405,7 +412,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         fsrs.set_fuzz_factor(cid, card.reps)
         new_ivl = fsrs.fuzzed_next_interval(s)
 
-        if fsrs.reschedule_threshold > 0:
+        if fsrs.reschedule_threshold > 0 and not fsrs.apply_easy_days:
             dr = fsrs.desired_retention
             odds = dr / (1 - dr)
 
