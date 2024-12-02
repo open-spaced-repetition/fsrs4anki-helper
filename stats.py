@@ -23,7 +23,7 @@ def _lineTbl_now(i):
     return "<table>" + "".join(i) + "</table>"
 
 
-def retention_stability_load(lim) -> tuple:
+def retention_stability(lim) -> tuple:
     elapse_stability_ivl_list = mw.col.db.all(
         f"""
     SELECT 
@@ -32,7 +32,6 @@ def retention_stability_load(lim) -> tuple:
             ELSE {mw.col.sched.today} - (odue - ivl)
         END
         ,json_extract(data, '$.s')
-        ,ivl 
         ,(SELECT COUNT(*) FROM cards c2 WHERE c1.nid = c2.nid AND queue != -1)
         ,nid
     FROM cards c1
@@ -44,33 +43,30 @@ def retention_stability_load(lim) -> tuple:
     )
     # x[0]: elapsed days
     # x[1]: stability
-    # x[2]: interval
-    # x[3]: same nid count
-    # x[4]: nid
+    # x[2]: same nid count
+    # x[3]: nid
     elapse_stability_ivl_list = filter(
         lambda x: x[1] is not None, elapse_stability_ivl_list
     )
-    retention_stability_load_list = list(
+    retention_stability_list = list(
         map(
             lambda x: (
                 power_forgetting_curve(max(x[0], 0), x[1]),
                 x[1],
-                1 / max(1, x[2]),
+                x[2],
                 x[3],
-                x[4],
             ),
             elapse_stability_ivl_list,
         )
     )
-    card_cnt = len(retention_stability_load_list)
-    note_cnt = len(set(x[4] for x in retention_stability_load_list))
+    card_cnt = len(retention_stability_list)
+    note_cnt = len(set(x[3] for x in retention_stability_list))
     if card_cnt == 0:
-        return 0, 0, 0, 0, 0, 0, 0, 0
-    recall_sum = sum(item[0] for item in retention_stability_load_list)
-    stability_sum = sum(item[1] for item in retention_stability_load_list)
-    load_sum = sum(item[2] for item in retention_stability_load_list)
+        return 0, 0, 0, 0, 0, 0, 0
+    recall_sum = sum(item[0] for item in retention_stability_list)
+    stability_sum = sum(item[1] for item in retention_stability_list)
     estimated_total_knowledge_notes = sum(
-        item[0] / item[3] for item in retention_stability_load_list
+        item[0] / item[2] for item in retention_stability_list
     )
 
     time_sum = mw.col.db.scalar(
@@ -90,7 +86,6 @@ def retention_stability_load(lim) -> tuple:
     return (
         recall_sum / card_cnt,
         stability_sum / card_cnt,
-        load_sum,
         card_cnt,
         round(recall_sum),
         estimated_total_knowledge_notes,
@@ -220,18 +215,15 @@ def get_fsrs_stats(self: CollectionStats):
     (
         retention,
         stability,
-        load,
         card_cnt,
         estimated_total_knowledge,
         estimated_total_knowledge_notes,
         note_cnt,
         time_sum,
-    ) = retention_stability_load(lim)
+    ) = retention_stability(lim)
     i = []
     _line_now(i, "Average predicted retention", f"{retention * 100: .2f}%")
     _line_now(i, "Average stability", f"{round(stability)} days")
-    if int_version() < 241000:
-        _line_now(i, "Daily Load", f"{round(load)} reviews/day")
     i.append(
         "<tr><td align=left style='padding: 5px'><b>Retention by Cards:</b></td></tr>"
     )
@@ -268,7 +260,6 @@ def get_fsrs_stats(self: CollectionStats):
         + "<details><summary>Interpretation</summary><ul>"
         + "<li><b>Average predicted retention</b>: the average probability of recalling a card today. Desired retention is the retention when the card is due. Average retention is the current retention of all cards, including those that are not yet due. These two values are different because most cards are not usually due. <b>The average predicted retention is calculated using FSRS formulas and depends on your parameters.</b> True retention is a measured value, not an algorithmic prediction. So, it doesn't change after changing the FSRS parameters.</li>"
         + "<li><b>Stability</b>: the time required for the retention to fall from 100% to 90%.</li>"
-        + "<li><b>Load</b>: an estimate of the average number of cards to be reviewed daily (assuming review at the scheduled time without advancing or postponing). Load = 1/I<sub>1</sub> + 1/I<sub>2</sub> + 1/I<sub>3</sub> +...+ 1/I<sub>n</sub>, where I<sub>n</sub> is the current interval of the n-th card.</li>"
         + "<li><b>Count</b>: the number of cards with FSRS memory states, excluding cards in the (re)learning stage.</li> "
         + "<li><b>Estimated total knowledge</b>: the number of cards the user is expected to know today, calculated as the product of average predicted retention and count.</li>"
         + "<li><b>Total time</b>: the amount of time spent doing reviews in Anki. This does not include time spent on making and editing cards, as well as time spent on reviewing suspended and deleted cards.</li>"
