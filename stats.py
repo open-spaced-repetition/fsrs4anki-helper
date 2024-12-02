@@ -45,9 +45,7 @@ def retention_stability(lim) -> tuple:
     # x[1]: stability
     # x[2]: same nid count
     # x[3]: nid
-    elapse_stability_list = filter(
-        lambda x: x[1] is not None, elapse_stability_list
-    )
+    elapse_stability_list = filter(lambda x: x[1] is not None, elapse_stability_list)
     retention_stability_list = list(
         map(
             lambda x: (
