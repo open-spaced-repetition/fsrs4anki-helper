@@ -24,7 +24,7 @@ def _lineTbl_now(i):
 
 
 def retention_stability(lim) -> tuple:
-    elapse_stability_ivl_list = mw.col.db.all(
+    elapse_stability_list = mw.col.db.all(
         f"""
     SELECT 
         CASE WHEN odid==0
@@ -45,8 +45,8 @@ def retention_stability(lim) -> tuple:
     # x[1]: stability
     # x[2]: same nid count
     # x[3]: nid
-    elapse_stability_ivl_list = filter(
-        lambda x: x[1] is not None, elapse_stability_ivl_list
+    elapse_stability_list = filter(
+        lambda x: x[1] is not None, elapse_stability_list
     )
     retention_stability_list = list(
         map(
@@ -56,7 +56,7 @@ def retention_stability(lim) -> tuple:
                 x[2],
                 x[3],
             ),
-            elapse_stability_ivl_list,
+            elapse_stability_list,
         )
     )
     card_cnt = len(retention_stability_list)
