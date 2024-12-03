@@ -399,8 +399,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
     else:
         return None
 
-    new_custom_data = {"v": "reschedule"}
-    card.custom_data = json.dumps(new_custom_data)
+    write_custom_data(card, "v", "reschedule")
 
     if card.type == CARD_TYPE_REV:
         fsrs.set_card(card)
