@@ -57,7 +57,7 @@ def steps_stats(deck_lim, period_lim):
     )
     SELECT first_rating, delta_t, recall
     FROM review_stats
-    WHERE first_rating != 4
+    WHERE first_rating BETWEEN 1 AND 3
     ORDER BY first_rating, delta_t
     """
     learning_revlogs = mw.col.db.all(sql)
@@ -135,21 +135,17 @@ def steps_stats(deck_lim, period_lim):
     ORDER BY delta_t;
     """
     relearning_revlogs = mw.col.db.all(sql)
-    stats_dict = {}
+    stats_dict = defaultdict(list)
     for first_rating, delta_t, recall in learning_revlogs:
-        if first_rating not in stats_dict:
-            stats_dict[first_rating] = []
         stats_dict[first_rating].append((delta_t, recall))
 
     if len(relearning_revlogs) > 0:
-        stats_dict[0] = []
         for delta_t, recall in relearning_revlogs:
             stats_dict[0].append((delta_t, recall))
 
     if len(learning_next_revlogs) > 0:
-        stats_dict[5] = []
         for delta_t, recall in learning_next_revlogs:
-            stats_dict[5].append((delta_t, recall))
+            stats_dict[4].append((delta_t, recall))
 
     display_dict = {}
 

@@ -1,4 +1,3 @@
-from collections import defaultdict
 from ..configuration import Config
 from ..utils import *
 from anki.decks import DeckManager

@@ -7,7 +7,6 @@ from anki.cards import Card, FSRSMemoryState
 from anki.decks import DeckManager
 from anki.utils import ids2str
 from aqt.gui_hooks import browser_menus_did_init
-from collections import defaultdict
 
 
 def check_review_distribution(actual_reviews: List[int], percentages: List[float]):

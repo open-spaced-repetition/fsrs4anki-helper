@@ -134,6 +134,7 @@ def get_steps_stats(self: CollectionStats):
             span.again { color: #f00 }
             span.hard { color: #ff8c00 }
             span.good { color: #008000 }
+            span.again-then-good { color: #ffff00 }
         </style>
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
@@ -154,13 +155,13 @@ def get_steps_stats(self: CollectionStats):
                 <td class="trc"><b>Reviews</b></td>
             </tr>"""
 
-    ratings = {1: "again", 2: "hard", 3: "good", 0: "lapse", 5: "again then good"}
+    ratings = {1: "again", 2: "hard", 3: "good", 4: "again-then-good", 0: "lapse"}
     for rating, style in ratings.items():
         stats = results["stats"].get(rating, {})
         if not stats:
             html += f"""
             <tr>
-                <td class="trl"><span class="{style}"><b>{style.title()}</b></span></td>
+                <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
@@ -176,7 +177,7 @@ def get_steps_stats(self: CollectionStats):
 
         html += f"""
             <tr>
-                <td class="trl"><span class="{style}"><b>{style.title()}</b></span></td>
+                <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
                 <td class="trr">{stats['r1']}</td>
                 <td class="trr">{format_time(stats['delay_q1'])}</td>
                 <td class="trr">{stats['r2']}</td>
@@ -240,12 +241,11 @@ def get_steps_stats(self: CollectionStats):
         function calculateSteps() {{
             const factor =  calculateFactor(parseFloat(document.querySelector("#desired-retention").value));
 
-            const againStep = calculateStep(stability[1], factor);
-            const hardStep = calculateStep((stability[2] * 2 - stability[1]), factor);
-            const goodStep = calculateStep(stability[3], factor);
-
-            const learningStep1 = againStep;
-            const learningStep2 = stability[2] * 2 - stability[1] < stability[3] ? hardStep : goodStep;
+            const learningStep1 = calculateStep(stability[1], factor);
+            // hardStep = (2 * stability[2] - stability[1]) * factor
+            // goodStep = stability[3] * factor
+            // againThenGoodStep = stability[4] * factor
+            const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor);
 
             learningStepRow.innerText = `${{learningStep1}} ${{learningStep2}}`;
 
