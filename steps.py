@@ -100,10 +100,7 @@ def steps_stats(deck_lim, period_lim):
     WHERE first_rating = 1 AND second_rating = 3
     ORDER BY delta_t
     """
-    start_time = time.time()
     learning_next_revlogs = mw.col.db.all(sql)
-    end_time = time.time()
-    print(f"Time taken for learning next revlogs: {end_time - start_time} seconds")
     sql = f"""
     WITH first_fail AS (
         SELECT cid, id AS first_id
