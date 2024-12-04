@@ -187,7 +187,76 @@ def get_steps_stats(self: CollectionStats):
                 <td class="trr">{stats['retention']}</td>
                 <td class="trr">{format_time(results['stability'][rating])}</td>
                 <td class="trr">{stats['count']}</td>
-            </tr>"""
+            </tr>
+            """
+
+    html += f"""
+    <tr>
+        <td colspan="11" class="trl">
+            <strong>Desired retention:</strong>
+            <input type="number" id="desired-retention" value="0.9" step="0.01" min="0.7" max="0.98" />
+        </td>
+    </tr>
+    <tr>
+        <td colspan="11" class="trl">
+            <strong>Recommended learning steps</strong>: 
+            <span id="learning-steps"></span>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="11" class="trl">
+            <strong>Recommended relearning steps</strong>: 
+            <span id="relearning-steps"></span>
+        </td>
+    </tr>
+
+    <script>
+        const learningStepRow = document.querySelector('#learning-steps');
+        const relearningStepRow = document.querySelector('#relearning-steps');
+        const cutoff = 86400 / 2;
+        const stability = {results['stability']};
+
+        function formatTime (seconds) {{
+            const h = Math.round(seconds / 3600);
+            const m = Math.round(seconds / 60);
+            return h > 5 ? `${{Math.round(h)}}h`
+                : m > 5 ? `${{Math.round(m)}}m`
+                : `${{Math.round(seconds)}}s`;
+        }};
+
+
+        const DECAY = -0.5;
+        const FACTOR = Math.pow(0.9, (1 / DECAY)) - 1;
+
+        function calculateFactor(dr) {{
+            return 1 / FACTOR * (Math.pow(dr, (1 / DECAY)) - 1);
+        }}
+
+        function calculateStep(stability, factor) {{
+            const step = stability * factor;
+            return (step >= cutoff || Number.isNaN(step)) ? "" : formatTime(Math.max(step, 1));
+        }};
+
+        function calculateSteps() {{
+            const factor =  calculateFactor(parseFloat(document.querySelector("#desired-retention").value));
+
+            const againStep = calculateStep(stability[1], factor);
+            const hardStep = calculateStep((stability[2] * 2 - stability[1]), factor);
+            const goodStep = calculateStep(stability[3], factor);
+
+            const learningStep1 = againStep;
+            const learningStep2 = stability[2] * 2 - stability[1] < stability[3] ? hardStep : goodStep;
+
+            learningStepRow.innerText = `${{learningStep1}} ${{learningStep2}}`;
+
+            relearningStepRow.innerText = calculateStep(stability[0], factor);
+        }};
+
+        calculateSteps();
+
+        document.querySelector('#desired-retention').addEventListener('input', calculateSteps);
+    </script>
+    """
 
     html += "</table>"
     html += (
