@@ -134,6 +134,7 @@ def get_steps_stats(self: CollectionStats):
             span.again { color: #f00 }
             span.hard { color: #ff8c00 }
             span.good { color: #008000 }
+            span.again-then-good { color: #fdd835 }
         </style>
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
@@ -154,13 +155,14 @@ def get_steps_stats(self: CollectionStats):
                 <td class="trc"><b>Reviews</b></td>
             </tr>"""
 
-    ratings = {1: "again", 2: "hard", 3: "good", 0: "lapse"}
+    ratings = {1: "again", 2: "hard", 3: "good", 4: "again-then-good", 0: "lapse"}
     for rating, style in ratings.items():
         stats = results["stats"].get(rating, {})
         if not stats:
+            results["stability"][rating] = 86400
             html += f"""
             <tr>
-                <td class="trl"><span class="{style}"><b>{style.title()}</b></span></td>
+                <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
@@ -176,7 +178,7 @@ def get_steps_stats(self: CollectionStats):
 
         html += f"""
             <tr>
-                <td class="trl"><span class="{style}"><b>{style.title()}</b></span></td>
+                <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
                 <td class="trr">{stats['r1']}</td>
                 <td class="trr">{format_time(stats['delay_q1'])}</td>
                 <td class="trr">{stats['r2']}</td>
@@ -240,12 +242,11 @@ def get_steps_stats(self: CollectionStats):
         function calculateSteps() {{
             const factor =  calculateFactor(parseFloat(document.querySelector("#desired-retention").value));
 
-            const againStep = calculateStep(stability[1], factor);
-            const hardStep = calculateStep((stability[2] * 2 - stability[1]), factor);
-            const goodStep = calculateStep(stability[3], factor);
-
-            const learningStep1 = againStep;
-            const learningStep2 = stability[2] * 2 - stability[1] < stability[3] ? hardStep : goodStep;
+            const learningStep1 = calculateStep(stability[1], factor);
+            // hardStep = (2 * stability[2] - stability[1]) * factor
+            // goodStep = stability[3] * factor
+            // againThenGoodStep = stability[4] * factor
+            const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor);
 
             learningStepRow.innerText = `${{learningStep1}} ${{learningStep2}}`;
 
@@ -268,6 +269,7 @@ def get_steps_stats(self: CollectionStats):
         + "<li>The 4 groups are further split and assigned to whatever the first rating of the cards was (Again or Hard or Good or Lapse). Therefore, each First Rating has 4 groups of subsequent ratings (Groups 1,2,3,4).</li>"
         + "<li>Average Retention rates (R̅₁, R̅₂, R̅₃, R̅₄) for each group of subsequent ratings and the Average Overall Retention (R̅) for the first ratings are shown. Based on this, the average stability for cards after the first rating of the day (Again or Hard or Good or Lapse) is calculated.</li>"
         + "<li>T<sub>X%</sub> means that X% of the cards in this deck with a first rating (Again or Hard or Good or Lapse) are delayed by this amount of time or less till the next rating.</li>"
+        + "<li>Recommended (re)learning steps are calculated from stability and desired retention. The 1st learning step is based S(Again). The 2nd learning step is based on the minimum of {S(Hard)* 2 - S(Again), S(Good), S(Again Then Good)}. The relearning step is base on S(Lapse).</li>"
         + "</ul>"
         "</td></tr></table>"
     )
