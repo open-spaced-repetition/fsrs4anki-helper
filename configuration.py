@@ -13,7 +13,6 @@ RESCHEDULE_THRESHOLD = "reschedule_threshold"
 DEBUG_NOTIFY = "debug_notify"
 FSRS_STATS = "fsrs_stats"
 DISPLAY_MEMORY_STATE = "display_memory_state"
-AUTO_EASY_DAYS = "auto_easy_days"
 HAS_RATED = "has_rated"
 HAS_SPONSORED = "has_sponsored"
 SHOW_STEPS_STATS = "show_steps_stats"
@@ -135,15 +134,6 @@ class Config:
     @display_memory_state.setter
     def display_memory_state(self, value):
         self.data[DISPLAY_MEMORY_STATE] = value
-        self.save()
-
-    @property
-    def auto_easy_days(self):
-        return self.data[AUTO_EASY_DAYS]
-
-    @auto_easy_days.setter
-    def auto_easy_days(self, value):
-        self.data[AUTO_EASY_DAYS] = value
         self.save()
 
     @property

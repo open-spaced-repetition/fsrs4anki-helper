@@ -273,18 +273,8 @@ menu_apply_easy_days_for_specific_date = build_action(
 )
 
 
-def set_auto_easy_days(checked, _):
-    config.auto_easy_days = checked
-
-
-menu_for_auto_easy_days = checkable(
-    title="Auto apply easy days on closing collection",
-    on_click=set_auto_easy_days,
-)
-
 menu_for_easy_days.addAction(menu_apply_easy_days_for_specific_date)
 menu_for_easy_days.addAction(menu_apply_easy_days)
-menu_for_easy_days.addAction(menu_for_auto_easy_days)
 
 
 def adjust_menu():
@@ -300,7 +290,6 @@ def adjust_menu():
         menu_auto_disperse_after_reschedule.setChecked(
             config.auto_disperse_after_reschedule
         )
-        menu_for_auto_easy_days.setChecked(config.auto_easy_days)
 
 
 @state_did_change.append
