@@ -10,7 +10,6 @@
     "debug_notify": false,
     "fsrs_stats": true,
     "display_memory_state": false,
-    "auto_easy_days": false,
     "has_rated": false,
     "has_sponsored": false,
     "show_steps_stats": false

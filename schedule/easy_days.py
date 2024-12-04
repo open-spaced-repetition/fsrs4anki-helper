@@ -16,7 +16,6 @@ from ..utils import *
 from ..configuration import Config
 from .reschedule import reschedule
 from anki.utils import ids2str
-from aqt.gui_hooks import profile_will_close
 
 
 def easy_days(did):
@@ -47,14 +46,6 @@ def easy_days(did):
     )
     if fut:
         return fut.result()
-
-
-@profile_will_close.append
-def auto_easy_days():
-    config = Config()
-    config.load()
-    if config.auto_easy_days:
-        easy_days(None)
 
 
 # Modified from https://github.com/sam1penny/countdown-to-events/blob/main/src/__init__.py#L86-L169
