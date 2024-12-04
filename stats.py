@@ -159,6 +159,7 @@ def get_steps_stats(self: CollectionStats):
     for rating, style in ratings.items():
         stats = results["stats"].get(rating, {})
         if not stats:
+            results["stability"][rating] = 86400
             html += f"""
             <tr>
                 <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
