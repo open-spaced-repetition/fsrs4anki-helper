@@ -213,7 +213,7 @@ def get_steps_stats(self: CollectionStats):
     <script>
         const learningStepRow = document.querySelector('#learning-steps');
         const relearningStepRow = document.querySelector('#relearning-steps');
-        const cutoff = 86400;
+        const cutoff = 86400 / 2;
         const stability = {results['stability']};
 
         function formatTime (seconds) {{
