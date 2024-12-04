@@ -269,6 +269,7 @@ def get_steps_stats(self: CollectionStats):
         + "<li>The 4 groups are further split and assigned to whatever the first rating of the cards was (Again or Hard or Good or Lapse). Therefore, each First Rating has 4 groups of subsequent ratings (Groups 1,2,3,4).</li>"
         + "<li>Average Retention rates (R̅₁, R̅₂, R̅₃, R̅₄) for each group of subsequent ratings and the Average Overall Retention (R̅) for the first ratings are shown. Based on this, the average stability for cards after the first rating of the day (Again or Hard or Good or Lapse) is calculated.</li>"
         + "<li>T<sub>X%</sub> means that X% of the cards in this deck with a first rating (Again or Hard or Good or Lapse) are delayed by this amount of time or less till the next rating.</li>"
+        + "<li>Recommended (re)learning steps are calculated from stability and desired retention. The 1st learning step is based S(Again). The 2nd learning step is based on the minimum of {S(Hard)* 2 - S(Again), S(Good), S(Again Then Good)}. The relearning step is base on S(Lapse).</li>"
         + "</ul>"
         "</td></tr></table>"
     )
