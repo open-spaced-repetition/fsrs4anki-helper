@@ -72,15 +72,11 @@ def steps_stats(deck_lim, period_lim):
         {"AND " + period_lim if period_lim else ""}
     ),
     second_review AS (
-		SELECT r.cid, r.id AS second_id, r.ease AS second_rating
-		FROM revlog r
-		JOIN first_review fr ON r.cid = fr.cid AND r.id > fr.first_id
-		WHERE r.ease BETWEEN 1 AND 4
-		AND r.id = (
-			SELECT MIN(id)
-			FROM revlog r2
-			WHERE r2.cid = r.cid AND r2.id > fr.first_id
-		)
+        SELECT r.cid, r.id AS second_id, r.ease AS second_rating,
+            ROW_NUMBER() OVER (PARTITION BY r.cid ORDER BY r.id) AS review_order
+        FROM revlog r
+        JOIN first_review fr ON r.cid = fr.cid AND r.id > fr.first_id
+        WHERE r.ease BETWEEN 1 AND 4
     ),
     third_review AS (
         SELECT r.cid, r.id AS third_id, CASE WHEN r.ease=1 THEN 0 ELSE 1 END AS recall,
@@ -97,7 +93,7 @@ def steps_stats(deck_lim, period_lim):
         FROM first_review fr
         JOIN second_review sr ON fr.cid = sr.cid
         JOIN third_review tr ON sr.cid = tr.cid
-        WHERE tr.review_order = 1
+        WHERE sr.review_order = 1 AND tr.review_order = 1
     )
     SELECT delta_t, recall
     FROM review_stats
