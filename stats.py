@@ -120,7 +120,7 @@ def get_steps_stats(self: CollectionStats):
         </style>
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
-                <td class="trl" rowspan=2><b>First Rating</b></td>
+                <td class="trl" rowspan=2><b>First Ratings</b></td>
                 <td class="trc" colspan=7><b>Delay And Retention Distribution</b></td>
                 <td class="trc" colspan=3><b>Summary</b></td>
             </tr>
