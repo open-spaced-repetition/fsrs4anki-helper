@@ -41,7 +41,6 @@ def retention_stability(lim) -> tuple:
     )
     # x[0]: elapsed days
     # x[1]: stability
-    elapse_stability_list = filter(lambda x: x[1] is not None, elapse_stability_list)
     retention_list = list(
         map(
             lambda x: power_forgetting_curve(max(x[0], 0), x[1]),
