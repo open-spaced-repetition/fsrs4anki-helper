@@ -272,8 +272,8 @@ def get_fsrs_stats(self: CollectionStats):
         time_sum,
     ) = retention_stability(lim)
     i = []
-    _line_now(i, "Total Count", f"{card_cnt} cards")
-    _line_now(i, "Total Time", f"{time_sum/3600:.1f} hours")
+    _line_now(i, "Studied cards", f"{card_cnt} cards")
+    _line_now(i, "Total review time", f"{time_sum/3600:.1f} hours")
     if time_sum > 0:
         _line_now(
             i,
@@ -283,13 +283,12 @@ def get_fsrs_stats(self: CollectionStats):
     title = CollectionStats._title(
         self,
         "FSRS Stats",
-        "Only calculated for cards with FSRS memory states",
     )
     stats_data = _lineTbl_now(i)
     interpretation = (
         "<details><summary>Interpretation</summary><ul>"
-        + "<li><b>Count</b>: the number of cards with FSRS memory states, excluding cards in the (re)learning stage.</li> "
-        + "<li><b>Total time</b>: the amount of time spent doing reviews in Anki. This does not include time spent on making and editing cards, as well as time spent on reviewing suspended and deleted cards.</li>"
+        + "<li><b>Studied cards</b>: the number of cards with FSRS memory states, excluding cards in the (re)learning stage.</li> "
+        + "<li><b>Total review time</b>: the amount of time spent doing reviews in Anki. This does not include the time spent on reviewing suspended and deleted cards.</li>"
         + "<li><b>Knowledge acquisition rate</b>: the number of cards memorized per hour of actively doing reviews in Anki, calculated as the ratio of total knowledge and total time. Larger values indicate efficient learning. This metric can be used to compare different learners. If your collection is very young, this number may initially be very low or very high.</li>"
         + "</ul></details>"
     )
