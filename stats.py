@@ -32,8 +32,6 @@ def retention_stability(lim) -> tuple:
             ELSE {mw.col.sched.today} - (odue - ivl)
         END
         ,json_extract(data, '$.s')
-        ,(SELECT COUNT(*) FROM cards c2 WHERE c1.nid = c2.nid AND queue != -1)
-        ,nid
     FROM cards c1
     WHERE queue != 0 AND queue != -1
     AND data != ''
@@ -43,24 +41,17 @@ def retention_stability(lim) -> tuple:
     )
     # x[0]: elapsed days
     # x[1]: stability
-    # x[2]: same nid count
-    # x[3]: nid
     elapse_stability_list = filter(lambda x: x[1] is not None, elapse_stability_list)
-    retention_stability_list = list(
+    retention_list = list(
         map(
-            lambda x: (
-                power_forgetting_curve(max(x[0], 0), x[1]),
-                x[1],
-                x[2],
-                x[3],
-            ),
+            lambda x: power_forgetting_curve(max(x[0], 0), x[1]),
             elapse_stability_list,
         )
     )
-    card_cnt = len(retention_stability_list)
+    card_cnt = len(retention_list)
     if card_cnt == 0:
         return 0, 0, 0
-    recall_sum = sum(item[0] for item in retention_stability_list)
+    recall_sum = sum(retention_list)
 
     time_sum = mw.col.db.scalar(
         f"""
@@ -281,9 +272,6 @@ def get_fsrs_stats(self: CollectionStats):
         time_sum,
     ) = retention_stability(lim)
     i = []
-    i.append(
-        "<tr><td align=left style='padding: 5px'><b>Retention by Cards:</b></td></tr>"
-    )
     _line_now(i, "Total Count", f"{card_cnt} cards")
     _line_now(i, "Total Time", f"{time_sum/3600:.1f} hours")
     if time_sum > 0:
