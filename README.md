@@ -143,7 +143,7 @@ Interpretation:
 
 ### Steps Stats
 
-![image](https://github.com/user-attachments/assets/7d7afafb-27f5-4986-b6eb-b5ef486c50a1)
+![](https://github.com/user-attachments/assets/3d1a9865-654d-4074-8eb5-2f905a4fdf69)
 
 The Steps Stats are based on the cards from the selected deck or collection that were first reviewed in the last 1 month/year or deck life and have at least two reviews.
 
