@@ -192,6 +192,9 @@ def get_steps_stats(self: CollectionStats):
             </tr>
             """
 
+        if stats["retention"] == 1 or stats["retention"] == 0 or stats["count"] < 100:
+            results["stability"][rating] = 86400
+
     html += f"""
     <tr>
         <td colspan="11" class="trl">
