@@ -116,6 +116,7 @@ def get_steps_stats(self: CollectionStats):
             span.hard { color: #ff8c00 }
             span.good { color: #008000 }
             span.again-then-good { color: #fdd835 }
+            span.good-then-again { color: #007bff }
         </style>
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
