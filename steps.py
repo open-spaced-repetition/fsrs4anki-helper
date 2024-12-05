@@ -97,10 +97,50 @@ def steps_stats(deck_lim, period_lim):
     )
     SELECT delta_t, recall
     FROM review_stats
-    WHERE first_rating = 1 AND second_rating = 3
+    WHERE second_rating = 3
     ORDER BY delta_t
     """
-    learning_next_revlogs = mw.col.db.all(sql)
+    again_then_good_revlogs = mw.col.db.all(sql)
+    sql = f"""
+    WITH first_review AS (
+        SELECT cid, MIN(id) AS first_id, ease AS first_rating
+        FROM revlog
+        WHERE ease BETWEEN 1 AND 4
+        {"AND " + deck_lim if deck_lim else ""}
+        GROUP BY cid
+        HAVING first_rating = 3
+        {"AND " + period_lim if period_lim else ""}
+    ),
+    second_review AS (
+        SELECT r.cid, r.id AS second_id, r.ease AS second_rating,
+            ROW_NUMBER() OVER (PARTITION BY r.cid ORDER BY r.id) AS review_order
+        FROM revlog r
+        JOIN first_review fr ON r.cid = fr.cid AND r.id > fr.first_id
+        WHERE r.ease BETWEEN 1 AND 4
+    ),
+    third_review AS (
+        SELECT r.cid, r.id AS third_id, CASE WHEN r.ease=1 THEN 0 ELSE 1 END AS recall,
+            ROW_NUMBER() OVER (PARTITION BY r.cid ORDER BY r.id) AS review_order
+        FROM revlog r
+        JOIN second_review sr ON r.cid = sr.cid AND r.id > sr.second_id
+        WHERE r.ease BETWEEN 1 AND 4
+    ),
+    review_stats AS (
+        SELECT fr.first_rating,
+            sr.second_rating,
+            (tr.third_id - sr.second_id) / 1000.0 AS delta_t,
+            tr.recall
+        FROM first_review fr
+        JOIN second_review sr ON fr.cid = sr.cid
+        JOIN third_review tr ON sr.cid = tr.cid
+        WHERE sr.review_order = 1 AND tr.review_order = 1
+    )
+    SELECT delta_t, recall
+    FROM review_stats
+    WHERE second_rating = 1
+    ORDER BY delta_t
+    """
+    good_then_again_revlogs = mw.col.db.all(sql)
     sql = f"""
     WITH first_fail AS (
         SELECT cid, id AS first_id
@@ -143,9 +183,13 @@ def steps_stats(deck_lim, period_lim):
         for delta_t, recall in relearning_revlogs:
             stats_dict[0].append((delta_t, recall))
 
-    if len(learning_next_revlogs) > 0:
-        for delta_t, recall in learning_next_revlogs:
+    if len(again_then_good_revlogs) > 0:
+        for delta_t, recall in again_then_good_revlogs:
             stats_dict[4].append((delta_t, recall))
+
+    if len(good_then_again_revlogs) > 0:
+        for delta_t, recall in good_then_again_revlogs:
+            stats_dict[5].append((delta_t, recall))
 
     display_dict = {}
 
