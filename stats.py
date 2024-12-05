@@ -136,7 +136,14 @@ def get_steps_stats(self: CollectionStats):
                 <td class="trc"><b>Reviews</b></td>
             </tr>"""
 
-    ratings = {1: "again", 2: "hard", 3: "good", 4: "again-then-good", 0: "lapse"}
+    ratings = {
+        1: "again",
+        2: "hard",
+        3: "good",
+        4: "again-then-good",
+        5: "good-then-again",
+        0: "lapse",
+    }
     for rating, style in ratings.items():
         stats = results["stats"].get(rating, {})
         if not stats:
