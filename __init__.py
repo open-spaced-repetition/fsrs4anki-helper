@@ -261,10 +261,10 @@ if not config.has_rated:
 if not config.has_sponsored:
     menu_for_helper.addAction(menu_sponsor)
 menu_for_helper.addSeparator()
-menu_for_curated_addons = menu_for_helper.addMenu("Curated Add-ons")
-menu_for_curated_addons.addAction(menu_pass_fail)
-menu_for_curated_addons.addAction(menu_ajt_card_management)
-menu_for_curated_addons.addAction(menu_search_stats_extended)
+menu_for_recommended_addons = menu_for_helper.addMenu("Recommended Add-ons")
+menu_for_recommended_addons.addAction(menu_pass_fail)
+menu_for_recommended_addons.addAction(menu_ajt_card_management)
+menu_for_recommended_addons.addAction(menu_search_stats_extended)
 
 menu_apply_easy_days = build_action(easy_days, "Apply easy days now")
 menu_apply_easy_days_for_specific_date = build_action(
