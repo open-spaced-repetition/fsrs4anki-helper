@@ -151,6 +151,7 @@ def get_steps_stats(self: CollectionStats):
     learning_count = sum(1 for r in ratings.items() if r[0] != 0)
 
     first_learning = True
+    not_enough_data = True
     for rating, style in ratings.items():
         stats = results["stats"].get(rating, {})
         if not stats:
@@ -181,6 +182,7 @@ def get_steps_stats(self: CollectionStats):
             </tr>"""
             continue
 
+        not_enough_data = False
         state_cell = ""
         if rating == 0:
             state_cell = '<td class="trl"><b>Relearning</b></td>'
@@ -210,7 +212,8 @@ def get_steps_stats(self: CollectionStats):
         if stats["retention"] == 1 or stats["retention"] == 0 or stats["count"] < 100:
             results["stability"][rating] = 86400
 
-    html += f"""
+    html += (
+        f"""
     <tr>
         <td colspan="12" class="trl">
             <strong>Desired retention:</strong>
@@ -258,17 +261,19 @@ def get_steps_stats(self: CollectionStats):
         }};
 
         function calculateSteps() {{
-            const factor =  calculateFactor(parseFloat(document.querySelector("#desired-retention").value));
+            const factor = calculateFactor(parseFloat(document.querySelector("#desired-retention").value));
 
             const learningStep1 = calculateStep(stability[1], factor);
-            // hardStep = (2 * stability[2] - stability[1]) * factor
-            // goodStep = stability[3] * factor
-            // againThenGoodStep = stability[4] * factor
             const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor);
 
-            learningStepRow.innerText = `${{learningStep1}} ${{learningStep2}}`;
+            learningStepRow.innerText = (!learningStep1 && !learningStep2) 
+                ? "You don't need learning steps" 
+                : `${{learningStep1}} ${{learningStep2}}`;
 
-            relearningStepRow.innerText = calculateStep(stability[0], factor);
+            const relearningStep = calculateStep(stability[0], factor);
+            relearningStepRow.innerText = !relearningStep 
+                ? "You don't need relearning steps" 
+                : relearningStep;
         }};
 
         calculateSteps();
@@ -276,6 +281,9 @@ def get_steps_stats(self: CollectionStats):
         document.querySelector('#desired-retention').addEventListener('input', calculateSteps);
     </script>
     """
+        if not not_enough_data
+        else ""
+    )
 
     html += "</table>"
     html += (
