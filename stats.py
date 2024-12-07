@@ -120,6 +120,7 @@ def get_steps_stats(self: CollectionStats):
         </style>
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
+                <td class="trl" rowspan=2><b>State</b></td>
                 <td class="trl" rowspan=2><b>First Ratings</b></td>
                 <td class="trc" colspan=7><b>Delay And Retention Distribution</b></td>
                 <td class="trc" colspan=3><b>Summary</b></td>
@@ -145,12 +146,27 @@ def get_steps_stats(self: CollectionStats):
         5: "good-then-again",
         0: "lapse",
     }
+
+    # Count how many non-lapse ratings we have for rowspan
+    learning_count = sum(1 for r in ratings.items() if r[0] != 0)
+
+    first_learning = True
     for rating, style in ratings.items():
         stats = results["stats"].get(rating, {})
         if not stats:
             results["stability"][rating] = 86400
+            state_cell = ""
+            if rating == 0:
+                state_cell = '<td class="trl"><b>Relearning</b></td>'
+            elif first_learning:
+                state_cell = (
+                    f'<td class="trl" rowspan="{learning_count}"><b>Learning</b></td>'
+                )
+                first_learning = False
+
             html += f"""
             <tr>
+                {state_cell}
                 <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
@@ -165,8 +181,18 @@ def get_steps_stats(self: CollectionStats):
             </tr>"""
             continue
 
+        state_cell = ""
+        if rating == 0:
+            state_cell = '<td class="trl"><b>Relearning</b></td>'
+        elif first_learning:
+            state_cell = (
+                f'<td class="trl" rowspan="{learning_count}"><b>Learning</b></td>'
+            )
+            first_learning = False
+
         html += f"""
             <tr>
+                {state_cell}
                 <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
                 <td class="trr">{stats['r1']}</td>
                 <td class="trr">{format_time(stats['delay_q1'])}</td>
@@ -186,19 +212,19 @@ def get_steps_stats(self: CollectionStats):
 
     html += f"""
     <tr>
-        <td colspan="11" class="trl">
+        <td colspan="12" class="trl">
             <strong>Desired retention:</strong>
             <input type="number" id="desired-retention" value="0.9" step="0.01" min="0.7" max="0.98" />
         </td>
     </tr>
     <tr>
-        <td colspan="11" class="trl">
+        <td colspan="12" class="trl">
             <strong>Recommended learning steps</strong>: 
             <span id="learning-steps"></span>
         </td>
     </tr>
     <tr>
-        <td colspan="11" class="trl">
+        <td colspan="12" class="trl">
             <strong>Recommended relearning steps</strong>: 
             <span id="relearning-steps"></span>
         </td>
