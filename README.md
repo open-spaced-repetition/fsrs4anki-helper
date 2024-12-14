@@ -130,7 +130,7 @@ Hold down the Shift key and click "Stats" to enter the old version of Anki's sta
 
 ### FSRS Stats
 
-![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/db368bcb-54a5-4ca2-bc14-acad382f643f)
+![](https://github.com/user-attachments/assets/7495b3d6-ef54-43d7-a674-53264748a961)
 
 The FSRS Stats are based on all cards in your deck or collection (whichever is selected) that you have ever reviewed. They remain unaffected by the 1 month/year settings.
 
