@@ -11,6 +11,7 @@ FSRS Helper is an Anki add-on that supports [FSRS](https://github.com/open-space
 - Less Anki on **Easy Days** (such as weekends) during rescheduling (based on load balance).
 - **Disperse** Siblings (cards with the same note) to avoid interference & reminder.
 - **Flatten** future due cards to a selected number of reviews per day.
+- **Steps Stats** quantify your short-term memory performance and recommend learning steps.
 
 # Requirements
 
