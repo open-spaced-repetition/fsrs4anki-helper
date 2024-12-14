@@ -151,18 +151,18 @@ The Steps Stats are based on the cards from the selected deck or collection that
 These stats are helpful for fine-tuning your (re)learning steps to achieve your desired retention in the short-term reviews. 
 
 How your learning steps affect the intervals:
-- If you firstly rate again, the interval is the 1st learning step.
-- If you firstly rate again and then rate good in a new card, the interval is the 2nd learning step.
-- If you firstly rate good, the interval is the 2nd learning step.
-- If you firstly rate hard, the interval is (1st learning step + 2nd learning step) / 2.
+- If your first rating for a new card is Again, the interval is the 1st learning step.
+- If your first rating is Again and the second one is Good, the interval is the 2nd learning step.
+- If your first rating is Good, the interval is the 2nd learning step.
+- If your first rating is Hard, the interval is (1st learning step + 2nd learning step) / 2.
 
-So the 1st recommended learning step is based on the stability of your cards where you rate again in the first review. 
+So the 1st recommended learning step is based on the stability of your cards where you press Again during the first review.
 
-For the 2nd recommended learning step, the senario is more complex. It is based on the minimum of the stability of three kinds of cards:
-- S(Again Then Good): You firstly rate again and then rate good in a new card.
-- S(Good): You firstly rate good.
-- S(Hard): You firstly rate hard.
-  - Because hard step is (1st learning step + 2nd learning step) / 2, 2nd learning step is 2 * hard step - 1st learning step. And hard step is based on S(Hard).
+For the 2nd recommended learning step, the scenario is more complex. It is based on the minimum of the stability of three kinds of cards:
+- S(Again Then Good): Your ratings are Again and then Good for a new card.
+- S(Good): Your first rating is Good.
+- S(Hard): Your first rating is Hard.
+  - Because a Hard step is (1st learning step + 2nd learning step) / 2, the 2nd learning step is 2 * hard step - 1st learning step. And the Hard step is based on S(Hard).
 
 ## Other features
 
