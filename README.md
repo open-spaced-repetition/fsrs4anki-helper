@@ -11,6 +11,7 @@ FSRS Helper is an Anki add-on that supports [FSRS](https://github.com/open-space
 - Less Anki on **Easy Days** (such as weekends) during rescheduling (based on load balance).
 - **Disperse** Siblings (cards with the same note) to avoid interference & reminder.
 - **Flatten** future due cards to a selected number of reviews per day.
+- **Steps Stats** quantify your short-term memory performance and recommend learning steps.
 
 # Requirements
 
@@ -147,7 +148,21 @@ Interpretation:
 
 The Steps Stats are based on the cards from the selected deck or collection that were first reviewed in the last 1 month/year or deck life and have at least two reviews.
 
-These stats are helpful for fine-tuning your (re)learning steps to achieve your desired retention in the short-term reviews. To learn more about learning steps, please read [learning steps](https://docs.ankiweb.net/deck-options.html#learning-steps) in the  Anki manual.
+These stats are helpful for fine-tuning your (re)learning steps to achieve your desired retention in the short-term reviews. 
+
+How your learning steps affect the intervals:
+- If your first rating for a new card is Again, the interval is the 1st learning step.
+- If your first rating is Again and the second one is Good, the interval is the 2nd learning step.
+- If your first rating is Good, the interval is the 2nd learning step.
+- If your first rating is Hard, the interval is (1st learning step + 2nd learning step) / 2.
+
+So the 1st recommended learning step is based on the stability of your cards where you press Again during the first review.
+
+For the 2nd recommended learning step, the scenario is more complex. It is based on the minimum of the stability of three kinds of cards:
+- S(Again Then Good): Your ratings are Again and then Good for a new card.
+- S(Good): Your first rating is Good.
+- S(Hard): Your first rating is Hard.
+  - Because a Hard step is (1st learning step + 2nd learning step) / 2, the 2nd learning step is 2 * hard step - 1st learning step. And the Hard step is based on S(Hard).
 
 ## Other features
 
