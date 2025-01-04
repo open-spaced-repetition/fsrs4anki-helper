@@ -186,7 +186,7 @@ menu_rate = build_action(rate_on_ankiweb, "Rate Add-on on AnkiWeb")
 def visualize_schedule(did=None):
     url = "https://open-spaced-repetition.github.io/anki_fsrs_visualizer"
     deck = mw.col.decks.current()
-    if "config" in deck:
+    if "conf" in deck:
         config = mw.col.decks.get_config(deck["conf"])
         retention = config["desiredRetention"]
         fsrs_params = (
