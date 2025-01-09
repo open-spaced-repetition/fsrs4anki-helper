@@ -21,7 +21,6 @@ import math
 import random
 import time
 from datetime import date, datetime, timedelta
-from anki.utils import int_version
 
 
 FSRS_ENABLE_WARNING = (
@@ -53,10 +52,7 @@ def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry
 
 
 def get_revlogs(cid: int):
-    if int_version() >= 241000:
-        return mw.col.get_review_logs(cid)
-    else:
-        return mw.col.card_stats_data(cid).revlog
+    return mw.col.get_review_logs(cid)
 
 
 def filter_revlogs(
@@ -165,10 +161,7 @@ def sched_current_date() -> date:
     return (now - timedelta(hours=next_day_start_at)).date()
 
 
-if int_version() < 231200:
-    DECAY = -1
-else:
-    DECAY = -0.5  # FSRS-4.5
+DECAY = -0.5
 FACTOR = 0.9 ** (1 / DECAY) - 1
 
 
