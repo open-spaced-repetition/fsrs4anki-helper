@@ -209,7 +209,7 @@ def get_steps_stats(self: CollectionStats):
             </tr>
             """
 
-        if stats["retention"] == 1 or stats["retention"] == 0 or stats["count"] < 100:
+        if stats["retention"] == 1 or stats["retention"] == 0:
             results["stability"][rating] = 86400
 
     html += (
@@ -238,6 +238,7 @@ def get_steps_stats(self: CollectionStats):
         const relearningStepRow = document.querySelector('#relearning-steps');
         const cutoff = 86400 / 2;
         const stability = {results['stability']};
+        const stats = {results['stats']};
 
         function formatTime (seconds) {{
             const h = Math.round(seconds / 3600);
@@ -255,16 +256,24 @@ def get_steps_stats(self: CollectionStats):
             return 1 / FACTOR * (Math.pow(dr, (1 / DECAY)) - 1);
         }}
 
-        function calculateStep(stability, factor) {{
+        function calculateStep(stability, factor, count) {{
             const step = stability * factor;
-            return (step >= cutoff || Number.isNaN(step)) ? "" : formatTime(Math.max(step, 1));
+            if ((step >= cutoff || Number.isNaN(step))) {{
+                return '';
+            }} else if (count < 100) {{
+                return '(not enough data)';
+            }}
+            return formatTime(Math.max(step, 1));
         }};
 
         function calculateSteps() {{
-            const factor = calculateFactor(parseFloat(document.querySelector("#desired-retention").value));
+            const desiredRetention = parseFloat(document.querySelector("#desired-retention").value);
+            const factor = calculateFactor(desiredRetention);
 
-            const learningStep1 = calculateStep(stability[1], factor);
-            const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor);
+            const learningStep1Count = stats[1]['count'];
+            const learningStep1 = calculateStep(stability[1], factor, learningStep1Count);
+            const learningStep2Count = (stats[2]['count'] + stats[3]['count'] + stats[4]['count']) / 3;
+            const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor, learningStep2Count);
 
             learningStepRow.innerText = (!learningStep1 && !learningStep2) 
                 ? "You don't need learning steps" 
