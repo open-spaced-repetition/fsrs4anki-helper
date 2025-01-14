@@ -280,7 +280,8 @@ def get_steps_stats(self: CollectionStats):
                 ? "You don't need learning steps" 
                 : `${{learningStep1}} ${{learningStep2}}`;
 
-            const relearningStep = calculateStep(stability[0], factor);
+            const relearningStepCount = stats[0]['count'];
+            const relearningStep = calculateStep(stability[0], factor, relearningStepCount);
             relearningStepRow.innerText = !relearningStep 
                 ? "You don't need relearning steps" 
                 : relearningStep;
