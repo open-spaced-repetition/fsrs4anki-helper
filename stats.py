@@ -261,7 +261,7 @@ def get_steps_stats(self: CollectionStats):
             if ((step >= cutoff || Number.isNaN(step))) {{
                 return '';
             }} else if (count < 100) {{
-                return '(not enough data)';
+                return '(data is not enough, please keep current setting)';
             }}
             return formatTime(Math.max(step, 1));
         }};
