@@ -156,6 +156,7 @@ def get_steps_stats(self: CollectionStats):
         stats = results["stats"].get(rating, {})
         if not stats:
             results["stability"][rating] = 86400
+            results["stats"][rating] = {"count": 0}
             state_cell = ""
             if rating == 0:
                 state_cell = '<td class="trl"><b>Relearning</b></td>'
