@@ -283,7 +283,7 @@ def get_steps_stats(self: CollectionStats):
                 learningStepRow.innerText = 'insufficient data to recommend the second step, please keep current setting';
             }} else {{
                 learningStepRow.innerText = (!learningStep1 && !learningStep2) 
-                    ? "You don't need learning steps" 
+                    ? "Keep the steps field blank." 
                     : `${{learningStep1}} ${{learningStep2}}`;
             }}
 
