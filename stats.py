@@ -257,12 +257,10 @@ def get_steps_stats(self: CollectionStats):
             return 1 / FACTOR * (Math.pow(dr, (1 / DECAY)) - 1);
         }}
 
-        function calculateStep(stability, factor, count) {{
+        function calculateStep(stability, factor) {{
             const step = stability * factor;
             if ((step >= cutoff || Number.isNaN(step))) {{
                 return '';
-            }} else if (count < 100) {{
-                return '(data is not enough, please keep current setting)';
             }}
             return formatTime(Math.max(step, 1));
         }};
@@ -272,13 +270,21 @@ def get_steps_stats(self: CollectionStats):
             const factor = calculateFactor(desiredRetention);
 
             const learningStep1Count = stats[1]['count'];
-            const learningStep1 = calculateStep(stability[1], factor, learningStep1Count);
+            const learningStep1 = calculateStep(stability[1], factor);
             const learningStep2Count = (stats[2]['count'] + stats[3]['count'] + stats[4]['count']) / 3;
-            const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor, learningStep2Count);
+            const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor);
 
-            learningStepRow.innerText = (!learningStep1 && !learningStep2) 
-                ? "You don't need learning steps" 
-                : `${{learningStep1}} ${{learningStep2}}`;
+            if (learningStep1Count < 100 && learningStep2Count < 100) {{
+                learningStepRow.innerText = '(data is not enough, please keep current setting)';
+            }} else if (learningStep1Count < 100) {{
+                learningStepRow.innerText = 'insufficient data to recommend the first step, please keep current setting';
+            }} else if (learningStep2Count < 100) {{
+                learningStepRow.innerText = 'insufficient data to recommend the second step, please keep current setting';
+            }} else {{
+                learningStepRow.innerText = (!learningStep1 && !learningStep2) 
+                    ? "You don't need learning steps" 
+                    : `${{learningStep1}} ${{learningStep2}}`;
+            }}
 
             const relearningStepCount = stats[0]['count'];
             const relearningStep = calculateStep(stability[0], factor, relearningStepCount);
