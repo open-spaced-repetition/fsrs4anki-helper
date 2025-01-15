@@ -36,6 +36,7 @@ def steps_stats(deck_lim, period_lim):
     SELECT cid, MIN(id) AS first_id, ease AS first_rating
     FROM revlog
     WHERE ease BETWEEN 1 AND 4
+    AND type = {REVLOG_LRN}
     {"AND " + deck_lim if deck_lim else ""}
     GROUP BY cid
     {"HAVING " + period_lim if period_lim else ""}
@@ -66,6 +67,7 @@ def steps_stats(deck_lim, period_lim):
         SELECT cid, MIN(id) AS first_id, ease AS first_rating
         FROM revlog
         WHERE ease BETWEEN 1 AND 4
+        AND type = {REVLOG_LRN}
         {"AND " + deck_lim if deck_lim else ""}
         GROUP BY cid
         HAVING first_rating = 1
@@ -106,6 +108,7 @@ def steps_stats(deck_lim, period_lim):
         SELECT cid, MIN(id) AS first_id, ease AS first_rating
         FROM revlog
         WHERE ease BETWEEN 1 AND 4
+        AND type = {REVLOG_LRN}
         {"AND " + deck_lim if deck_lim else ""}
         GROUP BY cid
         HAVING first_rating = 3
