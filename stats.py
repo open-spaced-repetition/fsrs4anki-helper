@@ -154,9 +154,10 @@ def get_steps_stats(self: CollectionStats):
     not_enough_data = True
     for rating, style in ratings.items():
         stats = results["stats"].get(rating, {})
-        if not stats:
+        if not stats or stats["count"] < 4:
             results["stability"][rating] = 86400
-            results["stats"][rating] = {"count": 0}
+            if "count" not in stats:
+                results["stats"][rating] = {"count": 0}
             state_cell = ""
             if rating == 0:
                 state_cell = '<td class="trl"><b>Relearning</b></td>'
