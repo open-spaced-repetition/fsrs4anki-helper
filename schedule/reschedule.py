@@ -356,12 +356,13 @@ def reschedule_background(
         fsrs.desired_retention = desired_retention
         fsrs.maximum_interval = maximum_interval
         fsrs.did = did
-        card = reschedule_card(cid, fsrs, filter_flag)
+        card, interval_updated = reschedule_card(cid, fsrs, filter_flag)
         if card is None:
             continue
         rescheduled_cards.append(card)
-        filtered_nids.add(nid)
-        cnt += 1
+        if interval_updated:
+            filtered_nids.add(nid)
+            cnt += 1
         if cnt % 500 == 0:
             mw.taskman.run_on_main(
                 lambda: mw.progress.update(
@@ -391,16 +392,14 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         s = memory_state.stability
         d = memory_state.difficulty
         if s is None or d is None:
-            return None
+            return None, False
         card.memory_state = FSRSMemoryState(stability=s, difficulty=d)
     elif card.memory_state:
         memory_state = card.memory_state
         s = memory_state.stability
         d = memory_state.difficulty
     else:
-        return None
-
-    write_custom_data(card, "v", "reschedule")
+        return None, False
 
     if card.type == CARD_TYPE_REV:
         fsrs.set_card(card)
@@ -420,14 +419,18 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
             adjusted_ivl_lower = next_interval(s, dr_upper)
 
             if card.ivl >= adjusted_ivl_lower and card.ivl <= adjusted_ivl_upper:
-                return None
+                if recompute:
+                    return card, False
+                else:
+                    return None, False
 
         due_before = card.odue if card.odid else card.due
         card = update_card_due_ivl(card, new_ivl)
+        write_custom_data(card, "v", "reschedule")
         due_after = card.odue if card.odid else card.due
         fsrs.update_due_cnt_per_day(due_before, due_after)
 
-    return card
+    return card, True
 
 
 def reschedule_browser_selected_cards(browser: browser.Browser):
