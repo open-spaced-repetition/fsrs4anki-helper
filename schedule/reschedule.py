@@ -313,7 +313,7 @@ def reschedule_background(
             END,
             nid
         FROM cards
-        WHERE queue IN ({QUEUE_TYPE_LRN}, {QUEUE_TYPE_REV}, {QUEUE_TYPE_DAY_LEARN_RELEARN})
+        WHERE queue NOT IN (0, -1, 4)
         {did_query if did_query is not None else ""}
         {recent_query if recent else ""}
         {filter_query if filter_flag else ""}
