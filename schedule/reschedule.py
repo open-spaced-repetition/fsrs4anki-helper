@@ -313,7 +313,7 @@ def reschedule_background(
             END,
             nid
         FROM cards
-        WHERE queue NOT IN (0, -1, 4)
+        WHERE queue NOT IN ({QUEUE_TYPE_SUSPENDED}, {QUEUE_TYPE_NEW}, {QUEUE_TYPE_PREVIEW})
         {did_query if did_query is not None else ""}
         {recent_query if recent else ""}
         {filter_query if filter_flag else ""}
