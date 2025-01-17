@@ -11,9 +11,12 @@ from anki.stats import (
     REVLOG_CRAM,
     REVLOG_RESCHED,
     CARD_TYPE_REV,
+    QUEUE_TYPE_SUSPENDED,
+    QUEUE_TYPE_NEW,
     QUEUE_TYPE_LRN,
     QUEUE_TYPE_REV,
     QUEUE_TYPE_DAY_LEARN_RELEARN,
+    QUEUE_TYPE_PREVIEW,
 )
 from aqt import mw
 import json
