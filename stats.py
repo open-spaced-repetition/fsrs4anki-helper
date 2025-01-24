@@ -154,8 +154,10 @@ def get_steps_stats(self: CollectionStats):
     not_enough_data = True
     for rating, style in ratings.items():
         stats = results["stats"].get(rating, {})
-        if not stats:
+        if not stats or stats["count"] < 4:
             results["stability"][rating] = 86400
+            if "count" not in stats:
+                results["stats"][rating] = {"count": 0}
             state_cell = ""
             if rating == 0:
                 state_cell = '<td class="trl"><b>Relearning</b></td>'
@@ -209,7 +211,7 @@ def get_steps_stats(self: CollectionStats):
             </tr>
             """
 
-        if stats["retention"] == 1 or stats["retention"] == 0 or stats["count"] < 100:
+        if stats["retention"] == 1 or stats["retention"] == 0:
             results["stability"][rating] = 86400
 
     html += (
@@ -238,6 +240,7 @@ def get_steps_stats(self: CollectionStats):
         const relearningStepRow = document.querySelector('#relearning-steps');
         const cutoff = 86400 / 2;
         const stability = {results['stability']};
+        const stats = {results['stats']};
 
         function formatTime (seconds) {{
             const h = Math.round(seconds / 3600);
@@ -257,23 +260,40 @@ def get_steps_stats(self: CollectionStats):
 
         function calculateStep(stability, factor) {{
             const step = stability * factor;
-            return (step >= cutoff || Number.isNaN(step)) ? "" : formatTime(Math.max(step, 1));
+            if ((step >= cutoff || Number.isNaN(step))) {{
+                return '';
+            }}
+            return formatTime(Math.max(step, 1));
         }};
 
         function calculateSteps() {{
-            const factor = calculateFactor(parseFloat(document.querySelector("#desired-retention").value));
+            const desiredRetention = parseFloat(document.querySelector("#desired-retention").value);
+            const factor = calculateFactor(desiredRetention);
 
+            const learningStep1Count = stats[1]['count'];
             const learningStep1 = calculateStep(stability[1], factor);
+            const learningStep2Count = (stats[2]['count'] + stats[3]['count'] + stats[4]['count']) / 3;
             const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor);
 
-            learningStepRow.innerText = (!learningStep1 && !learningStep2) 
-                ? "You don't need learning steps" 
-                : `${{learningStep1}} ${{learningStep2}}`;
+            if (learningStep1Count < 100) {{
+                learningStepRow.innerText = '(data is insufficient, please keep current setting)';
+            }} else if (learningStep2Count < 100) {{
+                learningStepRow.innerText = `${{learningStep1}}`;
+            }} else {{
+                learningStepRow.innerText = (!learningStep1 && !learningStep2) 
+                    ? "Keep the steps field blank." 
+                    : `${{learningStep1}} ${{learningStep2}}`;
+            }}
 
-            const relearningStep = calculateStep(stability[0], factor);
-            relearningStepRow.innerText = !relearningStep 
-                ? "You don't need relearning steps" 
-                : relearningStep;
+            const relearningStepCount = stats[0]['count'];
+            const relearningStep = calculateStep(stability[0], factor, relearningStepCount);
+            if (relearningStepCount < 100) {{
+                relearningStepRow.innerText = '(data is insufficient, please keep current setting)';
+            }} else {{
+                relearningStepRow.innerText = !relearningStep 
+                    ? "You don't need relearning steps" 
+                    : relearningStep;
+            }}
         }};
 
         calculateSteps();
