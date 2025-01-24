@@ -275,12 +275,10 @@ def get_steps_stats(self: CollectionStats):
             const learningStep2Count = (stats[2]['count'] + stats[3]['count'] + stats[4]['count']) / 3;
             const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor);
 
-            if (learningStep1Count < 100 && learningStep2Count < 100) {{
-                learningStepRow.innerText = '(data is not enough, please keep current setting)';
-            }} else if (learningStep1Count < 100) {{
-                learningStepRow.innerText = 'insufficient data to recommend the first step, please keep current setting';
+            if (learningStep1Count < 100) {{
+                learningStepRow.innerText = '(data is insufficient, please keep current setting)';
             }} else if (learningStep2Count < 100) {{
-                learningStepRow.innerText = 'insufficient data to recommend the second step, please keep current setting';
+                learningStepRow.innerText = `${{learningStep1}}`;
             }} else {{
                 learningStepRow.innerText = (!learningStep1 && !learningStep2) 
                     ? "Keep the steps field blank." 
@@ -289,9 +287,13 @@ def get_steps_stats(self: CollectionStats):
 
             const relearningStepCount = stats[0]['count'];
             const relearningStep = calculateStep(stability[0], factor, relearningStepCount);
-            relearningStepRow.innerText = !relearningStep 
-                ? "You don't need relearning steps" 
-                : relearningStep;
+            if (relearningStepCount < 100) {{
+                relearningStepRow.innerText = '(data is insufficient, please keep current setting)';
+            }} else {{
+                relearningStepRow.innerText = !relearningStep 
+                    ? "You don't need relearning steps" 
+                    : relearningStep;
+            }}
         }};
 
         calculateSteps();
