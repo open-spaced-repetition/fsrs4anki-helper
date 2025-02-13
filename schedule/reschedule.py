@@ -154,12 +154,6 @@ class FSRS:
         review_cnts: List[int],
         last_review: int,
     ):
-        if (
-            len(set(self.easy_days_review_ratio_list)) == 1
-            and len(self.easy_specific_due_dates) == 0
-        ):
-            return possible_intervals[review_cnts.index(min(review_cnts))]
-
         weights = [
             1 if r == 0 else (1 / (r**2)) * (1 / delta_t)
             for r, delta_t in zip(review_cnts, possible_intervals)
