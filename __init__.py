@@ -184,19 +184,20 @@ menu_rate = build_action(rate_on_ankiweb, "Rate Add-on on AnkiWeb")
 
 
 def visualize_schedule(did=None):
+    url = "https://open-spaced-repetition.github.io/anki_fsrs_visualizer"
     deck = mw.col.decks.current()
-    config = mw.col.decks.get_config(deck["conf"])
-    retention = config["desiredRetention"]
-    fsrs_params = (
-        config["fsrsParams5"]
-        if "fsrsParams5" in config and len(config["fsrsParams5"]) > 0
-        else config["fsrsWeights"]
-    )
-    fsrs_params_string = ",".join(f"{x:.4f}" for x in fsrs_params)
+    if "conf" in deck:
+        config = mw.col.decks.get_config(deck["conf"])
+        retention = config["desiredRetention"]
+        fsrs_params = (
+            config["fsrsParams5"]
+            if "fsrsParams5" in config and len(config["fsrsParams5"]) > 0
+            else config["fsrsWeights"]
+        )
+        fsrs_params_string = ",".join(f"{x:.4f}" for x in fsrs_params)
+        url += f"/?w={fsrs_params_string}&m={retention}"
 
-    openLink(
-        f"https://open-spaced-repetition.github.io/anki_fsrs_visualizer/?w={fsrs_params_string}&m={retention}"
-    )
+    openLink(url)
 
 
 menu_visualize = build_action(visualize_schedule, "Visualize Your FSRS Schedule")
