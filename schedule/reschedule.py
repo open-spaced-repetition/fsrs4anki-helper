@@ -10,11 +10,25 @@ from aqt.gui_hooks import browser_menus_did_init
 
 
 def check_review_distribution(actual_reviews: List[int], percentages: List[float]):
-    if sum(percentages) == 0:
-        return [1] * len(actual_reviews)
-    total_actual = sum(actual_reviews)
-    expected_distribution = [p * (total_actual / sum(percentages)) for p in percentages]
-    return [max(e - a, 0) for a, e in zip(actual_reviews, expected_distribution)]
+    easy_days_modifier = []
+    percentages = [p if p != 0 else 0.0001 for p in percentages]
+    possible_days_cnt = len(actual_reviews)
+    if possible_days_cnt <= 1:
+        return [1] * possible_days_cnt
+    total_review_count = sum(actual_reviews)
+    for p, review_count in zip(percentages, actual_reviews):
+        if p == 1:
+            easy_days_modifier.append(1)
+        elif p == 0.0001:
+            easy_days_modifier.append(0)
+        else:
+            other_days_count_total = total_review_count - review_count
+            other_days_p_total = sum(percentages) - p
+            if review_count / p >= other_days_count_total / other_days_p_total:
+                easy_days_modifier.append(0)
+            else:
+                easy_days_modifier.append(1)
+    return easy_days_modifier
 
 
 class FSRS:
@@ -140,12 +154,6 @@ class FSRS:
         review_cnts: List[int],
         last_review: int,
     ):
-        if (
-            len(set(self.easy_days_review_ratio_list)) == 1
-            and len(self.easy_specific_due_dates) == 0
-        ):
-            return possible_intervals[review_cnts.index(min(review_cnts))]
-
         weights = [
             1 if r == 0 else (1 / (r**2)) * (1 / delta_t)
             for r, delta_t in zip(review_cnts, possible_intervals)
@@ -157,13 +165,13 @@ class FSRS:
         ]
         weekdays = [date.weekday() for date in possible_dates]
 
-        mask = check_review_distribution(
+        easy_days_modifier = check_review_distribution(
             review_cnts, [self.easy_days_review_ratio_list[wd] for wd in weekdays]
         )
         for idx, ivl in enumerate(possible_intervals):
             if last_review + ivl in self.easy_specific_due_dates:
-                mask[idx] = False
-        final_weights = [w * m for w, m in zip(weights, mask)]
+                easy_days_modifier[idx] = 0
+        final_weights = [w * m for w, m in zip(weights, easy_days_modifier)]
 
         if sum(final_weights) > 0:
             return random.choices(possible_intervals, weights=final_weights)[0]
