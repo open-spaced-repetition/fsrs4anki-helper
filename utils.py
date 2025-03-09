@@ -85,6 +85,7 @@ def get_last_review_date(card: Card):
 
 
 def update_card_due_ivl(card: Card, new_ivl: int):
+    new_ivl = max(new_ivl, 1)
     card.ivl = new_ivl
     last_review_date = get_last_review_date(card)
     if card.odid:
