@@ -37,7 +37,7 @@ def _calculate_corrected_threshold(alpha: float, n: int) -> float:
     :return: The corrected threshold value based on the given parameters.
     """
     if n <= 0:
-      return 0.0
+        return 0.0
     return alpha / (_THRESHOLD_FACTOR * (n**2))
 
 
