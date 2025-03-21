@@ -4,6 +4,7 @@ from anki.cards import Card
 from anki.collection import BrowserColumns
 from aqt.browser import Browser, CellRow, Column, ItemId
 from ..utils import *
+from .detector import card_is_leech
 
 
 class CustomColumn:
@@ -70,3 +71,32 @@ class TargetRetrievabilityColumn(CustomColumn):
 
     def order_by_str(self) -> str:
         return """ivl / json_extract(CASE WHEN c.data != "" THEN c.data ELSE "{}" END, '$.s') ASC"""
+
+
+class LeechDetectorColumn(CustomColumn):
+    builtin_column = Column(
+        key="is_leech",
+        cards_mode_label="Is Leech",
+        notes_mode_label="Is Leech",
+        sorting_cards=BrowserColumns.SORTING_NONE,
+        uses_cell_font=False,
+        alignment=BrowserColumns.ALIGNMENT_CENTER,
+    )
+
+    def _display_value(self, card: Card) -> str:
+        if not mw.col.get_config("fsrs"):
+            tooltip(FSRS_ENABLE_WARNING)
+            return "N/A"
+        is_leech, metadata = card_is_leech(
+            card,
+            mw.col.card_stats_data(card.id).revlog,
+            3,
+            0.05,
+            False,
+            False,
+            4,
+        )
+        return "Yes" if is_leech else "No"
+
+    def order_by_str(self) -> str:
+        return "ivl ASC"

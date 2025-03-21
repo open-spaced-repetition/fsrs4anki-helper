@@ -9,6 +9,7 @@ from aqt.gui_hooks import (
 from .custom_columns import (
     CustomColumn,
     TargetRetrievabilityColumn,
+    LeechDetectorColumn,
 )
 from ..utils import *
 
@@ -16,6 +17,7 @@ browser: Optional[Browser] = None
 
 custom_columns = [
     TargetRetrievabilityColumn(),
+    LeechDetectorColumn(),
 ]
 
 
