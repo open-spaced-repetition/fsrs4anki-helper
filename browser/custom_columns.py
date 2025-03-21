@@ -90,11 +90,12 @@ class LeechDetectorColumn(CustomColumn):
         is_leech, metadata = card_is_leech(
             card,
             mw.col.card_stats_data(card.id).revlog,
-            3,
-            0.05,
-            False,
-            False,
-            4,
+            skip_reviews=3, # Or some other default value
+            leech_threshold=0.05,
+            dynamic_threshold=False,
+            incremental_check=False,
+            next_day_starts_at_hour=4,
+        )
         )
         return "Yes" if is_leech else "No"
 
