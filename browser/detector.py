@@ -204,10 +204,10 @@ def card_is_leech(
     next_day_starts_at_hour: int,
 ) -> (bool, Optional[float], Optional[float]):
     if skip_reviews < 1:
-        raise Exception("skip_reviews must be at least 1")
+        raise ValueError("skip_reviews must be at least 1")
 
     if leech_threshold < 0 or leech_threshold > 1:
-        raise Exception("leech_threshold must be between 0 and 1")
+        raise ValueError("leech_threshold must be between 0 and 1")
 
     reviews.reverse()
     filtered_reviews = filter_out_reviews_unwanted_by_fsrs(reviews)
