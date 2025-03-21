@@ -127,6 +127,8 @@ def filter_out_reviews_unwanted_by_fsrs(
             or (entry.review_kind == RevlogReviewKind.FILTERED and entry.ease == 0)
             # rescheduled
             or (entry.review_kind == RevlogReviewKind.RESCHEDULED)
+            # none
+            or (entry.memory_state.stability == 0)
         )
     ]
 

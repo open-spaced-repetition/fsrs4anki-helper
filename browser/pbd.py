@@ -35,7 +35,7 @@ def fast_poisson_binomial_pmf(p):
         # For each new Bernoulli trial, we update the entire PMF
         # We do this in reverse order to avoid overwriting values we still need
         for j in range(n, 0, -1):
-            pmf[j] = pmf[j] * (1 - prob) + pmf[j-1] * prob
+            pmf[j] = pmf[j] * (1 - prob) + pmf[j - 1] * prob
 
         # Update the probability of zero successes
         pmf[0] = pmf[0] * (1 - prob)

@@ -208,7 +208,7 @@ def card_is_leech(
 
     if leech_threshold < 0 or leech_threshold > 1:
         raise Exception("leech_threshold must be between 0 and 1")
-    
+
     reviews.reverse()
     filtered_reviews = filter_out_reviews_unwanted_by_fsrs(reviews)
     grouped_reviews = group_card_reviews_by_day(
