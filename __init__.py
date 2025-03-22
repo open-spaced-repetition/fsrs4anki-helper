@@ -144,9 +144,9 @@ add_action_to_gear(reschedule, i18n.t("reschedule-all-cards"))
 
 menu_reschedule_recent = build_action(
     reschedule_recent,
-    i18n.t("reschedule-recent-cards", days=config.days_to_reschedule),
+    i18n.t("reschedule-recent-cards", count=config.days_to_reschedule),
 )
-add_action_to_gear(reschedule_recent, i18n.t("reschedule-recent-cards", days=config.days_to_reschedule))
+add_action_to_gear(reschedule_recent, i18n.t("reschedule-recent-cards", count=config.days_to_reschedule))
 
 menu_postpone = build_action(postpone, i18n.t("postpone-all-decks"))
 add_action_to_gear(postpone, i18n.t("postpone-cards"))
@@ -285,7 +285,7 @@ menu_for_easy_days.addAction(menu_apply_easy_days)
 def adjust_menu():
     if mw.col is not None:
         menu_reschedule_recent.setText(
-            i18n.t("reschedule-recent-cards", days=config.days_to_reschedule)
+            i18n.t("reschedule-recent-cards", count=config.days_to_reschedule)
         )
         menu_auto_reschedule_after_sync.setChecked(config.auto_reschedule_after_sync)
         menu_auto_disperse_after_sync.setChecked(config.auto_disperse_after_sync)
