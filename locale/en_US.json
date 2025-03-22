@@ -8,7 +8,7 @@
     "show-steps-stats": "Show steps stats",
     "steps-stats-warning": "This feature would slow down the loading of the old stats page if you have a lot of reviews. Are you sure you want to enable it?",
     "reschedule-all-cards": "Reschedule all cards",
-    "reschedule-recent-cards": "Reschedule cards reviewed in the last {} days",
+    "reschedule-recent-cards": "Reschedule cards reviewed in the last %{days} days",
     "postpone-all-decks": "Postpone cards in all decks",
     "postpone-cards": "Postpone cards",
     "advance-all-decks": "Advance cards in all decks",
@@ -24,6 +24,13 @@
     "rate-addon": "Rate Add-on on AnkiWeb",
     "visualize-schedule": "Visualize Your FSRS Schedule",
     "fsrs-helper": "FSRS Helper",
-    "hi": "Hello world"
+    "sponsor-author": "Sponsor the Author",
+    "pass-fail": "Pass/Fail",
+    "ajt-card-management": "AJT Card Management",
+    "search-stats-extended": "Search Stats Extended",
+    "less-anki-easy-days": "Less Anki on Easy Days",
+    "apply-easy-days-now": "Apply easy days now",
+    "apply-easy-days-specific": "Apply easy days for specific dates",
+    "recommended-addons": "Recommended Add-ons"
   }
 }

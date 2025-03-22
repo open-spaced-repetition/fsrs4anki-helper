@@ -144,9 +144,9 @@ add_action_to_gear(reschedule, i18n.t("reschedule-all-cards"))
 
 menu_reschedule_recent = build_action(
     reschedule_recent,
-    i18n.t("reschedule-recent-cards").format(config.days_to_reschedule),
+    i18n.t("reschedule-recent-cards", days=config.days_to_reschedule),
 )
-add_action_to_gear(reschedule_recent, i18n.t("reschedule-recent-cards").format(config.days_to_reschedule))
+add_action_to_gear(reschedule_recent, i18n.t("reschedule-recent-cards", days=config.days_to_reschedule))
 
 menu_postpone = build_action(postpone, i18n.t("postpone-all-decks"))
 add_action_to_gear(postpone, i18n.t("postpone-cards"))
@@ -212,21 +212,21 @@ def sponsor(did=None):
     config.has_sponsored = True
 
 
-menu_sponsor = build_action(sponsor, "Sponsor the Author")
+menu_sponsor = build_action(sponsor, i18n.t("sponsor-author"))
 
 
 def pass_fail(did=None):
     openLink("https://ankiweb.net/shared/info/876946123")
 
 
-menu_pass_fail = build_action(pass_fail, "Pass/Fail")
+menu_pass_fail = build_action(pass_fail, i18n.t("pass-fail"))
 
 
 def ajt_card_management(did=None):
     openLink("https://ankiweb.net/shared/info/1021636467")
 
 
-menu_ajt_card_management = build_action(ajt_card_management, "AJT Card Management")
+menu_ajt_card_management = build_action(ajt_card_management, i18n.t("ajt-card-management"))
 
 
 def search_stats_extended(did=None):
@@ -234,17 +234,17 @@ def search_stats_extended(did=None):
 
 
 menu_search_stats_extended = build_action(
-    search_stats_extended, "Search Stats Extended"
+    search_stats_extended, i18n.t("search-stats-extended")
 )
 
-menu_for_helper = mw.form.menuTools.addMenu("FSRS Helper")
+menu_for_helper = mw.form.menuTools.addMenu(i18n.t("fsrs-helper"))
 menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_display_memory_state)
 menu_for_helper.addAction(menu_show_steps_stats)
 menu_for_helper.addAction(menu_auto_disperse_after_reschedule)
-menu_for_easy_days = menu_for_helper.addMenu("Less Anki on Easy Days")
+menu_for_easy_days = menu_for_helper.addMenu(i18n.t("less-anki-easy-days"))
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_reschedule_recent)
@@ -255,7 +255,7 @@ menu_for_helper.addAction(menu_disperse_siblings)
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reset)
 menu_for_helper.addAction(menu_clear_manual_rescheduling)
-menu_for_remedy = menu_for_helper.addMenu("Remedy Hard Misuse")
+menu_for_remedy = menu_for_helper.addMenu(i18n.t("remedy-hard-misuse"))
 menu_for_remedy.addAction(menu_remedy_hard_misuse)
 menu_for_remedy.addAction(menu_undo_remedy)
 menu_for_helper.addSeparator()
@@ -266,15 +266,15 @@ if not config.has_rated:
 if not config.has_sponsored:
     menu_for_helper.addAction(menu_sponsor)
 menu_for_helper.addSeparator()
-menu_for_recommended_addons = menu_for_helper.addMenu("Recommended Add-ons")
+menu_for_recommended_addons = menu_for_helper.addMenu(i18n.t("recommended-addons"))
 menu_for_recommended_addons.addAction(menu_pass_fail)
 menu_for_recommended_addons.addAction(menu_ajt_card_management)
 menu_for_recommended_addons.addAction(menu_search_stats_extended)
 
-menu_apply_easy_days = build_action(easy_days, "Apply easy days now")
+menu_apply_easy_days = build_action(easy_days, i18n.t("apply-easy-days-now"))
 menu_apply_easy_days_for_specific_date = build_action(
     lambda did: easy_day_for_sepcific_date(did, config),
-    "Apply easy days for specific dates",
+    i18n.t("apply-easy-days-specific"),
 )
 
 
@@ -285,7 +285,7 @@ menu_for_easy_days.addAction(menu_apply_easy_days)
 def adjust_menu():
     if mw.col is not None:
         menu_reschedule_recent.setText(
-            f"Reschedule cards reviewed in the last {config.days_to_reschedule} days"
+            i18n.t("reschedule-recent-cards", days=config.days_to_reschedule)
         )
         menu_auto_reschedule_after_sync.setChecked(config.auto_reschedule_after_sync)
         menu_auto_disperse_after_sync.setChecked(config.auto_disperse_after_sync)
