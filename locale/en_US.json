@@ -21,6 +21,7 @@
     "clear-custom-data": "Clear custom data in all cards",
     "delete-redundant-revlog": "Delete redundant manual revlog entries",
     "disperse-all-siblings": "Disperse all siblings",
+    "remedy-hard-misuse": "Remedy Hard Misuse",
     "remedy": "Remedy",
     "undo": "Undo",
     "contact-author": "Contact the Author on GitHub",
