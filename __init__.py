@@ -96,8 +96,7 @@ def set_auto_disperse_when_review(checked, _):
 
 
 menu_auto_disperse = checkable(
-    title=i18n.t("auto-disperse-when-review"),
-    on_click=set_auto_disperse_when_review
+    title=i18n.t("auto-disperse-when-review"), on_click=set_auto_disperse_when_review
 )
 
 
@@ -116,22 +115,18 @@ def set_display_memory_state(checked, _):
 
 
 menu_display_memory_state = checkable(
-    title=i18n.t("display-memory-state"),
-    on_click=set_display_memory_state
+    title=i18n.t("display-memory-state"), on_click=set_display_memory_state
 )
 
 
 def set_show_steps_stats(checked, _):
-    if not config.show_steps_stats and not askUser(
-        i18n.t("steps-stats-warning")
-    ):
+    if not config.show_steps_stats and not askUser(i18n.t("steps-stats-warning")):
         return
     config.show_steps_stats = checked
 
 
 menu_show_steps_stats = checkable(
-    title=i18n.t("show-steps-stats"),
-    on_click=set_show_steps_stats
+    title=i18n.t("show-steps-stats"), on_click=set_show_steps_stats
 )
 
 
@@ -146,7 +141,10 @@ menu_reschedule_recent = build_action(
     reschedule_recent,
     i18n.t("reschedule-recent-cards", count=config.days_to_reschedule),
 )
-add_action_to_gear(reschedule_recent, i18n.t("reschedule-recent-cards", count=config.days_to_reschedule))
+add_action_to_gear(
+    reschedule_recent,
+    i18n.t("reschedule-recent-cards", count=config.days_to_reschedule),
+)
 
 menu_postpone = build_action(postpone, i18n.t("postpone-all-decks"))
 add_action_to_gear(postpone, i18n.t("postpone-cards"))
@@ -154,9 +152,7 @@ add_action_to_gear(postpone, i18n.t("postpone-cards"))
 menu_advance = build_action(advance, i18n.t("advance-all-decks"))
 add_action_to_gear(advance, i18n.t("advance-cards"))
 
-menu_flatten = build_action(
-    flatten, i18n.t("flatten-all-decks")
-)
+menu_flatten = build_action(flatten, i18n.t("flatten-all-decks"))
 add_action_to_gear(flatten, i18n.t("flatten-cards"))
 
 menu_reset = build_action(clear_custom_data, i18n.t("clear-custom-data"))
@@ -165,7 +161,9 @@ menu_clear_manual_rescheduling = build_action(
     clear_manual_rescheduling, i18n.t("delete-redundant-revlog")
 )
 
-menu_disperse_siblings = build_action(disperse_siblings, i18n.t("disperse-all-siblings"))
+menu_disperse_siblings = build_action(
+    disperse_siblings, i18n.t("disperse-all-siblings")
+)
 
 menu_remedy_hard_misuse = build_action(remedy_hard_misuse, i18n.t("remedy"))
 
@@ -226,7 +224,9 @@ def ajt_card_management(did=None):
     openLink("https://ankiweb.net/shared/info/1021636467")
 
 
-menu_ajt_card_management = build_action(ajt_card_management, i18n.t("ajt-card-management"))
+menu_ajt_card_management = build_action(
+    ajt_card_management, i18n.t("ajt-card-management")
+)
 
 
 def search_stats_extended(did=None):
