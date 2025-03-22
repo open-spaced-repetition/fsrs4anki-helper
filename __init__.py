@@ -21,6 +21,7 @@ from .schedule import init_review_hook
 from .stats import init_stats
 from .browser.browser import init_browser
 from .configuration import Config, run_on_configuration_change
+from .i18n import i18n
 
 """
 Acknowledgement to Arthur Milchior, Carlos Duarte and oakkitten.
