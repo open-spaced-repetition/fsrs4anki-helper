@@ -2,6 +2,7 @@ from anki.stats import CollectionStats
 from .configuration import Config
 from .utils import *
 from .steps import steps_stats
+from .i18n import i18n
 
 
 def _line_now(i, a, b, bold=True):
@@ -103,11 +104,12 @@ def get_steps_stats(self: CollectionStats):
 
     title = CollectionStats._title(
         self,
-        "Steps Stats",
-        "Statistics for different first ratings during (re)learning steps",
+        i18n.t("step-stats"),
+        i18n.t("step-stats-subtitle"),
     )
 
-    html = """
+    html = (
+        """
         <style>
             td.trl { border: 1px solid; text-align: left; padding: 5px  }
             td.trr { border: 1px solid; text-align: right; padding: 5px  }
@@ -118,25 +120,28 @@ def get_steps_stats(self: CollectionStats):
             span.again-then-good { color: #fdd835 }
             span.good-then-again { color: #007bff }
         </style>
+        """
+        f"""
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
-                <td class="trl" rowspan=2><b>State</b></td>
-                <td class="trl" rowspan=2><b>First Ratings</b></td>
-                <td class="trc" colspan=7><b>Delay And Retention Distribution</b></td>
-                <td class="trc" colspan=3><b>Summary</b></td>
+                <td class="trl" rowspan=2><b>{i18n.t("state")}</b></td>
+                <td class="trl" rowspan=2><b>{i18n.t("first-ratings")}</b></td>
+                <td class="trc" colspan=7><b>{i18n.t("delay-and-retention-distribution")}</b></td>
+                <td class="trc" colspan=3><b>{i18n.t("summary")}</b></td>
             </tr>
             <tr>
                 <td class="trc"><b><span>R&#772;</span><sub>1</sub></b></td>
-                <td class="trc"><b>T<sub>25%</sub></b></td>
+                <td class="trc"><b>T<sub>{i18n.t("x-%", count=25)}</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span><sub>2</sub></b></td>
-                <td class="trc"><b>T<sub>50%</sub></b></td>
+                <td class="trc"><b>T<sub>{i18n.t("x-%", count=50)}</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span><sub>3</sub></b></td>
-                <td class="trc"><b>T<sub>75%</sub></b></td>
+                <td class="trc"><b>T<sub>{i18n.t("x-%", count=75)}</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span><sub>4</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span></b></td>
-                <td class="trc"><b>Stability</b></td>
-                <td class="trc"><b>Reviews</b></td>
+                <td class="trc"><b>{i18n.t("stability")}</b></td>
+                <td class="trc"><b>{i18n.t("reviews")}</b></td>
             </tr>"""
+    )
 
     ratings = {
         1: "again",
@@ -160,17 +165,15 @@ def get_steps_stats(self: CollectionStats):
                 results["stats"][rating] = {"count": 0}
             state_cell = ""
             if rating == 0:
-                state_cell = '<td class="trl"><b>Relearning</b></td>'
+                state_cell = f'<td class="trl"><b>{i18n.t("relearning")}</b></td>'
             elif first_learning:
-                state_cell = (
-                    f'<td class="trl" rowspan="{learning_count}"><b>Learning</b></td>'
-                )
+                state_cell = f'<td class="trl" rowspan="{learning_count}"><b>{i18n.t("learning")}</b></td>'
                 first_learning = False
 
             html += f"""
             <tr>
                 {state_cell}
-                <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
+                <td class="trl"><span class="{style}"><b>{i18n.t(style)}</b></span></td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
@@ -187,17 +190,15 @@ def get_steps_stats(self: CollectionStats):
         not_enough_data = False
         state_cell = ""
         if rating == 0:
-            state_cell = '<td class="trl"><b>Relearning</b></td>'
+            state_cell = f'<td class="trl"><b>{i18n.t("relearning")}</b></td>'
         elif first_learning:
-            state_cell = (
-                f'<td class="trl" rowspan="{learning_count}"><b>Learning</b></td>'
-            )
+            state_cell = f'<td class="trl" rowspan="{learning_count}"><b>{i18n.t("learning")}</b></td>'
             first_learning = False
 
         html += f"""
             <tr>
                 {state_cell}
-                <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
+                <td class="trl"><span class="{style}"><b>{i18n.t(style)}</b></span></td>
                 <td class="trr">{stats['r1']}</td>
                 <td class="trr">{format_time(stats['delay_q1'])}</td>
                 <td class="trr">{stats['r2']}</td>
@@ -218,19 +219,19 @@ def get_steps_stats(self: CollectionStats):
         f"""
     <tr>
         <td colspan="12" class="trl">
-            <strong>Desired retention:</strong>
+            <strong>{i18n.t("desired-retention")}:</strong>
             <input type="number" id="desired-retention" value="0.9" step="0.01" min="0.7" max="0.98" />
         </td>
     </tr>
     <tr>
         <td colspan="12" class="trl">
-            <strong>Recommended learning steps</strong>: 
+            <strong>{i18n.t("recommended-learning-steps")}</strong>: 
             <span id="learning-steps"></span>
         </td>
     </tr>
     <tr>
         <td colspan="12" class="trl">
-            <strong>Recommended relearning steps</strong>: 
+            <strong>{i18n.t("recommended-relearning-steps")}</strong>: 
             <span id="relearning-steps"></span>
         </td>
     </tr>
@@ -276,19 +277,19 @@ def get_steps_stats(self: CollectionStats):
             const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor);
 
             if (learningStep1Count < 100) {{
-                learningStepRow.innerText = '(data is insufficient, please keep current setting)';
+                learningStepRow.innerText = '{i18n.t("insufficient-learn-step-data")}';
             }} else if (learningStep2Count < 100) {{
                 learningStepRow.innerText = `${{learningStep1}}`;
             }} else {{
                 learningStepRow.innerText = (!learningStep1 && !learningStep2) 
-                    ? "Keep the steps field blank." 
+                    ? '{i18n.t("keep-steps-blank")}' 
                     : `${{learningStep1}} ${{learningStep2}}`;
             }}
 
             const relearningStepCount = stats[0]['count'];
             const relearningStep = calculateStep(stability[0], factor, relearningStepCount);
             if (relearningStepCount < 100) {{
-                relearningStepRow.innerText = '(data is insufficient, please keep current setting)';
+                relearningStepRow.innerText = '{i18n.t("insufficient-learn-step-data")}';
             }} else {{
                 relearningStepRow.innerText = !relearningStep 
                     ? "You don't need relearning steps" 
@@ -308,15 +309,8 @@ def get_steps_stats(self: CollectionStats):
     html += "</table>"
     html += (
         "<table style='text-align: left'><tr><td style='padding: 5px'>"
-        + "<summary>Interpretation</summary><ul>"
-        "<li>This table shows <b>the average time you wait before rating each card the next time</b> (Time Delay) based on your <b>first rating of the day for each card in the deck</b> (Again or Hard or Good or Lapse).</li>"
-        + "<li>It also shows <b>how well you remember a card after each subsequent rating (after its first rating) on average.</b></li>"
-        + "<li>The subsequent ratings after the first ratings of all cards in the deck are gathered and sorted by ascending order of the Time Delay (not shown on the table) and are then grouped into 4 groups (Time Delay 1<2<3<4).</li>"
-        + "<li>The 4 groups are further split and assigned to whatever the first rating of the cards was (Again or Hard or Good or Lapse). Therefore, each First Rating has 4 groups of subsequent ratings (Groups 1,2,3,4).</li>"
-        + "<li>Average Retention rates (R̅₁, R̅₂, R̅₃, R̅₄) for each group of subsequent ratings and the Average Overall Retention (R̅) for the first ratings are shown. Based on this, the average stability for cards after the first rating of the day (Again or Hard or Good or Lapse) is calculated.</li>"
-        + "<li>T<sub>X%</sub> means that X% of the cards in this deck with a first rating (Again or Hard or Good or Lapse) are delayed by this amount of time or less till the next rating.</li>"
-        + "<li>Recommended (re)learning steps are calculated from stability and desired retention. The 1st learning step is based S(Again). The 2nd learning step is based on the minimum of {S(Hard)* 2 - S(Again), S(Good), S(Again Then Good)}. The relearning step is base on S(Lapse).</li>"
-        + "</ul>"
+        f"<summary>{i18n.t('interpretation')}</summary>"
+        "<ul>" + i18n.t("step-stats-help") + "</ul>"
         "</td></tr></table>"
     )
     return self._section(title + html)
