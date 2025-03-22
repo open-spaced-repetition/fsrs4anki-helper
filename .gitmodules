@@ -1,0 +1,3 @@
+[submodule "python_i18n"]
+	path = python_i18n
+	url = https://github.com/danhper/python-i18n.git
