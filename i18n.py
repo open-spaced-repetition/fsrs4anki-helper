@@ -9,6 +9,7 @@ addon_dir = Path(os.path.dirname(__file__))
 
 i18n.load_path.append(addon_dir / "locale")
 i18n.set('filename_format', '{locale}.{format}')
+i18n.set('file_format', 'json')
 i18n.set('locale', locale)
 i18n.set('fallback', "en_US")
 tooltip(i18n.t("hi"))

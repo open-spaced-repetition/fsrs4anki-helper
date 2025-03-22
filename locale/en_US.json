@@ -1,5 +1,29 @@
 {
   "en_US": {
-    "hi": "hello world"
+    "sync-auto-reschedule": "Auto reschedule cards reviewed on other devices after sync",
+    "auto-disperse-after-sync": "Auto disperse siblings reviewed on other devices after sync",
+    "auto-disperse-when-review": "Auto disperse siblings when review",
+    "disperse-after-reschedule": "Disperse siblings after rescheduling (breaks Load Balance)",
+    "display-memory-state": "Display memory state after answer",
+    "show-steps-stats": "Show steps stats",
+    "steps-stats-warning": "This feature would slow down the loading of the old stats page if you have a lot of reviews. Are you sure you want to enable it?",
+    "reschedule-all-cards": "Reschedule all cards",
+    "reschedule-recent-cards": "Reschedule cards reviewed in the last {} days",
+    "postpone-all-decks": "Postpone cards in all decks",
+    "postpone-cards": "Postpone cards",
+    "advance-all-decks": "Advance cards in all decks",
+    "advance-cards": "Advance cards",
+    "flatten-all-decks": "Flatten future due cards in all decks (experimental)",
+    "flatten-cards": "Flatten future due cards",
+    "clear-custom-data": "Clear custom data in all cards",
+    "delete-redundant-revlog": "Delete redundant manual revlog entries",
+    "disperse-all-siblings": "Disperse all siblings",
+    "remedy": "Remedy",
+    "undo": "Undo",
+    "contact-author": "Contact Author on GitHub",
+    "rate-addon": "Rate Add-on on AnkiWeb",
+    "visualize-schedule": "Visualize Your FSRS Schedule",
+    "fsrs-helper": "FSRS Helper",
+    "hi": "Hello world"
   }
 }

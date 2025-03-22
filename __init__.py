@@ -64,7 +64,7 @@ def add_action_to_gear(fun, text):
 
     def aux(m, did):
         if not hasattr(m, "fsrs_helper_submenu"):
-            m.fsrs_helper_submenu = m.addMenu("FSRS Helper")
+            m.fsrs_helper_submenu = m.addMenu(i18n.t("fsrs-helper"))
         a = m.fsrs_helper_submenu.addAction(text)
         a.triggered.connect(lambda b, did=did: fun(did))
 
@@ -76,7 +76,7 @@ def set_auto_reschedule_after_sync(checked, _):
 
 
 menu_auto_reschedule_after_sync = checkable(
-    title="Auto reschedule cards reviewed on other devices after sync",
+    title=i18n.t("sync-auto-reschedule"),
     on_click=set_auto_reschedule_after_sync,
 )
 
@@ -86,7 +86,7 @@ def set_auto_disperse_after_sync(checked, _):
 
 
 menu_auto_disperse_after_sync = checkable(
-    title="Auto disperse siblings reviewed on other devices after sync",
+    title=i18n.t("auto-disperse-after-sync"),
     on_click=set_auto_disperse_after_sync,
 )
 
@@ -96,7 +96,8 @@ def set_auto_disperse_when_review(checked, _):
 
 
 menu_auto_disperse = checkable(
-    title="Auto disperse siblings when review", on_click=set_auto_disperse_when_review
+    title=i18n.t("auto-disperse-when-review"),
+    on_click=set_auto_disperse_when_review
 )
 
 
@@ -105,7 +106,7 @@ def set_auto_disperse_after_reschedule(checked, _):
 
 
 menu_auto_disperse_after_reschedule = checkable(
-    title="Disperse siblings after rescheduling (breaks Load Balance)",
+    title=i18n.t("disperse-after-reschedule"),
     on_click=set_auto_disperse_after_reschedule,
 )
 
@@ -115,20 +116,22 @@ def set_display_memory_state(checked, _):
 
 
 menu_display_memory_state = checkable(
-    title="Display memory state after answer", on_click=set_display_memory_state
+    title=i18n.t("display-memory-state"),
+    on_click=set_display_memory_state
 )
 
 
 def set_show_steps_stats(checked, _):
     if not config.show_steps_stats and not askUser(
-        "This feature would slow down the loading of the old stats page if you have a lot of reviews. Are you sure you want to enable it?"
+        i18n.t("steps-stats-warning")
     ):
         return
     config.show_steps_stats = checked
 
 
 menu_show_steps_stats = checkable(
-    title="Show steps stats", on_click=set_show_steps_stats
+    title=i18n.t("show-steps-stats"),
+    on_click=set_show_steps_stats
 )
 
 
@@ -136,44 +139,44 @@ def reschedule_recent(did):
     reschedule(did, recent=True)
 
 
-menu_reschedule = build_action(reschedule, "Reschedule all cards")
-add_action_to_gear(reschedule, "Reschedule all cards")
+menu_reschedule = build_action(reschedule, i18n.t("reschedule-all-cards"))
+add_action_to_gear(reschedule, i18n.t("reschedule-all-cards"))
 
 menu_reschedule_recent = build_action(
     reschedule_recent,
-    f"Reschedule cards reviewed in the last {config.days_to_reschedule} days",
+    i18n.t("reschedule-recent-cards").format(config.days_to_reschedule),
 )
-add_action_to_gear(reschedule_recent, "Reschedule recently reviewed cards")
+add_action_to_gear(reschedule_recent, i18n.t("reschedule-recent-cards").format(config.days_to_reschedule))
 
-menu_postpone = build_action(postpone, "Postpone cards in all decks")
-add_action_to_gear(postpone, "Postpone cards")
+menu_postpone = build_action(postpone, i18n.t("postpone-all-decks"))
+add_action_to_gear(postpone, i18n.t("postpone-cards"))
 
-menu_advance = build_action(advance, "Advance cards in all decks")
-add_action_to_gear(advance, "Advance cards")
+menu_advance = build_action(advance, i18n.t("advance-all-decks"))
+add_action_to_gear(advance, i18n.t("advance-cards"))
 
 menu_flatten = build_action(
-    flatten, "Flatten future due cards in all decks (experimental)"
+    flatten, i18n.t("flatten-all-decks")
 )
-add_action_to_gear(flatten, "Flatten future due cards")
+add_action_to_gear(flatten, i18n.t("flatten-cards"))
 
-menu_reset = build_action(clear_custom_data, "Clear custom data in all cards")
+menu_reset = build_action(clear_custom_data, i18n.t("clear-custom-data"))
 
 menu_clear_manual_rescheduling = build_action(
-    clear_manual_rescheduling, "Delete redundant manual revlog entries"
+    clear_manual_rescheduling, i18n.t("delete-redundant-revlog")
 )
 
-menu_disperse_siblings = build_action(disperse_siblings, "Disperse all siblings")
+menu_disperse_siblings = build_action(disperse_siblings, i18n.t("disperse-all-siblings"))
 
-menu_remedy_hard_misuse = build_action(remedy_hard_misuse, "Remedy")
+menu_remedy_hard_misuse = build_action(remedy_hard_misuse, i18n.t("remedy"))
 
-menu_undo_remedy = build_action(undo_remedy, "Undo")
+menu_undo_remedy = build_action(undo_remedy, i18n.t("undo"))
 
 
 def contact_author(did=None):
     openLink("https://github.com/open-spaced-repetition/fsrs4anki-helper")
 
 
-menu_contact = build_action(contact_author, "Contact Author on GitHub")
+menu_contact = build_action(contact_author, i18n.t("contact-author"))
 
 
 def rate_on_ankiweb(did=None):
@@ -181,7 +184,7 @@ def rate_on_ankiweb(did=None):
     config.has_rated = True
 
 
-menu_rate = build_action(rate_on_ankiweb, "Rate Add-on on AnkiWeb")
+menu_rate = build_action(rate_on_ankiweb, i18n.t("rate-addon"))
 
 
 def visualize_schedule(did=None):
@@ -201,7 +204,7 @@ def visualize_schedule(did=None):
     openLink(url)
 
 
-menu_visualize = build_action(visualize_schedule, "Visualize Your FSRS Schedule")
+menu_visualize = build_action(visualize_schedule, i18n.t("visualize-schedule"))
 
 
 def sponsor(did=None):
