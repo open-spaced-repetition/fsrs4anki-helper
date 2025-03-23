@@ -24,7 +24,7 @@ import math
 import random
 import time
 from datetime import date, datetime, timedelta
-
+from .i18n import t
 
 FSRS_ENABLE_WARNING = (
     "Please either enable FSRS in your deck options, or disable the FSRS helper add-on."

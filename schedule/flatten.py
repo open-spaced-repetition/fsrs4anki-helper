@@ -1,3 +1,4 @@
+from ..i18n import t
 from ..configuration import Config
 from ..utils import *
 from anki.decks import DeckManager
@@ -5,11 +6,9 @@ from anki.utils import ids2str
 
 
 def get_desired_flatten_limit_with_response(did):
-    inquire_text = "Enter the maximum number of reviews you want in the future.\n"
-    info_text = (
-        "This feature only affects the cards that have been scheduled by FSRS.\n"
-    )
-    warning_text = "This feature doesn't respect maximum interval settings, and may reduce your true retention significantly.\n"
+    inquire_text = t("flatten-inquire-text")
+    info_text = t("flatten-info-text")
+    warning_text = t("flatten-warning-text")
     (s, r) = getText(inquire_text + info_text + warning_text, default="100")
     if r:
         return (RepresentsInt(s), r)
@@ -24,11 +23,11 @@ def flatten(did):
     (desired_flatten_limit, resp) = get_desired_flatten_limit_with_response(did)
     if desired_flatten_limit is None:
         if resp:
-            showWarning("Please enter the number of cards you want to flatten.")
+            showWarning(t("flatten-enter-number"))
         return
     else:
         if desired_flatten_limit <= 0:
-            showWarning("Please enter a positive integer.")
+            showWarning(t("flatten-positive-integer"))
             return
 
     def on_done(future):
@@ -129,7 +128,7 @@ def flatten_background(did, desired_flatten_limit):
     )
 
     mw.taskman.run_on_main(
-        lambda: mw.progress.start(label="Flattening", max=total_cnt, immediate=True)
+        lambda: mw.progress.start(label=t("flatten-label"), max=total_cnt, immediate=True)
     )
     cnt = 0
     cancelled = False
@@ -164,7 +163,7 @@ def flatten_background(did, desired_flatten_limit):
             if cnt % 500 == 0:
                 mw.taskman.run_on_main(
                     lambda: mw.progress.update(
-                        label=f"{cnt}/{total_cnt} cards flattened",
+                        label=t("flatten-progress", count=cnt, total=total_cnt),
                         value=cnt,
                         max=total_cnt,
                     )
@@ -174,7 +173,7 @@ def flatten_background(did, desired_flatten_limit):
 
     mw.col.update_cards(flattened_cards)
     mw.col.merge_undo_entries(undo_entry)
-    result_text = f"{cnt} cards flattened in {time.time() - start_time:.2f} seconds."
+    result_text = t("flatten-result-text", count=cnt, seconds=(time.time() - start_time))
     if len(prev_target_rs) > 0 and len(new_target_rs) > 0:
-        result_text += f"<br>Mean target retention of flattened cards: {sum(prev_target_rs) / len(prev_target_rs):.2%} -> {sum(new_target_rs) / len(new_target_rs):.2%}"
+        result_text += t("flatten-retention-change", prev_retention=(sum(prev_target_rs) / len(prev_target_rs)), new_retention=(sum(new_target_rs) / len(new_target_rs)))
     return result_text
