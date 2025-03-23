@@ -76,6 +76,19 @@
     "past": "Past",
     "reviews-on-cards": "Reviews on cards",
 
+    "advance-inquire-text": "Enter the number of cards to be advanced.\n",
+    "advance-notification-text": "For this %{deck_collection}, it is relatively safe to advance up to %{count} cards.\n",
+    "advance-warning-text": "You can advance more cards if you wish, but it is not recommended.\nKeep in mind that whenever you use Postpone or Advance, you depart from the optimal scheduling.\n",
+    "advance-info-text": "This feature only affects the cards that have been scheduled by FSRS.",
+    "advance-enter-number": "Please enter the number of cards you want to advance.",
+    "advance-positive-integer": "Please enter a positive integer.",
+    "advance": "Advance",
+    "advance-result-text": {
+      "one": "1 card has been advanced.",
+      "other": "%{count} cards have been advanced."
+    },
+    "advance-retention-change": "<br>Mean target retention of advanced cards: %{left:.2%} -> {right:.2%}",
+
     "x-%": "%{count}%",
     "x-cards": {
       "one": "1 card",
