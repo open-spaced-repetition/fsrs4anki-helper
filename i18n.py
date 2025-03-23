@@ -34,5 +34,7 @@ i18n.add_translation("fail", tr.statistics_true_retention_fail())
 i18n.add_translation("retention", tr.statistics_true_retention_retention())
 i18n.add_translation("cards", tr.browsing_cards())
 
-# Uncomment this to mark translated text
-# i18n.t = lambda *args, **kwargs: "Translated"
+def t(*args, **kwargs):
+    # Uncomment this to mark translated text
+    # return "Translated"
+    return i18n.t(*args, **kwargs)

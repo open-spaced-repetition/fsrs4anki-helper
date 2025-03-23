@@ -2,7 +2,7 @@ from anki.stats import CollectionStats
 from .configuration import Config
 from .utils import *
 from .steps import steps_stats
-from .i18n import i18n
+from .i18n import t
 
 
 def _line_now(i, a, b, bold=True):
@@ -104,8 +104,8 @@ def get_steps_stats(self: CollectionStats):
 
     title = CollectionStats._title(
         self,
-        i18n.t("step-stats"),
-        i18n.t("step-stats-subtitle"),
+        t("step-stats"),
+        t("step-stats-subtitle"),
     )
 
     html = (
@@ -124,22 +124,22 @@ def get_steps_stats(self: CollectionStats):
         f"""
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
-                <td class="trl" rowspan=2><b>{i18n.t("state")}</b></td>
-                <td class="trl" rowspan=2><b>{i18n.t("first-ratings")}</b></td>
-                <td class="trc" colspan=7><b>{i18n.t("delay-and-retention-distribution")}</b></td>
-                <td class="trc" colspan=3><b>{i18n.t("summary")}</b></td>
+                <td class="trl" rowspan=2><b>{t("state")}</b></td>
+                <td class="trl" rowspan=2><b>{t("first-ratings")}</b></td>
+                <td class="trc" colspan=7><b>{t("delay-and-retention-distribution")}</b></td>
+                <td class="trc" colspan=3><b>{t("summary")}</b></td>
             </tr>
             <tr>
                 <td class="trc"><b><span>R&#772;</span><sub>1</sub></b></td>
-                <td class="trc"><b>T<sub>{i18n.t("x-%", count=25)}</sub></b></td>
+                <td class="trc"><b>T<sub>{t("x-%", count=25)}</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span><sub>2</sub></b></td>
-                <td class="trc"><b>T<sub>{i18n.t("x-%", count=50)}</sub></b></td>
+                <td class="trc"><b>T<sub>{t("x-%", count=50)}</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span><sub>3</sub></b></td>
-                <td class="trc"><b>T<sub>{i18n.t("x-%", count=75)}</sub></b></td>
+                <td class="trc"><b>T<sub>{t("x-%", count=75)}</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span><sub>4</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span></b></td>
-                <td class="trc"><b>{i18n.t("stability")}</b></td>
-                <td class="trc"><b>{i18n.t("reviews")}</b></td>
+                <td class="trc"><b>{t("stability")}</b></td>
+                <td class="trc"><b>{t("reviews")}</b></td>
             </tr>"""
     )
 
@@ -165,15 +165,15 @@ def get_steps_stats(self: CollectionStats):
                 results["stats"][rating] = {"count": 0}
             state_cell = ""
             if rating == 0:
-                state_cell = f'<td class="trl"><b>{i18n.t("relearning")}</b></td>'
+                state_cell = f'<td class="trl"><b>{t("relearning")}</b></td>'
             elif first_learning:
-                state_cell = f'<td class="trl" rowspan="{learning_count}"><b>{i18n.t("learning")}</b></td>'
+                state_cell = f'<td class="trl" rowspan="{learning_count}"><b>{t("learning")}</b></td>'
                 first_learning = False
 
             html += f"""
             <tr>
                 {state_cell}
-                <td class="trl"><span class="{style}"><b>{i18n.t(style)}</b></span></td>
+                <td class="trl"><span class="{style}"><b>{t(style)}</b></span></td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
@@ -190,15 +190,15 @@ def get_steps_stats(self: CollectionStats):
         not_enough_data = False
         state_cell = ""
         if rating == 0:
-            state_cell = f'<td class="trl"><b>{i18n.t("relearning")}</b></td>'
+            state_cell = f'<td class="trl"><b>{t("relearning")}</b></td>'
         elif first_learning:
-            state_cell = f'<td class="trl" rowspan="{learning_count}"><b>{i18n.t("learning")}</b></td>'
+            state_cell = f'<td class="trl" rowspan="{learning_count}"><b>{t("learning")}</b></td>'
             first_learning = False
 
         html += f"""
             <tr>
                 {state_cell}
-                <td class="trl"><span class="{style}"><b>{i18n.t(style)}</b></span></td>
+                <td class="trl"><span class="{style}"><b>{t(style)}</b></span></td>
                 <td class="trr">{stats['r1']}</td>
                 <td class="trr">{format_time(stats['delay_q1'])}</td>
                 <td class="trr">{stats['r2']}</td>
@@ -219,19 +219,19 @@ def get_steps_stats(self: CollectionStats):
         f"""
     <tr>
         <td colspan="12" class="trl">
-            <strong>{i18n.t("desired-retention")}:</strong>
+            <strong>{t("desired-retention")}:</strong>
             <input type="number" id="desired-retention" value="0.9" step="0.01" min="0.7" max="0.98" />
         </td>
     </tr>
     <tr>
         <td colspan="12" class="trl">
-            <strong>{i18n.t("recommended-learning-steps")}</strong>: 
+            <strong>{t("recommended-learning-steps")}</strong>: 
             <span id="learning-steps"></span>
         </td>
     </tr>
     <tr>
         <td colspan="12" class="trl">
-            <strong>{i18n.t("recommended-relearning-steps")}</strong>: 
+            <strong>{t("recommended-relearning-steps")}</strong>: 
             <span id="relearning-steps"></span>
         </td>
     </tr>
@@ -277,19 +277,19 @@ def get_steps_stats(self: CollectionStats):
             const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor);
 
             if (learningStep1Count < 100) {{
-                learningStepRow.innerText = '{i18n.t("insufficient-learn-step-data")}';
+                learningStepRow.innerText = '{t("insufficient-learn-step-data")}';
             }} else if (learningStep2Count < 100) {{
                 learningStepRow.innerText = `${{learningStep1}}`;
             }} else {{
                 learningStepRow.innerText = (!learningStep1 && !learningStep2) 
-                    ? '{i18n.t("keep-steps-blank")}' 
+                    ? '{t("keep-steps-blank")}' 
                     : `${{learningStep1}} ${{learningStep2}}`;
             }}
 
             const relearningStepCount = stats[0]['count'];
             const relearningStep = calculateStep(stability[0], factor, relearningStepCount);
             if (relearningStepCount < 100) {{
-                relearningStepRow.innerText = '{i18n.t("insufficient-learn-step-data")}';
+                relearningStepRow.innerText = '{t("insufficient-learn-step-data")}';
             }} else {{
                 relearningStepRow.innerText = !relearningStep 
                     ? "You don't need relearning steps" 
@@ -309,8 +309,8 @@ def get_steps_stats(self: CollectionStats):
     html += "</table>"
     html += (
         "<table style='text-align: left'><tr><td style='padding: 5px'>"
-        f"<summary>{i18n.t('interpretation')}</summary>"
-        "<ul>" + i18n.t("step-stats-help") + "</ul>"
+        f"<summary>{t('interpretation')}</summary>"
+        "<ul>" + t("step-stats-help") + "</ul>"
         "</td></tr></table>"
     )
     return self._section(title + html)
@@ -327,22 +327,22 @@ def get_fsrs_stats(self: CollectionStats):
         time_sum,
     ) = retention_stability(lim)
     i = []
-    _line_now(i, i18n.t("studied-cards"), f"{card_cnt} cards")
-    _line_now(i, i18n.t('total-review-time'), f"{time_sum/3600:.1f} hours")
+    _line_now(i, t("studied-cards"), f"{card_cnt} cards")
+    _line_now(i, t('total-review-time'), f"{time_sum/3600:.1f} hours")
     if time_sum > 0:
         _line_now(
             i,
-            i18n.t('knowledge-acquisition-rate'),
-            i18n.t('x-cards-per-hour', count=round(estimated_total_knowledge / (time_sum/3600), 1)),
+            t('knowledge-acquisition-rate'),
+            t('x-cards-per-hour', count=round(estimated_total_knowledge / (time_sum/3600), 1)),
         )
     title = CollectionStats._title(
         self,
-        i18n.t("fsrs-stats"),
+        t("fsrs-stats"),
     )
     stats_data = _lineTbl_now(i)
     interpretation = (
-        f"<details><summary>{i18n.t('interpretation')}</summary><ul>" +
-        i18n.t("fsrs-stats-help")
+        f"<details><summary>{t('interpretation')}</summary><ul>" +
+        t("fsrs-stats-help")
     )
     return self._section(
         title
@@ -387,10 +387,10 @@ def get_retention_graph(self: CollectionStats):
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
-            (1, "#7c7", i18n.t("review-count-young")),
-            (2, "#070", i18n.t("review-count-mature")),
-            (3, "#ffd268", i18n.t("retention-rate-young")),
-            (4, "#e49a60", i18n.t("retention-rate-mature")),
+            (1, "#7c7", t("review-count-young")),
+            (2, "#070", t("review-count-mature")),
+            (3, "#ffd268", t("retention-rate-young")),
+            (4, "#e49a60", t("retention-rate-mature")),
         ),
     )
 
@@ -446,8 +446,8 @@ def get_retention_graph(self: CollectionStats):
             id, data=data, conf=conf, xunit=chunk, ylabel=ylabel, ylabel2=ylabel2
         )
 
-    txt1 = self._title(i18n.t('retention-graph'), i18n.t('retention-graph-help'))
-    txt1 += plot("retention", data, ylabel=i18n.t('review-count'), ylabel2=i18n.t('retention-rate'))
+    txt1 = self._title(t('retention-graph'), t('retention-graph-help'))
+    txt1 += plot("retention", data, ylabel=t('review-count'), ylabel2=t('retention-rate'))
     return self._section(txt1)
 
 
@@ -491,18 +491,18 @@ def get_true_retention(self: CollectionStats):
 
     if self.type == 0:
         period = 31
-        pname = i18n.t('month')
+        pname = t('month')
     elif self.type == 1:
         period = 365
-        pname = i18n.t('year')
+        pname = t('year')
     elif self.type == 2:
         period = 36500
-        pname = i18n.t('deck-life')
+        pname = t('deck-life')
     pastPeriod = stats_list(lim, (mw.col.sched.day_cutoff - 86400 * period) * 1000)
     true_retention_part = CollectionStats._title(
         self,
-        i18n.t('true-retention'),
-        f"<p>{i18n.t('true-retention-help')}</p>",
+        t('true-retention'),
+        f"<p>{t('true-retention-help')}</p>",
     )
     config = Config()
     config.load()
@@ -519,34 +519,34 @@ def get_true_retention(self: CollectionStats):
     true_retention_part += f"""
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
-                <td class="trl" rowspan=3><b>{i18n.t('past')}</b></td>
-                <td class="trc" colspan=9><b>{i18n.t('reviews-on-cards')}</b></td>
-                <td class="trc" colspan=2 valign=middle><b>{i18n.t('cards')}</b></td>
+                <td class="trl" rowspan=3><b>{t('past')}</b></td>
+                <td class="trc" colspan=9><b>{t('reviews-on-cards')}</b></td>
+                <td class="trc" colspan=2 valign=middle><b>{t('cards')}</b></td>
             </tr>
             <tr>
-                <td class="trc" colspan=3><span class="young"><b>{i18n.t('young-annotated', mature_ivl=config.mature_ivl)}</b></span></td>
-                <td class="trc" colspan=3><span class="mature"><b>{i18n.t('mature-annotated', mature_ivl=config.mature_ivl)}</b></span></td>
-                <td class="trc" colspan=3><span class="total"><b>{i18n.t('total')}</b></span></td>
-                <td class="trc" rowspan=2><span class="young"><b>{i18n.t('learned')}</b></span></td>
-                <td class="trc" rowspan=2><span class="relearn"><b>{i18n.t('relearned')}</b></span></td>
+                <td class="trc" colspan=3><span class="young"><b>{t('young-annotated', mature_ivl=config.mature_ivl)}</b></span></td>
+                <td class="trc" colspan=3><span class="mature"><b>{t('mature-annotated', mature_ivl=config.mature_ivl)}</b></span></td>
+                <td class="trc" colspan=3><span class="total"><b>{t('total')}</b></span></td>
+                <td class="trc" rowspan=2><span class="young"><b>{t('learned')}</b></span></td>
+                <td class="trc" rowspan=2><span class="relearn"><b>{t('relearned')}</b></span></td>
             </tr>
             <tr>
-                <td class="trc"><span class="young">{i18n.t('pass')}</span></td>
-                <td class="trc"><span class="young">{i18n.t('fail')}</span></td>
-                <td class="trc"><span class="young">{i18n.t('retention')}</span></td>
-                <td class="trc"><span class="mature">{i18n.t('pass')}</span></td>
-                <td class="trc"><span class="mature">{i18n.t('fail')}</span></td>
-                <td class="trc"><span class="mature">{i18n.t('retention')}</span></td>
-                <td class="trc"><span class="total">{i18n.t('pass')}</span></td>
-                <td class="trc"><span class="total">{i18n.t('fail')}</span></td>
-                <td class="trc"><span class="total">{i18n.t('retention')}</span></td>
+                <td class="trc"><span class="young">{t('pass')}</span></td>
+                <td class="trc"><span class="young">{t('fail')}</span></td>
+                <td class="trc"><span class="young">{t('retention')}</span></td>
+                <td class="trc"><span class="mature">{t('pass')}</span></td>
+                <td class="trc"><span class="mature">{t('fail')}</span></td>
+                <td class="trc"><span class="mature">{t('retention')}</span></td>
+                <td class="trc"><span class="total">{t('pass')}</span></td>
+                <td class="trc"><span class="total">{t('fail')}</span></td>
+                <td class="trc"><span class="total">{t('retention')}</span></td>
             </tr>"""
-    true_retention_part += stats_row(i18n.t('day'), pastDay)
-    true_retention_part += stats_row(i18n.t('yesterday'), pastYesterday)
-    true_retention_part += stats_row(i18n.t('week'), pastWeek)
+    true_retention_part += stats_row(t('day'), pastDay)
+    true_retention_part += stats_row(t('yesterday'), pastYesterday)
+    true_retention_part += stats_row(t('week'), pastWeek)
     true_retention_part += stats_row(pname, pastPeriod)
     true_retention_part += "</table>"
-    true_retention_part += f"<p>{i18n.t('true-retention-mature-help')}</p>"
+    true_retention_part += f"<p>{t('true-retention-mature-help')}</p>"
     return self._section(true_retention_part)
 
 
