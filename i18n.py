@@ -22,6 +22,17 @@ i18n.add_translation("desired-retention", tr.deck_config_desired_retention(), lo
 i18n.add_translation("again", tr.studying_again(), locale=locale)
 i18n.add_translation("hard", tr.studying_hard(), locale=locale)
 i18n.add_translation("good", tr.studying_good(), locale=locale)
+i18n.add_translation("day", tr.statistics_true_retention_month(), locale=locale)
+i18n.add_translation("month", tr.statistics_true_retention_year(), locale=locale)
+i18n.add_translation("deck-life", tr.statistics_range_all_history(), locale=locale)
+i18n.add_translation("true-retention", tr.statistics_true_retention_title(), locale=locale)
+i18n.add_translation("day", tr.statistics_true_retention_today())
+i18n.add_translation("yesterday", tr.statistics_true_retention_yesterday())
+i18n.add_translation("week", tr.statistics_true_retention_week())
+i18n.add_translation("pass", tr.statistics_true_retention_pass())
+i18n.add_translation("fail", tr.statistics_true_retention_fail())
+i18n.add_translation("retention", tr.statistics_true_retention_retention())
+i18n.add_translation("cards", tr.browsing_cards())
 
 # Uncomment this to mark translated text
 # i18n.t = lambda *args, **kwargs: "Translated"

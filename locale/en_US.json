@@ -53,6 +53,37 @@
     "insufficient-learn-step-data": "(data is insufficient, please keep current setting)",
     "keep-steps-blank": "Keep the steps field blank.",
 
-    "x-%": "%{count}%"
+    "fsrs-stats": "FSRS Stats",
+    "knowledge-acquisition-rate": "Knowledge acquisition rate",
+    "studied-cards": "Studied cards",
+    "total-review-time": "Total review time",
+    "fsrs-stats-help": "<li><b>Studied cards</b>: the number of cards with FSRS memory states, excluding suspended cards.</li>\n<li><b>Total review time</b>: the amount of time spent doing reviews in Anki. This does not include the time spent on reviewing suspended and deleted cards.</li>\n<li><b>Knowledge acquisition rate</b>: the number of cards memorized per hour of actively doing reviews in Anki, calculated as the ratio of total knowledge and total time. Larger values indicate efficient learning. This metric can be used to compare different learners. If your collection is very young, this number may initially be very low or very high.</li>\n</ul></details>",
+    "review-count": "Review Count",
+    "review-count-young": "Review Count (young)",
+    "review-count-mature": "Review Count (mature)",
+    "retention-rate": "Retention Rate",
+    "retention-rate-young": "Retention Rate (young)",
+    "retention-rate-mature": "Retention Rate (mature)",
+    "retention-graph": "Retention Graph",
+    "retention-graph-help": "Retention rate and review count over time",
+    "true-retention-help": "The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.",
+    "true-retention-mature-help": "By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config.",
+    "young-annotated": "Young (ivl < %{mature_ivl} d)",
+    "mature-annotated":"Mature (ivl ≥ %{mature_ivl} d)",
+    "total": "Total",
+    "learned": "Learned",
+    "relearned": "Relearned",
+    "past": "Past",
+    "reviews-on-cards": "Reviews on cards",
+
+    "x-%": "%{count}%",
+    "x-cards": {
+      "one": "1 card",
+      "other": "%{count} cards"
+    },
+    "x-cards-per-hour": {
+      "one":"1 card/hour",
+      "other":"%{count} cards/hour"
+    }
   }
 }

@@ -327,25 +327,22 @@ def get_fsrs_stats(self: CollectionStats):
         time_sum,
     ) = retention_stability(lim)
     i = []
-    _line_now(i, "Studied cards", f"{card_cnt} cards")
-    _line_now(i, "Total review time", f"{time_sum/3600:.1f} hours")
+    _line_now(i, i18n.t("studied-cards"), f"{card_cnt} cards")
+    _line_now(i, i18n.t('total-review-time'), f"{time_sum/3600:.1f} hours")
     if time_sum > 0:
         _line_now(
             i,
-            "Knowledge acquisition rate",
-            f"{estimated_total_knowledge / (time_sum/3600):.1f} cards/hour",
+            i18n.t('knowledge-acquisition-rate'),
+            i18n.t('x-cards-per-hour', count=round(estimated_total_knowledge / (time_sum/3600), 1)),
         )
     title = CollectionStats._title(
         self,
-        "FSRS Stats",
+        i18n.t("fsrs-stats"),
     )
     stats_data = _lineTbl_now(i)
     interpretation = (
-        "<details><summary>Interpretation</summary><ul>"
-        + "<li><b>Studied cards</b>: the number of cards with FSRS memory states, excluding suspended cards.</li> "
-        + "<li><b>Total review time</b>: the amount of time spent doing reviews in Anki. This does not include the time spent on reviewing suspended and deleted cards.</li>"
-        + "<li><b>Knowledge acquisition rate</b>: the number of cards memorized per hour of actively doing reviews in Anki, calculated as the ratio of total knowledge and total time. Larger values indicate efficient learning. This metric can be used to compare different learners. If your collection is very young, this number may initially be very low or very high.</li>"
-        + "</ul></details>"
+        f"<details><summary>{i18n.t('interpretation')}</summary><ul>" +
+        i18n.t("fsrs-stats-help")
     )
     return self._section(
         title
@@ -390,10 +387,10 @@ def get_retention_graph(self: CollectionStats):
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
-            (1, "#7c7", "Review Count (young)"),
-            (2, "#070", "Review Count (mature)"),
-            (3, "#ffd268", "Retention Rate (young)"),
-            (4, "#e49a60", "Retention Rate (mature)"),
+            (1, "#7c7", i18n.t("review-count-young")),
+            (2, "#070", i18n.t("review-count-mature")),
+            (3, "#ffd268", i18n.t("retention-rate-young")),
+            (4, "#e49a60", i18n.t("retention-rate-mature")),
         ),
     )
 
@@ -449,8 +446,8 @@ def get_retention_graph(self: CollectionStats):
             id, data=data, conf=conf, xunit=chunk, ylabel=ylabel, ylabel2=ylabel2
         )
 
-    txt1 = self._title("Retention Graph", "Retention rate and review count over time")
-    txt1 += plot("retention", data, ylabel="Review Count", ylabel2="Retention Rate")
+    txt1 = self._title(i18n.t('retention-graph'), i18n.t('retention-graph-help'))
+    txt1 += plot("retention", data, ylabel=i18n.t('review-count'), ylabel2=i18n.t('retention-rate'))
     return self._section(txt1)
 
 
@@ -494,18 +491,18 @@ def get_true_retention(self: CollectionStats):
 
     if self.type == 0:
         period = 31
-        pname = "Month"
+        pname = i18n.t('month')
     elif self.type == 1:
         period = 365
-        pname = "Year"
+        pname = i18n.t('year')
     elif self.type == 2:
         period = 36500
-        pname = "Deck life"
+        pname = i18n.t('deck-life')
     pastPeriod = stats_list(lim, (mw.col.sched.day_cutoff - 86400 * period) * 1000)
     true_retention_part = CollectionStats._title(
         self,
-        "True Retention",
-        "<p>The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.</p>",
+        i18n.t('true-retention'),
+        f"<p>{i18n.t('true-retention-help')}</p>",
     )
     config = Config()
     config.load()
@@ -522,34 +519,34 @@ def get_true_retention(self: CollectionStats):
     true_retention_part += f"""
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
-                <td class="trl" rowspan=3><b>Past</b></td>
-                <td class="trc" colspan=9><b>Reviews on Cards</b></td>
-                <td class="trc" colspan=2 valign=middle><b>Cards</b></td>
+                <td class="trl" rowspan=3><b>{i18n.t('past')}</b></td>
+                <td class="trc" colspan=9><b>{i18n.t('reviews-on-cards')}</b></td>
+                <td class="trc" colspan=2 valign=middle><b>{i18n.t('cards')}</b></td>
             </tr>
             <tr>
-                <td class="trc" colspan=3><span class="young"><b>Young (ivl < {config.mature_ivl} d)</b></span></td>
-                <td class="trc" colspan=3><span class="mature"><b>Mature (ivl ≥ {config.mature_ivl} d)</b></span></td>
-                <td class="trc" colspan=3><span class="total"><b>Total</b></span></td>
-                <td class="trc" rowspan=2><span class="young"><b>Learned</b></span></td>
-                <td class="trc" rowspan=2><span class="relearn"><b>Relearned</b></span></td>
+                <td class="trc" colspan=3><span class="young"><b>{i18n.t('young-annotated', mature_ivl=config.mature_ivl)}</b></span></td>
+                <td class="trc" colspan=3><span class="mature"><b>{i18n.t('mature-annotated', mature_ivl=config.mature_ivl)}</b></span></td>
+                <td class="trc" colspan=3><span class="total"><b>{i18n.t('total')}</b></span></td>
+                <td class="trc" rowspan=2><span class="young"><b>{i18n.t('learned')}</b></span></td>
+                <td class="trc" rowspan=2><span class="relearn"><b>{i18n.t('relearned')}</b></span></td>
             </tr>
             <tr>
-                <td class="trc"><span class="young">Pass</span></td>
-                <td class="trc"><span class="young">Fail</span></td>
-                <td class="trc"><span class="young">Retention</span></td>
-                <td class="trc"><span class="mature">Pass</span></td>
-                <td class="trc"><span class="mature">Fail</span></td>
-                <td class="trc"><span class="mature">Retention</span></td>
-                <td class="trc"><span class="total">Pass</span></td>
-                <td class="trc"><span class="total">Fail</span></td>
-                <td class="trc"><span class="total">Retention</span></td>
+                <td class="trc"><span class="young">{i18n.t('pass')}</span></td>
+                <td class="trc"><span class="young">{i18n.t('fail')}</span></td>
+                <td class="trc"><span class="young">{i18n.t('retention')}</span></td>
+                <td class="trc"><span class="mature">{i18n.t('pass')}</span></td>
+                <td class="trc"><span class="mature">{i18n.t('fail')}</span></td>
+                <td class="trc"><span class="mature">{i18n.t('retention')}</span></td>
+                <td class="trc"><span class="total">{i18n.t('pass')}</span></td>
+                <td class="trc"><span class="total">{i18n.t('fail')}</span></td>
+                <td class="trc"><span class="total">{i18n.t('retention')}</span></td>
             </tr>"""
-    true_retention_part += stats_row("Day", pastDay)
-    true_retention_part += stats_row("Yesterday", pastYesterday)
-    true_retention_part += stats_row("Week", pastWeek)
+    true_retention_part += stats_row(i18n.t('day'), pastDay)
+    true_retention_part += stats_row(i18n.t('yesterday'), pastYesterday)
+    true_retention_part += stats_row(i18n.t('week'), pastWeek)
     true_retention_part += stats_row(pname, pastPeriod)
     true_retention_part += "</table>"
-    true_retention_part += f"<p>By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config.</p>"
+    true_retention_part += f"<p>{i18n.t('true-retention-mature-help')}</p>"
     return self._section(true_retention_part)
 
 
