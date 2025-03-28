@@ -128,7 +128,9 @@ def flatten_background(did, desired_flatten_limit):
     )
 
     mw.taskman.run_on_main(
-        lambda: mw.progress.start(label=t("flatten-label"), max=total_cnt, immediate=True)
+        lambda: mw.progress.start(
+            label=t("flatten-label"), max=total_cnt, immediate=True
+        )
     )
     cnt = 0
     cancelled = False
@@ -173,7 +175,13 @@ def flatten_background(did, desired_flatten_limit):
 
     mw.col.update_cards(flattened_cards)
     mw.col.merge_undo_entries(undo_entry)
-    result_text = t("flatten-result-text", count=cnt, seconds=(time.time() - start_time))
+    result_text = t(
+        "flatten-result-text", count=cnt, seconds=f"{(time.time() - start_time):.2f}"
+    )
     if len(prev_target_rs) > 0 and len(new_target_rs) > 0:
-        result_text += t("flatten-retention-change", prev_retention=(sum(prev_target_rs) / len(prev_target_rs)), new_retention=(sum(new_target_rs) / len(new_target_rs)))
+        result_text += t(
+            "flatten-retention-change",
+            prev_retention=(f"{sum(prev_target_rs) / len(prev_target_rs):.2f}"),
+            new_retention=(f"{sum(new_target_rs) / len(new_target_rs):.2f}"),
+        )
     return result_text

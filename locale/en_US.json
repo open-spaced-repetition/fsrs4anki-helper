@@ -97,8 +97,8 @@
     "flatten-label": "Flattening",
     "flatten": "Flatten",
     "flatten-progress": "%{count}/%{total} cards flattened",
-    "flatten-result-text": "%{count} cards flattened in %{seconds:.2f} seconds.",
-    "flatten-retention-change": "<br>Mean target retention of flattened cards: %{prev_retention:.2%} -> %{new_retention:.2%}",
+    "flatten-result-text": "%{count} cards flattened in %{seconds} seconds.",
+    "flatten-retention-change": "<br>Mean target retention of flattened cards: %{prev_retention} -> %{new_retention:.2%}",
 
     "postpone-inquire-text": "Enter the number of cards to be postponed.\n",
     "postpone-notification-text": "%{deck}, it is relatively safe to postpone up to %{safe_cnt} cards.\n",
