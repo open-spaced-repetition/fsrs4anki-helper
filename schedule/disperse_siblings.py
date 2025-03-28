@@ -172,7 +172,7 @@ def disperse_siblings_backgroud(
 
     mw.taskman.run_on_main(
         lambda: mw.progress.start(
-            label="Dispersing Siblings", max=sibilings_cnt, immediate=True
+            label=t("disperse-label"), max=sibilings_cnt, immediate=True
         )
     )
 
@@ -194,7 +194,9 @@ def disperse_siblings_backgroud(
         if note_cnt % 500 == 0:
             mw.taskman.run_on_main(
                 lambda: mw.progress.update(
-                    label=f"{note_cnt}/{len(nid_siblings)} notes dispersed",
+                    label=t(
+                        "disperse-progress", count=note_cnt, total=len(nid_siblings)
+                    ),
                     value=note_cnt,
                     max=sibilings_cnt,
                 )
@@ -203,8 +205,7 @@ def disperse_siblings_backgroud(
                 break
 
     mw.col.update_cards(dispersed_cards)
-    mw.col.merge_undo_entries(undo_entry)
-    return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} cards in {note_cnt} notes dispersed"
+    return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} {t('disperse-cards-in')} {note_cnt} {t('disperse-notes')}"
 
 
 def disperse_siblings_when_review(reviewer, card: Card, ease):
@@ -226,7 +227,6 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
 
     card_cnt = 0
     dispersed_cards = []
-    undo_entry = mw.col.undo_status().last_step
     best_due_dates, due_ranges, min_gap = disperse(siblings)
 
     for cid, due in best_due_dates.items():
@@ -238,18 +238,30 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
         write_custom_data(card, "v", "disperse")
         dispersed_cards.append(card)
         card_cnt += 1
-        message = f"Dispersed card {card.id} from {due_to_date_str(old_due)} to {due_to_date_str(due)}"
+        message = t(
+            "disperse-card-message",
+            card_id=card.id,
+            old_due=due_to_date_str(old_due),
+            new_due=due_to_date_str(due),
+        )
         messages.append(message)
 
     mw.col.update_cards(dispersed_cards)
-    mw.col.merge_undo_entries(undo_entry)
 
     if config.debug_notify:
         text = ""
         if min_gap == 0:
             for cid, due_range in due_ranges.items():
-                text += f"Card {cid} due range: {due_to_date_str(due_range[0])} - {due_to_date_str(due_range[1])}<br/>"
-            text = "Due dates are too close to disperse:}<br/>" + text
+                text += (
+                    t(
+                        "disperse-card-range",
+                        card_id=cid,
+                        start_due=due_to_date_str(due_range[0]),
+                        end_due=due_to_date_str(due_range[1]),
+                    )
+                    + "<br/>"
+                )
+            text = t("disperse-too-close") + "<br/>" + text
         tooltip(text + "<br/>".join(messages))
 
 

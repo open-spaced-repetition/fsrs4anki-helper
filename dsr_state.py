@@ -3,6 +3,7 @@ from anki.template import TemplateRenderContext, TemplateRenderOutput
 
 from .configuration import Config
 from .utils import power_forgetting_curve, get_last_review_date, mw
+from .i18n import t
 
 
 # called each time a custom filter is encountered
@@ -34,7 +35,7 @@ def fsrs_field_filter(
 
 
 def invalid_name(filter_name: str) -> str:
-    return f"invalid filter name: {filter_name}"
+    return t("invalid-filter-name", filter_name=filter_name)
 
 
 def calc_s(ctx: TemplateRenderContext) -> str:
@@ -42,7 +43,7 @@ def calc_s(ctx: TemplateRenderContext) -> str:
     if card.memory_state is None:
         return ""
     stability = card.memory_state.stability
-    return f"{stability:.2f} days"
+    return t("stability-days", stability=f"{stability:.2f}")
 
 
 def calc_d(ctx: TemplateRenderContext) -> str:
@@ -50,7 +51,7 @@ def calc_d(ctx: TemplateRenderContext) -> str:
     if card.memory_state is None:
         return ""
     difficulty = (card.memory_state.difficulty - 1) / 9
-    return f"{(difficulty * 100):.0f}%"
+    return t("difficulty-percent", difficulty=f"{(difficulty * 100):.0f}")
 
 
 def calc_r(ctx: TemplateRenderContext) -> str:
@@ -61,7 +62,7 @@ def calc_r(ctx: TemplateRenderContext) -> str:
     last_review_date = get_last_review_date(card)
     elapsed_days = mw.col.sched.today - last_review_date
     retrievability = power_forgetting_curve(elapsed_days, stability)
-    return f"{(retrievability * 100):.1f}%"
+    return t("retrievability-percent", retrievability=f"{(retrievability * 100):.1f}")
 
 
 def on_card_did_render(
@@ -72,10 +73,10 @@ def on_card_did_render(
     if config.display_memory_state:
         fsrs_enabled = mw.col.get_config("fsrs")
         fsrs_status = f"""<br><span id="FSRS_status" style="font-size:12px;opacity:0.5;font-family:monospace;text-align:left;line-height:1em;margin-top:10em;display:inline-block;">
-        {"FSRS: enabled" if fsrs_enabled else "FSRS: disabled"}
-        <br>D: {calc_d(context) if fsrs_enabled else "Unknown"}
-        <br>S: {calc_s(context) if fsrs_enabled else "Unknown"}
-        <br>R: {calc_r(context) if fsrs_enabled else "Unknown"}
+        {t("fsrs-status", status=t("enabled") if fsrs_enabled else t("disabled"))}
+        <br>D: {calc_d(context) if fsrs_enabled else t("unknown")}
+        <br>S: {calc_s(context) if fsrs_enabled else t("unknown")}
+        <br>R: {calc_r(context) if fsrs_enabled else t("unknown")}
         </span>"""
         output.answer_text += fsrs_status
 
