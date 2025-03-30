@@ -1,5 +1,5 @@
 import re
-from aqt.utils import tooltip, getText, showWarning, showInfo, askUser, t
+from aqt.utils import tooltip, getText, showWarning, showInfo, askUser
 from collections import OrderedDict, defaultdict
 from typing import List, Dict, Tuple
 from anki.stats_pb2 import CardStatsResponse
