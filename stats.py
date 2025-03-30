@@ -76,7 +76,7 @@ def retention_stability(lim) -> tuple:
 
 def todayStats_new(self):
     if not mw.col.get_config("fsrs"):
-        tooltip(FSRS_ENABLE_WARNING)
+        tooltip(t("enable-fsrs-warning"))
         return todayStats_old(self)
     return (
         todayStats_old(self)

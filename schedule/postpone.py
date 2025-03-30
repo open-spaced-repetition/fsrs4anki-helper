@@ -19,7 +19,7 @@ def get_desired_postpone_cnt_with_response(safe_cnt, did):
 
 def postpone(did):
     if not mw.col.get_config("fsrs"):
-        tooltip(FSRS_ENABLE_WARNING)
+        tooltip(t("enable-fsrs-warning"))
         return
 
     DM = DeckManager(mw.col)

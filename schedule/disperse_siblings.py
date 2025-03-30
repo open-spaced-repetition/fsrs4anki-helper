@@ -144,7 +144,7 @@ def disperse_siblings(
     if not mw.col:
         return None
     if not mw.col.get_config("fsrs"):
-        tooltip(FSRS_ENABLE_WARNING)
+        tooltip(t("enable-fsrs-warning"))
         return None
 
     start_time = time.time()
@@ -210,7 +210,7 @@ def disperse_siblings_backgroud(
 
 def disperse_siblings_when_review(reviewer, card: Card, ease):
     if not mw.col.get_config("fsrs"):
-        tooltip(FSRS_ENABLE_WARNING)
+        tooltip(t("enable-fsrs-warning"))
         return
 
     config = Config()

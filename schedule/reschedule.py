@@ -225,7 +225,7 @@ def reschedule(
     apply_easy_days=False,
 ):
     if not mw.col.get_config("fsrs"):
-        tooltip(FSRS_ENABLE_WARNING)
+        tooltip(t("enable-fsrs-warning"))
         return None
 
     start_time = time.time()

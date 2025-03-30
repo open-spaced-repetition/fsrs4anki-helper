@@ -17,7 +17,7 @@ def get_desired_flatten_limit_with_response(did):
 
 def flatten(did):
     if not mw.col.get_config("fsrs"):
-        tooltip(FSRS_ENABLE_WARNING)
+        tooltip(t("enable-fsrs-warning"))
         return
 
     (desired_flatten_limit, resp) = get_desired_flatten_limit_with_response(did)
