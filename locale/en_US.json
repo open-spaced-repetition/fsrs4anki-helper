@@ -137,6 +137,7 @@
     "disperse-card-message": "Dispersed card %{card_id} from %{old_due} to %{new_due}",
     "disperse-card-range": "Card %{card_id} due range: %{start_due} - %{end_due}",
     "disperse-too-close": "Due dates are too close to disperse:",
+    "disperse-result": "%{result} in %{count} seconds",
 
     "clear-custom-data-confirmation": "Clear custom data in all cards?\n    The custom scheduling of FSRS4Anki stored memory state in custom data.\n    It is unused when you enable the built-in FSRS.\n    Are you sure?",
     "clear-custom-data-result": "%{count} cards cleared in %{seconds} seconds.",

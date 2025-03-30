@@ -1,5 +1,5 @@
 import re
-from aqt.utils import tooltip, getText, showWarning, showInfo, askUser
+from aqt.utils import tooltip, getText, showWarning, showInfo, askUser, t
 from collections import OrderedDict, defaultdict
 from typing import List, Dict, Tuple
 from anki.stats_pb2 import CardStatsResponse
@@ -24,7 +24,6 @@ import math
 import random
 import time
 from datetime import date, datetime, timedelta
-from .i18n import t
 
 FSRS_ENABLE_WARNING = (
     "Please either enable FSRS in your deck options, or disable the FSRS helper add-on."
