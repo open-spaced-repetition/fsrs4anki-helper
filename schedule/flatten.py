@@ -137,7 +137,7 @@ def flatten_background(did, desired_flatten_limit):
     new_target_rs = []
     prev_target_rs = []
     flattened_cards = []
-    undo_entry = mw.col.add_custom_undo_entry("flatten")
+    undo_entry = mw.col.add_custom_undo_entry(t("flatten"))
     for new_due in range(today, today + 36500):
         if cancelled:
             break

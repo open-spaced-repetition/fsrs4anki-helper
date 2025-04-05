@@ -19,7 +19,7 @@ def clear_custom_data(did):
     cnt = 0
     reset_cards = []
     start_time = time.time()
-    undo_entry = mw.col.add_custom_undo_entry("Clear custom data")
+    undo_entry = mw.col.add_custom_undo_entry(t("clear-custom-data"))
     for cid in cards:
         card = mw.col.get_card(cid)
         card.custom_data = ""

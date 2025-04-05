@@ -185,7 +185,7 @@ def disperse_siblings_backgroud(
     card_cnt = 0
     note_cnt = 0
     dispersed_cards = []
-    undo_entry = mw.col.add_custom_undo_entry("Disperse Siblings")
+    undo_entry = mw.col.add_custom_undo_entry(t("disperse-siblings"))
     for nid, siblings in nid_siblings.items():
         best_due_dates, _, _ = disperse(siblings)
         for cid, due in best_due_dates.items():

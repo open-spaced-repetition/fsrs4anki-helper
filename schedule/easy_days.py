@@ -36,7 +36,7 @@ def easy_days(did):
         END IN {ids2str(due_days)}
         """
     )
-    undo_entry = mw.col.add_custom_undo_entry("Easy Days")
+    undo_entry = mw.col.add_custom_undo_entry(t("easy-days"))
     fut = reschedule(
         did=None,
         recent=False,
@@ -120,7 +120,7 @@ class EasySpecificDateManagerWidget(QWidget):
             today = mw.col.sched.today
             specific_due = today + day_offset
             specific_dues.append(specific_due)
-        undo_entry = mw.col.add_custom_undo_entry("Easy Days")
+        undo_entry = mw.col.add_custom_undo_entry(t("easy-days"))
         filtered_dues_cids = mw.col.db.list(
             f"""SELECT id
             FROM cards

@@ -155,7 +155,7 @@ add_action_to_gear(advance, t("advance-cards"))
 menu_flatten = build_action(flatten, t("flatten-all-decks"))
 add_action_to_gear(flatten, t("flatten-cards"))
 
-menu_reset = build_action(clear_custom_data, t("clear-custom-data"))
+menu_reset = build_action(clear_custom_data, t("clear-custom-data-title"))
 
 menu_clear_manual_rescheduling = build_action(
     clear_manual_rescheduling, t("delete-redundant-revlog")

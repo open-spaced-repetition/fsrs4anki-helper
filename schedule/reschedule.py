@@ -357,7 +357,7 @@ def reschedule_background(
     cancelled = False
     rescheduled_cards = []
     filtered_nids = set()
-    undo_entry = mw.col.add_custom_undo_entry("Reschedule")
+    undo_entry = mw.col.add_custom_undo_entry(t("reschedule"))
     for cid, did, nid, desired_retention, maximum_interval in cards:
         if cancelled:
             break

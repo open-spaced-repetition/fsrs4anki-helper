@@ -96,7 +96,7 @@ def advance(did):
     prev_target_rs = []
     advanced_cards = []
     start_time = time.time()
-    undo_entry = mw.col.add_custom_undo_entry("Advance")
+    undo_entry = mw.col.add_custom_undo_entry(t("advance"))
     for cid, did, ivl, stability, _, _, _ in cards:
         if cnt >= desired_advance_cnt:
             break
