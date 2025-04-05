@@ -90,7 +90,7 @@
       "one": "1 card has been advanced.",
       "other": "%{count} cards have been advanced."
     },
-    "advance-retention-change": "<br>Mean target retention of advanced cards: %{left:.2%} -> {right:.2%}",
+    "advance-retention-change": "<br>Mean target retention of advanced cards: %{left} -> {right}",
 
     "flatten-inquire-text": "Enter the maximum number of reviews you want in the future.\n",
     "flatten-info-text": "This feature only affects the cards that have been scheduled by FSRS.\n",
@@ -101,7 +101,7 @@
     "flatten": "Flatten",
     "flatten-progress": "%{count}/%{total} cards flattened",
     "flatten-result-text": "%{count} cards flattened in %{seconds} seconds.",
-    "flatten-retention-change": "<br>Mean target retention of flattened cards: %{prev_retention} -> %{new_retention:.2%}",
+    "flatten-retention-change": "<br>Mean target retention of flattened cards: %{prev_retention} -> %{new_retention}",
 
     "postpone-inquire-text": "Enter the number of cards to be postponed.\n",
     "postpone-notification-text": "%{deck}, it is relatively safe to postpone up to %{safe_cnt} cards.\n",
@@ -110,8 +110,8 @@
     "postpone-enter-number": "Please enter the number of cards you want to postpone.",
     "postpone-positive-integer": "Please enter a positive integer.",
     "postpone": "Postpone",
-    "postpone-result-text": "%{count} cards postponed in %{seconds:.2f} seconds.",
-    "postpone-retention-change": "<br>Mean target retention of postponed cards: %{prev_retention:.2%} -> %{new_retention:.2%}",
+    "postpone-result-text": "%{count} cards postponed in %{seconds} seconds.",
+    "postpone-retention-change": "<br>Mean target retention of postponed cards: %{prev_retention} -> %{new_retention}",
 
     "remedy-start-date": "Select the Start Date",
     "remedy-end-date": "Select the End Date",
