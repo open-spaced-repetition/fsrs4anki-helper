@@ -241,7 +241,7 @@ def reschedule(
         else:
             finish_text = future.result()
             mw.progress.finish()
-            tooltip(f"{finish_text} in {time.time() - start_time:.2f} seconds")
+            tooltip(t("reschedule-done-in-seconds", result=finish_text, seconds=f"{time.time() - start_time:.2f}"))
             mw.reset()
 
     fut = mw.taskman.run_in_background(
