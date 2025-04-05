@@ -241,7 +241,13 @@ def reschedule(
         else:
             finish_text = future.result()
             mw.progress.finish()
-            tooltip(t("reschedule-done-in-seconds", result=finish_text, seconds=f"{time.time() - start_time:.2f}"))
+            tooltip(
+                t(
+                    "reschedule-done-in-seconds",
+                    result=finish_text,
+                    seconds=f"{time.time() - start_time:.2f}",
+                )
+            )
             mw.reset()
 
     fut = mw.taskman.run_in_background(
@@ -328,7 +334,9 @@ def reschedule_background(
     )
     total_cnt = len(cid_did_nid)
     mw.taskman.run_on_main(
-        lambda: mw.progress.start(label=t("reschedule-label"), max=total_cnt, immediate=True)
+        lambda: mw.progress.start(
+            label=t("reschedule-label"), max=total_cnt, immediate=True
+        )
     )
     # x[0]: cid
     # x[1]: did

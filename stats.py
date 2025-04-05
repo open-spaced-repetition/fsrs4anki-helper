@@ -328,21 +328,23 @@ def get_fsrs_stats(self: CollectionStats):
     ) = retention_stability(lim)
     i = []
     _line_now(i, t("studied-cards"), f"{card_cnt} cards")
-    _line_now(i, t('total-review-time'), f"{time_sum/3600:.1f} hours")
+    _line_now(i, t("total-review-time"), f"{time_sum/3600:.1f} hours")
     if time_sum > 0:
         _line_now(
             i,
-            t('knowledge-acquisition-rate'),
-            t('x-cards-per-hour', count=round(estimated_total_knowledge / (time_sum/3600), 1)),
+            t("knowledge-acquisition-rate"),
+            t(
+                "x-cards-per-hour",
+                count=round(estimated_total_knowledge / (time_sum / 3600), 1),
+            ),
         )
     title = CollectionStats._title(
         self,
         t("fsrs-stats"),
     )
     stats_data = _lineTbl_now(i)
-    interpretation = (
-        f"<details><summary>{t('interpretation')}</summary><ul>" +
-        t("fsrs-stats-help")
+    interpretation = f"<details><summary>{t('interpretation')}</summary><ul>" + t(
+        "fsrs-stats-help"
     )
     return self._section(
         title
@@ -446,8 +448,10 @@ def get_retention_graph(self: CollectionStats):
             id, data=data, conf=conf, xunit=chunk, ylabel=ylabel, ylabel2=ylabel2
         )
 
-    txt1 = self._title(t('retention-graph'), t('retention-graph-help'))
-    txt1 += plot("retention", data, ylabel=t('review-count'), ylabel2=t('retention-rate'))
+    txt1 = self._title(t("retention-graph"), t("retention-graph-help"))
+    txt1 += plot(
+        "retention", data, ylabel=t("review-count"), ylabel2=t("retention-rate")
+    )
     return self._section(txt1)
 
 
@@ -491,17 +495,17 @@ def get_true_retention(self: CollectionStats):
 
     if self.type == 0:
         period = 31
-        pname = t('month')
+        pname = t("month")
     elif self.type == 1:
         period = 365
-        pname = t('year')
+        pname = t("year")
     elif self.type == 2:
         period = 36500
-        pname = t('deck-life')
+        pname = t("deck-life")
     pastPeriod = stats_list(lim, (mw.col.sched.day_cutoff - 86400 * period) * 1000)
     true_retention_part = CollectionStats._title(
         self,
-        t('true-retention'),
+        t("true-retention"),
         f"<p>{t('true-retention-help')}</p>",
     )
     config = Config()
@@ -541,9 +545,9 @@ def get_true_retention(self: CollectionStats):
                 <td class="trc"><span class="total">{t('fail')}</span></td>
                 <td class="trc"><span class="total">{t('retention')}</span></td>
             </tr>"""
-    true_retention_part += stats_row(t('day'), pastDay)
-    true_retention_part += stats_row(t('yesterday'), pastYesterday)
-    true_retention_part += stats_row(t('week'), pastWeek)
+    true_retention_part += stats_row(t("day"), pastDay)
+    true_retention_part += stats_row(t("yesterday"), pastYesterday)
+    true_retention_part += stats_row(t("week"), pastWeek)
     true_retention_part += stats_row(pname, pastPeriod)
     true_retention_part += "</table>"
     true_retention_part += f"<p>{t('true-retention-mature-help')}</p>"

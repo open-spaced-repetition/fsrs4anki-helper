@@ -6,7 +6,11 @@ from anki.utils import ids2str
 
 def get_desired_postpone_cnt_with_response(safe_cnt, did):
     inquire_text = t("postpone-inquire-text")
-    notification_text = t("postpone-notification-text", deck=("For this deck" if did else "For this collection"), safe_cnt=safe_cnt)
+    notification_text = t(
+        "postpone-notification-text",
+        deck=("For this deck" if did else "For this collection"),
+        safe_cnt=safe_cnt,
+    )
     warning_text = t("postpone-warning-text")
     info_text = t("postpone-info-text")
     (s, r) = getText(
@@ -112,8 +116,14 @@ def postpone(did):
 
     mw.col.update_cards(postponed_cards)
     mw.col.merge_undo_entries(undo_entry)
-    result_text = t("postpone-result-text", count=cnt, seconds=(time.time() - start_time))
+    result_text = t(
+        "postpone-result-text", count=cnt, seconds=(time.time() - start_time)
+    )
     if len(prev_target_rs) > 0 and len(new_target_rs) > 0:
-        result_text += t("postpone-retention-change", prev_retention=(sum(prev_target_rs) / len(prev_target_rs)), new_retention=(sum(new_target_rs) / len(new_target_rs)))
+        result_text += t(
+            "postpone-retention-change",
+            prev_retention=(sum(prev_target_rs) / len(prev_target_rs)),
+            new_retention=(sum(new_target_rs) / len(new_target_rs)),
+        )
     tooltip(result_text)
     mw.reset()

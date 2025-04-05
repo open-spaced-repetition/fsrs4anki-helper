@@ -161,9 +161,7 @@ menu_clear_manual_rescheduling = build_action(
     clear_manual_rescheduling, t("delete-redundant-revlog")
 )
 
-menu_disperse_siblings = build_action(
-    disperse_siblings, t("disperse-all-siblings")
-)
+menu_disperse_siblings = build_action(disperse_siblings, t("disperse-all-siblings"))
 
 menu_remedy_hard_misuse = build_action(remedy_hard_misuse, t("remedy"))
 
@@ -224,9 +222,7 @@ def ajt_card_management(did=None):
     openLink("https://ankiweb.net/shared/info/1021636467")
 
 
-menu_ajt_card_management = build_action(
-    ajt_card_management, t("ajt-card-management")
-)
+menu_ajt_card_management = build_action(ajt_card_management, t("ajt-card-management"))
 
 
 def search_stats_extended(did=None):
