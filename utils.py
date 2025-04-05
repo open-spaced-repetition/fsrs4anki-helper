@@ -24,6 +24,7 @@ import math
 import random
 import time
 from datetime import date, datetime, timedelta
+from .i18n import t
 
 
 def RepresentsInt(s):
