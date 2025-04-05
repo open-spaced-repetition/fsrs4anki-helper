@@ -1,0 +1,8 @@
+{
+    "en_GB": {
+        "fsrs-stats-help": "<li><b>Studied cards</b>: the number of cards with FSRS memory states, excluding suspended cards.</li>\n<li><b>Total review time</b>: the amount of time spent doing reviews in Anki. This does not include the time spent on reviewing suspended and deleted cards.</li>\n<li><b>Knowledge acquisition rate</b>: the number of cards memorised per hour of actively doing reviews in Anki, calculated as the ratio of total knowledge and total time. Larger values indicate efficient learning. This metric can be used to compare different learners. If your collection is very young, this number may initially be very low or very high.</li>\n</ul></details>",
+        "visualize-schedule": "Visualise Your FSRS Schedule",
+        "remedy-success": "%{count} reviews were remedied. Please re-optimise your FSRS parameters to incorporate the changes.",
+        "undo-remedy-success": "%{count} reviews were restored.\nPlease re-optimise your FSRS parameters to incorporate the changes."
+    }
+}
