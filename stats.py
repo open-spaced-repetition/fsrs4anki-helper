@@ -363,8 +363,6 @@ def get_fsrs_stats(self: CollectionStats):
         + t("fsrs-stats-help-line-2")
         + "<br>"
         + t("fsrs-stats-help-line-3")
-        + "<br>"
-        + t("fsrs-stats-help-line-4")
     )
     return self._section(
         title
