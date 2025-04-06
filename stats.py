@@ -309,9 +309,22 @@ def get_steps_stats(self: CollectionStats):
     html += "</table>"
     html += (
         "<table style='text-align: left'><tr><td style='padding: 5px'>"
-        f"<summary>{t('interpretation')}</summary>"
-        "<ul>" + t("step-stats-help") + "</ul>"
-        "</td></tr></table>"
+        + f"<summary>{t('interpretation')}</summary>"
+        + "<ul><li>"
+        + t("step-stats-help-line-1")
+        + "</li><li>"
+        + t("step-stats-help-line-2")
+        + "</li><li>"
+        + t("step-stats-help-line-3")
+        + "</li><li>"
+        + t("step-stats-help-line-4")
+        + "</li><li>"
+        + t("step-stats-help-line-5")
+        + "</li><li>"
+        + t("step-stats-help-line-6")
+        + "</li><li>"
+        + t("step-stats-help-line-7")
+        + "</li></ul> </td></tr></table>"
     )
     return self._section(title + html)
 
@@ -343,8 +356,15 @@ def get_fsrs_stats(self: CollectionStats):
         t("fsrs-stats"),
     )
     stats_data = _lineTbl_now(i)
-    interpretation = f"<details><summary>{t('interpretation')}</summary><ul>" + t(
-        "fsrs-stats-help"
+    interpretation = (
+        f"<details><summary>{t('interpretation')}</summary><ul>"
+        + t("fsrs-stats-help-line-1")
+        + "<br>"
+        + t("fsrs-stats-help-line-2")
+        + "<br>"
+        + t("fsrs-stats-help-line-3")
+        + "<br>"
+        + t("fsrs-stats-help-line-4")
     )
     return self._section(
         title
