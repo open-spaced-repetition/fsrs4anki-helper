@@ -118,7 +118,7 @@ def advance(did):
         result_text += t(
             "advance-retention-change",
             prev_retention=f"{sum(prev_target_rs) / len(prev_target_rs):.2f}",
-            right=f"{sum(new_target_rs) / len(new_target_rs):.2f}",
+            new_retention=f"{sum(new_target_rs) / len(new_target_rs):.2f}",
         )
 
     tooltip(result_text)

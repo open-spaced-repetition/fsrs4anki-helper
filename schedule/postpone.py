@@ -117,13 +117,13 @@ def postpone(did):
     mw.col.update_cards(postponed_cards)
     mw.col.merge_undo_entries(undo_entry)
     result_text = t(
-        "postpone-result-text", count=cnt, seconds=(time.time() - start_time)
+        "postpone-result-text", count=cnt, seconds=f"{(time.time() - start_time):.2f}"
     )
     if len(prev_target_rs) > 0 and len(new_target_rs) > 0:
         result_text += t(
             "postpone-retention-change",
-            prev_retention=(sum(prev_target_rs) / len(prev_target_rs)),
-            new_retention=(sum(new_target_rs) / len(new_target_rs)),
+            prev_retention=f"{sum(prev_target_rs) / len(prev_target_rs):.2f}",
+            new_retention=f"{sum(new_target_rs) / len(new_target_rs):.2f}",
         )
     tooltip(result_text)
     mw.reset()

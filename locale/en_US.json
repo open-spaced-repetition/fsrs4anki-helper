@@ -90,7 +90,7 @@
       "one": "1 card has been advanced.",
       "other": "%{count} cards have been advanced."
     },
-    "advance-retention-change": "<br>Mean target retention of advanced cards: %{left} -> {right}",
+    "advance-retention-change": "<br>Mean target retention of advanced cards: %{prev_retention} -> %{new_retention}",
 
     "flatten-inquire-text": "Enter the maximum number of reviews you want in the future.\n",
     "flatten-info-text": "This feature only affects the cards that have been scheduled by FSRS.\n",
