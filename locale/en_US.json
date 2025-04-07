@@ -144,6 +144,7 @@
       "one": "1 day",
       "other": "%{count} days"
     },
+    "fsrs-status": "FSRS: %{status}",
 
     "disperse-label": "Dispersing Siblings",
     "disperse-progress": "%{count}/%{total} notes dispersed",
