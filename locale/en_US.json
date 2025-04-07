@@ -140,6 +140,10 @@
       "one":"1 card/hour",
       "other":"%{count} cards/hour"
     },
+    "x-days": {
+      "one": "1 day",
+      "other": "%{count} days"
+    },
 
     "disperse-label": "Dispersing Siblings",
     "disperse-progress": "%{count}/%{total} notes dispersed",
