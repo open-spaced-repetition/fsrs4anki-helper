@@ -38,7 +38,7 @@ def auto_reschedule(local_rids: List[int], texts: List[str]):
     config = Config()
     config.load()
     if not config.auto_reschedule_after_sync:
-        texts.append("reschedule skipped")
+        texts.append(t("reschedule-skipped"))
         return
 
     remote_reviewed_cids = review_cid_remote(local_rids)

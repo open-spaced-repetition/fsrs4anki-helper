@@ -1,13 +1,21 @@
 from ..utils import *
+from ..i18n import t
 from anki.decks import DeckManager
 from anki.utils import ids2str
 
 
 def get_desired_advance_cnt_with_response(safe_cnt, did):
-    inquire_text = "Enter the number of cards to be advanced.\n"
-    notification_text = f"{'For this deck' if did else 'For this collection'}, it is relatively safe to advance up to {safe_cnt} cards.\n"
-    warning_text = "You can advance more cards if you wish, but it is not recommended.\nKeep in mind that whenever you use Postpone or Advance, you depart from the optimal scheduling.\n"
-    info_text = "This feature only affects the cards that have been scheduled by FSRS."
+    inquire_text = t("advance-inquire-text") + "\n"
+    notification_text = (
+        t(
+            "advance-notification-text",
+            deck_collection=t("deck" if did else "collection"),
+            count=safe_cnt,
+        )
+        + "\n"
+    )
+    warning_text = t("advance-warning-text")
+    info_text = t("advance-info-text")
     (s, r) = getText(
         inquire_text + notification_text + warning_text + info_text, default="10"
     )
@@ -18,7 +26,7 @@ def get_desired_advance_cnt_with_response(safe_cnt, did):
 
 def advance(did):
     if not mw.col.get_config("fsrs"):
-        tooltip(FSRS_ENABLE_WARNING)
+        tooltip(t("enable-fsrs-warning"))
         return
 
     DM = DeckManager(mw.col)
@@ -76,11 +84,11 @@ def advance(did):
     (desired_advance_cnt, resp) = get_desired_advance_cnt_with_response(safe_cnt, did)
     if desired_advance_cnt is None:
         if resp:
-            showWarning("Please enter the number of cards you want to advance.")
+            showWarning(t("advance-enter-number"))
         return
     else:
         if desired_advance_cnt <= 0:
-            showWarning("Please enter a positive integer.")
+            showWarning(t("advance-positive-integer"))
             return
 
     cnt = 0
@@ -88,7 +96,7 @@ def advance(did):
     prev_target_rs = []
     advanced_cards = []
     start_time = time.time()
-    undo_entry = mw.col.add_custom_undo_entry("Advance")
+    undo_entry = mw.col.add_custom_undo_entry(t("advance"))
     for cid, did, ivl, stability, _, _, _ in cards:
         if cnt >= desired_advance_cnt:
             break
@@ -105,9 +113,13 @@ def advance(did):
 
     mw.col.update_cards(advanced_cards)
     mw.col.merge_undo_entries(undo_entry)
-    result_text = f"{cnt} cards have been advanced."
+    result_text = t("advance-result-text", count=cnt)
     if len(new_target_rs) > 0 and len(prev_target_rs) > 0:
-        result_text += f"<br>Mean target retention of advanced cards: {sum(prev_target_rs) / len(prev_target_rs):.2%} -> {sum(new_target_rs) / len(new_target_rs):.2%}"
+        result_text += t(
+            "advance-retention-change",
+            prev_retention=f"{sum(prev_target_rs) / len(prev_target_rs):.2f}",
+            new_retention=f"{sum(new_target_rs) / len(new_target_rs):.2f}",
+        )
 
     tooltip(result_text)
     mw.reset()

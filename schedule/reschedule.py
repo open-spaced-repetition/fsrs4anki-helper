@@ -225,7 +225,7 @@ def reschedule(
     apply_easy_days=False,
 ):
     if not mw.col.get_config("fsrs"):
-        tooltip(FSRS_ENABLE_WARNING)
+        tooltip(t("enable-fsrs-warning"))
         return None
 
     start_time = time.time()
@@ -241,7 +241,13 @@ def reschedule(
         else:
             finish_text = future.result()
             mw.progress.finish()
-            tooltip(f"{finish_text} in {time.time() - start_time:.2f} seconds")
+            tooltip(
+                t(
+                    "reschedule-done-in-seconds",
+                    result=finish_text,
+                    seconds=f"{time.time() - start_time:.2f}",
+                )
+            )
             mw.reset()
 
     fut = mw.taskman.run_in_background(
@@ -328,7 +334,9 @@ def reschedule_background(
     )
     total_cnt = len(cid_did_nid)
     mw.taskman.run_on_main(
-        lambda: mw.progress.start(label="Rescheduling", max=total_cnt, immediate=True)
+        lambda: mw.progress.start(
+            label=t("reschedule-label"), max=total_cnt, immediate=True
+        )
     )
     # x[0]: cid
     # x[1]: did
@@ -349,7 +357,7 @@ def reschedule_background(
     cancelled = False
     rescheduled_cards = []
     filtered_nids = set()
-    undo_entry = mw.col.add_custom_undo_entry("Reschedule")
+    undo_entry = mw.col.add_custom_undo_entry(t("reschedule"))
     for cid, did, nid, desired_retention, maximum_interval in cards:
         if cancelled:
             break
@@ -366,7 +374,7 @@ def reschedule_background(
         if cnt % 500 == 0:
             mw.taskman.run_on_main(
                 lambda: mw.progress.update(
-                    label=f"{cnt}/{total_cnt} cards rescheduled",
+                    label=t("reschedule-progress", count=cnt, total=total_cnt),
                     value=cnt,
                     max=total_cnt,
                 )
@@ -376,7 +384,7 @@ def reschedule_background(
 
     mw.col.update_cards(rescheduled_cards)
     mw.col.merge_undo_entries(undo_entry)
-    finish_text = f"{cnt} cards rescheduled"
+    finish_text = t("reschedule-result", count=cnt)
 
     if config.auto_disperse_after_reschedule:
         filtered_nid_string = ids2str(filtered_nids)
@@ -440,7 +448,7 @@ def reschedule_browser_selected_cards(browser: browser.Browser):
 
 @browser_menus_did_init.append
 def on_browser_menus_did_init(browser: browser.Browser):
-    action = QAction("FSRS: Update memory state and reschedule", browser)
+    action = QAction(t("reschedule-browser-action"), browser)
     action.triggered.connect(lambda: reschedule_browser_selected_cards(browser))
     browser.form.menu_Cards.addSeparator()
     browser.form.menu_Cards.addAction(action)

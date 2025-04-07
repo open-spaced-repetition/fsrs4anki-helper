@@ -24,11 +24,7 @@ import math
 import random
 import time
 from datetime import date, datetime, timedelta
-
-
-FSRS_ENABLE_WARNING = (
-    "Please either enable FSRS in your deck options, or disable the FSRS helper add-on."
-)
+from .i18n import t
 
 
 def RepresentsInt(s):

@@ -1,13 +1,18 @@
+from ..i18n import t
 from ..utils import *
 from anki.decks import DeckManager
 from anki.utils import ids2str
 
 
 def get_desired_postpone_cnt_with_response(safe_cnt, did):
-    inquire_text = "Enter the number of cards to be postponed.\n"
-    notification_text = f"{'For this deck' if did else 'For this collection'}, it is relatively safe to postpone up to {safe_cnt} cards.\n"
-    warning_text = "You can postpone more cards if you wish, but it is not recommended.\nKeep in mind that whenever you use Postpone or Advance, you depart from the optimal scheduling.\n"
-    info_text = "This feature only affects the cards that have been scheduled by FSRS."
+    inquire_text = t("postpone-inquire-text")
+    notification_text = t(
+        "postpone-notification-text",
+        deck=("For this deck" if did else "For this collection"),
+        safe_cnt=safe_cnt,
+    )
+    warning_text = t("postpone-warning-text")
+    info_text = t("postpone-info-text")
     (s, r) = getText(
         inquire_text + notification_text + warning_text + info_text, default="10"
     )
@@ -18,7 +23,7 @@ def get_desired_postpone_cnt_with_response(safe_cnt, did):
 
 def postpone(did):
     if not mw.col.get_config("fsrs"):
-        tooltip(FSRS_ENABLE_WARNING)
+        tooltip(t("enable-fsrs-warning"))
         return
 
     DM = DeckManager(mw.col)
@@ -77,11 +82,11 @@ def postpone(did):
     (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response(safe_cnt, did)
     if desired_postpone_cnt is None:
         if resp:
-            showWarning("Please enter the number of cards you want to postpone.")
+            showWarning(t("postpone-enter-number"))
         return
     else:
         if desired_postpone_cnt <= 0:
-            showWarning("Please enter a positive integer.")
+            showWarning(t("postpone-positive-integer"))
             return
 
     cnt = 0
@@ -89,7 +94,7 @@ def postpone(did):
     prev_target_rs = []
     postponed_cards = []
     start_time = time.time()
-    undo_entry = mw.col.add_custom_undo_entry("Postpone")
+    undo_entry = mw.col.add_custom_undo_entry(t("postpone"))
     for cid, did, ivl, stability, elapsed_days, _, _, max_ivl in cards:
         if cnt >= desired_postpone_cnt:
             break
@@ -111,8 +116,14 @@ def postpone(did):
 
     mw.col.update_cards(postponed_cards)
     mw.col.merge_undo_entries(undo_entry)
-    result_text = f"{cnt} cards postponed in {time.time() - start_time:.2f} seconds."
+    result_text = t(
+        "postpone-result-text", count=cnt, seconds=f"{(time.time() - start_time):.2f}"
+    )
     if len(prev_target_rs) > 0 and len(new_target_rs) > 0:
-        result_text += f"<br>Mean target retention of postponed cards: {sum(prev_target_rs) / len(prev_target_rs):.2%} -> {sum(new_target_rs) / len(new_target_rs):.2%}"
+        result_text += t(
+            "postpone-retention-change",
+            prev_retention=f"{sum(prev_target_rs) / len(prev_target_rs):.2f}",
+            new_retention=f"{sum(new_target_rs) / len(new_target_rs):.2f}",
+        )
     tooltip(result_text)
     mw.reset()
