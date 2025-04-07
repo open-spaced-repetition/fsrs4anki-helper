@@ -2,6 +2,7 @@ from anki.stats import CollectionStats
 from .configuration import Config
 from .utils import *
 from .steps import steps_stats
+from .i18n import t
 
 
 def _line_now(i, a, b, bold=True):
@@ -75,7 +76,7 @@ def retention_stability(lim) -> tuple:
 
 def todayStats_new(self):
     if not mw.col.get_config("fsrs"):
-        tooltip(FSRS_ENABLE_WARNING)
+        tooltip(t("enable-fsrs-warning"))
         return todayStats_old(self)
     return (
         todayStats_old(self)
@@ -103,11 +104,12 @@ def get_steps_stats(self: CollectionStats):
 
     title = CollectionStats._title(
         self,
-        "Steps Stats",
-        "Statistics for different first ratings during (re)learning steps",
+        t("step-stats"),
+        t("step-stats-subtitle"),
     )
 
-    html = """
+    html = (
+        """
         <style>
             td.trl { border: 1px solid; text-align: left; padding: 5px  }
             td.trr { border: 1px solid; text-align: right; padding: 5px  }
@@ -118,25 +120,28 @@ def get_steps_stats(self: CollectionStats):
             span.again-then-good { color: #fdd835 }
             span.good-then-again { color: #007bff }
         </style>
+        """
+        f"""
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
-                <td class="trl" rowspan=2><b>State</b></td>
-                <td class="trl" rowspan=2><b>First Ratings</b></td>
-                <td class="trc" colspan=7><b>Delay And Retention Distribution</b></td>
-                <td class="trc" colspan=3><b>Summary</b></td>
+                <td class="trl" rowspan=2><b>{t("state")}</b></td>
+                <td class="trl" rowspan=2><b>{t("first-ratings")}</b></td>
+                <td class="trc" colspan=7><b>{t("delay-and-retention-distribution")}</b></td>
+                <td class="trc" colspan=3><b>{t("summary")}</b></td>
             </tr>
             <tr>
                 <td class="trc"><b><span>R&#772;</span><sub>1</sub></b></td>
-                <td class="trc"><b>T<sub>25%</sub></b></td>
+                <td class="trc"><b>T<sub>{t("x-%", count=25)}</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span><sub>2</sub></b></td>
-                <td class="trc"><b>T<sub>50%</sub></b></td>
+                <td class="trc"><b>T<sub>{t("x-%", count=50)}</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span><sub>3</sub></b></td>
-                <td class="trc"><b>T<sub>75%</sub></b></td>
+                <td class="trc"><b>T<sub>{t("x-%", count=75)}</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span><sub>4</sub></b></td>
                 <td class="trc"><b><span>R&#772;</span></b></td>
-                <td class="trc"><b>Stability</b></td>
-                <td class="trc"><b>Reviews</b></td>
+                <td class="trc"><b>{t("stability")}</b></td>
+                <td class="trc"><b>{t("reviews")}</b></td>
             </tr>"""
+    )
 
     ratings = {
         1: "again",
@@ -160,17 +165,15 @@ def get_steps_stats(self: CollectionStats):
                 results["stats"][rating] = {"count": 0}
             state_cell = ""
             if rating == 0:
-                state_cell = '<td class="trl"><b>Relearning</b></td>'
+                state_cell = f'<td class="trl"><b>{t("relearning")}</b></td>'
             elif first_learning:
-                state_cell = (
-                    f'<td class="trl" rowspan="{learning_count}"><b>Learning</b></td>'
-                )
+                state_cell = f'<td class="trl" rowspan="{learning_count}"><b>{t("learning")}</b></td>'
                 first_learning = False
 
             html += f"""
             <tr>
                 {state_cell}
-                <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
+                <td class="trl"><span class="{style}"><b>{t(style)}</b></span></td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
                 <td class="trr">N/A</td>
@@ -187,17 +190,15 @@ def get_steps_stats(self: CollectionStats):
         not_enough_data = False
         state_cell = ""
         if rating == 0:
-            state_cell = '<td class="trl"><b>Relearning</b></td>'
+            state_cell = f'<td class="trl"><b>{t("relearning")}</b></td>'
         elif first_learning:
-            state_cell = (
-                f'<td class="trl" rowspan="{learning_count}"><b>Learning</b></td>'
-            )
+            state_cell = f'<td class="trl" rowspan="{learning_count}"><b>{t("learning")}</b></td>'
             first_learning = False
 
         html += f"""
             <tr>
                 {state_cell}
-                <td class="trl"><span class="{style}"><b>{style.replace('-', ' ').title()}</b></span></td>
+                <td class="trl"><span class="{style}"><b>{t(style)}</b></span></td>
                 <td class="trr">{stats['r1']}</td>
                 <td class="trr">{format_time(stats['delay_q1'])}</td>
                 <td class="trr">{stats['r2']}</td>
@@ -218,19 +219,19 @@ def get_steps_stats(self: CollectionStats):
         f"""
     <tr>
         <td colspan="12" class="trl">
-            <strong>Desired retention:</strong>
+            <strong>{t("desired-retention")}:</strong>
             <input type="number" id="desired-retention" value="0.9" step="0.01" min="0.7" max="0.98" />
         </td>
     </tr>
     <tr>
         <td colspan="12" class="trl">
-            <strong>Recommended learning steps</strong>: 
+            <strong>{t("recommended-learning-steps")}</strong>: 
             <span id="learning-steps"></span>
         </td>
     </tr>
     <tr>
         <td colspan="12" class="trl">
-            <strong>Recommended relearning steps</strong>: 
+            <strong>{t("recommended-relearning-steps")}</strong>: 
             <span id="relearning-steps"></span>
         </td>
     </tr>
@@ -276,19 +277,19 @@ def get_steps_stats(self: CollectionStats):
             const learningStep2 = calculateStep(Math.min(stability[2] * 2 - stability[1], stability[3], stability[4]), factor);
 
             if (learningStep1Count < 100) {{
-                learningStepRow.innerText = '(data is insufficient, please keep current setting)';
+                learningStepRow.innerText = '{t("insufficient-learn-step-data")}';
             }} else if (learningStep2Count < 100) {{
                 learningStepRow.innerText = `${{learningStep1}}`;
             }} else {{
                 learningStepRow.innerText = (!learningStep1 && !learningStep2) 
-                    ? "Keep the steps field blank." 
+                    ? '{t("keep-steps-blank")}' 
                     : `${{learningStep1}} ${{learningStep2}}`;
             }}
 
             const relearningStepCount = stats[0]['count'];
             const relearningStep = calculateStep(stability[0], factor, relearningStepCount);
             if (relearningStepCount < 100) {{
-                relearningStepRow.innerText = '(data is insufficient, please keep current setting)';
+                relearningStepRow.innerText = '{t("insufficient-learn-step-data")}';
             }} else {{
                 relearningStepRow.innerText = !relearningStep 
                     ? "You don't need relearning steps" 
@@ -308,16 +309,22 @@ def get_steps_stats(self: CollectionStats):
     html += "</table>"
     html += (
         "<table style='text-align: left'><tr><td style='padding: 5px'>"
-        + "<summary>Interpretation</summary><ul>"
-        "<li>This table shows <b>the average time you wait before rating each card the next time</b> (Time Delay) based on your <b>first rating of the day for each card in the deck</b> (Again or Hard or Good or Lapse).</li>"
-        + "<li>It also shows <b>how well you remember a card after each subsequent rating (after its first rating) on average.</b></li>"
-        + "<li>The subsequent ratings after the first ratings of all cards in the deck are gathered and sorted by ascending order of the Time Delay (not shown on the table) and are then grouped into 4 groups (Time Delay 1<2<3<4).</li>"
-        + "<li>The 4 groups are further split and assigned to whatever the first rating of the cards was (Again or Hard or Good or Lapse). Therefore, each First Rating has 4 groups of subsequent ratings (Groups 1,2,3,4).</li>"
-        + "<li>Average Retention rates (R̅₁, R̅₂, R̅₃, R̅₄) for each group of subsequent ratings and the Average Overall Retention (R̅) for the first ratings are shown. Based on this, the average stability for cards after the first rating of the day (Again or Hard or Good or Lapse) is calculated.</li>"
-        + "<li>T<sub>X%</sub> means that X% of the cards in this deck with a first rating (Again or Hard or Good or Lapse) are delayed by this amount of time or less till the next rating.</li>"
-        + "<li>Recommended (re)learning steps are calculated from stability and desired retention. The 1st learning step is based S(Again). The 2nd learning step is based on the minimum of {S(Hard)* 2 - S(Again), S(Good), S(Again Then Good)}. The relearning step is base on S(Lapse).</li>"
-        + "</ul>"
-        "</td></tr></table>"
+        + f"<summary>{t('interpretation')}</summary>"
+        + "<ul><li>"
+        + t("step-stats-help-line-1")
+        + "</li><li>"
+        + t("step-stats-help-line-2")
+        + "</li><li>"
+        + t("step-stats-help-line-3")
+        + "</li><li>"
+        + t("step-stats-help-line-4")
+        + "</li><li>"
+        + t("step-stats-help-line-5")
+        + "</li><li>"
+        + t("step-stats-help-line-6")
+        + "</li><li>"
+        + t("step-stats-help-line-7")
+        + "</li></ul> </td></tr></table>"
     )
     return self._section(title + html)
 
@@ -333,25 +340,29 @@ def get_fsrs_stats(self: CollectionStats):
         time_sum,
     ) = retention_stability(lim)
     i = []
-    _line_now(i, "Studied cards", f"{card_cnt} cards")
-    _line_now(i, "Total review time", f"{time_sum/3600:.1f} hours")
+    _line_now(i, t("studied-cards"), f"{card_cnt} cards")
+    _line_now(i, t("total-review-time"), f"{time_sum/3600:.1f} hours")
     if time_sum > 0:
         _line_now(
             i,
-            "Knowledge acquisition rate",
-            f"{estimated_total_knowledge / (time_sum/3600):.1f} cards/hour",
+            t("knowledge-acquisition-rate"),
+            t(
+                "x-cards-per-hour",
+                count=round(estimated_total_knowledge / (time_sum / 3600), 1),
+            ),
         )
     title = CollectionStats._title(
         self,
-        "FSRS Stats",
+        t("fsrs-stats"),
     )
     stats_data = _lineTbl_now(i)
     interpretation = (
-        "<details><summary>Interpretation</summary><ul>"
-        + "<li><b>Studied cards</b>: the number of cards with FSRS memory states, excluding suspended cards.</li> "
-        + "<li><b>Total review time</b>: the amount of time spent doing reviews in Anki. This does not include the time spent on reviewing suspended and deleted cards.</li>"
-        + "<li><b>Knowledge acquisition rate</b>: the number of cards memorized per hour of actively doing reviews in Anki, calculated as the ratio of total knowledge and total time. Larger values indicate efficient learning. This metric can be used to compare different learners. If your collection is very young, this number may initially be very low or very high.</li>"
-        + "</ul></details>"
+        f"<details><summary>{t('interpretation')}</summary><ul>"
+        + t("fsrs-stats-help-line-1")
+        + "<br>"
+        + t("fsrs-stats-help-line-2")
+        + "<br>"
+        + t("fsrs-stats-help-line-3")
     )
     return self._section(
         title
@@ -396,10 +407,10 @@ def get_retention_graph(self: CollectionStats):
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
-            (1, "#7c7", "Review Count (young)"),
-            (2, "#070", "Review Count (mature)"),
-            (3, "#ffd268", "Retention Rate (young)"),
-            (4, "#e49a60", "Retention Rate (mature)"),
+            (1, "#7c7", t("review-count-young")),
+            (2, "#070", t("review-count-mature")),
+            (3, "#ffd268", t("retention-rate-young")),
+            (4, "#e49a60", t("retention-rate-mature")),
         ),
     )
 
@@ -455,8 +466,10 @@ def get_retention_graph(self: CollectionStats):
             id, data=data, conf=conf, xunit=chunk, ylabel=ylabel, ylabel2=ylabel2
         )
 
-    txt1 = self._title("Retention Graph", "Retention rate and review count over time")
-    txt1 += plot("retention", data, ylabel="Review Count", ylabel2="Retention Rate")
+    txt1 = self._title(t("retention-graph"), t("retention-graph-help"))
+    txt1 += plot(
+        "retention", data, ylabel=t("review-count"), ylabel2=t("retention-rate")
+    )
     return self._section(txt1)
 
 
@@ -500,18 +513,18 @@ def get_true_retention(self: CollectionStats):
 
     if self.type == 0:
         period = 31
-        pname = "Month"
+        pname = t("month")
     elif self.type == 1:
         period = 365
-        pname = "Year"
+        pname = t("year")
     elif self.type == 2:
         period = 36500
-        pname = "Deck life"
+        pname = t("deck-life")
     pastPeriod = stats_list(lim, (mw.col.sched.day_cutoff - 86400 * period) * 1000)
     true_retention_part = CollectionStats._title(
         self,
-        "True Retention",
-        "<p>The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.</p>",
+        t("true-retention"),
+        f"<p>{t('true-retention-help')}</p>",
     )
     config = Config()
     config.load()
@@ -528,34 +541,34 @@ def get_true_retention(self: CollectionStats):
     true_retention_part += f"""
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
-                <td class="trl" rowspan=3><b>Past</b></td>
-                <td class="trc" colspan=9><b>Reviews on Cards</b></td>
-                <td class="trc" colspan=2 valign=middle><b>Cards</b></td>
+                <td class="trl" rowspan=3><b>{t('past')}</b></td>
+                <td class="trc" colspan=9><b>{t('reviews-on-cards')}</b></td>
+                <td class="trc" colspan=2 valign=middle><b>{t('cards')}</b></td>
             </tr>
             <tr>
-                <td class="trc" colspan=3><span class="young"><b>Young (ivl < {config.mature_ivl} d)</b></span></td>
-                <td class="trc" colspan=3><span class="mature"><b>Mature (ivl ≥ {config.mature_ivl} d)</b></span></td>
-                <td class="trc" colspan=3><span class="total"><b>Total</b></span></td>
-                <td class="trc" rowspan=2><span class="young"><b>Learned</b></span></td>
-                <td class="trc" rowspan=2><span class="relearn"><b>Relearned</b></span></td>
+                <td class="trc" colspan=3><span class="young"><b>{t('young-annotated', mature_ivl=config.mature_ivl)}</b></span></td>
+                <td class="trc" colspan=3><span class="mature"><b>{t('mature-annotated', mature_ivl=config.mature_ivl)}</b></span></td>
+                <td class="trc" colspan=3><span class="total"><b>{t('total')}</b></span></td>
+                <td class="trc" rowspan=2><span class="young"><b>{t('learned')}</b></span></td>
+                <td class="trc" rowspan=2><span class="relearn"><b>{t('relearned')}</b></span></td>
             </tr>
             <tr>
-                <td class="trc"><span class="young">Pass</span></td>
-                <td class="trc"><span class="young">Fail</span></td>
-                <td class="trc"><span class="young">Retention</span></td>
-                <td class="trc"><span class="mature">Pass</span></td>
-                <td class="trc"><span class="mature">Fail</span></td>
-                <td class="trc"><span class="mature">Retention</span></td>
-                <td class="trc"><span class="total">Pass</span></td>
-                <td class="trc"><span class="total">Fail</span></td>
-                <td class="trc"><span class="total">Retention</span></td>
+                <td class="trc"><span class="young">{t('pass')}</span></td>
+                <td class="trc"><span class="young">{t('fail')}</span></td>
+                <td class="trc"><span class="young">{t('retention')}</span></td>
+                <td class="trc"><span class="mature">{t('pass')}</span></td>
+                <td class="trc"><span class="mature">{t('fail')}</span></td>
+                <td class="trc"><span class="mature">{t('retention')}</span></td>
+                <td class="trc"><span class="total">{t('pass')}</span></td>
+                <td class="trc"><span class="total">{t('fail')}</span></td>
+                <td class="trc"><span class="total">{t('retention')}</span></td>
             </tr>"""
-    true_retention_part += stats_row("Day", pastDay)
-    true_retention_part += stats_row("Yesterday", pastYesterday)
-    true_retention_part += stats_row("Week", pastWeek)
+    true_retention_part += stats_row(t("day"), pastDay)
+    true_retention_part += stats_row(t("yesterday"), pastYesterday)
+    true_retention_part += stats_row(t("week"), pastWeek)
     true_retention_part += stats_row(pname, pastPeriod)
     true_retention_part += "</table>"
-    true_retention_part += f"<p>By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config.</p>"
+    true_retention_part += f"<p>{t('true-retention-mature-help')}</p>"
     return self._section(true_retention_part)
 
 

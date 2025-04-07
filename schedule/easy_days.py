@@ -36,7 +36,7 @@ def easy_days(did):
         END IN {ids2str(due_days)}
         """
     )
-
+    undo_entry = mw.col.add_custom_undo_entry(t("easy-days"))
     fut = reschedule(
         did=None,
         recent=False,
@@ -45,6 +45,7 @@ def easy_days(did):
         apply_easy_days=True,
     )
     if fut:
+        mw.col.merge_undo_entries(undo_entry)
         return fut.result()
 
 
@@ -72,14 +73,14 @@ class EasySpecificDateManagerWidget(QWidget):
         self.layout = QVBoxLayout()
 
         self.dateLabel = QLabel()
-        self.dateLabel.setText("Select the Date(s)")
+        self.dateLabel.setText(t("easy-days-select-date"))
         self.dateEdit = QDateEdit()
         self.dateEdit.setDateTime(QDateTime.currentDateTime())
 
-        self.addDateBtn = QPushButton("Add the Selected Date")
+        self.addDateBtn = QPushButton(t("easy-days-add-date"))
         self.addDateBtn.clicked.connect(self.addEventFunc)
 
-        self.applyEasyDayBtn = QPushButton("Apply Easy Days")
+        self.applyEasyDayBtn = QPushButton(t("easy-days-apply-easy-days"))
         self.applyEasyDayBtn.clicked.connect(self.apply_easy_day_for_specific_date)
 
         self.layout.addWidget(self.dateLabel)
@@ -90,15 +91,15 @@ class EasySpecificDateManagerWidget(QWidget):
         self.layout.addStretch()
 
         self.setLayout(self.layout)
-        self.setWindowTitle("Easy Days for Specific Dates")
+        self.setWindowTitle(t("easy-days-title"))
 
     def addEventFunc(self):
         specific_date = self.dateEdit.date().toPyDate()
         if specific_date in self.specific_dates:
-            tooltip("This date has already been added")
+            tooltip(t("easy-days-date-already-added"))
             return
         if specific_date < sched_current_date():
-            tooltip("Easy days can't be applied on past dates.")
+            tooltip(t("easy-days-past-date"))
             return
         self.specific_dates.append(specific_date)
         self.config.easy_dates = [
@@ -110,7 +111,7 @@ class EasySpecificDateManagerWidget(QWidget):
 
     def apply_easy_day_for_specific_date(self):
         if len(self.specific_dates) == 0:
-            tooltip("Please add the dates first.")
+            tooltip(t("easy-days-no-dates"))
             return
         specific_dues = []
         current_date = sched_current_date()
@@ -119,7 +120,7 @@ class EasySpecificDateManagerWidget(QWidget):
             today = mw.col.sched.today
             specific_due = today + day_offset
             specific_dues.append(specific_due)
-
+        undo_entry = mw.col.add_custom_undo_entry(t("easy-days"))
         filtered_dues_cids = mw.col.db.list(
             f"""SELECT id
             FROM cards
@@ -140,6 +141,7 @@ class EasySpecificDateManagerWidget(QWidget):
             easy_specific_due_dates=specific_dues,
             apply_easy_days=True,
         )
+        mw.col.merge_undo_entries(undo_entry)
 
 
 class DateLabelWidget(QWidget):
@@ -152,7 +154,7 @@ class DateLabelWidget(QWidget):
         self.setLayout(layout)
         self.eventDate = QLabel(date.strftime("%Y-%m-%d"))
 
-        self.deleteButton = QPushButton("Delete")
+        self.deleteButton = QPushButton(t("easy-days-delete"))
         self.deleteButton.clicked.connect(self.deleteEvent)
 
         layout.addWidget(self.eventDate)

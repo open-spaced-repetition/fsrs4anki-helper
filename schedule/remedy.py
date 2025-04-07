@@ -13,13 +13,13 @@ class RemedyDateRangeWidget(QWidget):
     def setup_ui(self):
         self.layout = QVBoxLayout()
 
-        self.start_date_label = QLabel("Select the Start Date")
+        self.start_date_label = QLabel(t("remedy-start-date"))
         self.start_date_edit = QDateEdit()
         self.start_date_edit.setDateTime(datetime.strptime("2006-01-01", "%Y-%m-%d"))
-        self.end_date_label = QLabel("Select the End Date")
+        self.end_date_label = QLabel(t("remedy-end-date"))
         self.end_date_edit = QDateEdit()
         self.end_date_edit.setDateTime(QDateTime.currentDateTime())
-        self.remedy_button = QPushButton("Remedy")
+        self.remedy_button = QPushButton(t("remedy"))
         self.remedy_button.clicked.connect(self.remedy_hard_misuse)
 
         self.layout.addWidget(self.start_date_label)
@@ -29,7 +29,7 @@ class RemedyDateRangeWidget(QWidget):
         self.layout.addWidget(self.remedy_button)
 
         self.setLayout(self.layout)
-        self.setWindowTitle("Remedy Hard Misuse")
+        self.setWindowTitle(t("remedy-title"))
         self.resize(300, 200)
 
     def remedy_hard_misuse(self):
@@ -43,18 +43,15 @@ class RemedyDateRangeWidget(QWidget):
         )
 
         if len(revlog_ids) == 0:
-            tooltip(
-                "There are no reviews with a Hard rating in the selected range of dates."
-            )
+            tooltip(t("remedy-no-hard-reviews"))
             return
 
         start_date = self.start_date_edit.date().toString("yyyy-MM-dd")
         end_date = self.end_date_edit.date().toString("yyyy-MM-dd")
         yes = askUser(
-            f"{len(revlog_ids)} reviews had a Hard rating between {start_date} and {end_date}.\n"
-            + "These ratings will be replaced with Again.\n"
-            + "The IDs of these revlogs will be stored in a CSV file in the addon folder to allow undoing the changes.\n"
-            + "Do you want to proceed?"
+            t("remedy-confirmation").format(
+                count=len(revlog_ids), start_date=start_date, end_date=end_date
+            )
         )
 
         if not yes:
@@ -75,10 +72,7 @@ class RemedyDateRangeWidget(QWidget):
         with open(revlog_id_csv, "a") as f:
             f.write("\n".join(map(str, revlog_ids)))
 
-        showInfo(
-            f"{len(revlog_ids)} reviews were remedied.\n"
-            + "Please re-optimize your FSRS parameters to incorporate the changes."
-        )
+        showInfo(t("remedy-success").format(count=len(revlog_ids)))
         mw.reset()
         self.close()
 
@@ -97,7 +91,7 @@ def undo_remedy(did):
     user_files.mkdir(parents=True, exist_ok=True)
     revlog_id_csv = os.path.join(user_files, f"{mw.pm.name}_hard_misuse_remedy.csv")
     if not os.path.exists(revlog_id_csv):
-        tooltip("No remedied reviews found")
+        tooltip(t("undo-remedy-no-file"))
         return
 
     if not ask_one_way_sync():
@@ -115,9 +109,6 @@ def undo_remedy(did):
     col_set_modified()
     mw.col.set_schema_modified()
     os.remove(revlog_id_csv)
-    tooltip(f"{len(revlog_ids)} reviews restored")
-    showInfo(
-        f"{len(revlog_ids)} reviews were restored.\n"
-        + "Please re-optimize your FSRS parameters to incorporate the changes."
-    )
+    tooltip(t("undo-remedy-restored").format(count=len(revlog_ids)))
+    showInfo(t("undo-remedy-success").format(count=len(revlog_ids)))
     mw.reset()

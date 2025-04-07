@@ -59,7 +59,7 @@ class TargetRetrievabilityColumn(CustomColumn):
 
     def _display_value(self, card: Card) -> str:
         if not mw.col.get_config("fsrs"):
-            tooltip(FSRS_ENABLE_WARNING)
+            tooltip(t("enable-fsrs-warning"))
             return "N/A"
         if card.ivl < 1:
             return "N/A"
