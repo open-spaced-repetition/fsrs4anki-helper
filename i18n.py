@@ -6,6 +6,9 @@ from aqt import mw
 from aqt.utils import tr
 
 locale = mw.pm.meta["defaultLang"]
+if locale == "en":
+    locale = "en_US"
+
 addon_dir = Path(os.path.dirname(__file__))
 
 i18n.load_path.append(addon_dir / "locale")
