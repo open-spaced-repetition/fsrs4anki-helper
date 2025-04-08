@@ -233,6 +233,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
 
     card_cnt = 0
     dispersed_cards = []
+    last_undo_step = mw.col.undo_status().last_step
     best_due_dates, due_ranges, min_gap = disperse(siblings)
 
     for cid, due in best_due_dates.items():
@@ -253,6 +254,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
         messages.append(message)
 
     mw.col.update_cards(dispersed_cards)
+    mw.col.merge_undo_entries(last_undo_step)
 
     if config.debug_notify:
         text = ""
