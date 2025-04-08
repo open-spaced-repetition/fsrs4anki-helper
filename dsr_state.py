@@ -43,7 +43,7 @@ def calc_s(ctx: TemplateRenderContext) -> str:
     if card.memory_state is None:
         return ""
     stability = card.memory_state.stability
-    return t("stability-days", stability=f"{stability:.2f}")
+    return t("x-days", count=round(stability, 2))
 
 
 def calc_d(ctx: TemplateRenderContext) -> str:
@@ -51,7 +51,7 @@ def calc_d(ctx: TemplateRenderContext) -> str:
     if card.memory_state is None:
         return ""
     difficulty = (card.memory_state.difficulty - 1) / 9
-    return t("difficulty-percent", difficulty=f"{(difficulty * 100):.0f}")
+    return t("x-%", count=f"{(difficulty * 100):.0f}")
 
 
 def calc_r(ctx: TemplateRenderContext) -> str:
@@ -62,7 +62,7 @@ def calc_r(ctx: TemplateRenderContext) -> str:
     last_review_date = get_last_review_date(card)
     elapsed_days = mw.col.sched.today - last_review_date
     retrievability = power_forgetting_curve(elapsed_days, stability)
-    return t("retrievability-percent", retrievability=f"{(retrievability * 100):.1f}")
+    return t("x-%", count=f"{(retrievability * 100):.1f}")
 
 
 def on_card_did_render(
