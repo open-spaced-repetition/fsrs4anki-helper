@@ -154,7 +154,7 @@ def disperse_siblings(
         tooltip(
             t(
                 "disperse-result",
-                result=future.result,
+                result=future.result(),
                 count=f"{time.time() - start_time:.2f}",
             )
         )
