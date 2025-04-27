@@ -24,11 +24,6 @@ jobs:
           for file in locale/*.json; do
             basename=$(basename "$file" .json)
 
-            if [ "$basename" = "en_US" ]; then
-              echo "Skipping reference file $file"
-              continue
-            fi
-
             echo "Checking file: $file (expecting key: $basename)"
 
             # Check if top-level key exists
@@ -37,6 +32,11 @@ jobs:
             else
               echo "❌ Error: Key \"$basename\" not found in $file or invalid json"
               exit 1
+            fi
+
+            if [ "$basename" = "en_US" ]; then
+              echo "Skipping reference file $file"
+              continue
             fi
 
             # Get the keys under the basename
