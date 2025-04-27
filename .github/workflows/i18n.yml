@@ -1,4 +1,4 @@
-name: Validate Locale JSON
+name: i18n
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
       - 'locale/*.json'
 
 jobs:
-  check-locale:
+  i18n:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
