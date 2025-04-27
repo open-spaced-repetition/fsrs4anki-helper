@@ -1,0 +1,29 @@
+name: Validate Locale JSON Files
+
+on:
+  pull_request:
+    paths:
+      - 'locale/*.json'
+  push:
+    paths:
+      - 'locale/*.json'
+
+jobs:
+  check-locale-keys:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check each locale file
+        run: |
+          set -e
+          for file in locale/*.json; do
+            basename=$(basename "$file" .json)
+            echo "Checking file: $file (expecting key: $basename)"
+            if jq -e --arg key "$basename" 'has($key)' "$file" > /dev/null; then
+              echo "✅ $basename key exists in $file"
+            else
+              echo "❌ Error: Key \"$basename\" not found in $file"
+              exit 1
+            fi
+          done
