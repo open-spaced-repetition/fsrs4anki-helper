@@ -1,4 +1,4 @@
-name: Validate Locale JSON Files and Keys
+name: Validate Locale JSON
 
 on:
   pull_request:
