@@ -23,7 +23,7 @@ jobs:
             if jq -e --arg key "$basename" 'has($key)' "$file" > /dev/null; then
               echo "✅ $basename key exists in $file"
             else
-              echo "❌ Error: Key \"$basename\" not found in $file"
+              echo "❌ Error: Key \"$basename\" not found in $file or $file is not valid json"
               exit 1
             fi
           done
