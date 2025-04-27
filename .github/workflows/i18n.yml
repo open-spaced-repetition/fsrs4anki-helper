@@ -9,7 +9,7 @@ on:
       - 'locale/*.json'
 
 jobs:
-  check-locale-keys:
+  check-locale:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
