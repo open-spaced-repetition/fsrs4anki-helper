@@ -1,4 +1,4 @@
-name: Validate Locale JSON Files
+name: Validate Locale JSON Files and Keys
 
 on:
   pull_request:
@@ -14,16 +14,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check each locale file
+      - name: Validate locale files
         run: |
           set -e
+
+          # Load en_US keys
+          en_keys=$(jq -r '.en_US | keys_unsorted[]' locale/en_US.json | sort)
+
           for file in locale/*.json; do
             basename=$(basename "$file" .json)
+
+            if [ "$basename" = "en_US" ]; then
+              echo "Skipping reference file $file"
+              continue
+            fi
+
             echo "Checking file: $file (expecting key: $basename)"
+
+            # Check if top-level key exists
             if jq -e --arg key "$basename" 'has($key)' "$file" > /dev/null; then
-              echo "✅ $basename key exists in $file"
+              echo "✅ Top-level key $basename exists"
             else
-              echo "❌ Error: Key \"$basename\" not found in $file or $file is not valid json"
+              echo "❌ Error: Key \"$basename\" not found in $file or invalid json"
               exit 1
+            fi
+
+            # Get the keys under the basename
+            locale_keys=$(jq -r --arg key "$basename" '.[$key] | keys_unsorted[]' "$file" | sort)
+
+            # Compare keys
+            missing_keys=$(comm -23 <(echo "$locale_keys") <(echo "$en_keys"))
+
+            if [ -n "$missing_keys" ]; then
+              echo "❌ Error: The following keys in $file ($basename) are not present in en_US:"
+              echo "$missing_keys"
+              exit 1
+            else
+              echo "✅ All keys in $basename are valid"
             fi
           done
