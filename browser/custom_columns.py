@@ -60,11 +60,11 @@ class TargetRetrievabilityColumn(CustomColumn):
     def _display_value(self, card: Card) -> str:
         if not mw.col.get_config("fsrs"):
             tooltip(t("enable-fsrs-warning"))
-            return "N/A"
+            return t("not-available")
         if card.ivl < 1:
-            return "N/A"
+            return t("not-available")
         if not card.memory_state:
-            return "N/A"
+            return t("not-available")
         retrievability = power_forgetting_curve(card.ivl, card.memory_state.stability)
         return f"{retrievability * 100:.2f}%"
 

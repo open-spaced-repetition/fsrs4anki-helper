@@ -175,6 +175,7 @@
     "reschedule-result": "%{count} cards rescheduled",
     "reschedule-browser-action": "FSRS: Update memory state and reschedule",
     "reschedule-done-in-seconds": "%{result} in %{seconds} seconds",
+    "not-available": "N/A",
 
     "enable-fsrs-warning": "Please either enable FSRS in your deck options, or disable the FSRS helper add-on."
   }
