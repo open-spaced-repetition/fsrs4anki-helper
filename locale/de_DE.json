@@ -50,7 +50,7 @@
     "delay-and-retention-distribution": "Verteilung von Zeitverzögerung und Erinnerungsquote",
     "summary": "Zusammenfassung",
     "interpretation": "Erläuterungen",
-    "step-stats-help-line-1": "Die Tabelle zeigt die durchschnittliche Zeit, die verstrichen ist, bevor eine Karte nach ihrer ersten Bewertung erneut bewert wurde (Zeitverzögerung).",
+    "step-stats-help-line-1": "Die Tabelle zeigt die durchschnittliche Zeit an, die verstrichen ist, bevor eine Karte nach Ihrer ersten Bewertung erneut bewertet wurde (Zeitverzögerung).",
     "step-stats-help-line-2": "Die Tabelle zeigt auch an, wie gut Sie sich durchschnittlich bei den erneuten Bewertungen an eine Karte erinnern können.",
     "step-stats-help-line-3": "Alle erneuten Bewertungen werden gesammelt, nach Zeitverzögerung aufsteigend sortiert und in 4 Gruppen mit jeweils gleich vielen Elementen unterteilt. In Gruppe 1 sind die Elemente mit der geringsten Zeitverzögerung, und in Gruppe 4 die Elemente mit der größten Zeitverzögerung.",
     "step-stats-help-line-4": "Die Elemente jeder Gruppe werden danach gemäß der ersten Bewertung der Karte auf die einzelnen Zeilen („Nochmal“, „Schwer“ usw.) aufgeteilt. Daher enthält jede Zeile Daten für alle 4 Gruppen.",
