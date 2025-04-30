@@ -174,16 +174,16 @@ def get_steps_stats(self: CollectionStats):
             <tr>
                 {state_cell}
                 <td class="trl"><span class="{style}"><b>{t(style)}</b></span></td>
-                <td class="trr">N/A</td>
-                <td class="trr">N/A</td>
-                <td class="trr">N/A</td>
-                <td class="trr">N/A</td>
-                <td class="trr">N/A</td>
-                <td class="trr">N/A</td>
-                <td class="trr">N/A</td>
-                <td class="trr">N/A</td>
-                <td class="trr">N/A</td>
-                <td class="trr">N/A</td>
+                <td class="trr">{t("not-available")}</td>
+                <td class="trr">{t("not-available")}</td>
+                <td class="trr">{t("not-available")}</td>
+                <td class="trr">{t("not-available")}</td>
+                <td class="trr">{t("not-available")}</td>
+                <td class="trr">{t("not-available")}</td>
+                <td class="trr">{t("not-available")}</td>
+                <td class="trr">{t("not-available")}</td>
+                <td class="trr">{t("not-available")}</td>
+                <td class="trr">{t("not-available")}</td>
             </tr>"""
             continue
 
