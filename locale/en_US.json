@@ -104,7 +104,7 @@
     "flatten-inquire-text": "Enter the maximum number of reviews you want in the future.\n",
     "flatten-info-text": "This feature only affects the cards that have been scheduled by FSRS.\n",
     "flatten-warning-text": "This feature doesn't respect maximum interval settings, and may reduce your true retention significantly.\n",
-    "flatten-enter-number": "Please enter the number of cards you want to flatten.",
+    "flatten-enter-number": "Please enter the maximum number of reviews you want in the future.",
     "flatten-positive-integer": "Please enter a positive integer.",
     "flatten-label": "Flattening",
     "flatten": "Flatten",
