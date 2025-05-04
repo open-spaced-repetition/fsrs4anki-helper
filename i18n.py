@@ -46,8 +46,6 @@ i18n.add_translation(
     "retention", tr.statistics_true_retention_retention(), locale=locale
 )
 i18n.add_translation("cards", tr.browsing_cards(), locale=locale)
-i18n.add_translation("deck", tr.decks_deck(), locale=locale)
-i18n.add_translation("collection", tr.browsing_whole_collection(), locale=locale)
 
 
 def t(*args, **kwargs):
