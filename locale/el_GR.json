@@ -89,7 +89,8 @@
     "reviews-on-cards": "Επαναλήψεις σε κάρτες",
 
     "advance-inquire-text": "Enter the number of cards to be advanced.\n",
-    "advance-notification-text": "For this %{deck_collection}, it is relatively safe to advance up to %{count} cards.\n",
+    "advance-notification-text-deck": "For this deck, it is relatively safe to advance up to %{count} cards.\n",
+    "advance-notification-text-collection": "For this collection, it is relatively safe to advance up to %{count} cards.\n",
     "advance-warning-text": "You can advance more cards if you wish, but it is not recommended.\nKeep in mind that whenever you use Postpone or Advance, you depart from the optimal scheduling.\n",
     "advance-info-text": "Αυτή η λειτουργία επηρεάζει μόνο τις κάρτες που έχουν προγραμματιστεί από το FSRS.",
     "advance-enter-number": "Please enter the number of cards you want to advance.",
