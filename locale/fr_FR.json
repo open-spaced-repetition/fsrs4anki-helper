@@ -89,7 +89,8 @@
     "reviews-on-cards": "Révisions de cartes",
 
     "advance-inquire-text": "Entrez le nombre de cartes à avancer.\n",
-    "advance-notification-text": "Pour %{deck_collection}, il est relativement sûr d'avancer jusqu'à %{count} cartes.\n",
+    "advance-notification-text-deck": "Pour ce paquet, il est relativement sûr d'avancer jusqu'à %{count} cartes.\n",
+    "advance-notification-text-collection": "Pour cette collection, il est relativement sûr d'avancer jusqu'à %{count} cartes.\n",
     "advance-warning-text": "Vous pouvez avancer plus de cartes si vous le souhaitez, mais cela est déconseillé.\nGardez en tête qu'à chaque fois que vous utilisez Reporter or Avancer, vous divergez du programme optimal.\n",
     "advance-info-text": "Cette fonctionnalité n'affecte que les cartes qui ont été programmées par FSRS.",
     "advance-enter-number": "Veuillez entrer le nombre de cartes que vous souhaitez avancer.",
