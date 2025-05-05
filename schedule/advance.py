@@ -8,8 +8,11 @@ def get_desired_advance_cnt_with_response(safe_cnt, did):
     inquire_text = t("advance-inquire-text") + "\n"
     notification_text = (
         t(
-            "advance-notification-text",
-            deck_collection=t("deck" if did else "collection"),
+            (
+                "advance-notification-text-deck"
+                if did
+                else "advance-notification-text-collection"
+            ),
             count=safe_cnt,
         )
         + "\n"
