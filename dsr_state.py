@@ -59,9 +59,10 @@ def calc_r(ctx: TemplateRenderContext) -> str:
     if card.memory_state is None:
         return ""
     stability = card.memory_state.stability
+    decay = card.decay or 0.5
     last_review_date = get_last_review_date(card)
     elapsed_days = mw.col.sched.today - last_review_date
-    retrievability = power_forgetting_curve(elapsed_days, stability)
+    retrievability = power_forgetting_curve(elapsed_days, stability, -decay)
     return t("x-%", count=f"{(retrievability * 100):.1f}")
 
 
