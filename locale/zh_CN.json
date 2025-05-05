@@ -89,7 +89,7 @@
 
     "advance-inquire-text": "输入要提前的卡片数量。\n",
     "advance-notification-text-deck": "对于这个牌组，相对安全地提前最多 %{count} 张卡片。\n",
-    "advance-notification-text-collection": "对于这个全部集合，相对安全地提前最多 %{count} 张卡片。\n",
+    "advance-notification-text-collection": "对于这个集合，相对安全地提前最多 %{count} 张卡片。\n",
     "advance-warning-text": "如果您愿意，可以提前更多卡片，但不推荐。\n请记住，每当您使用推迟或提前功能时，都会偏离最优调度。\n",
     "advance-info-text": "此功能仅影响已由 FSRS 安排的卡片。",
     "advance-enter-number": "请输入您想要提前的卡片数量。",
