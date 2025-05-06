@@ -1,13 +1,13 @@
 {
   "el_GR": {
     "fsrs-helper": "FSRS Helper",
-    "sync-auto-reschedule": "Auto reschedule cards reviewed on other devices after sync",
+    "sync-auto-reschedule": "Αυτόματος επαναπρογραμματισμός καρτών που γίνονται επανάληψη σε άλλες συσκευές μετά το συγχρονισμό",
     "auto-disperse-after-sync": "Auto disperse siblings reviewed on other devices after sync",
     "auto-disperse-when-review": "Auto disperse siblings when review",
     "disperse-after-reschedule": "Disperse siblings after rescheduling (breaks Load Balance)",
     "display-memory-state": "Εμφάνιση κατάστασης μνήμης μετά την απάντηση",
-    "show-steps-stats": "Show steps stats",
-    "steps-stats-warning": "This feature would slow down the loading of the old stats page if you have a lot of reviews. Are you sure you want to enable it?",
+    "show-steps-stats": "Εμφάνιση στατιστικών στοιχείων βημάτων",
+    "steps-stats-warning": "Αυτή η λειτουργία θα επιβραδύνει τη φόρτωση της παλιάς σελίδας στατιστικών αν έχετε πολλές επαναλήψεις. Είστε σίγουροι ότι θέλετε να την ενεργοποιήσετε;",
     "reschedule-all-cards": "Επαναπρογραμματισμός όλων των καρτών",
     "reschedule-recent-cards": {
       "one": "Επαναπρογραμματισμός καρτών που έγιναν επανάληψη την τελευταία ημέρα",
@@ -30,7 +30,7 @@
     "undo": "Αναίρεση",
     "contact-author": "Επικοινωνία με τον συγγραφέα στο GitHub",
     "rate-addon": "Βαθμολογήστε το Add-on στο AnkiWeb",
-    "visualize-schedule": "Visualize Your FSRS Schedule",
+    "visualize-schedule": "Οπτικοποιήστε το FSRS χρονοδιάγραμμά σας",
     "sponsor-author": "Υποστηρίξτε τον συγγραφέα",
     "pass-fail": "Pass/Fail",
     "ajt-card-management": "AJT Card Management",
@@ -80,8 +80,8 @@
     "retention-graph-help": "Retention rate and review count over time",
     "true-retention-help": "The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.",
     "true-retention-mature-help": "By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config.",
-    "young-annotated": "Young (ivl < %{mature_ivl} d)",
-    "mature-annotated":"Mature (ivl ≥ %{mature_ivl} d)",
+    "young-annotated": "Νέα (ivl < %{mature_ivl} d)",
+    "mature-annotated":"Ώριμα (ivl ≥ %{mature_ivl} d)",
     "total": "Σύνολο",
     "learned": "Learned",
     "relearned": "Relearned",
@@ -97,10 +97,10 @@
     "advance-positive-integer": "Παρακαλώ εισάγετε έναν θετικό ακέραιο αριθμό.",
     "advance": "Advance",
     "advance-result-text": {
-      "one": "1 card has been advanced.",
-      "other": "%{count} cards have been advanced."
+      "one": "1 κάρτα έχει προωθηθεί.",
+      "other": "%{count} κάρτες έχουν προωθηθεί."
     },
-    "advance-retention-change": "<br>Mean target retention of advanced cards: %{prev_retention} -> %{new_retention}",
+    "advance-retention-change": "<br>Μέσος στόχος ανάκλησης προωθημένων καρτών: %{prev_retention} -> %{new_retention}",
 
     "flatten-inquire-text": "Εισάγετε τον μέγιστο αριθμό επαναλήψεων που θέλετε στο μέλλον.\n",
     "flatten-info-text": "Αυτή η λειτουργία επηρεάζει μόνο τις κάρτες που έχουν προγραμματιστεί από το FSRS.\n",
@@ -175,7 +175,7 @@
     "reschedule-progress": "%{count}/%{total} επαναπρογραμματισμένες κάρτες",
     "reschedule-result": "%{count} κάρτες επαναπρογραμματίστηκαν",
     "reschedule-browser-action": "FSRS: Ενημέρωση κατάστασης μνήμης και επαναπρογραμματισμός",
-    "reschedule-done-in-seconds": "%{result} in %{seconds} seconds",
+    "reschedule-done-in-seconds": "%{result} σε %{seconds} δευτερόλεπτα",
 
     "enable-fsrs-warning": "Παρακαλούμε είτε ενεργοποιήστε το FSRS στις επιλογές της τράπουλας, είτε απενεργοποιήστε το πρόσθετο FSRS helper."
   }
