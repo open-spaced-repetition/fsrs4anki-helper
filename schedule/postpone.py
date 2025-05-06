@@ -44,7 +44,8 @@ def postpone(did):
             THEN {mw.col.sched.today} - (due - ivl) + ivl * 0.075
             ELSE {mw.col.sched.today} - (odue - ivl) + ivl * 0.075
             END,
-            json_extract(data, '$.dr')
+            json_extract(data, '$.dr'),
+            COALESCE(json_extract(data, '$.decay'), 0.5),
         FROM cards
         WHERE data != ''
         AND json_extract(data, '$.s') IS NOT NULL
@@ -60,13 +61,14 @@ def postpone(did):
     # x[3]: stability
     # x[4]: approx elapsed days after postpone
     # x[5]: desired retention
-    # x[6]: approx retention after postpone
-    # x[7]: max interval
+    # x[6]: decay
+    # x[7]: approx retention after postpone
+    # x[8]: max interval
     cards = map(
         lambda x: (
             x
             + [
-                power_forgetting_curve(max(x[4], 0), x[3]),
+                power_forgetting_curve(max(x[4], 0), x[3], -x[6]),
                 DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
             ]
         ),
@@ -74,9 +76,9 @@ def postpone(did):
     )
     # sort by (elapsed_days / scheduled_days - 1)
     # = ln(current retention)/ln(requested retention)-1, -stability (ascending)
-    cards = sorted(cards, key=lambda x: ((1 / x[6] - 1) / (1 / x[5] - 1) - 1, -x[3]))
+    cards = sorted(cards, key=lambda x: ((1 / x[7] - 1) / (1 / x[5] - 1) - 1, -x[3]))
     safe_cnt = len(
-        list(filter(lambda x: (1 / x[6] - 1) / (1 / x[5] - 1) - 1 < 0.15, cards))
+        list(filter(lambda x: (1 / x[7] - 1) / (1 / x[5] - 1) - 1 < 0.15, cards))
     )
 
     (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response(safe_cnt, did)
@@ -95,7 +97,7 @@ def postpone(did):
     postponed_cards = []
     start_time = time.time()
     undo_entry = mw.col.add_custom_undo_entry(t("postpone"))
-    for cid, did, ivl, stability, elapsed_days, _, _, max_ivl in cards:
+    for cid, did, ivl, stability, elapsed_days, _, decay, _, max_ivl in cards:
         if cnt >= desired_postpone_cnt:
             break
 
@@ -110,8 +112,8 @@ def postpone(did):
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "postpone")
         postponed_cards.append(card)
-        prev_target_rs.append(power_forgetting_curve(ivl, stability))
-        new_target_rs.append(power_forgetting_curve(new_ivl, stability))
+        prev_target_rs.append(power_forgetting_curve(ivl, stability, -decay))
+        new_target_rs.append(power_forgetting_curve(new_ivl, stability, -decay))
         cnt += 1
 
     mw.col.update_cards(postponed_cards)
