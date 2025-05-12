@@ -1,7 +1,8 @@
+from pathlib import Path
 from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
 from aqt import mw
 from aqt.qt import QAction
-from aqt.utils import tooltip, openLink, askUser
+from aqt.utils import tooltip, openLink, askUser, showInfo
 from typing import Callable
 
 from .dsr_state import init_dsr_status_hook
@@ -211,6 +212,17 @@ def sponsor(did=None):
 menu_sponsor = build_action(sponsor, t("sponsor-author"))
 
 
+def export_dataset(did=None):
+    addon = mw.addonManager.addonFromModule(__name__)
+    user_files = Path(mw.addonManager.addonsFolder(addon)) / "user_files"
+    user_files.mkdir(parents=True, exist_ok=True)
+    mw.col.export_dataset_for_research(f"{user_files}/{mw.pm.name}.revlog")
+    showInfo(f"Your dataset has been exported to {user_files}/{mw.pm.name}.revlog")
+
+
+menu_export_dataset = build_action(export_dataset, t("export-dataset"))
+
+
 def pass_fail(did=None):
     openLink("https://ankiweb.net/shared/info/876946123")
 
@@ -261,6 +273,7 @@ if not config.has_rated:
     menu_for_helper.addAction(menu_rate)
 if not config.has_sponsored:
     menu_for_helper.addAction(menu_sponsor)
+menu_for_helper.addAction(menu_export_dataset)
 menu_for_helper.addSeparator()
 menu_for_recommended_addons = menu_for_helper.addMenu(t("recommended-addons"))
 menu_for_recommended_addons.addAction(menu_pass_fail)
