@@ -1,8 +1,8 @@
 from pathlib import Path
 from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
 from aqt import mw
-from aqt.qt import QAction
-from aqt.utils import tooltip, openLink, askUser, showInfo
+from aqt.qt import QAction, QDesktopServices, QUrl
+from aqt.utils import openLink, askUser
 from typing import Callable
 
 from .dsr_state import init_dsr_status_hook
@@ -217,7 +217,7 @@ def export_dataset(did=None):
     user_files = Path(mw.addonManager.addonsFolder(addon)) / "user_files"
     user_files.mkdir(parents=True, exist_ok=True)
     mw.col.export_dataset_for_research(f"{user_files}/{mw.pm.name}.revlog")
-    showInfo(f"Your dataset has been exported to {user_files}/{mw.pm.name}.revlog")
+    QDesktopServices.openUrl(QUrl.fromLocalFile(str(user_files.absolute())))
 
 
 menu_export_dataset = build_action(export_dataset, t("export-dataset"))
