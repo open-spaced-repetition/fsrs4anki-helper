@@ -40,6 +40,7 @@ i18n.add_translation(
     "yesterday", tr.statistics_true_retention_yesterday(), locale=locale
 )
 i18n.add_translation("week", tr.statistics_true_retention_week(), locale=locale)
+i18n.add_translation("year", tr.statistics_true_retention_year(), locale=locale)
 i18n.add_translation("pass", tr.statistics_true_retention_pass(), locale=locale)
 i18n.add_translation("fail", tr.statistics_true_retention_fail(), locale=locale)
 i18n.add_translation(
