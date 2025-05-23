@@ -33,6 +33,7 @@ def retention_stability(lim) -> tuple:
             ELSE {mw.col.sched.today} - (odue - ivl)
         END
         ,json_extract(data, '$.s')
+        ,COALESCE(json_extract(data, '$.decay'), 0.5)
     FROM cards c1
     WHERE queue != 0 AND queue != -1
     AND data != ''
@@ -42,9 +43,10 @@ def retention_stability(lim) -> tuple:
     )
     # x[0]: elapsed days
     # x[1]: stability
+    # x[2]: decay
     retention_list = list(
         map(
-            lambda x: power_forgetting_curve(max(x[0], 0), x[1]),
+            lambda x: power_forgetting_curve(max(x[0], 0), x[1], -x[2]),
             elapse_stability_list,
         )
     )
