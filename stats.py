@@ -573,7 +573,7 @@ def get_true_retention(self: CollectionStats):
 
 
 def retentionAsString(n, d):
-    return "%0.1f%%" % ((n * 100) / d) if d else "N/A"
+    return "%0.1f%%" % ((n * 100) / d) if d else t("not-available")
 
 
 def stats_list(lim, span):
