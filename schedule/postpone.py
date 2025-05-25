@@ -76,9 +76,21 @@ def postpone(did):
     )
     # sort by (elapsed_days / scheduled_days - 1)
     # = ln(current retention)/ln(requested retention)-1, -stability (ascending)
-    cards = sorted(cards, key=lambda x: ((x[7]**(-1/x[6]) - 1) / (x[5]**(-1/x[6]) - 1) - 1, -x[3]))
+    cards = sorted(
+        cards,
+        key=lambda x: (
+            (x[7] ** (-1 / x[6]) - 1) / (x[5] ** (-1 / x[6]) - 1) - 1,
+            -x[3],
+        ),
+    )
     safe_cnt = len(
-        list(filter(lambda x: (x[7]**(-1/x[6]) - 1) / (x[5]**(-1/x[6]) - 1) - 1 < 0.15, cards))
+        list(
+            filter(
+                lambda x: (x[7] ** (-1 / x[6]) - 1) / (x[5] ** (-1 / x[6]) - 1) - 1
+                < 0.15,
+                cards,
+            )
+        )
     )
 
     (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response(safe_cnt, did)
