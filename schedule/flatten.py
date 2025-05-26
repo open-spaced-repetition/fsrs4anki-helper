@@ -159,7 +159,7 @@ def flatten_background(did, desired_flatten_limit):
             write_custom_data(card, "v", "flatten")
             flattened_cards.append(card)
             stability = card.memory_state.stability
-            decay = card.decay or 0.5
+            decay = get_decay(card)
             prev_target_rs.append(power_forgetting_curve(ivl, stability, -decay))
             new_target_rs.append(power_forgetting_curve(new_ivl, stability, -decay))
             cnt += 1

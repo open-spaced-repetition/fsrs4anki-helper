@@ -249,3 +249,7 @@ def format_time(x, pos=None):
         return f"{x/3600:.2f}h"
     else:
         return f"{x/86400:.2f}d"
+
+
+def get_decay(card: Card):
+    return getattr(card, "decay", 0.5) or 0.5

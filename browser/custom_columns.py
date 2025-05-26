@@ -66,7 +66,7 @@ class TargetRetrievabilityColumn(CustomColumn):
         if not card.memory_state:
             return t("not-available")
         retrievability = power_forgetting_curve(
-            card.ivl, card.memory_state.stability, -(card.decay or 0.5)
+            card.ivl, card.memory_state.stability, -get_decay(card)
         )
         return f"{retrievability * 100:.2f}%"
 

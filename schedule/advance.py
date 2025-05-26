@@ -50,8 +50,8 @@ def advance(did):
             THEN {mw.col.sched.today} - (due - ivl)
             ELSE {mw.col.sched.today} - (odue - ivl)
             END,
-            json_extract(data, '$.dr')
-            COALESCE(json_extract(data, '$.decay'), 0.5),
+            json_extract(data, '$.dr'),
+            COALESCE(json_extract(data, '$.decay'), 0.5)
         FROM cards
         WHERE data != '' 
         AND json_extract(data, '$.s') IS NOT NULL

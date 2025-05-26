@@ -2,7 +2,7 @@ from anki import hooks
 from anki.template import TemplateRenderContext, TemplateRenderOutput
 
 from .configuration import Config
-from .utils import power_forgetting_curve, get_last_review_date, mw
+from .utils import get_decay, power_forgetting_curve, get_last_review_date, mw
 from .i18n import t
 
 
@@ -59,10 +59,9 @@ def calc_r(ctx: TemplateRenderContext) -> str:
     if card.memory_state is None:
         return ""
     stability = card.memory_state.stability
-    decay = card.decay or 0.5
     last_review_date = get_last_review_date(card)
     elapsed_days = mw.col.sched.today - last_review_date
-    retrievability = power_forgetting_curve(elapsed_days, stability, -decay)
+    retrievability = power_forgetting_curve(elapsed_days, stability, -get_decay(card))
     return t("x-%", count=f"{(retrievability * 100):.1f}")
 
 

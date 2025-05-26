@@ -45,7 +45,7 @@ def postpone(did):
             ELSE {mw.col.sched.today} - (odue - ivl) + ivl * 0.075
             END,
             json_extract(data, '$.dr'),
-            COALESCE(json_extract(data, '$.decay'), 0.5),
+            COALESCE(json_extract(data, '$.decay'), 0.5)
         FROM cards
         WHERE data != ''
         AND json_extract(data, '$.s') IS NOT NULL
