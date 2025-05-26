@@ -65,7 +65,9 @@ class TargetRetrievabilityColumn(CustomColumn):
             return t("not-available")
         if not card.memory_state:
             return t("not-available")
-        retrievability = power_forgetting_curve(card.ivl, card.memory_state.stability)
+        retrievability = power_forgetting_curve(
+            card.ivl, card.memory_state.stability, -get_decay(card)
+        )
         return f"{retrievability * 100:.2f}%"
 
     def order_by_str(self) -> str:
