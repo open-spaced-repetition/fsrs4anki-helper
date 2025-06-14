@@ -375,7 +375,9 @@ def reschedule_background(
         fsrs.desired_retention = desired_retention
         fsrs.maximum_interval = maximum_interval
         fsrs.did = did
-        card, interval_updated = reschedule_card(cid, fsrs, filter_flag, auto_reschedule)
+        card, interval_updated = reschedule_card(
+            cid, fsrs, filter_flag, auto_reschedule
+        )
         if card is None:
             continue
         rescheduled_cards.append(card)
