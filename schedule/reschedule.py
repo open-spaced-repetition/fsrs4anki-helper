@@ -231,6 +231,7 @@ def reschedule(
     filtered_cids={},
     easy_specific_due_dates=[],
     apply_easy_days=False,
+    auto_reschedule=False,
 ):
     if not mw.col.get_config("fsrs"):
         tooltip(t("enable-fsrs-warning"))
@@ -266,6 +267,7 @@ def reschedule(
             filtered_cids,
             easy_specific_due_dates,
             apply_easy_days,
+            auto_reschedule,
         ),
         on_done,
     )
@@ -280,6 +282,7 @@ def reschedule_background(
     filtered_cids={},
     easy_specific_due_dates=[],
     apply_easy_days=False,
+    auto_reschedule=False,
 ):
     config = Config()
     config.load()
@@ -376,7 +379,7 @@ def reschedule_background(
         if card is None:
             continue
         rescheduled_cards.append(card)
-        if interval_updated:
+        if interval_updated or auto_reschedule:
             filtered_nids.add(nid)
             cnt += 1
         if cnt % 500 == 0:
