@@ -48,6 +48,7 @@ def auto_reschedule(local_rids: List[int], texts: List[str]):
         recent=False,
         filter_flag=True,
         filtered_cids=set(remote_reviewed_cids),
+        auto_reschedule=True,
     )
 
     if fut:
