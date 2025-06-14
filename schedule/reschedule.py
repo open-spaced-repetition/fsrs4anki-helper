@@ -426,7 +426,9 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
         decay = get_decay(card)
         new_ivl = fsrs.fuzzed_next_interval(s, -decay)
 
-        if fsrs.reschedule_threshold > 0 and not (fsrs.apply_easy_days or auto_reschedule):
+        if fsrs.reschedule_threshold > 0 and not (
+            fsrs.apply_easy_days or auto_reschedule
+        ):
             dr = fsrs.desired_retention
             odds = dr / (1 - dr)
 
