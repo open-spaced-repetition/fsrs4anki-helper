@@ -375,11 +375,11 @@ def reschedule_background(
         fsrs.desired_retention = desired_retention
         fsrs.maximum_interval = maximum_interval
         fsrs.did = did
-        card, interval_updated = reschedule_card(cid, fsrs, filter_flag)
+        card, interval_updated = reschedule_card(cid, fsrs, filter_flag, auto_reschedule)
         if card is None:
             continue
         rescheduled_cards.append(card)
-        if interval_updated or auto_reschedule:
+        if interval_updated:
             filtered_nids.add(nid)
             cnt += 1
         if cnt % 500 == 0:
@@ -404,7 +404,7 @@ def reschedule_background(
     return finish_text
 
 
-def reschedule_card(cid, fsrs: FSRS, recompute=False):
+def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
     card = mw.col.get_card(cid)
     if recompute:
         memory_state = mw.col.compute_memory_state(cid)
@@ -426,7 +426,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
         decay = get_decay(card)
         new_ivl = fsrs.fuzzed_next_interval(s, -decay)
 
-        if fsrs.reschedule_threshold > 0 and not fsrs.apply_easy_days:
+        if fsrs.reschedule_threshold > 0 and not (fsrs.apply_easy_days or auto_reschedule):
             dr = fsrs.desired_retention
             odds = dr / (1 - dr)
 
