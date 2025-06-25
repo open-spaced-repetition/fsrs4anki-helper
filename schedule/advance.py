@@ -20,7 +20,8 @@ def get_desired_advance_cnt_with_response(safe_cnt, did):
     warning_text = t("advance-warning-text")
     info_text = t("advance-info-text")
     (s, r) = getText(
-        inquire_text + notification_text + warning_text + info_text, default="10"
+        inquire_text + notification_text + warning_text + info_text,
+        default=f"{min(safe_cnt, 10)}",
     )
     if r:
         return (RepresentsInt(s), r)
