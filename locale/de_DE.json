@@ -32,6 +32,7 @@
     "rate-addon": "Diese Erweiterung auf AnkiWeb bewerten",
     "visualize-schedule": "Zeitplanung visualisieren",
     "sponsor-author": "Den Entwickler unterstützen",
+    "export-dataset": "Wiederholungsverlauf exportieren",
     "pass-fail": "Pass/Fail",
     "ajt-card-management": "AJT Card Management",
     "search-stats-extended": "Search Stats Extended",
@@ -89,7 +90,8 @@
     "reviews-on-cards": "Anzahl der Wiederholungen",
 
     "advance-inquire-text": "Geben Sie die Anzahl der Karten ein, die vorverlegt werden sollen.\n\n",
-    "advance-notification-text": "Es ist recht sicher, bis zu %{count} Karten vorzuverlegen.\n\n",
+    "advance-notification-text-deck": "Es ist recht sicher, bis zu %{count} Karten vorzuverlegen.\n\n",
+    "advance-notification-text-collection": "Es ist recht sicher, bis zu %{count} Karten vorzuverlegen.\n\n",
     "advance-warning-text": "Sie können mehr Karten vorverlegen, aber es wird\nnicht empfohlen. Beachten Sie, dass bei der Verwendung von\n„Nach hinten verlegen“ oder „Vorverlegen“ von der optimalen\nZeitplanung abgewichen wird.\n\n",
     "advance-info-text": "Diese Funktion wirkt sich nur auf Karten aus, die von FSRS geplant\nwurden.",
     "advance-enter-number": "Geben Sie die Anzahl der Karten ein, die vorverlegt werden sollen.\n",

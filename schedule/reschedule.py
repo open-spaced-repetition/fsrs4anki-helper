@@ -216,8 +216,8 @@ class FSRS:
         )
         return best_ivl
 
-    def fuzzed_next_interval(self, stability):
-        new_interval = next_interval(stability, self.desired_retention)
+    def fuzzed_next_interval(self, stability, decay):
+        new_interval = next_interval(stability, self.desired_retention, decay)
         return self.apply_fuzz(new_interval)
 
     def set_card(self, card: Card):
@@ -231,6 +231,7 @@ def reschedule(
     filtered_cids={},
     easy_specific_due_dates=[],
     apply_easy_days=False,
+    auto_reschedule=False,
 ):
     if not mw.col.get_config("fsrs"):
         tooltip(t("enable-fsrs-warning"))
@@ -266,6 +267,7 @@ def reschedule(
             filtered_cids,
             easy_specific_due_dates,
             apply_easy_days,
+            auto_reschedule,
         ),
         on_done,
     )
@@ -280,6 +282,7 @@ def reschedule_background(
     filtered_cids={},
     easy_specific_due_dates=[],
     apply_easy_days=False,
+    auto_reschedule=False,
 ):
     config = Config()
     config.load()
@@ -372,7 +375,9 @@ def reschedule_background(
         fsrs.desired_retention = desired_retention
         fsrs.maximum_interval = maximum_interval
         fsrs.did = did
-        card, interval_updated = reschedule_card(cid, fsrs, filter_flag)
+        card, interval_updated = reschedule_card(
+            cid, fsrs, filter_flag, auto_reschedule
+        )
         if card is None:
             continue
         rescheduled_cards.append(card)
@@ -401,7 +406,7 @@ def reschedule_background(
     return finish_text
 
 
-def reschedule_card(cid, fsrs: FSRS, recompute=False):
+def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
     card = mw.col.get_card(cid)
     if recompute:
         memory_state = mw.col.compute_memory_state(cid)
@@ -420,19 +425,22 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False):
     if card.type == CARD_TYPE_REV:
         fsrs.set_card(card)
         fsrs.set_fuzz_factor(cid, card.reps)
-        new_ivl = fsrs.fuzzed_next_interval(s)
+        decay = get_decay(card)
+        new_ivl = fsrs.fuzzed_next_interval(s, -decay)
 
-        if fsrs.reschedule_threshold > 0 and not fsrs.apply_easy_days:
+        if fsrs.reschedule_threshold > 0 and not (
+            fsrs.apply_easy_days or auto_reschedule
+        ):
             dr = fsrs.desired_retention
             odds = dr / (1 - dr)
 
             odds_lower = (1 - fsrs.reschedule_threshold) * odds
             dr_lower = odds_lower / (odds_lower + 1)
-            adjusted_ivl_upper = next_interval(s, dr_lower)
+            adjusted_ivl_upper = next_interval(s, dr_lower, -decay)
 
             odds_upper = (1 + fsrs.reschedule_threshold) * odds
             dr_upper = odds_upper / (odds_upper + 1)
-            adjusted_ivl_lower = next_interval(s, dr_upper)
+            adjusted_ivl_lower = next_interval(s, dr_upper, -decay)
 
             if card.ivl >= adjusted_ivl_lower and card.ivl <= adjusted_ivl_upper:
                 if recompute:

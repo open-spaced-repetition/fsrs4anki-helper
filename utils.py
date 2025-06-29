@@ -161,16 +161,17 @@ def sched_current_date() -> date:
     return (now - timedelta(hours=next_day_start_at)).date()
 
 
-DECAY = -0.5
-FACTOR = 0.9 ** (1 / DECAY) - 1
+DECAY = -0.2
 
 
-def power_forgetting_curve(t, s):
-    return (1 + FACTOR * t / s) ** DECAY
+def power_forgetting_curve(t, s, decay=DECAY):
+    factor = 0.9 ** (1 / decay) - 1
+    return (1 + factor * t / s) ** decay
 
 
-def next_interval(s, r):
-    ivl = s / FACTOR * (r ** (1 / DECAY) - 1)
+def next_interval(s, r, decay=DECAY):
+    factor = 0.9 ** (1 / decay) - 1
+    ivl = s / factor * (r ** (1 / decay) - 1)
     return max(1, int(round(ivl)))
 
 
@@ -248,3 +249,7 @@ def format_time(x, pos=None):
         return f"{x/3600:.2f}h"
     else:
         return f"{x/86400:.2f}d"
+
+
+def get_decay(card: Card):
+    return getattr(card, "decay", 0.5) or 0.5
