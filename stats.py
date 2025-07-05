@@ -409,10 +409,10 @@ def get_retention_graph(self: CollectionStats):
     data, _ = self._splitRepData(
         offset_retention_review_cnt,
         (
-            (1, "#7c7", t("review-count-young")),
-            (2, "#070", t("review-count-mature")),
-            (3, "#ffd268", t("retention-rate-young")),
-            (4, "#e49a60", t("retention-rate-mature")),
+            (1, "#7c7", "C" + t("review-count-young")),
+            (2, "#070", "C" + t("review-count-mature")),
+            (3, "#ffd268", "R" + t("retention-rate-young")),
+            (4, "#e49a60", "R" + t("retention-rate-mature")),
         ),
     )
 
@@ -422,7 +422,9 @@ def get_retention_graph(self: CollectionStats):
     tmp = -2
     new_data = []
     for item in filter(lambda x: x["label"] is not None, data):
-        if item["label"].startswith("Retention"):
+        retention = item["label"].startswith("R")
+        item["label"] = item["label"][1:]
+        if retention:
             item["lines"] = {"show": True}
             item["bars"] = {"show": False}
             item["yaxis"] = 2
