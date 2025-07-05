@@ -415,6 +415,8 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
         if s is None or d is None:
             return None, False
         card.memory_state = FSRSMemoryState(stability=s, difficulty=d)
+        if hasattr(memory_state, "decay") and hasattr(card, "decay"):
+            card.decay = memory_state.decay
     elif card.memory_state:
         memory_state = card.memory_state
         s = memory_state.stability
