@@ -44,7 +44,7 @@ def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry
         + mw.col.sched.today
     )
     if card.odid:
-        card.odue = max(due, 1)
+        card.odue = due if due != 0 else 1
     else:
         card.due = due
     mw.col.update_card(card)
@@ -84,10 +84,11 @@ def update_card_due_ivl(card: Card, new_ivl: int):
     new_ivl = max(new_ivl, 1)
     card.ivl = new_ivl
     last_review_date = get_last_review_date(card)
+    new_due = last_review_date + new_ivl
     if card.odid:
-        card.odue = max(last_review_date + new_ivl, 1)
+        card.odue = new_due if new_due != 0 else 1
     else:
-        card.due = last_review_date + new_ivl
+        card.due = new_due
     return card
 
 
