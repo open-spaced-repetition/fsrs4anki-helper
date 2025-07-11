@@ -190,10 +190,14 @@ def visualize_schedule(did=None):
     if "conf" in deck:
         config = mw.col.decks.get_config(deck["conf"])
         retention = config["desiredRetention"]
-        fsrs_params = (
-            config["fsrsParams5"]
-            if "fsrsParams5" in config and len(config["fsrsParams5"]) > 0
-            else config["fsrsWeights"]
+        param_options = ["fsrsParams6", "fsrsParams5", "fsrsWeights"]
+        fsrs_params = next(
+            (
+                config[param]
+                for param in param_options
+                if param in config and len(config[param]) > 0
+            ),
+            None,
         )
         fsrs_params_string = ",".join(f"{x:.4f}" for x in fsrs_params)
         url += f"/?w={fsrs_params_string}&m={retention}"
