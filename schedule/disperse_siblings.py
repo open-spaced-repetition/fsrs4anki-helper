@@ -211,6 +211,7 @@ def disperse_siblings_backgroud(
                 break
 
     mw.col.update_cards(dispersed_cards)
+    mw.col.merge_undo_entries(undo_entry)
     return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} {t('disperse-cards-in')} {note_cnt} {t('disperse-notes')}"
 
 
