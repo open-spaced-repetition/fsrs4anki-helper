@@ -43,7 +43,7 @@
     "recommended-addons": "Recommended Add-ons",
 
     "step-stats": "Step Stats",
-    "step-stats-disabled": "If you would like to see your step stats, please enable them in <code>tools > show step stats.</code>",
+    "step-stats-disabled": "If you would like to see your step stats, please enable them in <code>Tools > FSRS Helper > Show step stats.</code>",
     "step-stats-subtitle": "Statistics for different first ratings during (re)learning steps",
     "again-then-good": "Again Then Good",
     "good-then-again": "Good Then Again",
