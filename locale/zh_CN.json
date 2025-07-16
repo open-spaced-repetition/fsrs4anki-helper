@@ -42,7 +42,7 @@
     "recommended-addons": "推荐插件",
 
     "step-stats": "初学/重学统计",
-    "step-stats-disabled": "If you would like to see your step stats, please enable them in <code>Tools > FSRS Helper > Show step stats.</code>",
+    "step-stats-disabled": "If you would like to see your (re)learning step statistics, you can enable them with <code>Tools > FSRS Helper > Show step stats.</code><br/><br/>This graph will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "step-stats-subtitle": "初学/重学阶段中不同首次评分的统计",
     "again-then-good": "重来后良好",
     "good-then-again": "良好后重来",

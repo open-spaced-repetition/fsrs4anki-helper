@@ -42,7 +42,7 @@
     "recommended-addons": "Greffons recommandés",
 
     "step-stats": "Statistiques des Étapes",
-    "step-stats-disabled": "If you would like to see your step stats, please enable them in <code>Tools > FSRS Helper > Show step stats.</code>",
+    "step-stats-disabled": "If you would like to see your (re)learning step statistics, you can enable them with <code>Tools > FSRS Helper > Show step stats.</code><br/><br/>This graph will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "step-stats-subtitle": "Statistiques pour différentes premières évaluations pendant les étapes de (ré)apprentissage",
     "again-then-good": "À Revoir puis Correct",
     "good-then-again": "Correct puis À Revoir",
