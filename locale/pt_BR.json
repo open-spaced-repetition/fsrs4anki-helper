@@ -42,6 +42,7 @@
     "recommended-addons": "Complementos recomendados",
 
     "step-stats": "Estatísticas dos Passos",
+    "step-stats-disabled": "If you would like to see your step stats, please enable them in <code>tools > show step stats.</code>",
     "step-stats-subtitle": "Estatísticas para diferentes classificações iniciais durante os passos de (re)aprendizado",
     "again-then-good": "Novamente Depois Bom",
     "good-then-again": "Bom Depois Novamente",
