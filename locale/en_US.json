@@ -7,7 +7,7 @@
     "disperse-after-reschedule": "Disperse siblings after rescheduling (breaks Load Balance)",
     "display-memory-state": "Display memory state after answer",
     "show-steps-stats": "Show step stats",
-    "steps-stats-warning": "This feature will slow down the speed at which of the old stats page loads if you have a lot of reviews. Are you sure you want to enable it?",
+    "steps-stats-warning": "This feature will slow down the speed at which the old stats page loads if you have a lot of reviews. Are you sure you want to enable it?",
     "reschedule-all-cards": "Reschedule all cards",
     "reschedule-recent-cards": {
       "one": "Reschedule cards reviewed in the last day",
