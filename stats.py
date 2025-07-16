@@ -93,7 +93,7 @@ def get_steps_stats(self: CollectionStats):
     config = Config()
     config.load()
     if not config.show_steps_stats:
-        return ""
+        return f"""<h1>{t("step-stats")}</h1><p>{t("step-stats-disabled")}</p>"""
     start, days, chunk = self.get_start_end_chunk()
     if days is not None:
         period_lim = "first_id > %d" % (

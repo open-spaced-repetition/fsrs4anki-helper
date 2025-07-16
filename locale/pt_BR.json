@@ -42,6 +42,7 @@
     "recommended-addons": "Complementos recomendados",
 
     "step-stats": "Estatísticas dos Passos",
+    "step-stats-disabled": "If you would like to see your (re)learning step statistics, you can enable them with <code>Tools > FSRS Helper > Show step stats.</code><br/><br/>This graph will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "step-stats-subtitle": "Estatísticas para diferentes classificações iniciais durante os passos de (re)aprendizado",
     "again-then-good": "Novamente Depois Bom",
     "good-then-again": "Bom Depois Novamente",
