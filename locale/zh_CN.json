@@ -42,6 +42,7 @@
     "recommended-addons": "推荐插件",
 
     "step-stats": "初学/重学统计",
+    "step-stats-disabled": "If you would like to see your step stats, please enable them in <code>tools > show step stats.</code>",
     "step-stats-subtitle": "初学/重学阶段中不同首次评分的统计",
     "again-then-good": "重来后良好",
     "good-then-again": "良好后重来",
