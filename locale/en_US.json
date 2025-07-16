@@ -6,7 +6,7 @@
     "auto-disperse-when-review": "Auto disperse siblings when review",
     "disperse-after-reschedule": "Disperse siblings after rescheduling (breaks Load Balance)",
     "display-memory-state": "Display memory state after answer",
-    "show-steps-stats": "Show steps stats",
+    "show-steps-stats": "Show step stats",
     "steps-stats-warning": "This feature would slow down the loading of the old stats page if you have a lot of reviews. Are you sure you want to enable it?",
     "reschedule-all-cards": "Reschedule all cards",
     "reschedule-recent-cards": {
@@ -42,7 +42,7 @@
     "easy-days": "Easy Days",
     "recommended-addons": "Recommended Add-ons",
 
-    "step-stats": "Steps Stats",
+    "step-stats": "Step Stats",
     "step-stats-disabled": "If you would like to see your step stats, please enable them in <code>tools > show step stats.</code>",
     "step-stats-subtitle": "Statistics for different first ratings during (re)learning steps",
     "again-then-good": "Again Then Good",
