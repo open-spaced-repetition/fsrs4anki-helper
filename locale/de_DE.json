@@ -7,7 +7,7 @@
     "disperse-after-reschedule": "Nach Umplanung Abstände zwischen Geschwisterkarten vergrößern (beeinträchtigt Glättung des täglichen Arbeitspensums)",
     "display-memory-state": "FSRS-Kartenstatus unterhalb der Antwort anzeigen",
     "show-steps-stats": "Lernstufen-Statistik anzeigen",
-    "steps-stats-warning": "Diese Funktion könnte das Laden der alten Statistikseite verlangsamen, wenn Sie viele Wiederholungen haben. Sind Sie sicher, dass Sie sie aktivieren möchten?",
+    "steps-stats-warning": "Bei umfangreichen Daten wird die alte Statistik-Seite langsamer laden. Trotzdem aktivieren?",
     "reschedule-all-cards": "Alle Karten umplanen",
     "reschedule-recent-cards": {
       "one": "Karten umplanen, die gestern wiederholt wurden",
