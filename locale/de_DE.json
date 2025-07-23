@@ -7,7 +7,7 @@
     "disperse-after-reschedule": "Nach Umplanung Abstände zwischen Geschwisterkarten vergrößern (beeinträchtigt Glättung des täglichen Arbeitspensums)",
     "display-memory-state": "FSRS-Kartenstatus unterhalb der Antwort anzeigen",
     "show-steps-stats": "Lernstufen-Statistik anzeigen",
-    "steps-stats-warning": "Bei umfangreichen Daten wird die alte Statistik-Seite langsamer laden. Trotzdem aktivieren?",
+    "steps-stats-warning": "Bei umfangreichen Daten wird die alte Statistik-Seite dann langsamer laden. Trotzdem aktivieren?",
     "reschedule-all-cards": "Alle Karten umplanen",
     "reschedule-recent-cards": {
       "one": "Karten umplanen, die gestern wiederholt wurden",
@@ -43,7 +43,7 @@
     "recommended-addons": "Empfohlene Erweiterungen",
 
     "step-stats": "Lernstufen",
-    "step-stats-disabled": "Die Anzeige der Lernstufen-Statistik kann unter <code>Extras → FSRS-Helfer → Lernstufen-Statistik anzeigen</code> aktiviert werden. Bei umfangreichen Daten wird die Statistik-Seite langsamer laden. Aktivieren Sie diese Funktion nur bei Bedarf.",
+    "step-stats-disabled": "Die Anzeige der Lernstufen-Statistik kann unter „<code>Extras→FSRS-Helfer→Lernstufen-Statistik anzeigen</code>“ aktiviert werden. Bei umfangreichen Daten wird die Statistik-Seite dann langsamer laden. Aktivieren Sie diese Funktion nur bei Bedarf.",
     "step-stats-subtitle": "Aufgeschlüsselt nach der jeweils ersten Bewertung",
     "again-then-good": "„Nochmal“, dann „Gut“",
     "good-then-again": "„Gut“, dann „Nochmal“",
