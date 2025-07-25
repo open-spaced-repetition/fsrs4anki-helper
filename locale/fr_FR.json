@@ -123,6 +123,7 @@
     "postpone": "Reporter",
     "postpone-result-text": "%{count} cartes reportées en %{seconds} secondes.",
     "postpone-retention-change": "<br>Rétention moyenne ciblée des cartes reportées: %{prev_retention} -> %{new_retention}",
+    "postpone-reach-max-ivl": "<br>Failed to postpone %{reach_max_ivl_cnt} cards due to maximum interval.",
 
     "remedy-start-date": "Sélectionnez la Date de Départ",
     "remedy-end-date": "Sélectionnez la Date de Fin",

@@ -123,6 +123,7 @@
     "postpone": "Αναβολή",
     "postpone-result-text": "%{count} κάρτες αναβλήθηκαν σε %{seconds} δευτερόλεπτα.",
     "postpone-retention-change": "<br>Μέσος στόχος ανάκλησης των αναβληθέντων καρτών: %{prev_retention} -> %{new_retention}",
+    "postpone-reach-max-ivl": "<br>Failed to postpone %{reach_max_ivl_cnt} cards due to maximum interval.",
 
     "remedy-start-date": "Επιλέξτε την ημερομηνία έναρξης",
     "remedy-end-date": "Επιλέξτε την ημερομηνία λήξης",

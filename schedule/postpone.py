@@ -105,6 +105,7 @@ def postpone(did):
             return
 
     cnt = 0
+    reach_max_ivl_cnt = 0
     new_target_rs = []
     prev_target_rs = []
     postponed_cards = []
@@ -119,21 +120,27 @@ def postpone(did):
         last_review = get_last_review_date(card)
         elapsed_days = mw.col.sched.today - last_review
         delay = elapsed_days - ivl
-        new_ivl = min(
-            max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay), max_ivl
-        )
+        new_ivl = max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay)
+        if new_ivl > max_ivl:
+            reach_max_ivl_cnt += 1
+            new_ivl = max_ivl
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "postpone")
         postponed_cards.append(card)
         prev_target_rs.append(power_forgetting_curve(ivl, stability, -decay))
         new_target_rs.append(power_forgetting_curve(new_ivl, stability, -decay))
         cnt += 1
-
+    cnt -= reach_max_ivl_cnt
     mw.col.update_cards(postponed_cards)
     mw.col.merge_undo_entries(undo_entry)
     result_text = t(
         "postpone-result-text", count=cnt, seconds=f"{(time.time() - start_time):.2f}"
     )
+    if reach_max_ivl_cnt > 0:
+        result_text += t(
+            "postpone-reach-max-ivl",
+            reach_max_ivl_cnt=reach_max_ivl_cnt,
+        )
     if len(prev_target_rs) > 0 and len(new_target_rs) > 0:
         result_text += t(
             "postpone-retention-change",
