@@ -123,6 +123,7 @@
     "postpone": "推迟",
     "postpone-result-text": "在 %{seconds} 秒内推迟了 %{count} 张卡片。",
     "postpone-retention-change": "<br>推迟卡片的平均目标保留率：%{prev_retention} -> %{new_retention}",
+    "postpone-reach-max-ivl": "<br>由于最大间隔，无法推迟 %{reach_max_ivl_cnt} 张卡片。",
 
     "remedy-start-date": "选择开始日期",
     "remedy-end-date": "选择结束日期",

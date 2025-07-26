@@ -124,6 +124,7 @@
     "postpone": "Nach hinten verlegen",
     "postpone-result-text": "%{count} Karten wurden in %{seconds} Sekunden nach hinten verlegt.",
     "postpone-retention-change": "<br>Die durchschnittliche Erinnerungsquote der betroffenen Karten lag zuvor bei %{prev_retention} und liegt jetzt bei %{new_retention}.",
+    "postpone-reach-max-ivl": "<br>Failed to postpone %{reach_max_ivl_cnt} cards due to maximum interval.",
 
     "remedy-start-date": "Anfangsdatum",
     "remedy-end-date": "Enddatum",
