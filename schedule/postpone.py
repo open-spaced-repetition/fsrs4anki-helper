@@ -123,7 +123,7 @@ def postpone(did):
         new_ivl = min(
             max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay), max_ivl
         )
-        if new_ivl <= ivl:
+        if new_ivl <= ivl and new_ivl = max_ivl:
             reach_max_ivl_cnt += 1
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "postpone")
