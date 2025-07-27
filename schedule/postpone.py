@@ -119,7 +119,7 @@ def postpone(did):
         random.seed(cid + ivl)
         last_review = get_last_review_date(card)
         elapsed_days = mw.col.sched.today - last_review
-        delay = elapsed_days - ivl
+        delay = max(elapsed_days - ivl, 0)
         new_ivl = min(
             max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay), max_ivl
         )
