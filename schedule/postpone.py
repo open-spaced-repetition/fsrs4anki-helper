@@ -120,10 +120,11 @@ def postpone(did):
         last_review = get_last_review_date(card)
         elapsed_days = mw.col.sched.today - last_review
         delay = elapsed_days - ivl
-        new_ivl = max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay)
-        if new_ivl > max_ivl:
+        new_ivl = min(
+            max(1, math.ceil(ivl * (1.05 + 0.05 * random.random())) + delay), max_ivl
+        )
+        if new_ivl <= ivl:
             reach_max_ivl_cnt += 1
-            new_ivl = max_ivl
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "postpone")
         postponed_cards.append(card)
