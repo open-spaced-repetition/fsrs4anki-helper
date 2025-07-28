@@ -124,7 +124,7 @@
     "postpone": "Postpone",
     "postpone-result-text": "%{count} cards postponed in %{seconds} seconds.",
     "postpone-retention-change": "<br>Mean target retention of postponed cards: %{prev_retention} -> %{new_retention}",
-    "postpone-reach-max-ivl": "<br>Failed to postpone %{reach_max_ivl_cnt} cards due to maximum interval.",
+    "postpone-reach-max-ivl": "<br>Failed to postpone %{reach_max_ivl_cnt} cards because they had already reached the configured maximum interval.",
 
     "remedy-start-date": "Select the Start Date",
     "remedy-end-date": "Select the End Date",
