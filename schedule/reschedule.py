@@ -155,7 +155,7 @@ class FSRS:
         last_review: int,
     ):
         weights = [
-            1 if r == 0 else (1 / (r**2)) * (1 / delta_t)
+            1 if r == 0 else (1 / (r**2.15)) * (1 / (delta_t**3))
             for r, delta_t in zip(review_cnts, possible_intervals)
         ]
 
