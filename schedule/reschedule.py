@@ -428,7 +428,6 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
         fsrs.set_card(card)
         fsrs.set_fuzz_factor(cid, card.reps)
         decay = get_decay(card)
-        new_ivl = fsrs.fuzzed_next_interval(s, -decay)
 
         if fsrs.reschedule_threshold > 0 and not (
             fsrs.apply_easy_days or auto_reschedule
@@ -450,6 +449,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
                 else:
                     return None, False
 
+        new_ivl = fsrs.fuzzed_next_interval(s, -decay)
         due_before = card.odue if card.odid else card.due
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "reschedule")
