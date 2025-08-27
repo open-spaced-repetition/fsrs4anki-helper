@@ -45,14 +45,18 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     for cid, nid, did, stability, due in siblings:
         if nid not in nid_siblings_dict:
             nid_siblings_dict[nid] = []
+        dr_deck = mw.col.decks.get(did)["desiredRetention"]
+        dr_preset = mw.col.decks.config_dict_for_deck_id(did)["desiredRetention"]
+        dr = dr_deck / 100 if dr_deck is not None else dr_preset / 100
+        max_ivl = mw.col.decks.config_dict_for_deck_id(did)["rev"]["maxIvl"]
         nid_siblings_dict[nid].append(
             (
                 cid,
                 did,
                 stability,
                 due,
-                mw.col.decks.config_dict_for_deck_id(did)["desiredRetention"],
-                mw.col.decks.config_dict_for_deck_id(did)["rev"]["maxIvl"],
+                dr,
+                max_ivl,
             )
         )
     return nid_siblings_dict
