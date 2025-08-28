@@ -352,14 +352,15 @@ def reschedule_background(
     # x[0]: cid
     # x[1]: did
     # x[2]: nid
-    # x[3]: desired retention
-    # x[4]: max interval
+    # x[3]: preset desired retention
+    # x[4]: deck desired retention
+    # x[5]: max interval
     cards = map(
         lambda x: (
             x
             + [
                 fsrs.DM.config_dict_for_deck_id(x[1])["desiredRetention"],
-                fsrs.DM.get(x[1])["desiredRetention"],
+                fsrs.DM.get(x[1]).get("desiredRetention"),
                 fsrs.DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
             ]
         ),
