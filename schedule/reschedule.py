@@ -352,15 +352,17 @@ def reschedule_background(
     # x[0]: cid
     # x[1]: did
     # x[2]: nid
-    # x[3]: preset desired retention
-    # x[4]: deck desired retention
-    # x[5]: max interval
+    # x[3]: desired retention
+    # x[4]: max interval
     cards = map(
         lambda x: (
             x
             + [
-                fsrs.DM.config_dict_for_deck_id(x[1])["desiredRetention"],
-                fsrs.DM.get(x[1]).get("desiredRetention"),
+                (
+                    fsrs.DM.get(x[1]).get("desiredRetention") / 100
+                    if fsrs.DM.get(x[1]).get("desiredRetention") is not None
+                    else fsrs.DM.config_dict_for_deck_id(x[1])["desiredRetention"]
+                ),
                 fsrs.DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
             ]
         ),
@@ -375,17 +377,11 @@ def reschedule_background(
         cid,
         did,
         nid,
-        preset_desired_retention,
-        deck_desired_retention,
+        desired_retention,
         maximum_interval,
     ) in cards:
         if cancelled:
             break
-        desired_retention = (
-            deck_desired_retention / 100
-            if deck_desired_retention is not None
-            else preset_desired_retention
-        )
         fsrs.desired_retention = desired_retention
         fsrs.maximum_interval = maximum_interval
         fsrs.did = did

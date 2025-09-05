@@ -84,7 +84,11 @@ def get_siblings_when_review(card: Card):
     siblings = map(
         lambda x: x
         + [
-            mw.col.decks.config_dict_for_deck_id(x[1]).get("desiredRetention"),
+            (
+                mw.col.decks.get(x[1]).get("desiredRetention") / 100
+                if mw.col.decks.get(x[1]).get("desiredRetention") is not None
+                else mw.col.decks.config_dict_for_deck_id(x[1])["desiredRetention"]
+            ),
             mw.col.decks.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
         ],
         siblings,
