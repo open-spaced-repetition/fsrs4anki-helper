@@ -47,7 +47,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
             nid_siblings_dict[nid] = []
         dr_deck = mw.col.decks.get(did).get("desiredRetention")
         dr_preset = mw.col.decks.config_dict_for_deck_id(did)["desiredRetention"]
-        dr = dr_deck / 100 if dr_deck is not None else dr_preset / 100
+        dr = dr_deck / 100 if dr_deck is not None else dr_preset
         max_ivl = mw.col.decks.config_dict_for_deck_id(did)["rev"]["maxIvl"]
         nid_siblings_dict[nid].append(
             (
