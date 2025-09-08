@@ -358,7 +358,11 @@ def reschedule_background(
         lambda x: (
             x
             + [
-                fsrs.DM.config_dict_for_deck_id(x[1])["desiredRetention"],
+                (
+                    fsrs.DM.get(x[1]).get("desiredRetention") / 100
+                    if fsrs.DM.get(x[1]).get("desiredRetention") is not None
+                    else fsrs.DM.config_dict_for_deck_id(x[1])["desiredRetention"]
+                ),
                 fsrs.DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
             ]
         ),
@@ -369,7 +373,13 @@ def reschedule_background(
     rescheduled_cards = []
     filtered_nids = set()
     undo_entry = mw.col.add_custom_undo_entry(t("reschedule"))
-    for cid, did, nid, desired_retention, maximum_interval in cards:
+    for (
+        cid,
+        did,
+        nid,
+        desired_retention,
+        maximum_interval,
+    ) in cards:
         if cancelled:
             break
         fsrs.desired_retention = desired_retention
