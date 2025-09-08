@@ -1,4 +1,5 @@
 import re
+from anki.decks import DeckManager
 from aqt.utils import tooltip, getText, showWarning, showInfo, askUser
 from collections import OrderedDict, defaultdict
 from typing import List, Dict, Tuple
@@ -254,3 +255,11 @@ def format_time(x, pos=None):
 
 def get_decay(card: Card):
     return getattr(card, "decay", 0.5) or 0.5
+
+
+def get_dr(deck_manager: DeckManager, did: int):
+    return (
+        deck_manager.get(did).get("desiredRetention") / 100
+        if deck_manager.get(did).get("desiredRetention") is not None
+        else deck_manager.config_dict_for_deck_id(did)["desiredRetention"]
+    )

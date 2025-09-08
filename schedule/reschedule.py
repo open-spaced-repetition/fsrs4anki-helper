@@ -358,11 +358,7 @@ def reschedule_background(
         lambda x: (
             x
             + [
-                (
-                    fsrs.DM.get(x[1]).get("desiredRetention") / 100
-                    if fsrs.DM.get(x[1]).get("desiredRetention") is not None
-                    else fsrs.DM.config_dict_for_deck_id(x[1])["desiredRetention"]
-                ),
+                get_dr(fsrs.DM, x[1]),
                 fsrs.DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
             ]
         ),
