@@ -5,6 +5,8 @@ from aqt.qt import QAction, QDesktopServices, QUrl
 from aqt.utils import openLink, askUser
 from typing import Callable
 
+from utils import get_dr
+
 from .dsr_state import init_dsr_status_hook
 from .sync_hook import init_sync_hook
 from .schedule.reschedule import reschedule
@@ -189,7 +191,7 @@ def visualize_schedule(did=None):
     deck = mw.col.decks.current()
     if "conf" in deck:
         config = mw.col.decks.get_config(deck["conf"])
-        retention = config["desiredRetention"]
+        retention = get_dr(mw.col.decks, deck["id"])
         param_options = ["fsrsParams6", "fsrsParams5", "fsrsWeights"]
         fsrs_params = next(
             (
