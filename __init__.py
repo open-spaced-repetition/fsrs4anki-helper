@@ -5,7 +5,7 @@ from aqt.qt import QAction, QDesktopServices, QUrl
 from aqt.utils import openLink, askUser
 from typing import Callable
 
-from utils import get_dr
+from .utils import get_dr
 
 from .dsr_state import init_dsr_status_hook
 from .sync_hook import init_sync_hook
@@ -199,7 +199,7 @@ def visualize_schedule(did=None):
                 for param in param_options
                 if param in config and len(config[param]) > 0
             ),
-            None,
+            [],
         )
         fsrs_params_string = ",".join(f"{x:.4f}" for x in fsrs_params)
         url += f"/?w={fsrs_params_string}&m={retention}"
