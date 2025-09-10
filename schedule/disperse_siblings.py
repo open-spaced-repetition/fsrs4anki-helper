@@ -45,9 +45,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     for cid, nid, did, stability, due in siblings:
         if nid not in nid_siblings_dict:
             nid_siblings_dict[nid] = []
-        dr_deck = mw.col.decks.get(did).get("desiredRetention")
-        dr_preset = mw.col.decks.config_dict_for_deck_id(did)["desiredRetention"]
-        dr = dr_deck / 100 if dr_deck is not None else dr_preset
+        dr = get_dr(mw.col.decks, did)
         max_ivl = mw.col.decks.config_dict_for_deck_id(did)["rev"]["maxIvl"]
         nid_siblings_dict[nid].append(
             (
@@ -84,11 +82,7 @@ def get_siblings_when_review(card: Card):
     siblings = map(
         lambda x: x
         + [
-            (
-                mw.col.decks.get(x[1]).get("desiredRetention") / 100
-                if mw.col.decks.get(x[1]).get("desiredRetention") is not None
-                else mw.col.decks.config_dict_for_deck_id(x[1])["desiredRetention"]
-            ),
+            get_dr(mw.col.decks, x[1]),
             mw.col.decks.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
         ],
         siblings,
