@@ -1,17 +1,12 @@
 from aqt import (
-    QButtonGroup,
-    QDate,
     QDateEdit,
     QDateTime,
     QHBoxLayout,
     QLabel,
     QPushButton,
-    QRadioButton,
     QVBoxLayout,
     QWidget,
-    QSlider,
 )
-from aqt.qt import Qt
 from ..utils import *
 from ..configuration import Config
 from .reschedule import reschedule

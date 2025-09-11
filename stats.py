@@ -201,16 +201,16 @@ def get_steps_stats(self: CollectionStats):
             <tr>
                 {state_cell}
                 <td class="trl"><span class="{style}"><b>{t(style)}</b></span></td>
-                <td class="trr">{stats['r1']}</td>
-                <td class="trr">{format_time(stats['delay_q1'])}</td>
-                <td class="trr">{stats['r2']}</td>
-                <td class="trr">{format_time(stats['delay_q2'])}</td>
-                <td class="trr">{stats['r3']}</td>
-                <td class="trr">{format_time(stats['delay_q3'])}</td>
-                <td class="trr">{stats['r4']}</td>
-                <td class="trr">{stats['retention']}</td>
-                <td class="trr">{format_time(results['stability'][rating])}</td>
-                <td class="trr">{stats['count']}</td>
+                <td class="trr">{stats["r1"]}</td>
+                <td class="trr">{format_time(stats["delay_q1"])}</td>
+                <td class="trr">{stats["r2"]}</td>
+                <td class="trr">{format_time(stats["delay_q2"])}</td>
+                <td class="trr">{stats["r3"]}</td>
+                <td class="trr">{format_time(stats["delay_q3"])}</td>
+                <td class="trr">{stats["r4"]}</td>
+                <td class="trr">{stats["retention"]}</td>
+                <td class="trr">{format_time(results["stability"][rating])}</td>
+                <td class="trr">{stats["count"]}</td>
             </tr>
             """
 
@@ -242,8 +242,8 @@ def get_steps_stats(self: CollectionStats):
         const learningStepRow = document.querySelector('#learning-steps');
         const relearningStepRow = document.querySelector('#relearning-steps');
         const cutoff = 86400 / 2;
-        const stability = {results['stability']};
-        const stats = {results['stats']};
+        const stability = {results["stability"]};
+        const stats = {results["stats"]};
 
         function formatTime (seconds) {{
             const h = Math.round(seconds / 3600);
@@ -343,7 +343,7 @@ def get_fsrs_stats(self: CollectionStats):
     ) = retention_stability(lim)
     i = []
     _line_now(i, t("studied-cards"), f"{card_cnt} cards")
-    _line_now(i, t("total-review-time"), f"{time_sum/3600:.1f} hours")
+    _line_now(i, t("total-review-time"), f"{time_sum / 3600:.1f} hours")
     if time_sum > 0:
         _line_now(
             i,
@@ -545,27 +545,27 @@ def get_true_retention(self: CollectionStats):
     true_retention_part += f"""
         <table style="border-collapse: collapse;" cellspacing="0" cellpadding="2">
             <tr>
-                <td class="trl" rowspan=3><b>{t('past')}</b></td>
-                <td class="trc" colspan=9><b>{t('reviews-on-cards')}</b></td>
-                <td class="trc" colspan=2 valign=middle><b>{t('cards')}</b></td>
+                <td class="trl" rowspan=3><b>{t("past")}</b></td>
+                <td class="trc" colspan=9><b>{t("reviews-on-cards")}</b></td>
+                <td class="trc" colspan=2 valign=middle><b>{t("cards")}</b></td>
             </tr>
             <tr>
-                <td class="trc" colspan=3><span class="young"><b>{t('young-annotated', mature_ivl=config.mature_ivl)}</b></span></td>
-                <td class="trc" colspan=3><span class="mature"><b>{t('mature-annotated', mature_ivl=config.mature_ivl)}</b></span></td>
-                <td class="trc" colspan=3><span class="total"><b>{t('total')}</b></span></td>
-                <td class="trc" rowspan=2><span class="young"><b>{t('learned')}</b></span></td>
-                <td class="trc" rowspan=2><span class="relearn"><b>{t('relearned')}</b></span></td>
+                <td class="trc" colspan=3><span class="young"><b>{t("young-annotated", mature_ivl=config.mature_ivl)}</b></span></td>
+                <td class="trc" colspan=3><span class="mature"><b>{t("mature-annotated", mature_ivl=config.mature_ivl)}</b></span></td>
+                <td class="trc" colspan=3><span class="total"><b>{t("total")}</b></span></td>
+                <td class="trc" rowspan=2><span class="young"><b>{t("learned")}</b></span></td>
+                <td class="trc" rowspan=2><span class="relearn"><b>{t("relearned")}</b></span></td>
             </tr>
             <tr>
-                <td class="trc"><span class="young">{t('pass')}</span></td>
-                <td class="trc"><span class="young">{t('fail')}</span></td>
-                <td class="trc"><span class="young">{t('retention')}</span></td>
-                <td class="trc"><span class="mature">{t('pass')}</span></td>
-                <td class="trc"><span class="mature">{t('fail')}</span></td>
-                <td class="trc"><span class="mature">{t('retention')}</span></td>
-                <td class="trc"><span class="total">{t('pass')}</span></td>
-                <td class="trc"><span class="total">{t('fail')}</span></td>
-                <td class="trc"><span class="total">{t('retention')}</span></td>
+                <td class="trc"><span class="young">{t("pass")}</span></td>
+                <td class="trc"><span class="young">{t("fail")}</span></td>
+                <td class="trc"><span class="young">{t("retention")}</span></td>
+                <td class="trc"><span class="mature">{t("pass")}</span></td>
+                <td class="trc"><span class="mature">{t("fail")}</span></td>
+                <td class="trc"><span class="mature">{t("retention")}</span></td>
+                <td class="trc"><span class="total">{t("pass")}</span></td>
+                <td class="trc"><span class="total">{t("fail")}</span></td>
+                <td class="trc"><span class="total">{t("retention")}</span></td>
             </tr>"""
     true_retention_part += stats_row(t("day"), pastDay)
     true_retention_part += stats_row(t("yesterday"), pastYesterday)

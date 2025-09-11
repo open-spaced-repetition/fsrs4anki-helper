@@ -209,6 +209,7 @@ def visualize_schedule(did=None):
 
 menu_visualize = build_action(visualize_schedule, t("visualize-schedule"))
 
+
 def export_dataset(did=None):
     addon = mw.addonManager.addonFromModule(__name__)
     user_files = Path(mw.addonManager.addonsFolder(addon)) / "user_files"
