@@ -1,8 +1,10 @@
 import os
+from ..i18n import t
 from pathlib import Path
 from ..utils import *
 from anki.utils import ids2str
 from aqt import QDateTime, QWidget, QVBoxLayout, QLabel, QPushButton, QDateEdit
+from aqt.utils import tooltip, showInfo
 
 
 class RemedyDateRangeWidget(QWidget):
