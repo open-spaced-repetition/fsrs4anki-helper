@@ -180,14 +180,6 @@ I'm Jarrett Ye, a diehard fan of spaced repetition. I used Anki during my high s
 
 If you like FSRS Helper, [please Rate this!👍](https://ankiweb.net/shared/review/759844606) Your support will allow more people to enjoy this fantastic tool and improve their learning experience!
 
-*A kind request*: Writing, supporting, and maintaining FSRS takes considerable time and effort. If this tool has become a valuable asset in your studies, please consider showing your appreciation by clicking the button below to make a contribution on Ko-fi. Every bit of support is greatly appreciated and will go a long way in helping me maintain and improve FSRS over time!
-
-<a href='https://ko-fi.com/X8X6LQZM4' target='_blank'><img height='32' width="127"
-    style='border:0px;height:32px;' src='https://storage.ko-fi.com/cdn/kofi1.png?v=6' border='0'
-    alt='Buy Me a Coffee at ko-fi.com' /></a>
-
-Or support me in GitHub: [Sponsor @L-M-Sherlock on GitHub Sponsors](https://github.com/sponsors/L-M-Sherlock)
-
 # Acknowledgements
 
 I referred to the following projects while developing FSRS Helper:

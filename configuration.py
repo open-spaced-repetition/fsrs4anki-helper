@@ -14,7 +14,6 @@ DEBUG_NOTIFY = "debug_notify"
 FSRS_STATS = "fsrs_stats"
 DISPLAY_MEMORY_STATE = "display_memory_state"
 HAS_RATED = "has_rated"
-HAS_SPONSORED = "has_sponsored"
 SHOW_STEPS_STATS = "show_steps_stats"
 
 
@@ -143,15 +142,6 @@ class Config:
     @has_rated.setter
     def has_rated(self, value):
         self.data[HAS_RATED] = value
-        self.save()
-
-    @property
-    def has_sponsored(self):
-        return self.data[HAS_SPONSORED]
-
-    @has_sponsored.setter
-    def has_sponsored(self, value):
-        self.data[HAS_SPONSORED] = value
         self.save()
 
     @property

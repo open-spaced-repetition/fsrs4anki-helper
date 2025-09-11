@@ -209,15 +209,6 @@ def visualize_schedule(did=None):
 
 menu_visualize = build_action(visualize_schedule, t("visualize-schedule"))
 
-
-def sponsor(did=None):
-    openLink("https://github.com/sponsors/L-M-Sherlock")
-    config.has_sponsored = True
-
-
-menu_sponsor = build_action(sponsor, t("sponsor-author"))
-
-
 def export_dataset(did=None):
     addon = mw.addonManager.addonFromModule(__name__)
     user_files = Path(mw.addonManager.addonsFolder(addon)) / "user_files"
@@ -277,8 +268,6 @@ menu_for_helper.addAction(menu_contact)
 menu_for_helper.addAction(menu_visualize)
 if not config.has_rated:
     menu_for_helper.addAction(menu_rate)
-if not config.has_sponsored:
-    menu_for_helper.addAction(menu_sponsor)
 menu_for_helper.addAction(menu_export_dataset)
 menu_for_helper.addSeparator()
 menu_for_recommended_addons = menu_for_helper.addMenu(t("recommended-addons"))
