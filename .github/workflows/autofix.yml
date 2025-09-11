@@ -17,11 +17,10 @@ jobs:
       - uses: astral-sh/setup-uv@557e51de59eb14aaaba2ed9621916900a91d50c6
         with:
           version: "0.4.20"
-      - run: uv add ruff
       # Fix lint errors
-      - run: uv run ruff check --fix-only .
+      - run: uvx ruff check --fix-only .
       # Format code
-      - run: uv run ruff format .
+      - run: uvx ruff format .
 
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
       
