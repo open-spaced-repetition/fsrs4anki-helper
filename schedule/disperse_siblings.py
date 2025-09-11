@@ -1,6 +1,6 @@
 from ..utils import *
 from ..configuration import Config
-from anki.utils import ids2str, html_to_text_line
+from anki.utils import ids2str
 
 
 def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
@@ -214,7 +214,7 @@ def disperse_siblings_backgroud(
 
     mw.col.update_cards(dispersed_cards)
     mw.col.merge_undo_entries(undo_entry)
-    return f"{text_from_reschedule +', ' if text_from_reschedule != '' else ''}{card_cnt} {t('disperse-cards-in')} {note_cnt} {t('disperse-notes')}"
+    return f"{text_from_reschedule + ', ' if text_from_reschedule != '' else ''}{card_cnt} {t('disperse-cards-in')} {note_cnt} {t('disperse-notes')}"
 
 
 def disperse_siblings_when_review(reviewer, card: Card, ease):

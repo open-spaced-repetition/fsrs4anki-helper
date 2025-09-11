@@ -1,7 +1,6 @@
 from .python_i18n import i18n
 import os.path
 from pathlib import Path
-from aqt.utils import tooltip
 from aqt import mw
 from aqt.utils import tr
 

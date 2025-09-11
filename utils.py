@@ -1,8 +1,6 @@
-import re
 from anki.decks import DeckManager
-from aqt.utils import tooltip, getText, showWarning, showInfo, askUser
-from collections import OrderedDict, defaultdict
-from typing import List, Dict, Tuple
+from aqt.utils import askUser
+from typing import List
 from anki.stats_pb2 import CardStatsResponse
 from anki.cards import Card
 from anki.stats import (
@@ -10,22 +8,12 @@ from anki.stats import (
     REVLOG_REV,
     REVLOG_RELRN,
     REVLOG_CRAM,
-    REVLOG_RESCHED,
-    CARD_TYPE_REV,
-    QUEUE_TYPE_SUSPENDED,
-    QUEUE_TYPE_NEW,
-    QUEUE_TYPE_LRN,
-    QUEUE_TYPE_REV,
-    QUEUE_TYPE_DAY_LEARN_RELEARN,
-    QUEUE_TYPE_PREVIEW,
 )
 from aqt import mw
 import json
 import math
-import random
 import time
 from datetime import date, datetime, timedelta
-from .i18n import t
 
 
 def RepresentsInt(s):
@@ -246,11 +234,11 @@ def format_time(x, pos=None):
     if x < 60:
         return f"{x:.0f}s"
     elif x < 3600:
-        return f"{x/60:.2f}m"
+        return f"{x / 60:.2f}m"
     elif x < 86400:
-        return f"{x/3600:.2f}h"
+        return f"{x / 3600:.2f}h"
     else:
-        return f"{x/86400:.2f}d"
+        return f"{x / 86400:.2f}d"
 
 
 def get_decay(card: Card):

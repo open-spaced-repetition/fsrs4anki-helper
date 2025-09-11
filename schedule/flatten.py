@@ -100,7 +100,7 @@ def flatten_background(did, desired_flatten_limit):
         {true_due} AS true_due,
         json_extract(data, '$.s') AS stability
     FROM cards
-    WHERE true_due < { today }
+    WHERE true_due < {today}
     AND data != '' 
     AND json_extract(data, '$.s') IS NOT NULL
     AND queue = {QUEUE_TYPE_REV}
@@ -119,7 +119,7 @@ def flatten_background(did, desired_flatten_limit):
             for day, cnt in mw.col.db.all(
                 f"""SELECT {true_due} AS true_due, count() 
                         FROM cards 
-                        WHERE true_due >= { today }
+                        WHERE true_due >= {today}
                         AND queue = {QUEUE_TYPE_REV}
                         {"AND did IN %s" % did_list if did is not None else ""}
                         GROUP BY {true_due}"""
