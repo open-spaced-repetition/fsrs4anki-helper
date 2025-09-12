@@ -3,6 +3,8 @@ from typing import Optional, Sequence
 from anki.cards import Card
 from anki.collection import BrowserColumns
 from aqt.browser import Browser, CellRow, Column, ItemId
+from aqt.utils import tooltip
+from ..i18n import t
 from ..utils import *
 
 
