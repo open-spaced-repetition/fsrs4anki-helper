@@ -1,7 +1,12 @@
-from ..i18n import t
-from ..utils import *
+import random
+import time
+import math
 from anki.decks import DeckManager
 from anki.utils import ids2str
+from anki.stats import QUEUE_TYPE_REV
+from aqt.utils import tooltip, showWarning, getText
+from ..i18n import t
+from ..utils import *
 
 
 def get_desired_postpone_cnt_with_response(safe_cnt, did):

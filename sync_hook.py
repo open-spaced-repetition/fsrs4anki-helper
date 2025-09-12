@@ -1,9 +1,11 @@
 from aqt.gui_hooks import sync_will_start, sync_did_finish
+from anki.utils import ids2str
+from typing import List
 from .schedule.reschedule import reschedule
 from .schedule.disperse_siblings import disperse_siblings
 from .configuration import Config
 from .utils import *
-from anki.utils import ids2str
+from .i18n import t
 
 
 def create_comparelog(local_rids: List[int]) -> None:
