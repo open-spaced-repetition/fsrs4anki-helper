@@ -7,6 +7,7 @@ from .configuration import Config
 from .utils import *
 from .i18n import t
 
+
 def create_comparelog(local_rids: List[int]) -> None:
     local_rids.clear()
     local_rids.extend([id for id in mw.col.db.list("SELECT id FROM revlog")])

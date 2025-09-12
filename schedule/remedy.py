@@ -6,6 +6,7 @@ from aqt.utils import tooltip, showInfo
 from ..i18n import t
 from ..utils import *
 
+
 class RemedyDateRangeWidget(QWidget):
     def __init__(self):
         super().__init__()

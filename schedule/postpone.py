@@ -8,6 +8,7 @@ from aqt.utils import tooltip, showWarning, getText
 from ..i18n import t
 from ..utils import *
 
+
 def get_desired_postpone_cnt_with_response(safe_cnt, did):
     inquire_text = t("postpone-inquire-text")
     notification_text = t(
