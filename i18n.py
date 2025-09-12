@@ -1,5 +1,5 @@
-from .python_i18n import i18n
 import os.path
+from .python_i18n import i18n
 from pathlib import Path
 from aqt import mw
 from aqt.utils import tr

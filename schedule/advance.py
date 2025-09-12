@@ -1,7 +1,10 @@
-from ..utils import *
-from ..i18n import t
+import time
 from anki.decks import DeckManager
 from anki.utils import ids2str
+from aqt.utils import tooltip, showWarning, getText
+from anki.stats import QUEUE_TYPE_REV
+from ..i18n import t
+from ..utils import *
 
 
 def get_desired_advance_cnt_with_response(safe_cnt, did):

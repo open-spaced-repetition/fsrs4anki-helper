@@ -1,3 +1,6 @@
+import json
+import math
+import time
 from anki.decks import DeckManager
 from aqt.utils import askUser
 from typing import List
@@ -10,9 +13,6 @@ from anki.stats import (
     REVLOG_CRAM,
 )
 from aqt import mw
-import json
-import math
-import time
 from datetime import date, datetime, timedelta
 
 

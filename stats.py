@@ -1,8 +1,9 @@
+from aqt.utils import tooltip
 from anki.stats import CollectionStats
 from .configuration import Config
-from .utils import *
 from .steps import steps_stats
 from .i18n import t
+from .utils import *
 
 
 def _line_now(i, a, b, bold=True):

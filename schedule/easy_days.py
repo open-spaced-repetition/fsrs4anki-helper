@@ -7,10 +7,12 @@ from aqt import (
     QVBoxLayout,
     QWidget,
 )
-from ..utils import *
-from ..configuration import Config
-from .reschedule import reschedule
 from anki.utils import ids2str
+from aqt.utils import tooltip
+from .reschedule import reschedule
+from ..configuration import Config
+from ..i18n import t
+from ..utils import *
 
 
 def easy_days(did):
