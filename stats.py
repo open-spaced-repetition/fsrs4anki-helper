@@ -281,7 +281,7 @@ def get_steps_stats(self: CollectionStats):
             if (stats[2]['count'] >= 100) candidates.push(stability[2] * 2 - stability[1]);
             if (stats[3]['count'] >= 100) candidates.push(stability[3]);
             if (stats[4]['count'] >= 100) candidates.push(stability[4]);
-            const learningStep2 = candidates.length > 0 ? calculateStep(Math.min(...candidates), factor) : '';
+            const learningStep2 = candidates.length > 0 ? calculateStep(Math.max(Math.min(...candidates), stability[1]), factor) : '';
 
             if (learningStep1Count < 100) {{
                 learningStepRow.innerText = '{t("insufficient-learn-step-data")}';
