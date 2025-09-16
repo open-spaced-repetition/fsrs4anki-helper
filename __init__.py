@@ -133,6 +133,15 @@ menu_show_steps_stats = checkable(
 )
 
 
+def set_show_true_retention(checked, _):
+    config.show_true_retention = checked
+
+
+menu_show_true_retention = checkable(
+    title=t("show-true-retention"), on_click=set_show_true_retention
+)
+
+
 def reschedule_recent(did):
     reschedule(did, recent=True)
 
@@ -249,6 +258,7 @@ menu_for_helper.addAction(menu_auto_disperse_after_sync)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_display_memory_state)
 menu_for_helper.addAction(menu_show_steps_stats)
+menu_for_helper.addAction(menu_show_true_retention)
 menu_for_helper.addAction(menu_auto_disperse_after_reschedule)
 menu_for_easy_days = menu_for_helper.addMenu(t("less-anki-easy-days"))
 menu_for_helper.addSeparator()
@@ -297,6 +307,7 @@ def adjust_menu():
         menu_auto_disperse.setChecked(config.auto_disperse_when_review)
         menu_display_memory_state.setChecked(config.display_memory_state)
         menu_show_steps_stats.setChecked(config.show_steps_stats)
+        menu_show_true_retention.setChecked(config.show_true_retention)
         menu_auto_disperse_after_reschedule.setChecked(
             config.auto_disperse_after_reschedule
         )

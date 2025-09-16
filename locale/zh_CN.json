@@ -7,6 +7,7 @@
     "disperse-after-reschedule": "重新安排后分散关联卡片（会破坏负载均衡）",
     "display-memory-state": "回答后显示记忆状态",
     "show-steps-stats": "显示初学/重学间隔统计",
+    "show-true-retention": "显示真实保留率",
     "steps-stats-warning": "如果您有大量复习记录，此功能会减慢旧统计页面的加载速度。确定要启用吗？",
     "reschedule-all-cards": "重新安排所有卡片",
     "reschedule-recent-cards": {
@@ -79,6 +80,7 @@
     "retention-graph": "保留率图表",
     "retention-graph-help": "随时间变化的保留率和复习次数",
     "true-retention-help": "真实保留率是仅计算间隔大于或等于一天的卡片的通过率。它是比重来率更好的学习质量指标。",
+    "true-retention-disabled": "如果您想查看真实保留率统计信息，可以使用<code>工具 > FSRS 助手 > 显示真实保留率</code>来启用它们。<br/><br/>如果您有很多复习记录，这个表格将减慢这个页面的加载速度，所以要谨慎启用它。",
     "true-retention-mature-help": "默认情况下，已熟练卡片定义为间隔为 21 天或更长的卡片。此截止值可以在插件配置中调整。",
     "young-annotated": "欠熟练（间隔 < %{mature_ivl} 天）",
     "mature-annotated": "已熟练（间隔 ≥ %{mature_ivl} 天）",

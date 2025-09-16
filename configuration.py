@@ -15,6 +15,7 @@ FSRS_STATS = "fsrs_stats"
 DISPLAY_MEMORY_STATE = "display_memory_state"
 HAS_RATED = "has_rated"
 SHOW_STEPS_STATS = "show_steps_stats"
+SHOW_TRUE_RETENTION = "show_true_retention"
 
 
 def load_config():
@@ -151,4 +152,13 @@ class Config:
     @show_steps_stats.setter
     def show_steps_stats(self, value):
         self.data[SHOW_STEPS_STATS] = value
+        self.save()
+
+    @property
+    def show_true_retention(self):
+        return self.data[SHOW_TRUE_RETENTION]
+
+    @show_true_retention.setter
+    def show_true_retention(self, value):
+        self.data[SHOW_TRUE_RETENTION] = value
         self.save()

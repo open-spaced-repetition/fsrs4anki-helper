@@ -11,5 +11,6 @@
     "fsrs_stats": true,
     "display_memory_state": false,
     "has_rated": false,
-    "show_steps_stats": false
+    "show_steps_stats": false,
+    "show_true_retention": true
 }
