@@ -138,8 +138,7 @@ def set_show_true_retention(checked, _):
 
 
 menu_show_true_retention = checkable(
-    title=t("show-true-retention"),
-    on_click=set_show_true_retention
+    title=t("show-true-retention"), on_click=set_show_true_retention
 )
 
 

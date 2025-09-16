@@ -496,7 +496,9 @@ def get_true_retention(self: CollectionStats):
     config = Config()
     config.load()
     if not config.show_true_retention:
-        return f"""<h1>{t("true-retention")}</h1><p>{t("true-retention-disabled")}</p>"""
+        return (
+            f"""<h1>{t("true-retention")}</h1><p>{t("true-retention-disabled")}</p>"""
+        )
     if self._revlogLimit():
         lim = " AND " + self._revlogLimit()
     else:
