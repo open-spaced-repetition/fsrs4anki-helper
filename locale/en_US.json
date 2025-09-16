@@ -7,6 +7,7 @@
     "disperse-after-reschedule": "Disperse siblings after rescheduling (breaks Load Balance)",
     "display-memory-state": "Display memory state after answer",
     "show-steps-stats": "Show step stats",
+    "show-true-retention": "Show true retention",
     "steps-stats-warning": "This feature will slow down the speed at which the old stats page loads if you have a lot of reviews. Are you sure you want to enable it?",
     "reschedule-all-cards": "Reschedule all cards",
     "reschedule-recent-cards": {
@@ -80,6 +81,7 @@
     "retention-graph": "Retention Graph",
     "retention-graph-help": "Retention rate and review count over time",
     "true-retention-help": "The True Retention is the pass rate calculated only on cards with intervals greater than or equal to one day. It is a better indicator of the learning quality than the Again rate.",
+    "true-retention-disabled": "If you would like to see your true retention statistics, you can enable them with <code>Tools > FSRS Helper > Show true retention.</code><br/><br/>This table will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "true-retention-mature-help": "By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config.",
     "young-annotated": "Young (ivl < %{mature_ivl} d)",
     "mature-annotated":"Mature (ivl ≥ %{mature_ivl} d)",

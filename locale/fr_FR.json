@@ -7,6 +7,7 @@
     "disperse-after-reschedule": "Disperser les cartes associées après une reprogrammation (casse l'Équilibrage de la Charge)",
     "display-memory-state": "Afficher l'état de la mémoire après une réponse",
     "show-steps-stats": "Afficher les statistiques des étapes",
+    "show-true-retention": "Afficher la rétention réelle",
     "steps-stats-warning": "Cette fonctionnalité peut ralentir le chargement de l'ancienne page de statistiques si vous avez beaucoup de révisions. Êtes vous sûr de vouloir l'activer ?",
     "reschedule-all-cards": "Reprogrammer toutes les cartes",
     "reschedule-recent-cards": {
@@ -79,6 +80,7 @@
     "retention-graph": "Graphique de Rétention",
     "retention-graph-help": "Taux de rétention et nombre de révisions en fonction du temps",
     "true-retention-help": "La Rétention Réelle est est le taux de succès calculé seulement sur les cartes d'intervalles supérieurs ou égaux à un jour. Il s'agit d'un meilleur indicateur de qualité d'apprentissage que le taux de À Revoir.",
+    "true-retention-disabled": "Si vous souhaitez voir vos statistiques de rétention réelle, vous pouvez les activer avec <code>Outils > FSRS Helper > Afficher la rétention réelle.</code><br/><br/>Ce tableau ralentira la vitesse de chargement de cette page si vous avez beaucoup de révisions, activez-le avec précaution.",
     "true-retention-mature-help": "Par défaut, les cartes matures sont définies comme les cartes avec un intervalle de 21 jours ou plus. Ce seuil peut être ajusté dans la configuration du greffon.",
     "young-annotated": "Jeune (ivl < %{mature_ivl} j)",
     "mature-annotated": "Mature (ivl ≥ %{mature_ivl} j)",
