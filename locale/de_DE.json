@@ -81,7 +81,7 @@
     "retention-graph": "Erinnerungsquoten-Diagramm",
     "retention-graph-help": "Erinnerungsquote und Anzahl der Wiederholungen im zeitlichen Verlauf",
     "true-retention-help": "Die tatsächliche Erinnerungsquote wird ausschließlich aus Karten mit einem Intervall von mindestens einem Tag berechnet. Sie liefert eine bessere Einschätzung des Lernfortschritts als die Fehlversuchsquote.",
-    "true-retention-disabled": "Falls Sie Ihre tatsächliche Erinnerungsquote-Statistiken anzeigen möchten, können Sie diese unter <code>Extras > FSRS-Helfer > Tatsächliche Erinnerungsquote anzeigen</code> aktivieren.<br/><br/>Diese Tabelle verlangsamt das Laden dieser Seite bei vielen Wiederholungen, aktivieren Sie sie daher mit Vorsicht.",
+    "true-retention-disabled": "Die Anzeige der Statistik der tatsächliche Erinnerungsquote kann unter <code>Extras→FSRS-Helfer→Tatsächliche Erinnerungsquote anzeigen</code> aktiviert werden.<br/><br/> Bei umfangreichen Daten wird die Statistik-Seite dann langsamer laden. Aktivieren Sie diese Funktion nur bei Bedarf.",
     "true-retention-mature-help": "Als Karten mit langem Intervall gelten standardmäßig Karten mit einem Intervall von 21 Tagen oder länger. Dieser Grenzwert kann in der Datei config.json angepasst werden.",
     "young-annotated": "Kurzes Intervall < %{mature_ivl} Tage",
     "mature-annotated":"Langes Intervall ≥ %{mature_ivl} Tage",
