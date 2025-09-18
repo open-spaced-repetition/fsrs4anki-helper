@@ -338,7 +338,7 @@ def reschedule_background(
                     SELECT cid
                     FROM revlog
                     GROUP BY cid
-                    HAVING MAX(CASE WHEN ease = 0 THEN id ELSE NULL END) = MAX(id)
+                    HAVING MAX(CASE WHEN type = 4 THEN id ELSE NULL END) = MAX(id)
                 )
             """
 
