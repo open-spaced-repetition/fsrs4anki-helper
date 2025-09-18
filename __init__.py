@@ -117,8 +117,8 @@ def set_reschedule_set_due_date(checked, _):
     config.reschedule_set_due_date = checked
 
 
-menu_overwrite_resched_cards = checkable(
-    title=t("overwrite-manually-scheduled-cards"),
+menu_reschedule_set_due_date = checkable(
+    title=t("reschedule-set-due-date"),
     on_click=set_reschedule_set_due_date,
 )
 
@@ -265,7 +265,7 @@ menu_search_stats_extended = build_action(
 menu_for_helper = mw.form.menuTools.addMenu(t("fsrs-helper"))
 menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
-menu_for_helper.addAction(menu_overwrite_resched_cards)
+menu_for_helper.addAction(menu_reschedule_set_due_date)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_display_memory_state)
 menu_for_helper.addAction(menu_show_steps_stats)
@@ -322,7 +322,7 @@ def adjust_menu():
         menu_auto_disperse_after_reschedule.setChecked(
             config.auto_disperse_after_reschedule
         )
-        menu_overwrite_resched_cards.setChecked(config.reschedule_set_due_date)
+        menu_reschedule_set_due_date.setChecked(config.reschedule_set_due_date)
 
 
 @state_did_change.append
