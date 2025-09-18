@@ -8,6 +8,7 @@
     "display-memory-state": "Display memory state after answer",
     "show-steps-stats": "Show step stats",
     "show-true-retention": "Show true retention",
+    "skip-manually-rescheduled-cards": "Skip manually scheduled cards while rescheduling",
     "steps-stats-warning": "This feature will slow down the speed at which the old stats page loads if you have a lot of reviews. Are you sure you want to enable it?",
     "reschedule-all-cards": "Reschedule all cards",
     "reschedule-recent-cards": {

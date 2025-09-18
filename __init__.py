@@ -114,26 +114,11 @@ menu_auto_disperse_after_reschedule = checkable(
 
 
 def set_skip_manual_resched_cards(checked, _):
-    if config.skip_manual_resched_cards:
-        config.skip_manual_resched_cards = checked
-    else:
-        warning = (
-            "Due to the nature of Anki's database, FSRS Helper cannot distinguish among cards rescheduled by following operations:\n"
-            + "- Set due date\n"
-            + "- Reset (earlier called Forget)\n"
-            + "- 'Reschedule cards on change' in FSRS section of Deck Options\n\n"
-            + "When you enable this option, cards that were last modified by any of the above will be skipped during rescheduling."
-        )
-        checked = askUser(
-            warning,
-            title="Warning",
-        )
-        config.skip_manual_resched_cards = checked
-        menu_skip_manual_resched_cards.setChecked(checked)
+    config.skip_manual_resched_cards = checked
 
 
 menu_skip_manual_resched_cards = checkable(
-    title="Skip manually rescheduled cards when rescheduling",
+    title=t("skip-manually-rescheduled-cards"),
     on_click=set_skip_manual_resched_cards,
 )
 
@@ -280,13 +265,13 @@ menu_search_stats_extended = build_action(
 menu_for_helper = mw.form.menuTools.addMenu(t("fsrs-helper"))
 menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
+menu_for_helper.addAction(menu_skip_manual_resched_cards)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_display_memory_state)
 menu_for_helper.addAction(menu_show_steps_stats)
 menu_for_helper.addAction(menu_show_true_retention)
 menu_for_helper.addAction(menu_auto_disperse_after_reschedule)
 menu_for_easy_days = menu_for_helper.addMenu(t("less-anki-easy-days"))
-menu_for_helper.addAction(menu_skip_manual_resched_cards)
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_reschedule_recent)
