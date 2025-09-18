@@ -114,11 +114,11 @@ menu_auto_disperse_after_reschedule = checkable(
 
 
 def set_skip_manual_resched_cards(checked, _):
-    config.skip_manual_resched_cards = checked
+    config.reschedule_set_due_date = checked
 
 
 menu_skip_manual_resched_cards = checkable(
-    title=t("skip-manually-rescheduled-cards"),
+    title=t("overwrite-manually-scheduled-cards"),
     on_click=set_skip_manual_resched_cards,
 )
 
@@ -322,7 +322,7 @@ def adjust_menu():
         menu_auto_disperse_after_reschedule.setChecked(
             config.auto_disperse_after_reschedule
         )
-        menu_skip_manual_resched_cards.setChecked(config.skip_manual_resched_cards)
+        menu_skip_manual_resched_cards.setChecked(config.reschedule_set_due_date)
 
 
 @state_did_change.append

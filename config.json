@@ -13,5 +13,5 @@
     "has_rated": false,
     "show_steps_stats": false,
     "show_true_retention": true,
-    "skip_manual_resched_cards": true
+    "reschedule-set-due-date": false
 }

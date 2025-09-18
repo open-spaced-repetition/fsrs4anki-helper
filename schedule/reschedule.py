@@ -332,15 +332,14 @@ def reschedule_background(
     if filter_flag:
         filter_query = f"AND id IN {ids2str(filtered_cids)}"
 
-    if config.skip_manual_resched_cards:
-        skip_query = """
-                AND id NOT IN (
-                    SELECT cid
-                    FROM revlog
-                    GROUP BY cid
-                    HAVING MAX(CASE WHEN type = 4 THEN id ELSE NULL END) = MAX(id)
-                )
-            """
+    skip_query = """
+            AND id NOT IN (
+                SELECT cid
+                FROM revlog
+                GROUP BY cid
+                HAVING MAX(CASE WHEN type = 4 THEN id ELSE NULL END) = MAX(id)
+            )
+        """ if not config.reschedule_set_due_date else ""
 
     cid_did_nid = mw.col.db.all(
         f"""
@@ -356,7 +355,7 @@ def reschedule_background(
         {did_query if did_query is not None else ""}
         {recent_query if recent else ""}
         {filter_query if filter_flag else ""}
-        {skip_query if config.skip_manual_resched_cards else ""}
+        {skip_query}
         ORDER BY ivl
     """
     )

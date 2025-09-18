@@ -14,7 +14,7 @@ DEBUG_NOTIFY = "debug_notify"
 FSRS_STATS = "fsrs_stats"
 DISPLAY_MEMORY_STATE = "display_memory_state"
 HAS_RATED = "has_rated"
-SKIP_MANUAL_RESCHED_CARDS = "skip_manual_resched_cards"
+RESCHEDULE_SET_DUE_DATE = "reschedule-set-due-date"
 SHOW_STEPS_STATS = "show_steps_stats"
 SHOW_TRUE_RETENTION = "show_true_retention"
 
@@ -147,12 +147,12 @@ class Config:
         self.save()
 
     @property
-    def skip_manual_resched_cards(self):
-        return self.data[SKIP_MANUAL_RESCHED_CARDS]
+    def reschedule_set_due_date(self):
+        return self.data[RESCHEDULE_SET_DUE_DATE]
 
-    @skip_manual_resched_cards.setter
-    def skip_manual_resched_cards(self, value):
-        self.data[SKIP_MANUAL_RESCHED_CARDS] = value
+    @reschedule_set_due_date.setter
+    def reschedule_set_due_date(self, value):
+        self.data[RESCHEDULE_SET_DUE_DATE] = value
         self.save()
 
     @property
