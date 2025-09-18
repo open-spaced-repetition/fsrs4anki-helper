@@ -14,6 +14,7 @@ DEBUG_NOTIFY = "debug_notify"
 FSRS_STATS = "fsrs_stats"
 DISPLAY_MEMORY_STATE = "display_memory_state"
 HAS_RATED = "has_rated"
+SKIP_MANUAL_RESCHED_CARDS = "skip_manual_resched_cards"
 SHOW_STEPS_STATS = "show_steps_stats"
 SHOW_TRUE_RETENTION = "show_true_retention"
 
@@ -143,6 +144,15 @@ class Config:
     @has_rated.setter
     def has_rated(self, value):
         self.data[HAS_RATED] = value
+        self.save()
+
+    @property
+    def skip_manual_resched_cards(self):
+        return self.data[SKIP_MANUAL_RESCHED_CARDS]
+
+    @skip_manual_resched_cards.setter
+    def skip_manual_resched_cards(self, value):
+        self.data[SKIP_MANUAL_RESCHED_CARDS] = value
         self.save()
 
     @property
