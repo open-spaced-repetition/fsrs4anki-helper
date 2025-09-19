@@ -113,6 +113,16 @@ menu_auto_disperse_after_reschedule = checkable(
 )
 
 
+def set_reschedule_set_due_date(checked, _):
+    config.reschedule_set_due_date = checked
+
+
+menu_reschedule_set_due_date = checkable(
+    title=t("reschedule-set-due-date"),
+    on_click=set_reschedule_set_due_date,
+)
+
+
 def set_display_memory_state(checked, _):
     config.display_memory_state = checked
 
@@ -255,6 +265,7 @@ menu_search_stats_extended = build_action(
 menu_for_helper = mw.form.menuTools.addMenu(t("fsrs-helper"))
 menu_for_helper.addAction(menu_auto_reschedule_after_sync)
 menu_for_helper.addAction(menu_auto_disperse_after_sync)
+menu_for_helper.addAction(menu_reschedule_set_due_date)
 menu_for_helper.addAction(menu_auto_disperse)
 menu_for_helper.addAction(menu_display_memory_state)
 menu_for_helper.addAction(menu_show_steps_stats)
@@ -311,6 +322,7 @@ def adjust_menu():
         menu_auto_disperse_after_reschedule.setChecked(
             config.auto_disperse_after_reschedule
         )
+        menu_reschedule_set_due_date.setChecked(config.reschedule_set_due_date)
 
 
 @state_did_change.append

@@ -14,6 +14,7 @@ DEBUG_NOTIFY = "debug_notify"
 FSRS_STATS = "fsrs_stats"
 DISPLAY_MEMORY_STATE = "display_memory_state"
 HAS_RATED = "has_rated"
+RESCHEDULE_SET_DUE_DATE = "reschedule-set-due-date"
 SHOW_STEPS_STATS = "show_steps_stats"
 SHOW_TRUE_RETENTION = "show_true_retention"
 
@@ -143,6 +144,15 @@ class Config:
     @has_rated.setter
     def has_rated(self, value):
         self.data[HAS_RATED] = value
+        self.save()
+
+    @property
+    def reschedule_set_due_date(self):
+        return self.data[RESCHEDULE_SET_DUE_DATE]
+
+    @reschedule_set_due_date.setter
+    def reschedule_set_due_date(self, value):
+        self.data[RESCHEDULE_SET_DUE_DATE] = value
         self.save()
 
     @property
