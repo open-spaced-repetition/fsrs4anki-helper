@@ -43,7 +43,7 @@
     "recommended-addons": "Empfohlene Erweiterungen",
 
     "step-stats": "Lernstufen",
-    "step-stats-disabled": "Die Anzeige der Lernstufen-Statistik kann unter „<code>Extras→FSRS-Helfer→Lernstufen-Statistik anzeigen</code>“ aktiviert werden. Bei umfangreichen Daten wird die Statistik-Seite dann langsamer laden. Aktivieren Sie diese Funktion nur bei Bedarf.",
+    "step-stats-disabled": "Die Anzeige der Lernstufen-Statistik kann unter „<code>Extras→FSRS-Helfer→Lernstufen-Statistik anzeigen</code>“ aktiviert werden.<br/><br/>Bei umfangreichen Daten wird die Statistik-Seite dann langsamer laden. Aktivieren Sie diese Funktion nur bei Bedarf.",
     "step-stats-subtitle": "Aufgeschlüsselt nach der jeweils ersten Bewertung",
     "again-then-good": "„Nochmal“, dann „Gut“",
     "good-then-again": "„Gut“, dann „Nochmal“",
