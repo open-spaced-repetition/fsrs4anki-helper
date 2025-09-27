@@ -251,3 +251,11 @@ def get_dr(deck_manager: DeckManager, did: int):
         if deck_manager.get(did).get("desiredRetention") is not None
         else deck_manager.config_dict_for_deck_id(did)["desiredRetention"]
     )
+
+
+def greater_than_last(card: Card, ivl):
+    previous_interval = card.lastIvl
+    if ivl > previous_interval:
+        return previous_interval + 1
+    else:
+        return 0

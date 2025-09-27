@@ -188,18 +188,11 @@ class FSRS:
         else:
             return random.choices(possible_intervals, weights=weights)[0]
 
-    def greater_than_last(self, ivl):
-        previous_interval = self.card.lastIvl
-        if ivl > previous_interval:
-            return previous_interval + 1
-        else:
-            return 0
-
     def apply_fuzz(self, ivl):
         if ivl < 2.5:
             return ivl
         min_ivl, max_ivl = get_fuzz_range(
-            ivl, self.greater_than_last(ivl), self.maximum_interval
+            ivl, greater_than_last(self.card, ivl), self.maximum_interval
         )
 
         # Load balance
@@ -210,7 +203,7 @@ class FSRS:
             if due > last_review + max_ivl + 2:
                 current_ivl = due - last_review
                 min_ivl, max_ivl = get_fuzz_range(
-                    current_ivl, self.greater_than_last(current_ivl), current_ivl
+                    current_ivl, greater_than_last(self.card, current_ivl), current_ivl
                 )
 
         if last_review + max_ivl < self.today:
