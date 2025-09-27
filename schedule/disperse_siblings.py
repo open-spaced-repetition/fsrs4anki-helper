@@ -103,10 +103,7 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     if new_ivl <= 2.5:
         return (due, due), last_review
 
-    revlogs = filter_revlogs(get_revlogs(cid))
-    last_elapsed_days = (
-        int((revlogs[0].time - revlogs[1].time) / 86400) if len(revlogs) >= 2 else 0
-    )
+    last_elapsed_days = card.lastIvl
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_elapsed_days, maximum_interval)
     if (
         due > last_review + max_ivl + 2
