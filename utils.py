@@ -55,7 +55,7 @@ def filter_revlogs(
     )
 
 
-def get_last_review_date(card: Card):
+def get_last_review_date_and_interval(card: Card):
     revlogs = get_revlogs(card.id)
     try:
         last_revlog = filter_revlogs(revlogs)[0]
@@ -63,16 +63,17 @@ def get_last_review_date(card: Card):
             math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400)
             + mw.col.sched.today
         )
+        last_interval = int(round(getattr(last_revlog, "last_interval", 0) / 86400))
     except IndexError:
         due = card.odue if card.odid else card.due
         last_review_date = due - card.ivl
-    return last_review_date
+    return last_review_date, last_interval
 
 
 def update_card_due_ivl(card: Card, new_ivl: int):
     new_ivl = max(new_ivl, 1)
     card.ivl = new_ivl
-    last_review_date = get_last_review_date(card)
+    last_review_date, _ = get_last_review_date_and_interval(card)
     new_due = last_review_date + new_ivl
     if card.odid:
         card.odue = new_due if new_due != 0 else 1
@@ -251,11 +252,3 @@ def get_dr(deck_manager: DeckManager, did: int):
         if deck_manager.get(did).get("desiredRetention") is not None
         else deck_manager.config_dict_for_deck_id(did)["desiredRetention"]
     )
-
-
-def greater_than_last(card: Card, ivl):
-    previous_interval = card.lastIvl
-    if ivl > previous_interval:
-        return previous_interval + 1
-    else:
-        return 0

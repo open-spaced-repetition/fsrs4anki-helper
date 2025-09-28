@@ -97,24 +97,20 @@ def get_siblings_when_review(card: Card):
 
 def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     card = mw.col.get_card(cid)
-    last_review = get_last_review_date(card)
+    last_review, last_interval = get_last_review_date_and_interval(card)
     new_ivl = next_interval(stability, desired_retention, -get_decay(card))
 
     if new_ivl <= 2.5:
         return (due, due), last_review
 
-    min_ivl, max_ivl = get_fuzz_range(
-        new_ivl, greater_than_last(card, new_ivl), maximum_interval
-    )
+    min_ivl, max_ivl = get_fuzz_range(new_ivl, last_interval, maximum_interval)
     if (
         due > last_review + max_ivl + 2
     ):  # +2 is just a safeguard to exclude cards that go beyond the fuzz range due to rounding
         # don't reschedule the card to bring it within the fuzz range. Rather, create another fuzz range around the original due date.
         current_ivl = due - last_review
         # set maximum_interval = current_ivl to prevent a further increase in ivl
-        min_ivl, max_ivl = get_fuzz_range(
-            current_ivl, greater_than_last(card, current_ivl), current_ivl
-        )
+        min_ivl, max_ivl = get_fuzz_range(current_ivl, last_interval, current_ivl)
     if due >= mw.col.sched.today:
         due_range = (
             max(last_review + min_ivl, mw.col.sched.today),
@@ -197,7 +193,7 @@ def disperse_siblings_backgroud(
         best_due_dates, _, _ = disperse(siblings)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
-            last_review = get_last_review_date(card)
+            last_review, _ = get_last_review_date_and_interval(card)
             card = update_card_due_ivl(card, due - last_review)
             write_custom_data(card, "v", "disperse")
             dispersed_cards.append(card)
@@ -248,7 +244,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
         due = max(due, mw.col.sched.today + 1)
         card = mw.col.get_card(cid)
         old_due = card.odue if card.odid else card.due
-        last_review = get_last_review_date(card)
+        last_review, _ = get_last_review_date_and_interval(card)
         card = update_card_due_ivl(card, due - last_review)
         write_custom_data(card, "v", "disperse")
         dispersed_cards.append(card)

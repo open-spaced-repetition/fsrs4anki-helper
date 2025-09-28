@@ -123,7 +123,7 @@ def advance(did):
             break
 
         card = mw.col.get_card(cid)
-        last_review = get_last_review_date(card)
+        last_review, _ = get_last_review_date_and_interval(card)
         new_ivl = mw.col.sched.today - last_review
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "advance")

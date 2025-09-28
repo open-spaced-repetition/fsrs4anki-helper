@@ -191,19 +191,17 @@ class FSRS:
     def apply_fuzz(self, ivl):
         if ivl < 2.5:
             return ivl
-        min_ivl, max_ivl = get_fuzz_range(
-            ivl, greater_than_last(self.card, ivl), self.maximum_interval
-        )
+        last_review, last_interval = get_last_review_date_and_interval(self.card)
+        min_ivl, max_ivl = get_fuzz_range(ivl, last_interval, self.maximum_interval)
 
         # Load balance
         due = self.card.odue if self.card.odid else self.card.due
-        last_review = get_last_review_date(self.card)
 
         if self.apply_easy_days:
             if due > last_review + max_ivl + 2:
                 current_ivl = due - last_review
                 min_ivl, max_ivl = get_fuzz_range(
-                    current_ivl, greater_than_last(self.card, current_ivl), current_ivl
+                    current_ivl, last_interval, current_ivl
                 )
 
         if last_review + max_ivl < self.today:
