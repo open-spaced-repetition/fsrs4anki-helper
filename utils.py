@@ -63,20 +63,18 @@ def get_last_review_date_and_interval(card: Card):
             math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400)
             + mw.col.sched.today
         )
-        last_interval = int(
-            round(
-                getattr(
-                    last_revlog,
-                    "last_interval",
-                    (
-                        int((revlogs[0].time - revlogs[1].time) / 86400)
-                        if len(revlogs) >= 2
-                        else 0
-                    ),
-                )
-                / 86400
-            )
-        )
+        # Calculate last_interval in days, prefer 'last_interval' attribute if present, otherwise fallback to time difference
+        if hasattr(last_revlog, "last_interval"):
+            # If last_interval attribute exists, use it (assumed to be in seconds)
+            last_interval_seconds = last_revlog.last_interval
+        elif len(revlogs) >= 2:
+            # Fallback: use the time difference between the two most recent revlogs
+            last_interval_seconds = revlogs[0].time - revlogs[1].time
+        else:
+            # If not enough revlogs, default to 0
+            last_interval_seconds = 0
+
+        last_interval = int(round(last_interval_seconds / 86400))
     except IndexError:
         due = card.odue if card.odid else card.due
         last_review_date = due - card.ivl
