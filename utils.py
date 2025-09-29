@@ -123,7 +123,7 @@ FUZZ_RANGES = [
 ]
 
 
-def get_fuzz_range(interval, elapsed_days, maximum_interval):
+def get_fuzz_range(interval, last_interval, maximum_interval):
     delta = 1.0
     for range in FUZZ_RANGES:
         delta += range["factor"] * max(
@@ -134,8 +134,8 @@ def get_fuzz_range(interval, elapsed_days, maximum_interval):
     max_ivl = int(round(interval + delta))
     min_ivl = max(2, min_ivl)
     max_ivl = min(max_ivl, maximum_interval)
-    if interval > elapsed_days:
-        min_ivl = max(min_ivl, elapsed_days + 1)
+    if interval > last_interval:
+        min_ivl = max(min_ivl, last_interval + 1)
     min_ivl = min(min_ivl, max_ivl)
     return min_ivl, max_ivl
 
