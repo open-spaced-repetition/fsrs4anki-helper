@@ -52,7 +52,6 @@ class FSRS:
     due_today_per_preset: Dict[int, int]
     reviewed_today_per_preset: Dict[int, int]
     card: Card
-    elapsed_days: int
     apply_easy_days: bool
     current_date: date
     today: int
@@ -65,7 +64,6 @@ class FSRS:
         self.maximum_interval = 36500
         self.desired_retention = 0.9
         self.easy_specific_due_dates = []
-        self.elapsed_days = 0
         self.apply_easy_days = False
         self.current_date = sched_current_date()
         self.today = mw.col.sched.today
@@ -193,18 +191,17 @@ class FSRS:
     def apply_fuzz(self, ivl):
         if ivl < 2.5:
             return ivl
-        min_ivl, max_ivl = get_fuzz_range(ivl, self.elapsed_days, self.maximum_interval)
-        self.elapsed_days = 0
+        last_review, last_interval = get_last_review_date_and_interval(self.card)
+        min_ivl, max_ivl = get_fuzz_range(ivl, last_interval, self.maximum_interval)
 
         # Load balance
         due = self.card.odue if self.card.odid else self.card.due
-        last_review = get_last_review_date(self.card)
 
         if self.apply_easy_days:
             if due > last_review + max_ivl + 2:
                 current_ivl = due - last_review
                 min_ivl, max_ivl = get_fuzz_range(
-                    current_ivl, self.elapsed_days, current_ivl
+                    current_ivl, last_interval, current_ivl
                 )
 
         if last_review + max_ivl < self.today:

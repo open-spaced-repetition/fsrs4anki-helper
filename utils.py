@@ -55,24 +55,35 @@ def filter_revlogs(
     )
 
 
-def get_last_review_date(card: Card):
-    revlogs = get_revlogs(card.id)
-    try:
-        last_revlog = filter_revlogs(revlogs)[0]
+def get_last_review_date_and_interval(card: Card):
+    revlogs = filter_revlogs(get_revlogs(card.id))
+    last_interval_seconds = 0  # set default value
+
+    if revlogs:
+        last_revlog = revlogs[0]
         last_review_date = (
             math.ceil((last_revlog.time - mw.col.sched.day_cutoff) / 86400)
             + mw.col.sched.today
         )
-    except IndexError:
+        # Calculate last_interval
+        if hasattr(last_revlog, "last_interval"):
+            # prefer 'last_interval' attribute if present
+            last_interval_seconds = last_revlog.last_interval
+        elif len(revlogs) >= 2:
+            # otherwise, fallback to the time difference between the two most recent revlogs
+            last_interval_seconds = revlogs[0].time - revlogs[1].time
+    else:
         due = card.odue if card.odid else card.due
         last_review_date = due - card.ivl
-    return last_review_date
+
+    last_interval = int(round(last_interval_seconds / 86400))
+    return last_review_date, last_interval
 
 
 def update_card_due_ivl(card: Card, new_ivl: int):
     new_ivl = max(new_ivl, 1)
     card.ivl = new_ivl
-    last_review_date = get_last_review_date(card)
+    last_review_date, _ = get_last_review_date_and_interval(card)
     new_due = last_review_date + new_ivl
     if card.odid:
         card.odue = new_due if new_due != 0 else 1
@@ -122,7 +133,7 @@ FUZZ_RANGES = [
 ]
 
 
-def get_fuzz_range(interval, elapsed_days, maximum_interval):
+def get_fuzz_range(interval, last_interval, maximum_interval):
     delta = 1.0
     for range in FUZZ_RANGES:
         delta += range["factor"] * max(
@@ -133,8 +144,8 @@ def get_fuzz_range(interval, elapsed_days, maximum_interval):
     max_ivl = int(round(interval + delta))
     min_ivl = max(2, min_ivl)
     max_ivl = min(max_ivl, maximum_interval)
-    if interval > elapsed_days:
-        min_ivl = max(min_ivl, elapsed_days + 1)
+    if interval > last_interval:
+        min_ivl = max(min_ivl, last_interval + 1)
     min_ivl = min(min_ivl, max_ivl)
     return min_ivl, max_ivl
 

@@ -157,7 +157,7 @@ def flatten_background(did, desired_flatten_limit):
         end_index = cnt + min(quota, rest_cnt)
         for cid, _, ivl in cards_to_flatten[start_index:end_index]:
             card = mw.col.get_card(cid)
-            last_review = get_last_review_date(card)
+            last_review, _ = get_last_review_date_and_interval(card)
             new_ivl = new_due - last_review
             card = update_card_due_ivl(card, new_ivl)
             write_custom_data(card, "v", "flatten")
