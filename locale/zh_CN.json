@@ -8,6 +8,7 @@
     "display-memory-state": "回答后显示记忆状态",
     "show-steps-stats": "显示初学/重学间隔统计",
     "show-true-retention": "显示真实保留率",
+    "reschedule-set-due-date": "重新安排时覆盖设置到期日期",
     "steps-stats-warning": "如果您有大量复习记录，此功能会减慢旧统计页面的加载速度。确定要启用吗？",
     "reschedule-all-cards": "重新安排所有卡片",
     "reschedule-recent-cards": {
