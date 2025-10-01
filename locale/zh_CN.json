@@ -8,6 +8,7 @@
     "display-memory-state": "回答后显示记忆状态",
     "show-steps-stats": "显示初学/重学间隔统计",
     "show-true-retention": "显示真实保留率",
+    "reschedule-set-due-date": "重新安排时覆盖设置到期日",
     "steps-stats-warning": "如果您有大量复习记录，此功能会减慢旧统计页面的加载速度。确定要启用吗？",
     "reschedule-all-cards": "重新安排所有卡片",
     "reschedule-recent-cards": {
@@ -157,7 +158,7 @@
 
     "clear-custom-data-confirmation": "清除所有卡片中的自定义数据？\n    FSRS4Anki 的自定义调度将记忆状态存储在自定义数据中。\n    当您启用内置 FSRS 时，这些数据不会被使用。\n    确定要清除吗？",
     "clear-custom-data-result": "在 %{seconds} 秒内清除了 %{count} 张卡片。",
-    "clear-manual-rescheduling-confirmation": "此选项会删除由\"设置到期日期\"和\"更改时重新安排卡片\"生成的复习记录条目，这些条目紧接在另一个手动或重新安排条目之前。\n\n此操作无法撤销。是否继续？",
+    "clear-manual-rescheduling-confirmation": "此选项会删除由\"设置到期日\"和\"更改时重新安排卡片\"生成的复习记录条目，这些条目紧接在另一个手动或重新安排条目之前。\n\n此操作无法撤销。是否继续？",
     "clear-manual-rescheduling-result": "已删除 %{count} 条复习记录。",
     "easy-days-select-date": "选择日期",
     "easy-days-add-date": "添加所选日期",
