@@ -225,9 +225,12 @@ class FSRS:
         )
         return best_ivl
 
-    def fuzzed_next_interval(self, stability, decay):
+    def next_interval(self, stability, decay, fuzz=False):
         new_interval = next_interval(stability, self.desired_retention, decay)
-        return self.apply_fuzz(new_interval)
+        if not fuzz:
+            return new_interval
+        else:
+            return self.apply_fuzz(new_interval)
 
     def set_card(self, card: Card):
         self.card = card
@@ -472,7 +475,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
                 else:
                     return None, False
 
-        new_ivl = fsrs.fuzzed_next_interval(s, -decay)
+        new_ivl = fsrs.next_interval(s, -decay, fuzz=mw.col._get_load_balancer_enabled())
         due_before = card.odue if card.odid else card.due
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "reschedule")
