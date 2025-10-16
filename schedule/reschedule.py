@@ -58,6 +58,7 @@ class FSRS:
     did: int
     did_to_preset_id: Dict[int, int]
     preset_id_to_easy_days_percentages: Dict[int, List[float]]
+    load_balancer_enabled: bool
 
     def __init__(self) -> None:
         self.reschedule_threshold = 0
@@ -68,6 +69,7 @@ class FSRS:
         self.current_date = sched_current_date()
         self.today = mw.col.sched.today
         self.DM = DeckManager(mw.col)
+        self.load_balancer_enabled = mw.col._get_load_balancer_enabled()
 
     def set_load_balance(self, did_query=None):
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
@@ -225,12 +227,11 @@ class FSRS:
         )
         return best_ivl
 
-    def next_interval(self, stability, decay, fuzz=False):
+    def next_interval(self, stability, decay):
         new_interval = next_interval(stability, self.desired_retention, decay)
-        if not fuzz:
-            return new_interval
-        else:
+        if self.load_balancer_enabled:
             return self.apply_fuzz(new_interval)
+        return new_interval
 
     def set_card(self, card: Card):
         self.card = card
@@ -475,9 +476,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
                 else:
                     return None, False
 
-        new_ivl = fsrs.next_interval(
-            s, -decay, fuzz=mw.col._get_load_balancer_enabled()
-        )
+        new_ivl = fsrs.next_interval(s, -decay)
         due_before = card.odue if card.odid else card.due
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "reschedule")
