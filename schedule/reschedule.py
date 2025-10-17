@@ -196,7 +196,7 @@ class FSRS:
 
         if not self.load_balancer_enabled:
             return ivl + mw.col.fuzz_delta(self.card.id, ivl)
-        
+
         last_review, last_interval = get_last_review_date_and_interval(self.card)
         min_ivl, max_ivl = get_fuzz_range(ivl, last_interval, self.maximum_interval)
 
