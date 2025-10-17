@@ -73,17 +73,9 @@ class FSRS:
         # Version-specific load balancer check
         anki_version = point_version()
         if anki_version >= 250700:  # 25.07+
-            self.load_balancer_enabled = (
-                mw.col._get_load_balancer_enabled()
-                if hasattr(mw.col, "_get_load_balancer_enabled")
-                else False
-            )
+            self.load_balancer_enabled = mw.col._get_load_balancer_enabled()
         elif anki_version >= 241100:  # 24.11+
-            self.load_balancer_enabled = (
-                mw.col._get_enable_load_balancer()
-                if hasattr(mw.col, "_get_enable_load_balancer")
-                else False
-            )
+            self.load_balancer_enabled = mw.col._get_enable_load_balancer()
         else:  # Older versions
             self.load_balancer_enabled = False
 
