@@ -4,7 +4,7 @@ from aqt import QAction, browser
 from .disperse_siblings import disperse_siblings
 from anki.cards import Card, FSRSMemoryState
 from anki.decks import DeckManager
-from anki.utils import ids2str
+from anki.utils import ids2str, point_version
 from anki.stats import (
     CARD_TYPE_REV,
     QUEUE_TYPE_SUSPENDED,
@@ -69,12 +69,23 @@ class FSRS:
         self.current_date = sched_current_date()
         self.today = mw.col.sched.today
         self.DM = DeckManager(mw.col)
-        if hasattr(mw.col, "_get_load_balancer_enabled"):
-            self.load_balancer_enabled = mw.col._get_load_balancer_enabled()
-        else:
+
+        # Version-specific load balancer check
+        anki_version = point_version()
+        if anki_version >= 250700:  # 25.07+
             self.load_balancer_enabled = (
-                False  # Or fetch default from config if applicable
+                mw.col._get_load_balancer_enabled()
+                if hasattr(mw.col, "_get_load_balancer_enabled")
+                else False
             )
+        elif anki_version >= 241100:  # 24.11+
+            self.load_balancer_enabled = (
+                mw.col._get_enable_load_balancer()
+                if hasattr(mw.col, "_get_enable_load_balancer")
+                else False
+            )
+        else:  # Older versions
+            self.load_balancer_enabled = False
 
     def set_load_balance(self, did_query=None):
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
