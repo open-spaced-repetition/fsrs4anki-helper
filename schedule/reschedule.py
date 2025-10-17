@@ -69,7 +69,9 @@ class FSRS:
         self.current_date = sched_current_date()
         self.today = mw.col.sched.today
         self.DM = DeckManager(mw.col)
-        self.load_balancer_enabled = mw.col._get_load_balancer_enabled()
+        self.load_balancer_enabled = getattr(
+            mw.col, "_get_load_balancer_enabled", lambda: False
+        )()
 
     def set_load_balance(self, did_query=None):
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
