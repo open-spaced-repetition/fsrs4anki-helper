@@ -4,3 +4,4 @@
 __pycache__
 *.ipynb
 meta.json
+*.ankiaddon
