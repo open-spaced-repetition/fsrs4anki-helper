@@ -491,7 +491,8 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "reschedule")
         due_after = card.odue if card.odid else card.due
-        fsrs.update_due_cnt_per_day(due_before, due_after)
+        if fsrs.load_balancer_enabled or fsrs.easy_specific_due_dates:
+            fsrs.update_due_cnt_per_day(due_before, due_after)
 
     return card, True
 
