@@ -79,7 +79,7 @@ class FSRS:
         else:  # Older versions
             self.load_balancer_enabled = False
 
-    def set_load_balance(self, did_query=None):
+    def set_load_balance(self):
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
         original_did = "CASE WHEN odid==0 THEN did ELSE odid END"
 
@@ -88,7 +88,6 @@ class FSRS:
                 FROM cards 
                 WHERE type = 2  
                 AND queue != -1
-                {did_query if did_query is not None else ""}
                 GROUP BY {original_did}, {true_due}"""
         )
 
