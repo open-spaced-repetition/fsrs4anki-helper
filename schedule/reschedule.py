@@ -201,7 +201,7 @@ class FSRS:
         if ivl < 2.5:
             return ivl
 
-        if not self.load_balancer_enabled:
+        if not self.load_balancer_enabled and not self.easy_specific_due_dates:
             return ivl + mw.col.fuzz_delta(self.card.id, ivl)
 
         last_review, last_interval = get_last_review_date_and_interval(self.card)
@@ -316,15 +316,16 @@ def reschedule_background(
         did_list = ids2str(fsrs.DM.deck_and_child_ids(did))
         did_query = f"AND did IN {did_list}"
 
-    fsrs.set_load_balance()
-    fsrs.easy_specific_due_dates = easy_specific_due_dates
     fsrs.apply_easy_days = apply_easy_days
+    if fsrs.load_balancer_enabled or easy_specific_due_dates:
+        fsrs.set_load_balance()
+        fsrs.easy_specific_due_dates = easy_specific_due_dates
 
-    for easy_date_str in config.easy_dates:
-        easy_date = datetime.strptime(easy_date_str, "%Y-%m-%d").date()
-        specific_due = fsrs.today + (easy_date - fsrs.current_date).days
-        if specific_due not in fsrs.easy_specific_due_dates:
-            fsrs.easy_specific_due_dates.append(specific_due)
+        for easy_date_str in config.easy_dates:
+            easy_date = datetime.strptime(easy_date_str, "%Y-%m-%d").date()
+            specific_due = fsrs.today + (easy_date - fsrs.current_date).days
+            if specific_due not in fsrs.easy_specific_due_dates:
+                fsrs.easy_specific_due_dates.append(specific_due)
 
     if recent:
         today_cutoff = mw.col.sched.day_cutoff
