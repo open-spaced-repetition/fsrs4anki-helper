@@ -316,7 +316,7 @@ def reschedule_background(
         did_list = ids2str(fsrs.DM.deck_and_child_ids(did))
         did_query = f"AND did IN {did_list}"
 
-    fsrs.set_load_balance(did_query=did_query)
+    fsrs.set_load_balance()
     fsrs.easy_specific_due_dates = easy_specific_due_dates
     fsrs.apply_easy_days = apply_easy_days
 
