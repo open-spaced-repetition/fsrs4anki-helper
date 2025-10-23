@@ -319,7 +319,7 @@ def reschedule_background(
     fsrs.apply_easy_days = apply_easy_days
     if fsrs.load_balancer_enabled or easy_specific_due_dates:
         fsrs.set_load_balance()
-        fsrs.easy_specific_due_dates = easy_specific_due_dates
+        fsrs.easy_specific_due_dates = list(easy_specific_due_dates)
 
         for easy_date_str in config.easy_dates:
             easy_date = datetime.strptime(easy_date_str, "%Y-%m-%d").date()
