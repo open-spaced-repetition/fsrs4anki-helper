@@ -79,7 +79,7 @@ class FSRS:
         else:  # Older versions
             self.load_balancer_enabled = False
 
-    def set_load_balance(self, did_query=None):
+    def set_load_balance(self):
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
         original_did = "CASE WHEN odid==0 THEN did ELSE odid END"
 
@@ -88,7 +88,6 @@ class FSRS:
                 FROM cards 
                 WHERE type = 2  
                 AND queue != -1
-                {did_query if did_query is not None else ""}
                 GROUP BY {original_did}, {true_due}"""
         )
 
@@ -317,7 +316,7 @@ def reschedule_background(
         did_list = ids2str(fsrs.DM.deck_and_child_ids(did))
         did_query = f"AND did IN {did_list}"
 
-    fsrs.set_load_balance(did_query=did_query)
+    fsrs.set_load_balance()
     fsrs.easy_specific_due_dates = easy_specific_due_dates
     fsrs.apply_easy_days = apply_easy_days
 
