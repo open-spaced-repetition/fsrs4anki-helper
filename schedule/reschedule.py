@@ -72,7 +72,7 @@ class FSRS:
 
         # Version-specific load balancer check
         anki_version = point_version()
-        if anki_version >= 250700:  # 25.07+
+        if anki_version >= 250500:  # 25.05+
             self.load_balancer_enabled = mw.col._get_load_balancer_enabled()
         elif anki_version >= 241100:  # 24.11+
             self.load_balancer_enabled = mw.col._get_enable_load_balancer()
