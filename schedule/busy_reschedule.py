@@ -1,6 +1,7 @@
 import time
 from collections import defaultdict
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, List, Optional
 
 from anki.cards import Card, FSRSMemoryState
@@ -18,7 +19,9 @@ from aqt.utils import tooltip
 
 from ..i18n import t
 from ..utils import (
+    get_decay,
     get_last_review_date_and_interval,
+    power_forgetting_curve,
     update_card_due_ivl,
     write_custom_data,
 )
@@ -30,6 +33,46 @@ class BusyCard:
     original_due: int
     last_review: int
     stability: float
+    original_interval: int
+
+
+def _get_log_path() -> Optional[Path]:
+    try:
+        profile_folder = mw.pm.profileFolder()
+    except Exception:
+        return None
+    return Path(profile_folder) / "fsrs_busy_reschedule.log"
+
+
+def _append_log_entry(log_path: Optional[Path], busy_card: BusyCard, new_due: int):
+    if log_path is None:
+        return
+
+    original_interval = busy_card.original_interval
+    new_interval = max(1, new_due - busy_card.last_review)
+    decay = -get_decay(busy_card.card)
+    retention_original = power_forgetting_curve(
+        original_interval, busy_card.stability, decay
+    )
+    retention_new = power_forgetting_curve(new_interval, busy_card.stability, decay)
+
+    header = (
+        "card_id,stability,last_review,original_due,new_due,"
+        "original_interval,new_interval,retention_original,retention_new\n"
+    )
+    line = (
+        f"{busy_card.card.id},{busy_card.stability:.6f},{busy_card.last_review},"
+        f"{busy_card.original_due},{new_due},{original_interval},{new_interval},"
+        f"{retention_original:.6f},{retention_new:.6f}\n"
+    )
+
+    try:
+        if not log_path.exists():
+            log_path.write_text(header, encoding="utf-8")
+        with log_path.open("a", encoding="utf-8") as log_file:
+            log_file.write(line)
+    except OSError:
+        pass
 
 
 def _ensure_memory_state(card: Card) -> Optional[FSRSMemoryState]:
@@ -100,12 +143,14 @@ def _build_busy_card(
         return None
     last_review, _ = get_last_review_date_and_interval(card)
     true_due = card.odue if card.odid else card.due
+    original_interval = max(1, true_due - last_review)
 
     return BusyCard(
         card=card,
         original_due=true_due,
         last_review=last_review,
         stability=memory_state.stability,
+        original_interval=original_interval,
     )
 
 
@@ -113,12 +158,13 @@ def _allocate_busy_cards(
     cards: List[BusyCard],
     candidate_days: List[int],
     target_totals: Dict[int, int],
+    log_path: Optional[Path],
 ) -> Dict[int, List[BusyCard]]:
     assigned = defaultdict(list)
     current_totals = defaultdict(int)
     sorted_cards = sorted(
         cards,
-        key=lambda c: (c.stability, c.last_review, c.original_due),
+        key=lambda c: (c.original_interval, c.stability, c.last_review, c.original_due),
     )
 
     earliest_day = candidate_days[0] if candidate_days else 0
@@ -129,11 +175,13 @@ def _allocate_busy_cards(
             if current_totals[day] < target_totals[day]:
                 current_totals[day] += 1
                 assigned[day].append(busy_card)
+                _append_log_entry(log_path, busy_card, day)
                 break
         else:
             fallback_day = candidate_days[-1]
             current_totals[fallback_day] += 1
             assigned[fallback_day].append(busy_card)
+            _append_log_entry(log_path, busy_card, fallback_day)
     return assigned
 
 
@@ -195,6 +243,13 @@ def _busy_reschedule_background(did, busy_days: int, spread_days: int):
         did_query = (
             f"AND CASE WHEN odid==0 THEN did ELSE odid END IN {ids2str(did_list)}"
         )
+
+    log_path = _get_log_path()
+    if log_path and log_path.exists():
+        try:
+            log_path.unlink()
+        except OSError:
+            log_path = None
 
     window_cards = _fetch_window_cards(busy_start, window_end, did_query)
     if not window_cards:
@@ -282,7 +337,9 @@ def _busy_reschedule_background(did, busy_days: int, spread_days: int):
         additional = extra_quota + (1 if idx < extra_remainder else 0)
         target_totals[day] = base_counts[day] + additional
 
-    assignments = _allocate_busy_cards(busy_card_entries, candidate_days, target_totals)
+    assignments = _allocate_busy_cards(
+        busy_card_entries, candidate_days, target_totals, log_path
+    )
     updated_count = _update_cards(assignments, assignment_total)
     if updated_count > 0:
         mw.col.merge_undo_entries(undo_entry)
