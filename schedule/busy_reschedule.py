@@ -161,27 +161,38 @@ def _allocate_busy_cards(
     log_path: Optional[Path],
 ) -> Dict[int, List[BusyCard]]:
     assigned = defaultdict(list)
-    current_totals = defaultdict(int)
     sorted_cards = sorted(
         cards,
-        key=lambda c: (c.original_interval, c.stability, c.last_review, c.original_due),
+        key=lambda c: (c.original_interval, c.original_due),
     )
 
-    earliest_day = candidate_days[0] if candidate_days else 0
+    if not candidate_days:
+        return assigned
+
+    remaining = {day: target_totals.get(day, 0) for day in candidate_days}
+
     for busy_card in sorted_cards:
-        for day in candidate_days:
-            if day < earliest_day:
-                continue
-            if current_totals[day] < target_totals[day]:
-                current_totals[day] += 1
-                assigned[day].append(busy_card)
-                _append_log_entry(log_path, busy_card, day)
-                break
-        else:
-            fallback_day = candidate_days[-1]
-            current_totals[fallback_day] += 1
-            assigned[fallback_day].append(busy_card)
-            _append_log_entry(log_path, busy_card, fallback_day)
+        earliest_day = max(candidate_days[0], busy_card.original_due)
+        feasible_days = [
+            day
+            for day in candidate_days
+            if day >= earliest_day and remaining.get(day, 0) > 0
+        ]
+
+        if not feasible_days:
+            feasible_days = [day for day in candidate_days if remaining.get(day, 0) > 0]
+
+        if not feasible_days:
+            continue
+
+        def day_cost(day: int) -> tuple[float, int]:
+            cost = abs(day - busy_card.original_due) / busy_card.original_interval
+            return (cost, day)
+
+        best_day = min(feasible_days, key=day_cost)
+        remaining[best_day] -= 1
+        assigned[best_day].append(busy_card)
+        _append_log_entry(log_path, busy_card, best_day)
     return assigned
 
 
