@@ -120,7 +120,7 @@ def _prompt_busy_parameters():
     return busy_days, spread_days
 
 
-def _fetch_window_cards(busy_start: int, window_end: int, did_query: str) -> List[Card]:
+def _fetch_window_cards(window_end: int, did_query: str) -> List[Card]:
     cids = mw.col.db.list(
         f"""
         SELECT id
@@ -128,7 +128,7 @@ def _fetch_window_cards(busy_start: int, window_end: int, did_query: str) -> Lis
         WHERE type = {CARD_TYPE_REV}
         AND queue NOT IN ({QUEUE_TYPE_SUSPENDED}, {QUEUE_TYPE_NEW}, {QUEUE_TYPE_PREVIEW})
         {did_query}
-        AND CASE WHEN odid==0 THEN due ELSE odue END BETWEEN {busy_start} AND {window_end}
+        AND CASE WHEN odid==0 THEN due ELSE odue END <= {window_end}
     """
     )
     return [mw.col.get_card(cid) for cid in cids]
@@ -238,7 +238,6 @@ def _update_cards(assignments: Dict[int, List[BusyCard]], total: int) -> int:
 def _busy_reschedule_background(did, busy_days: int, spread_days: int):
     deck_manager = DeckManager(mw.col)
     today = mw.col.sched.today
-    busy_start = today
     busy_end = today + busy_days - 1
     window_end = today + busy_days + spread_days - 1
 
@@ -262,7 +261,7 @@ def _busy_reschedule_background(did, busy_days: int, spread_days: int):
         except OSError:
             log_path = None
 
-    window_cards = _fetch_window_cards(busy_start, window_end, did_query)
+    window_cards = _fetch_window_cards(window_end, did_query)
     if not window_cards:
         return {"count": 0, "skipped": 0, "busy_days": busy_days}
 
