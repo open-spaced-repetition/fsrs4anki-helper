@@ -82,7 +82,7 @@ Here's a comparison, the first graph is rescheduling via the Anki's built-in met
 
 The add-on reads Anki's built-in Easy Days configuration (weekly schedule) and applies it when rescheduling cards. You need to configure Easy Days in Anki's settings (Deck Options → Easy Days), not in the add-on settings.
 
-Additionally, the add-on allows you to configure specific dates as easy days. You can add specific dates (e.g., holidays, busy periods) through Tools → FSRS Helper → Less Anki on Easy Days → Manage Specific Dates. Cards due on these specific dates will be rescheduled to avoid those days.
+Additionally, the add-on allows you to configure specific dates as easy days. You can add specific dates (e.g., holidays, busy periods) through Tools → FSRS Helper → Less Anki on Easy Days → Apply easy days for specific dates, which opens a window where you can manage and apply easy days for specific dates. Cards due on these specific dates will be rescheduled to avoid those days.
 
 **Note**: After Anki 24.11, the easy days feature is built-in in Anki. The add-on reads Anki's Easy Days configuration to ensure consistency when rescheduling cards, allowing you to apply the same easy days settings during the rescheduling process.
 
