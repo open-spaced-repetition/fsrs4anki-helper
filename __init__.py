@@ -15,7 +15,7 @@ from .schedule.advance import advance
 from .schedule.flatten import flatten
 from .schedule.reset import clear_custom_data, clear_manual_rescheduling
 from .schedule.disperse_siblings import disperse_siblings
-from .schedule.busy_reschedule import reschedule_busy_period
+from .schedule.schedule_break import schedule_break
 from .schedule.easy_days import (
     easy_days,
     easy_day_for_sepcific_date,
@@ -169,8 +169,8 @@ add_action_to_gear(
     t("reschedule-recent-cards", count=config.days_to_reschedule),
 )
 
-menu_busy_reschedule = build_action(reschedule_busy_period, t("busy-reschedule-menu"))
-add_action_to_gear(reschedule_busy_period, t("busy-reschedule-menu"))
+menu_schedule_break = build_action(schedule_break, t("schedule-break-menu"))
+add_action_to_gear(schedule_break, t("schedule-break-menu"))
 
 menu_postpone = build_action(postpone, t("postpone-all-decks"))
 add_action_to_gear(postpone, t("postpone-cards"))
@@ -279,7 +279,7 @@ menu_for_easy_days = menu_for_helper.addMenu(t("less-anki-easy-days"))
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_reschedule_recent)
-menu_for_helper.addAction(menu_busy_reschedule)
+menu_for_helper.addAction(menu_schedule_break)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)
 menu_for_helper.addAction(menu_flatten)
