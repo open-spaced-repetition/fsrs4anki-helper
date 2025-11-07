@@ -2,7 +2,7 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-FSRS Helper is an Anki add-on that supports [FSRS](https://github.com/open-spaced-repetition/fsrs4anki) algorithm. It has nine main features:
+FSRS Helper is an Anki add-on that supports [FSRS](https://github.com/open-spaced-repetition/fsrs4anki) algorithm. It has the following main features:
 
 - **Reschedule** cards based on their entire review histories.
 - **Postpone** a selected number of due cards.
@@ -12,6 +12,8 @@ FSRS Helper is an Anki add-on that supports [FSRS](https://github.com/open-space
 - Less Anki on **Easy Days** (such as weekends) during rescheduling (based on load balance).
 - **Disperse** Siblings (cards with the same note) to avoid interference & reminder.
 - **Flatten** future due cards to a selected number of reviews per day.
+- **Remedy Hard Misuse** to correct historical Hard button misuse by converting Hard reviews to Again.
+- **Reset** to clear custom data or manual rescheduling records.
 - **Steps Stats** quantify your short-term memory performance and recommend learning steps.
 
 # Requirements
@@ -78,9 +80,11 @@ Here's a comparison, the first graph is rescheduling via the Anki's built-in met
 
 ## Easy Days
 
-You can select any day or days from Monday through Sunday to take off. Once enabled, the Helper add-on will try to avoid these days when rescheduling. On "Reduced" days, you will only have ~50% the usual amount of reviews. On "Minimum" days, there will be ~0% reviews.
+The add-on reads Anki's built-in Easy Days configuration (weekly schedule) and applies it when rescheduling cards. You need to configure Easy Days in Anki's settings (Deck Options → Easy Days), not in the add-on settings.
 
-**Update**: after Anki 24.11, the easy days feature is built-in. So you don't need to configure it in the add-on settings.
+Additionally, the add-on allows you to configure specific dates as easy days. You can add specific dates (e.g., holidays, busy periods) through Tools → FSRS Helper → Less Anki on Easy Days → Manage Specific Dates. Cards due on these specific dates will be rescheduled to avoid those days.
+
+**Note**: After Anki 24.11, the easy days feature is built-in in Anki. The add-on reads Anki's Easy Days configuration to ensure consistency when rescheduling cards, allowing you to apply the same easy days settings during the rescheduling process.
 
 Note: Easy Days only works for cards in the "review" stage. Due to technical limitations, FSRS doesn't modify the interval and due date of cards in the "(re)learning" stage. And it also doesn't reschedule cards whose interval is less than 3 days.
 
@@ -109,20 +113,6 @@ In Anki, some templates will generate multiple cards related in content from the
 ## Flatten
 
 You can set the maximum number of reviews per day for future days. The Helper add-on will find out the days that exceed the limit and postpone the extra cards to the future.
-
-## Advanced Search (<=2.1.66)
-
-In the card browser, you can right-click on the header and click on Difficulty, Stability, Retention to display the current memory states of cards.
-
-![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/7fb2b357-19d0-45fb-9cc0-f925258a6280)
-
-The Helper also adds [search syntax](https://docs.ankiweb.net/searching.html) for these three properties, here are some examples:
-
-- s<10: Cards with memory stability less than 10 days
-- d=5: Cards with difficulty equal to 5
-- r<0.6: Cards with memory retrievability (recall probability) less than 60%
-
-In Anki 23.10+, you can use the built-in search syntax to search for them as [card properties](https://docs.ankiweb.net/searching.html#card-properties).
 
 ## Advanced Statistics
 
@@ -163,20 +153,43 @@ For the 2nd recommended learning step, the scenario is more complex. It is based
 - S(Hard): Your first rating is Hard.
   - Because a Hard step is (1st learning step + 2nd learning step) / 2, the 2nd learning step is 2 * hard step - 1st learning step. And the Hard step is based on S(Hard).
 
+### True Retention
+
+True Retention is a statistic that shows the pass rate calculated only on cards with intervals greater than or equal to one day. It provides a better indicator of learning quality than the Again rate because it excludes cards in the learning phase.
+
+To enable True Retention statistics, go to Tools → FSRS Helper → Show true retention. Note that this table may slow down the statistics page loading if you have a lot of reviews, so enable it with caution.
+
+By default, mature cards are defined as cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on configuration (`mature_ivl` setting).
+
+## Remedy Hard Misuse
+
+This feature allows you to correct historical misuse of the Hard button by converting Hard reviews (ease = 2) to Again reviews (ease = 1) within a specified date range. This can help improve the accuracy of your FSRS parameters and scheduling. You can also undo the remedy operation if needed.
+
+**Important:** This feature modifies your review history. It is recommended to create a backup before using this feature. You can undo this operation if you have the remedy record file.
+
+## Reset
+
+The add-on provides two reset options:
+
+- **Clear custom data:** Removes all custom data stored by the add-on on cards. This can be useful if you want to start fresh with the add-on's tracking.
+- **Clear manual rescheduling:** Removes redundant manual rescheduling entries from the review log. This helps clean up your review history.
+
 ## Other features
 
 - **Auto reschedule cards reviewed on other devices after sync:** This option is useful if you do some (or all) of your reviews on platforms that don't support FSRS such as AnkiDroid or AnkiWeb. If this option is enabled, the reviews synced from the other devices will be automatically rescheduled according to the FSRS algorithm. If you are relying on this feature, it is recommended to sync the reviews daily for the best results.
-- **Auto reschedule the card you just reviewed (<=2.1.66):** If you enable this option, every card that you review will be rescheduled. Enabling this option is not essential for using FSRS. It is mainly intended for gradually transitioning your old cards to FSRS when starting to use FSRS. The other option for transitioning old cards to FSRS is to reschedule all cards, but this tends to induce a huge backlog for many people. Other advantages of enabling the "Auto reschedule the card you just reviewed" option include:
-    - Load balance and easy days are applied when rescheduling.
-    - It allows you to use learning or relearning steps longer than or equal to 1 day without breaking the scheduling. However, for best results, it is not recommended to use such steps even with this option enabled because FSRS can determine the next intervals more accurately.
-
-    However, this option also has some disadvantages, which include:
-    - The intervals displayed above the answer buttons may be inconsistent with the real interval after rescheduling, though the real ones will be more optimal.
-    - It might have a small effect on the responsiveness of Anki and introduce lags because it needs more calculations for each review and causes constant queue rebuilding.
 - **Auto disperse siblings when review:** It automatically disperses siblings after each review. But it could cause constant queue rebuilding, which slows down Anki and breaks Display Order settings.
 - **Reschedule all cards:** This option is used to reschedule all the cards in the decks in which FSRS is enabled. It should only be used after you have installed FSRS for the first time and/or updated your parameters.
-- **Reschedule cards reviewed in the last 7 days:** This option can be used to reschedule the cards that were reviewed in the last few days. The number of days can be adjusted in the add-on config.
-- **Update scheduler:** This option can be used to check for updates to the FSRS scheduler and update the scheduler code if an update is available. While updating the scheduler code, this option preserves your existing configuration.
+- **Reschedule cards reviewed in the last n days:** This option can be used to reschedule the cards that were reviewed in the last few days. The number of days (default: 7) can be adjusted in the add-on configuration. To change this setting:
+  1. Go to Tools → FSRS Helper → Configuration (or open the add-on configuration)
+  2. Find the `days_to_reschedule` setting
+  3. Change the value to your desired number of days
+  4. Save the configuration
+- **Display memory state after answer:** When enabled, this option displays the current Difficulty (D), Stability (S), and Retrievability (R) values below the answer buttons after each review. This helps you understand the memory state of each card.
+- **Show true retention:** When enabled, this option adds a "True Retention" section to the statistics page. True retention is the pass rate calculated only on cards with intervals greater than or equal to one day, providing a better indicator of learning quality than the Again rate.
+- **Reschedule set due date:** When enabled, this option allows rescheduling to overwrite cards that have manually set due dates. By default, cards with manually set due dates are skipped during rescheduling.
+- **Visualize schedule:** Opens a web-based visualization tool that shows your FSRS schedule based on your current parameters and desired retention.
+- **Export dataset:** Exports your review history dataset for research purposes. The exported file is saved in the add-on's `user_files` folder.
+- **Browser custom columns:** The add-on adds a "Target R" (Target Retrievability) column to the card browser, showing the predicted retrievability for each card.
 
 # Mechanism
 
