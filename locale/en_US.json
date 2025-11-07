@@ -17,7 +17,7 @@
     },
     "schedule-break-menu": "Schedule a Break",
     "schedule-break-dialog-title": "Schedule a Break",
-    "schedule-break-dialog-break-days": "How many upcoming days will you be away from Anki?",
+    "schedule-break-dialog-break-days": "How many upcoming days will you be away from Anki?\n\nNote: Cards overdue (backlog), due today, and due during the break period will be rescheduled.",
     "schedule-break-dialog-spread-days": "Across how many days should the reviews be redistributed?",
     "schedule-break-label": "Scheduling a break",
     "schedule-break-analyze-progress": "Preparing %{count} of %{total} cards",

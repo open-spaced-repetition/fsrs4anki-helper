@@ -17,7 +17,7 @@
     },
     "schedule-break-menu": "安排休息",
     "schedule-break-dialog-title": "安排休息",
-    "schedule-break-dialog-break-days": "未来有多少天无法使用 Anki？",
+    "schedule-break-dialog-break-days": "未来有多少天无法使用 Anki？\n\n注意：逾期卡片（积压）、今天到期以及休息期间的卡片都会被重新安排。",
     "schedule-break-dialog-spread-days": "希望把复习平均分散到多少天？",
     "schedule-break-label": "正在安排休息",
     "schedule-break-analyze-progress": "正在分析 %{count} / %{total} 张卡片",
