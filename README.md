@@ -2,11 +2,12 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-FSRS Helper is an Anki add-on that supports [FSRS](https://github.com/open-spaced-repetition/fsrs4anki) algorithm. It has eight main features:
+FSRS Helper is an Anki add-on that supports [FSRS](https://github.com/open-spaced-repetition/fsrs4anki) algorithm. It has nine main features:
 
 - **Reschedule** cards based on their entire review histories.
 - **Postpone** a selected number of due cards.
 - **Advance** a selected number of undue cards.
+- **Schedule a Break** to redistribute cards due during an upcoming period when you'll be away from Anki.
 - **Balance** the load during rescheduling (based on fuzz).
 - Less Anki on **Easy Days** (such as weekends) during rescheduling (based on load balance).
 - **Disperse** Siblings (cards with the same note) to avoid interference & reminder.
@@ -34,9 +35,10 @@ Installation link: https://ankiweb.net/shared/info/759844606
 
 | Feature name      | How does it work?                                            | When should I use it?                                        |
 | ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| Reschedule        | Calculates stability, difficulty, and the optimum interval from the entire review history for each card using FSRS parameters. Then, it changes the due dates of cards. | When you update the parameters or desired retention of FSRS. Rescheduling with the Helper does not add to the size of your collection, unlike Anki’s built-in “Reschedule cards on change.” |
+| Reschedule        | Calculates stability, difficulty, and the optimum interval from the entire review history for each card using FSRS parameters. Then, it changes the due dates of cards. | When you update the parameters or desired retention of FSRS. Rescheduling with the Helper does not add to the size of your collection, unlike Anki's built-in "Reschedule cards on change." |
 | Advance           | Decreases the intervals of undue cards based on current and requested R, and interval length to minimize damage to long-term learning. | When you want to review your material ahead of time, for example, before a test. |
 | Postpone          | Increases the intervals of cards that are due today based on current and requested R, and interval length in a way that minimizes damage to long-term learning. | When you are dealing with a large number of reviews after taking a break from Anki or after rescheduling. |
+| Schedule a Break  | Redistributes cards due during an upcoming break period (including overdue cards and cards due today) across follow-up days. Uses a cost function to minimize deviation from original due dates. | When you know you'll be away from Anki for a period (e.g., vacation, busy work period) and want to proactively redistribute reviews. |
 | Load Balancing    | After the optimal interval is calculated, it is adjusted by a random amount to make the distribution of reviews over time more uniform. | Always. This feature makes your workload (reviews per day) more consistent. |
 | Easy Days         | After the optimal interval is calculated, it is slightly adjusted to change the due date. | If you want to spend less time on Anki on some days of the week, for example, Sundays. |
 | Disperse Siblings | Siblings are cards generated from the same note. Their intervals are adjusted to spread them further apart from each other. | Always. This feature alleviates the interference; disabling it will only decrease the efficiency of spaced repetition. |
@@ -57,6 +59,12 @@ These two functions are very similar, so I'll talk about them together. You can 
 ![image](https://github.com/user-attachments/assets/56ff6f97-c111-43f6-be1c-43415dbb5e0b)
 
 ![image](https://github.com/open-spaced-repetition/fsrs4anki-helper/assets/32575846/f9838010-cb00-44ce-aefc-10300f2a586e)
+
+## Schedule a Break
+
+This feature allows you to redistribute cards due during an upcoming period when you cannot use Anki across follow-up days. You specify how many days you'll be away (break days) and across how many days the reviews should be redistributed (spread days).
+
+**Important:** This feature will reduce future memory retention rates. The algorithm can only minimize the decline. You can undo this operation using Edit -> Undo.
 
 ## Load Balance
 
