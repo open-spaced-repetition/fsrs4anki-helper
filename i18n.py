@@ -7,6 +7,8 @@ from aqt.utils import tr
 locale = mw.pm.meta["defaultLang"]
 if locale == "en":
     locale = "en_US"
+if locale == "de":
+    locale = "de_DE"
 
 addon_dir = Path(os.path.dirname(__file__))
 
