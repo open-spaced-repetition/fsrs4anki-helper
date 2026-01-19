@@ -104,7 +104,7 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
         return (due, due), last_review
 
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_interval, maximum_interval)
-    
+
     # If the card is currently scheduled outside the fuzz range, don't reschedule the card to bring it within the fuzz range.
     # Rather, create a new fuzz range around the original due date. Users can use `reschedule` to bring the card in range.
     if (
