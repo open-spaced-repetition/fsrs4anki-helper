@@ -119,6 +119,8 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
     ):  # +2 is just a safeguard to exclude cards that go beyond the fuzz range due to rounding
         current_ivl = due - last_review
         min_ivl, max_ivl = get_fuzz_range(current_ivl, last_interval, maximum_interval)
+        # Prevent a further decrease in ivl because it is already lower than the optimal range
+        min_ivl = max(current_ivl, min_ivl)
 
     if due >= mw.col.sched.today:
         due_range = (
