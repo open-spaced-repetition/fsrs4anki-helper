@@ -56,8 +56,7 @@ def retention_stability(lim) -> tuple:
         return 0, 0, 0
     recall_sum = sum(retention_list)
 
-    time_sum = mw.col.db.scalar(
-        f"""
+    time_sum = mw.col.db.scalar(f"""
     SELECT SUM(time)/1000
     FROM revlog
     WHERE cid IN (
@@ -68,8 +67,7 @@ def retention_stability(lim) -> tuple:
         AND json_extract(data, '$.s') IS NOT NULL
         {lim}
     )
-    """
-    )
+    """)
     return (
         card_cnt,
         round(recall_sum),

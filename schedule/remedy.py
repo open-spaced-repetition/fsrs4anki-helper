@@ -35,14 +35,12 @@ class RemedyDateRangeWidget(QWidget):
         self.resize(300, 200)
 
     def remedy_hard_misuse(self):
-        revlog_ids = mw.col.db.list(
-            f"""SELECT id
+        revlog_ids = mw.col.db.list(f"""SELECT id
             FROM revlog
             WHERE ease = 2
             AND id > {self.start_date_edit.dateTime().toMSecsSinceEpoch()}
             AND id < {self.end_date_edit.dateTime().toMSecsSinceEpoch()}
-            """
-        )
+            """)
 
         if len(revlog_ids) == 0:
             tooltip(t("remedy-no-hard-reviews"))
@@ -59,12 +57,10 @@ class RemedyDateRangeWidget(QWidget):
         if not yes:
             return
 
-        mw.col.db.execute(
-            f"""UPDATE revlog
+        mw.col.db.execute(f"""UPDATE revlog
             SET ease = 1, usn = -1
             WHERE id IN {ids2str(revlog_ids)}
-            """
-        )
+            """)
         col_set_modified()
         mw.col.set_schema_modified()
         addon = mw.addonManager.addonFromModule(__name__)
@@ -102,12 +98,10 @@ def undo_remedy(did):
     with open(revlog_id_csv, "r") as f:
         revlog_ids = list(map(int, f.read().splitlines()))
 
-    mw.col.db.execute(
-        f"""UPDATE revlog
+    mw.col.db.execute(f"""UPDATE revlog
         SET ease = 2, usn = -1
         WHERE id IN {ids2str(revlog_ids)}
-        """
-    )
+        """)
     col_set_modified()
     mw.col.set_schema_modified()
     os.remove(revlog_id_csv)

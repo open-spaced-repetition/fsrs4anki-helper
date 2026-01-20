@@ -24,7 +24,7 @@ def fsrs_field_filter(
 
     # split the name into the 'fsrs' prefix, and the rest
     try:
-        (label, rest) = filter_name.split("-", maxsplit=1)
+        label, rest = filter_name.split("-", maxsplit=1)
     except ValueError:
         return invalid_name(filter_name)
 

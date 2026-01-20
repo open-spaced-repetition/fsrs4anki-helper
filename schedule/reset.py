@@ -8,14 +8,12 @@ def clear_custom_data(did):
     if not askUser(t("clear-custom-data-confirmation")):
         return
 
-    cards = mw.col.db.list(
-        """
+    cards = mw.col.db.list("""
             SELECT id
             FROM cards
             WHERE data != '' 
             AND json_extract(data, '$.cd') IS NOT NULL
-        """
-    )
+        """)
 
     cnt = 0
     reset_cards = []
@@ -46,8 +44,7 @@ def clear_manual_rescheduling(did):
     if not ask_one_way_sync():
         return
 
-    revlog_ids = mw.col.db.list(
-        """
+    revlog_ids = mw.col.db.list("""
         SELECT cur.id
         FROM revlog as cur
         WHERE cur.type >= 4
@@ -62,8 +59,7 @@ def clear_manual_rescheduling(did):
                 AND cid == cur.cid
             )
         ) >= 4
-    """
-    )
+    """)
     cnt = len(revlog_ids)
     mw.col.db.execute(f"DELETE FROM revlog WHERE id IN {ids2str(revlog_ids)}")
     col_set_modified()

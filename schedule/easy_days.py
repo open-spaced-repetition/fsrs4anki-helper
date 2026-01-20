@@ -22,8 +22,7 @@ def easy_days(did):
     due_days = [today + day_offset for day_offset in range(35)]
 
     # find cards that are due in easy days in the next 35 days
-    due_in_easy_days_cids = mw.col.db.list(
-        f"""SELECT id
+    due_in_easy_days_cids = mw.col.db.list(f"""SELECT id
         FROM cards
         WHERE data != '' 
         AND json_extract(data, '$.s') IS NOT NULL
@@ -31,8 +30,7 @@ def easy_days(did):
         THEN due
         ELSE odue
         END IN {ids2str(due_days)}
-        """
-    )
+        """)
     undo_entry = mw.col.add_custom_undo_entry(t("easy-days"))
     fut = reschedule(
         did=None,
@@ -118,8 +116,7 @@ class EasySpecificDateManagerWidget(QWidget):
             specific_due = today + day_offset
             specific_dues.append(specific_due)
         undo_entry = mw.col.add_custom_undo_entry(t("easy-days"))
-        filtered_dues_cids = mw.col.db.list(
-            f"""SELECT id
+        filtered_dues_cids = mw.col.db.list(f"""SELECT id
             FROM cards
             WHERE data != '' 
             AND json_extract(data, '$.s') IS NOT NULL
@@ -127,8 +124,7 @@ class EasySpecificDateManagerWidget(QWidget):
             THEN due
             ELSE odue
             END IN {ids2str(specific_dues)}
-            """
-        )
+            """)
 
         reschedule(
             None,

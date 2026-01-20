@@ -133,16 +133,14 @@ def _prompt_break_parameters():
 
 
 def _fetch_window_cards(window_end: int, did_query: str) -> List[Card]:
-    cids = mw.col.db.list(
-        f"""
+    cids = mw.col.db.list(f"""
         SELECT id
         FROM cards
         WHERE type = {CARD_TYPE_REV}
         AND queue NOT IN ({QUEUE_TYPE_SUSPENDED}, {QUEUE_TYPE_NEW}, {QUEUE_TYPE_PREVIEW})
         {did_query}
         AND CASE WHEN odid==0 THEN due ELSE odue END <= {window_end}
-    """
-    )
+    """)
     return [mw.col.get_card(cid) for cid in cids]
 
 

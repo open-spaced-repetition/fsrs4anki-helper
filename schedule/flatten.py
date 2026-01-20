@@ -13,7 +13,7 @@ def get_desired_flatten_limit_with_response(did):
     inquire_text = t("flatten-inquire-text")
     info_text = t("flatten-info-text")
     warning_text = t("flatten-warning-text")
-    (s, r) = getText(inquire_text + info_text + warning_text, default="100")
+    s, r = getText(inquire_text + info_text + warning_text, default="100")
     if r:
         return (RepresentsInt(s), r)
     return (None, r)
@@ -24,7 +24,7 @@ def flatten(did):
         tooltip(t("enable-fsrs-warning"))
         return
 
-    (desired_flatten_limit, resp) = get_desired_flatten_limit_with_response(did)
+    desired_flatten_limit, resp = get_desired_flatten_limit_with_response(did)
     if desired_flatten_limit is None:
         if resp:
             showWarning(t("flatten-enter-number"))
@@ -59,8 +59,7 @@ def flatten_background(did, desired_flatten_limit):
     current_date = sched_current_date()
     true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
 
-    cards_exceed_future = mw.col.db.all(
-        f"""
+    cards_exceed_future = mw.col.db.all(f"""
     SELECT rc.id, rc.true_due, rc.stability
     FROM (
         SELECT id,
@@ -95,11 +94,9 @@ def flatten_background(did, desired_flatten_limit):
     ) AS overdue ON rc.true_due = overdue.true_due
     WHERE rc.rank > {desired_flatten_limit}
     ORDER BY rc.true_due
-        """
-    )
+        """)
 
-    cards_backlog = mw.col.db.all(
-        f"""
+    cards_backlog = mw.col.db.all(f"""
     SELECT id,
         {true_due} AS true_due,
         json_extract(data, '$.s') AS stability
@@ -110,8 +107,7 @@ def flatten_background(did, desired_flatten_limit):
     AND queue = {QUEUE_TYPE_REV}
     {"AND did IN %s" % did_list if did is not None else ""}
     ORDER BY stability
-    """
-    )
+    """)
 
     cards_to_flatten = cards_backlog + cards_exceed_future
     total_cnt = len(cards_to_flatten)
@@ -120,14 +116,12 @@ def flatten_background(did, desired_flatten_limit):
         int,
         {
             day: cnt
-            for day, cnt in mw.col.db.all(
-                f"""SELECT {true_due} AS true_due, count() 
+            for day, cnt in mw.col.db.all(f"""SELECT {true_due} AS true_due, count() 
                         FROM cards 
                         WHERE true_due >= {today}
                         AND queue = {QUEUE_TYPE_REV}
                         {"AND did IN %s" % did_list if did is not None else ""}
-                        GROUP BY {true_due}"""
-            )
+                        GROUP BY {true_due}""")
         },
     )
 

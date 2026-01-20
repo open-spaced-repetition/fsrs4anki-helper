@@ -16,8 +16,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if filter_flag:
         nid_query = f"AND nid IN {filtered_nid_string}"
 
-    siblings = mw.col.db.all(
-        f"""
+    siblings = mw.col.db.all(f"""
     SELECT 
         id,
         nid,
@@ -44,8 +43,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     AND type = 2
     AND queue != -1
     {did_query if did is not None else ""}
-    """
-    )
+    """)
     nid_siblings_dict = {}
     for cid, nid, did, stability, due in siblings:
         if nid not in nid_siblings_dict:
@@ -66,8 +64,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 
 
 def get_siblings_when_review(card: Card):
-    siblings = mw.col.db.all(
-        f"""
+    siblings = mw.col.db.all(f"""
     SELECT 
         id,
         CASE WHEN odid==0
@@ -82,8 +79,7 @@ def get_siblings_when_review(card: Card):
     AND json_extract(data, '$.s') IS NOT NULL
     AND type = 2
     AND queue != -1
-    """
-    )
+    """)
     siblings = map(
         lambda x: x
         + [
@@ -104,13 +100,24 @@ def get_due_range(cid, stability, due, desired_retention, maximum_interval):
         return (due, due), last_review
 
     min_ivl, max_ivl = get_fuzz_range(new_ivl, last_interval, maximum_interval)
+
+    # If the card is currently scheduled outside the fuzz range, don't reschedule the card to bring it within the fuzz range.
+    # Rather, create a new fuzz range around the original due date. Users can use `reschedule` to bring the card in range.
     if (
         due > last_review + max_ivl + 2
     ):  # +2 is just a safeguard to exclude cards that go beyond the fuzz range due to rounding
-        # don't reschedule the card to bring it within the fuzz range. Rather, create another fuzz range around the original due date.
         current_ivl = due - last_review
         # set maximum_interval = current_ivl to prevent a further increase in ivl
         min_ivl, max_ivl = get_fuzz_range(current_ivl, last_interval, current_ivl)
+
+    if (
+        due < last_review + min_ivl - 2
+    ):  # +2 is just a safeguard to exclude cards that go beyond the fuzz range due to rounding
+        current_ivl = due - last_review
+        min_ivl, max_ivl = get_fuzz_range(current_ivl, last_interval, maximum_interval)
+        # Prevent a further decrease in ivl because it is already lower than the optimal range
+        min_ivl = max(current_ivl, min_ivl)
+
     if due >= mw.col.sched.today:
         due_range = (
             max(last_review + min_ivl, mw.col.sched.today),
