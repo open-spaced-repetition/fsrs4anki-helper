@@ -71,10 +71,13 @@ def auto_disperse(local_rids: List[int], texts: List[str]):
 
     remote_reviewed_cids = review_cid_remote(local_rids)
     remote_reviewed_cid_string = ids2str(remote_reviewed_cids)
-    remote_reviewed_nids = [nid for nid in mw.col.db.list(f"""SELECT DISTINCT nid 
+    remote_reviewed_nids = [
+        nid
+        for nid in mw.col.db.list(f"""SELECT DISTINCT nid 
             FROM cards 
             WHERE id IN {remote_reviewed_cid_string}
-        """)]
+        """)
+    ]
     remote_reviewed_nid_string = ids2str(remote_reviewed_nids)
 
     fut = disperse_siblings(

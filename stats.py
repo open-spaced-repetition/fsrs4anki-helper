@@ -26,7 +26,8 @@ def _lineTbl_now(i):
 
 
 def retention_stability(lim) -> tuple:
-    elapse_stability_list = mw.col.db.all(f"""
+    elapse_stability_list = mw.col.db.all(
+        f"""
     SELECT 
         CASE WHEN odid==0
             THEN {mw.col.sched.today} - (due - ivl)
@@ -38,7 +39,9 @@ def retention_stability(lim) -> tuple:
     WHERE queue != 0 AND queue != -1
     AND data != ''
     AND json_extract(data, '$.s') IS NOT NULL
-    """ + lim)
+    """
+        + lim
+    )
     # x[0]: elapsed days
     # x[1]: stability
     # x[2]: decay
