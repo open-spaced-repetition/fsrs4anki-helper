@@ -18,7 +18,7 @@ def get_desired_postpone_cnt_with_response(safe_cnt, did):
     )
     warning_text = t("postpone-warning-text")
     info_text = t("postpone-info-text")
-    (s, r) = getText(
+    s, r = getText(
         inquire_text + notification_text + warning_text + info_text,
         default=f"{min(safe_cnt, 10)}",
     )
@@ -36,8 +36,7 @@ def postpone(did):
     if did is not None:
         did_list = ids2str(DM.deck_and_child_ids(did))
 
-    cards = mw.col.db.all(
-        f"""
+    cards = mw.col.db.all(f"""
         SELECT 
             id, 
             CASE WHEN odid==0
@@ -59,8 +58,7 @@ def postpone(did):
         AND due <= {mw.col.sched.today}
         AND queue = {QUEUE_TYPE_REV}
         {"AND did IN %s" % did_list if did is not None else ""}
-    """
-    )
+    """)
     # x[0]: cid
     # x[1]: did
     # x[2]: interval
@@ -99,7 +97,7 @@ def postpone(did):
         )
     )
 
-    (desired_postpone_cnt, resp) = get_desired_postpone_cnt_with_response(safe_cnt, did)
+    desired_postpone_cnt, resp = get_desired_postpone_cnt_with_response(safe_cnt, did)
     if desired_postpone_cnt is None:
         if resp:
             showWarning(t("postpone-enter-number"))

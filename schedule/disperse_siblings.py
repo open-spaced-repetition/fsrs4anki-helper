@@ -16,8 +16,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     if filter_flag:
         nid_query = f"AND nid IN {filtered_nid_string}"
 
-    siblings = mw.col.db.all(
-        f"""
+    siblings = mw.col.db.all(f"""
     SELECT 
         id,
         nid,
@@ -44,8 +43,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     AND type = 2
     AND queue != -1
     {did_query if did is not None else ""}
-    """
-    )
+    """)
     nid_siblings_dict = {}
     for cid, nid, did, stability, due in siblings:
         if nid not in nid_siblings_dict:
@@ -66,8 +64,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 
 
 def get_siblings_when_review(card: Card):
-    siblings = mw.col.db.all(
-        f"""
+    siblings = mw.col.db.all(f"""
     SELECT 
         id,
         CASE WHEN odid==0
@@ -82,8 +79,7 @@ def get_siblings_when_review(card: Card):
     AND json_extract(data, '$.s') IS NOT NULL
     AND type = 2
     AND queue != -1
-    """
-    )
+    """)
     siblings = map(
         lambda x: x
         + [

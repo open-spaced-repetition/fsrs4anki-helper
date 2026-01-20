@@ -26,8 +26,7 @@ def _lineTbl_now(i):
 
 
 def retention_stability(lim) -> tuple:
-    elapse_stability_list = mw.col.db.all(
-        f"""
+    elapse_stability_list = mw.col.db.all(f"""
     SELECT 
         CASE WHEN odid==0
             THEN {mw.col.sched.today} - (due - ivl)
@@ -39,9 +38,7 @@ def retention_stability(lim) -> tuple:
     WHERE queue != 0 AND queue != -1
     AND data != ''
     AND json_extract(data, '$.s') IS NOT NULL
-    """
-        + lim
-    )
+    """ + lim)
     # x[0]: elapsed days
     # x[1]: stability
     # x[2]: decay
@@ -56,8 +53,7 @@ def retention_stability(lim) -> tuple:
         return 0, 0, 0
     recall_sum = sum(retention_list)
 
-    time_sum = mw.col.db.scalar(
-        f"""
+    time_sum = mw.col.db.scalar(f"""
     SELECT SUM(time)/1000
     FROM revlog
     WHERE cid IN (
@@ -68,8 +64,7 @@ def retention_stability(lim) -> tuple:
         AND json_extract(data, '$.s') IS NOT NULL
         {lim}
     )
-    """
-    )
+    """)
     return (
         card_cnt,
         round(recall_sum),

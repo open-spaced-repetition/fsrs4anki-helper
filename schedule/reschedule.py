@@ -83,13 +83,11 @@ class FSRS:
         true_due = "CASE WHEN odid==0 THEN due ELSE odue END"
         original_did = "CASE WHEN odid==0 THEN did ELSE odid END"
 
-        deck_stats = mw.col.db.all(
-            f"""SELECT {original_did}, {true_due}, count() 
+        deck_stats = mw.col.db.all(f"""SELECT {original_did}, {true_due}, count() 
                 FROM cards 
                 WHERE type = 2  
                 AND queue != -1
-                GROUP BY {original_did}, {true_due}"""
-        )
+                GROUP BY {original_did}, {true_due}""")
 
         self.due_cnt_per_day_per_preset = defaultdict(lambda: defaultdict(int))
         self.did_to_preset_id = {}
@@ -356,8 +354,7 @@ def reschedule_background(
         else ""
     )
 
-    cid_did_nid = mw.col.db.all(
-        f"""
+    cid_did_nid = mw.col.db.all(f"""
         SELECT 
             id,
             CASE WHEN odid==0
@@ -372,8 +369,7 @@ def reschedule_background(
         {filter_query if filter_flag else ""}
         {skip_query}
         ORDER BY ivl
-    """
-    )
+    """)
     total_cnt = len(cid_did_nid)
     mw.taskman.run_on_main(
         lambda: mw.progress.start(

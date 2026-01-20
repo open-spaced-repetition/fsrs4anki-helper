@@ -22,7 +22,7 @@ def get_desired_advance_cnt_with_response(safe_cnt, did):
     )
     warning_text = t("advance-warning-text")
     info_text = t("advance-info-text")
-    (s, r) = getText(
+    s, r = getText(
         inquire_text + notification_text + warning_text + info_text,
         default=f"{min(safe_cnt, 10)}",
     )
@@ -40,8 +40,7 @@ def advance(did):
     if did is not None:
         did_list = ids2str(DM.deck_and_child_ids(did))
 
-    cards = mw.col.db.all(
-        f"""
+    cards = mw.col.db.all(f"""
         SELECT 
             id, 
             CASE WHEN odid==0
@@ -63,8 +62,7 @@ def advance(did):
         AND due > {mw.col.sched.today}
         AND queue = {QUEUE_TYPE_REV}
         {"AND did IN %s" % did_list if did is not None else ""}
-    """
-    )
+    """)
     # x[0]: cid
     # x[1]: did
     # x[2]: interval
@@ -102,7 +100,7 @@ def advance(did):
         )
     )
 
-    (desired_advance_cnt, resp) = get_desired_advance_cnt_with_response(safe_cnt, did)
+    desired_advance_cnt, resp = get_desired_advance_cnt_with_response(safe_cnt, did)
     if desired_advance_cnt is None:
         if resp:
             showWarning(t("advance-enter-number"))
