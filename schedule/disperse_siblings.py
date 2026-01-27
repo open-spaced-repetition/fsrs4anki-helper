@@ -248,7 +248,6 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
     best_due_dates, due_ranges, min_gap = disperse(siblings)
 
     for cid, due in best_due_dates.items():
-        due = max(due, mw.col.sched.today + 1)
         card = mw.col.get_card(cid)
         old_due = card.odue if card.odid else card.due
         last_review, _ = get_last_review_date_and_interval(card)
