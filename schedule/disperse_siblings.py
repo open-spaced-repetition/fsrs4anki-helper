@@ -171,7 +171,7 @@ def disperse_siblings(
         mw.reset()
 
     fut = mw.taskman.run_in_background(
-        lambda: disperse_siblings_backgroud(
+        lambda: disperse_siblings_background(
             did, filter_flag, filtered_nid_string, text_from_reschedule
         ),
         on_done,
@@ -180,7 +180,7 @@ def disperse_siblings(
     return fut
 
 
-def disperse_siblings_backgroud(
+def disperse_siblings_background(
     did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""
 ):
     nid_siblings = get_siblings(did, filter_flag, filtered_nid_string)
