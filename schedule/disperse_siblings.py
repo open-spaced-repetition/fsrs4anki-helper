@@ -52,10 +52,10 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 
         if did not in deck_config_cache:
             deck_config_cache[did] = {
-                'dr': get_dr(mw.col.decks, did),
-                'max_ivl': mw.col.decks.config_dict_for_deck_id(did)["rev"]["maxIvl"]
+                "dr": get_dr(mw.col.decks, did),
+                "max_ivl": mw.col.decks.config_dict_for_deck_id(did)["rev"]["maxIvl"],
             }
-            
+
         config = deck_config_cache[did]
         nid_siblings_dict[nid].append(
             (
@@ -63,8 +63,8 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
                 did,
                 stability,
                 due,
-                config['dr'],
-                config['max_ivl'],
+                config["dr"],
+                config["max_ivl"],
             )
         )
     return nid_siblings_dict
