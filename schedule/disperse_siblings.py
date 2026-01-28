@@ -45,19 +45,26 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
     {did_query if did is not None else ""}
     """)
     nid_siblings_dict = {}
+    deck_config_cache = {}
     for cid, nid, did, stability, due in siblings:
         if nid not in nid_siblings_dict:
             nid_siblings_dict[nid] = []
-        dr = get_dr(mw.col.decks, did)
-        max_ivl = mw.col.decks.config_dict_for_deck_id(did)["rev"]["maxIvl"]
+
+        if did not in deck_config_cache:
+            deck_config_cache[did] = {
+                "dr": get_dr(mw.col.decks, did),
+                "max_ivl": mw.col.decks.config_dict_for_deck_id(did)["rev"]["maxIvl"],
+            }
+
+        config = deck_config_cache[did]
         nid_siblings_dict[nid].append(
             (
                 cid,
                 did,
                 stability,
                 due,
-                dr,
-                max_ivl,
+                config["dr"],
+                config["max_ivl"],
             )
         )
     return nid_siblings_dict
