@@ -59,6 +59,8 @@
     "step-stats": "Step Stats",
     "step-stats-disabled": "If you would like to see your (re)learning step statistics, you can enable them with <code>Tools > FSRS Helper > Show step stats.</code><br/><br/>This graph will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "step-stats-subtitle": "Statistics for different first ratings during (re)learning steps",
+    "step-stats-scope-collection": "Scope: whole collection.",
+    "step-stats-scope-preset": "Scope: all decks using preset %{preset_name}.",
     "again-then-good": "Again Then Good",
     "good-then-again": "Good Then Again",
     "first-ratings": "First ratings",

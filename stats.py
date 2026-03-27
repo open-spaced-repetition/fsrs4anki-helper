@@ -1,5 +1,8 @@
+import html
+
 from aqt.utils import tooltip
 from anki.stats import CollectionStats
+from anki.utils import ids2str
 from .configuration import Config
 from .steps import steps_stats
 from .i18n import t
@@ -88,6 +91,35 @@ def todayStats_new(self):
     )
 
 
+def get_step_stats_scope(self: CollectionStats) -> tuple[str, str]:
+    card_lim = self._revlogLimit()
+    if self.wholeCollection or not card_lim:
+        return card_lim, t("step-stats-scope-collection")
+
+    current_deck = self.col.decks.current()
+    if not current_deck or current_deck.get("dyn"):
+        return card_lim, ""
+
+    preset_id = current_deck.get("conf") if current_deck else None
+    if preset_id is None:
+        return card_lim, ""
+
+    preset = self.col.decks.get_config(preset_id) or {}
+    preset_name = preset.get("name") or str(preset_id)
+    scoped_deck_ids = [
+        deck["id"]
+        for deck in self.col.decks.all()
+        if deck.get("conf") == preset_id and not deck.get("dyn")
+    ]
+    if not scoped_deck_ids:
+        return card_lim, ""
+
+    return (
+        "cid in (select id from cards where did in %s)" % ids2str(scoped_deck_ids),
+        t("step-stats-scope-preset", preset_name=html.escape(preset_name)),
+    )
+
+
 def get_steps_stats(self: CollectionStats):
     config = Config()
     config.load()
@@ -100,14 +132,16 @@ def get_steps_stats(self: CollectionStats):
         )
     else:
         period_lim = ""
-    deck_lim = self._revlogLimit()
-    results = steps_stats(deck_lim, period_lim)
+    card_lim, scope_note = get_step_stats_scope(self)
+    results = steps_stats(card_lim, period_lim)
 
     title = CollectionStats._title(
         self,
         t("step-stats"),
         t("step-stats-subtitle"),
     )
+
+    scope_note_html = f"<p><em>{scope_note}</em></p>" if scope_note else ""
 
     html = (
         """
@@ -336,7 +370,7 @@ def get_steps_stats(self: CollectionStats):
         + t("step-stats-help-line-7")
         + "</li></ul> </td></tr></table>"
     )
-    return self._section(title + html)
+    return self._section(title + scope_note_html + html)
 
 
 def get_fsrs_stats(self: CollectionStats):
