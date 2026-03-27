@@ -73,6 +73,8 @@
     "step-stats-help-line-5": "Average Retention rates (R̅₁, R̅₂, R̅₃, R̅₄) for each group of subsequent ratings and the Average Overall Retention (R̅) for the first ratings are shown. Based on this, the average stability for cards after the first rating of the day (Again or Hard or Good or Lapse) is calculated.",
     "step-stats-help-line-6": "T<sub>X%</sub> means that X% of the cards in this deck with a first rating (Again or Hard or Good or Lapse) are delayed by this amount of time or less till the next rating.",
     "step-stats-help-line-7": "Recommended (re)learning steps are calculated from stability and desired retention. The 1st learning step is based S(Again). The 2nd learning step is based on the minimum of {S(Hard)* 2 - S(Again), S(Good), S(Again Then Good)}. The relearning step is base on S(Lapse).",
+    "warning": "Warning",
+    "step-stats-warning": "Due to technical limitations, at most two learning steps and one relearning step can be recommended. This doesn't mean you need that many steps, nor that they are sufficient. If you are already using more steps and are using FSRS, be cautious when changing the number of steps. Reducing steps may significantly lower your retention, and FSRS takes a long time to adapt to your new step configuration.",
     "recommended-learning-steps": "Recommended learning steps",
     "recommended-relearning-steps": "Recommended relearning steps",
     "lapse": "Lapse",

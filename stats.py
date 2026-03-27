@@ -236,6 +236,11 @@ def get_steps_stats(self: CollectionStats):
             <span id="relearning-steps"></span>
         </td>
     </tr>
+    <tr>
+        <td colspan="12" class="trl">
+            <strong>{t("warning")}:</strong> {t("step-stats-warning")}
+        </td>
+    </tr>
 
     <script>
         const learningStepRow = document.querySelector('#learning-steps');
