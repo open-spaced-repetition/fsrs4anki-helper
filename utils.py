@@ -48,8 +48,9 @@ def filter_revlogs(
 ) -> List[CardStatsResponse.StatsRevlogEntry]:
     return list(
         filter(
-            lambda x: x.button_chosen >= 1
-            and (x.review_kind != REVLOG_CRAM or x.ease != 0),
+            lambda x: (
+                x.button_chosen >= 1 and (x.review_kind != REVLOG_CRAM or x.ease != 0)
+            ),
             revlogs,
         )
     )

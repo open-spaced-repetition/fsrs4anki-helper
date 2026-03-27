@@ -90,8 +90,9 @@ def postpone(did):
     safe_cnt = len(
         list(
             filter(
-                lambda x: (x[7] ** (-1 / x[6]) - 1) / (x[5] ** (-1 / x[6]) - 1) - 1
-                < 0.15,
+                lambda x: (
+                    (x[7] ** (-1 / x[6]) - 1) / (x[5] ** (-1 / x[6]) - 1) - 1 < 0.15
+                ),
                 cards,
             )
         )

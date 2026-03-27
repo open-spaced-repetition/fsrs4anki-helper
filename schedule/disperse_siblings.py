@@ -88,11 +88,13 @@ def get_siblings_when_review(card: Card):
     AND queue != -1
     """)
     siblings = map(
-        lambda x: x
-        + [
-            get_dr(mw.col.decks, x[1]),
-            mw.col.decks.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
-        ],
+        lambda x: (
+            x
+            + [
+                get_dr(mw.col.decks, x[1]),
+                mw.col.decks.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
+            ]
+        ),
         siblings,
     )
     return list(siblings)

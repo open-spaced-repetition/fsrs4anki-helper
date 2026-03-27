@@ -93,8 +93,9 @@ def advance(did):
     safe_cnt = len(
         list(
             filter(
-                lambda x: 1 - (x[7] ** (-1 / x[6]) - 1) / (x[5] ** (-1 / x[6]) - 1)
-                < 0.13,
+                lambda x: (
+                    1 - (x[7] ** (-1 / x[6]) - 1) / (x[5] ** (-1 / x[6]) - 1) < 0.13
+                ),
                 cards,
             )
         )
