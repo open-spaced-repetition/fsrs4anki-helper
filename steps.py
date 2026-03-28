@@ -31,14 +31,14 @@ def fit_forgetting_curve(points, low=1, high=86400 * 30, tolerance=0.1):
     return (high + low) / 2
 
 
-def steps_stats(deck_lim, period_lim):
+def steps_stats(card_lim, period_lim):
     sql = f"""
     WITH first_review AS (
     SELECT cid, MIN(id) AS first_id, ease AS first_rating
     FROM revlog
     WHERE ease BETWEEN 1 AND 4
     AND type = {REVLOG_LRN}
-    {"AND " + deck_lim if deck_lim else ""}
+    {"AND " + card_lim if card_lim else ""}
     GROUP BY cid
     {"HAVING " + period_lim if period_lim else ""}
     ),
@@ -69,7 +69,7 @@ def steps_stats(deck_lim, period_lim):
         FROM revlog
         WHERE ease BETWEEN 1 AND 4
         AND type = {REVLOG_LRN}
-        {"AND " + deck_lim if deck_lim else ""}
+        {"AND " + card_lim if card_lim else ""}
         GROUP BY cid
         HAVING first_rating = 1
         {"AND " + period_lim if period_lim else ""}
@@ -110,7 +110,7 @@ def steps_stats(deck_lim, period_lim):
         FROM revlog
         WHERE ease BETWEEN 1 AND 4
         AND type = {REVLOG_LRN}
-        {"AND " + deck_lim if deck_lim else ""}
+        {"AND " + card_lim if card_lim else ""}
         GROUP BY cid
         HAVING first_rating = 3
         {"AND " + period_lim if period_lim else ""}
@@ -150,7 +150,7 @@ def steps_stats(deck_lim, period_lim):
         SELECT cid, id AS first_id
         FROM revlog
         WHERE type = {REVLOG_REV} AND ease = 1
-        {"AND " + deck_lim if deck_lim else ""}
+        {"AND " + card_lim if card_lim else ""}
         {"AND " + period_lim if period_lim else ""}
     ),
     next_review AS (
