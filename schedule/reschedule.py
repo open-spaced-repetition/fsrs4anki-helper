@@ -98,7 +98,7 @@ class FSRS:
             self.due_cnt_per_day_per_preset[preset_id][due_date] += count
             self.did_to_preset_id[did] = preset_id
             self.preset_id_to_easy_days_percentages[preset_id] = (
-                self.DM.config_dict_for_deck_id(did)["easyDaysPercentages"]
+                self.DM.config_dict_for_deck_id(did).get("easyDaysPercentages", [])
             )
 
         self.due_today_per_preset = defaultdict(
