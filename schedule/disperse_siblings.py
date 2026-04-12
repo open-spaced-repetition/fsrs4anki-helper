@@ -1,10 +1,12 @@
 import time
 from typing import Dict, Tuple
+
+from anki.cards import Card
 from anki.utils import ids2str
 from aqt.utils import tooltip
-from anki.cards import Card
-from ..i18n import t
+
 from ..configuration import Config
+from ..i18n import t
 from ..utils import *
 
 
@@ -17,7 +19,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
         nid_query = f"AND nid IN {filtered_nid_string}"
 
     siblings = mw.col.db.all(f"""
-    SELECT 
+    SELECT
         id,
         nid,
         CASE WHEN odid==0
@@ -72,7 +74,7 @@ def get_siblings(did=None, filter_flag=False, filtered_nid_string=""):
 
 def get_siblings_when_review(card: Card):
     siblings = mw.col.db.all(f"""
-    SELECT 
+    SELECT
         id,
         CASE WHEN odid==0
         THEN did
@@ -170,10 +172,11 @@ def disperse_siblings(
 
     def on_done(future):
         mw.progress.finish()
+        _, result = future.result()
         tooltip(
             t(
                 "disperse-result",
-                result=future.result(),
+                result=result,
                 count=f"{time.time() - start_time:.2f}",
             )
         )
@@ -231,7 +234,8 @@ def disperse_siblings_background(
 
     mw.col.update_cards(dispersed_cards)
     mw.col.merge_undo_entries(undo_entry)
-    return f"{text_from_reschedule + ', ' if text_from_reschedule != '' else ''}{card_cnt} {t('disperse-cards-in')} {note_cnt} {t('disperse-notes')}"
+    result_text = f"{text_from_reschedule + ', ' if text_from_reschedule != '' else ''}{card_cnt} {t('disperse-cards-in')} {note_cnt} {t('disperse-notes')}"
+    return card_cnt, result_text
 
 
 def disperse_siblings_when_review(reviewer, card: Card, ease):

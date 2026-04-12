@@ -265,12 +265,12 @@ def reschedule(
         config = Config()
         config.load()
         if config.auto_disperse_after_reschedule:
-            finish_text, filtered_nid_string = future.result()
+            _, finish_text, filtered_nid_string = future.result()
             mw.progress.finish()
             mw.reset()
             disperse_siblings(did, True, filtered_nid_string, finish_text)
         else:
-            finish_text = future.result()
+            _, finish_text = future.result()
             mw.progress.finish()
             tooltip(
                 t(
@@ -436,9 +436,9 @@ def reschedule_background(
 
     if config.auto_disperse_after_reschedule:
         filtered_nid_string = ids2str(filtered_nids)
-        return (finish_text, filtered_nid_string)
+        return (cnt, finish_text, filtered_nid_string)
 
-    return finish_text
+    return (cnt, finish_text)
 
 
 def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
