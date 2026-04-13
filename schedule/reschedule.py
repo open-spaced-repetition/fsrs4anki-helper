@@ -463,6 +463,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
         fsrs.set_card(card)
         fsrs.set_fuzz_factor(cid, card.reps)
         decay = get_decay(card)
+        card.desired_retention = fsrs.desired_retention
 
         if fsrs.reschedule_threshold > 0 and not (
             fsrs.apply_easy_days or auto_reschedule
