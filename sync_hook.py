@@ -1,4 +1,5 @@
 from aqt.gui_hooks import sync_will_start, sync_did_finish
+from aqt.sync import sync_collection
 from anki.utils import ids2str
 from typing import List
 from .schedule.reschedule import reschedule
@@ -33,17 +34,25 @@ def review_cid_remote(local_rids: List[int]):
     return remote_reviewed_cids
 
 
-def auto_reschedule(local_rids: List[int], texts: List[str]):
-    if len(local_rids) == 0:
+def push_changes() -> None:
+    if not mw.pm.sync_auth():
         return
+    sync_collection(mw, on_done=lambda: mw.reset())
+
+
+def auto_reschedule(local_rids: List[int], texts: List[str]) -> bool:
+    if len(local_rids) == 0:
+        return False
     texts.clear()
     config = Config()
     config.load()
     if not config.auto_reschedule_after_sync:
         texts.append(t("reschedule-skipped"))
-        return
+        return False
 
     remote_reviewed_cids = review_cid_remote(local_rids)
+    if not remote_reviewed_cids:
+        return False
 
     fut = reschedule(
         did=None,
@@ -57,24 +66,29 @@ def auto_reschedule(local_rids: List[int], texts: List[str]):
         # wait for reschedule to finish
         texts.append(fut.result())
 
+    return True
 
-def auto_disperse(local_rids: List[int], texts: List[str]):
+
+def auto_disperse(local_rids: List[int], texts: List[str]) -> bool:
     if len(local_rids) == 0:
-        return
+        return False
     config = Config()
     config.load()
     if not config.auto_disperse_after_sync:
-        return
+        return False
 
     if config.auto_reschedule_after_sync and config.auto_disperse_after_reschedule:
-        return
+        return False
 
     remote_reviewed_cids = review_cid_remote(local_rids)
+    if not remote_reviewed_cids:
+        return False
+
     remote_reviewed_cid_string = ids2str(remote_reviewed_cids)
     remote_reviewed_nids = [
         nid
-        for nid in mw.col.db.list(f"""SELECT DISTINCT nid 
-            FROM cards 
+        for nid in mw.col.db.list(f"""SELECT DISTINCT nid
+            FROM cards
             WHERE id IN {remote_reviewed_cid_string}
         """)
     ]
@@ -90,13 +104,20 @@ def auto_disperse(local_rids: List[int], texts: List[str]):
 
     if fut:
         # wait for disperse to finish
-        return fut.result()
+        fut.result()
+
+    return True
 
 
 def init_sync_hook():
     local_rids = []
     texts = []
 
+    def on_sync_finished():
+        modified = auto_reschedule(local_rids, texts)
+        modified = auto_disperse(local_rids, texts) or modified
+        if modified:
+            push_changes()
+
     sync_will_start.append(lambda: create_comparelog(local_rids))
-    sync_did_finish.append(lambda: auto_reschedule(local_rids, texts))
-    sync_did_finish.append(lambda: auto_disperse(local_rids, texts))
+    sync_did_finish.append(on_sync_finished)
