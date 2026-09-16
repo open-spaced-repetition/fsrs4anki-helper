@@ -1,4 +1,6 @@
 import time
+from bisect import bisect_left, bisect_right
+from heapq import heappop, heappush
 from typing import Dict, Tuple
 
 from anki.cards import Card
@@ -296,91 +298,144 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
         tooltip(text + "<br/>".join(messages))
 
 
-# Modifying the algorithm to accept a dictionary as input and return a dictionary as output
 def maximize_siblings_due_gap(points_dict: Dict[int, Tuple[int, int]]):
-    """
-    Function to find the arrangement that maximizes the gaps between adjacent points
-    while maintaining the maximum minimum gap. Accepts and returns dictionaries.
-    """
-    # Convert the dictionary to a list of tuples and also keep track of the original keys
-    points_list = [(k, v) for k, v in points_dict.items()]
+    """Maximize the minimum gap without imposing an order on sibling cards."""
+    # Stable identities make the result independent of database/insertion order.
+    points_list = sorted(points_dict.items())
+    max_min_gap, arrangement = find_max_min_gap_and_arrangement(
+        [interval for _, interval in points_list]
+    )
 
-    # Sort the list based on the right endpoints of the intervals
-    points_list.sort(key=lambda x: x[1][1])
+    # Preserve the existing preference for later dates, using the order actually
+    # chosen by the solver. Deadline order may differ for nested windows.
+    order = sorted(range(len(points_list)), key=arrangement.__getitem__)
+    for position, i in enumerate(order):
+        right_limit = points_list[i][1][1]
+        if position + 1 < len(order):
+            right_limit = min(
+                right_limit, arrangement[order[position + 1]] - max_min_gap
+            )
+        arrangement[i] = right_limit
 
-    # First, find the maximum minimum gap and the arrangement that achieves it
-    intervals_only = [interval for _, interval in points_list]
-    max_min_gap, initial_arrangement = find_max_min_gap_and_arrangement(intervals_only)
-
-    # Initialize the optimized arrangement with the initial arrangement
-    optimized_arrangement = initial_arrangement.copy()
-
-    # Go through each point to try to maximize the gap with its adjacent points
-    for i in range(len(points_list)):
-        left_limit, right_limit = points_list[i][1]
-
-        # Set initial boundaries based on the previous and next points in the arrangement
-        if i > 0:
-            left_limit = max(left_limit, optimized_arrangement[i - 1] + max_min_gap)
-        if i < len(points_list) - 1:
-            right_limit = min(right_limit, optimized_arrangement[i + 1] - max_min_gap)
-
-        # Move the point as far to the right as possible within the adjusted limits
-        optimized_arrangement[i] = right_limit
-
-    # Convert the list back to a dictionary
-    optimized_arrangement_dict = {
-        points_list[i][0]: optimized_arrangement[i] for i in range(len(points_list))
-    }
-
-    return max_min_gap, optimized_arrangement_dict
+    return max_min_gap, {cid: arrangement[i] for i, (cid, _) in enumerate(points_list)}
 
 
 def find_max_min_gap_and_arrangement(points):
+    """Return the global maximum integer gap and dates in the input order.
+
+    Inputs are inclusive integer windows. They are not mutated. For fewer than
+    two points the gap is defined as zero.
     """
-    Find the maximum minimum gap between adjacent points and also return the arrangement that achieves it.
-    """
-    # Sort the points based on their right endpoints
-    points.sort(key=lambda x: x[1])
+    arrangement = [left for left, _ in points]
+    if len(points) < 2:
+        return 0, arrangement
 
-    # Initialize binary search parameters
-    min_gap = 0  # Minimum possible gap
-    max_gap = points[-1][1] - points[0][0]  # Maximum possible gap
-    best_gap = 0  # To store the result
-
-    arrangement = []  # To store the best arrangement of points
-
-    def can_place_points_with_arrangement(points, min_gap):
-        """
-        A greedy algorithm to check if we can place all points with a minimum gap of `min_gap`.
-        Also returns the arrangement if possible.
-        """
-        last_point_position = points[0][
-            0
-        ]  # Place the first point at its leftmost position
-        temp_arrangement = [last_point_position]
-        for i in range(1, len(points)):
-            next_possible_point = last_point_position + min_gap
-            # Find the rightmost position in the current point's range where it can be placed
-            if next_possible_point > points[i][1]:
-                return (
-                    False,
-                    [],
-                )  # Can't place the point while maintaining the minimum gap
-            last_point_position = max(next_possible_point, points[i][0])
-            temp_arrangement.append(last_point_position)
-        return True, temp_arrangement
+    min_gap = 1
+    max_gap = (max(right for _, right in points) - min(arrangement)) // (
+        len(points) - 1
+    )
+    best_gap = 0
 
     while min_gap <= max_gap:
-        mid_gap = (min_gap + max_gap) // 2  # Compute the middle gap
-        can_place, temp_arrangement = can_place_points_with_arrangement(points, mid_gap)
-        if can_place:
-            # If we can place all points with this gap, it means we can try to increase it
+        mid_gap = (min_gap + max_gap) // 2
+        candidate = _place_siblings_with_gap(points, mid_gap)
+        if candidate is not None:
             best_gap = mid_gap
-            arrangement = temp_arrangement  # Update the best arrangement
+            arrangement = candidate
             min_gap = mid_gap + 1
         else:
-            # If we can't place all points with this gap, it means we need to try a smaller gap
             max_gap = mid_gap - 1
 
     return best_gap, arrangement
+
+
+def _place_siblings_with_gap(points, min_gap):
+    """Find a feasible arrangement in any order, or return None.
+
+    Treat a point in [L, R] as a job of length min_gap with release L and
+    completion deadline R + min_gap. Earliest-deadline dispatch is sufficient
+    after excluding forbidden start regions (Garey et al., 1981;
+    https://doi.org/10.1137/0210018). See also the integer formulation in
+    Artiouchine and Baptiste, section 3: https://doi.org/10.1007/s10601-006-9009-1.
+
+    Incremental backward scheduling computes these regions in O(n^2 log n)
+    time and O(n) space. A successful greedy pass skips that work entirely.
+    """
+    if not points or min_gap == 0:
+        return [left for left, _ in points]
+
+    release_order = sorted(
+        range(len(points)), key=lambda i: (points[i][0], points[i][1], i)
+    )
+
+    def dispatch(forbidden_starts, forbidden_ends):
+        ready = []
+        pending = 0
+        date = points[release_order[0]][0]
+        arrangement = [0] * len(points)
+        for _ in points:
+            if not ready:
+                date = max(date, points[release_order[pending]][0])
+            region = bisect_right(forbidden_starts, date) - 1
+            if region >= 0 and date <= forbidden_ends[region]:
+                date = forbidden_ends[region] + 1
+            while pending < len(points) and points[release_order[pending]][0] <= date:
+                i = release_order[pending]
+                left, right = points[i]
+                heappush(ready, (right, left, i))
+                pending += 1
+            right, _, i = heappop(ready)
+            if date > right:
+                return None
+            arrangement[i] = date
+            date += min_gap
+        return arrangement
+
+    arrangement = dispatch([], [])
+    if arrangement is not None:
+        return arrangement
+
+    # Inclusive forbidden integer regions, sorted and merged. No feasible
+    # arrangement may put ANY point in these regions, regardless of its ID.
+    forbidden_starts = []
+    forbidden_ends = []
+    deadlines = sorted({right for _, right in points})
+    latest_starts = [right + min_gap for right in deadlines]
+    first_active = len(deadlines)
+    pending = len(points) - 1
+    while pending >= 0:
+        release = points[release_order[pending]][0]
+        while pending >= 0 and points[release_order[pending]][0] == release:
+            _, right = points[release_order[pending]]
+            first_deadline = bisect_left(deadlines, right)
+            first_active = min(first_active, first_deadline)
+            # For each deadline, add this job to the set of jobs released at
+            # or after 'release' that must finish by that deadline. Pack that
+            # set backwards, skipping forbidden starts. Previously packed
+            # jobs remain valid: new regions end before their release dates.
+            for j in range(first_deadline, len(deadlines)):
+                date = latest_starts[j] - min_gap
+                region = bisect_right(forbidden_starts, date) - 1
+                if region >= 0 and date <= forbidden_ends[region]:
+                    date = forbidden_starts[region] - 1
+                latest_starts[j] = date
+            pending -= 1
+
+        latest_start = min(latest_starts[first_active:])
+        if latest_start < release:
+            return None
+
+        # A point starting here would prevent a constrained set from starting
+        # by its latest feasible start. Integer endpoints are inclusive.
+        lower = latest_start - min_gap + 1
+        upper = release - 1
+        if lower <= upper:
+            # Releases decrease, so a new region can only touch the leftmost
+            # existing region. Merge adjacent regions as well as overlaps.
+            if forbidden_starts and upper >= forbidden_starts[0] - 1:
+                forbidden_starts[0] = min(forbidden_starts[0], lower)
+            else:
+                forbidden_starts.insert(0, lower)
+                forbidden_ends.insert(0, upper)
+
+    return dispatch(forbidden_starts, forbidden_ends)
