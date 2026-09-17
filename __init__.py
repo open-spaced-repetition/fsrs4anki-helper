@@ -1,31 +1,31 @@
+from collections.abc import Callable
 from pathlib import Path
-from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
+
 from aqt import mw
+from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
 from aqt.qt import QAction, QDesktopServices, QUrl
-from aqt.utils import openLink, askUser
-from typing import Callable
+from aqt.utils import askUser, openLink
 
-from .utils import get_dr
-
-from .dsr_state import init_dsr_status_hook
-from .sync_hook import init_sync_hook
-from .schedule.reschedule import reschedule
-from .schedule.postpone import postpone
-from .schedule.advance import advance
-from .schedule.flatten import flatten
-from .schedule.reset import clear_custom_data, clear_manual_rescheduling
-from .schedule.disperse_siblings import disperse_siblings
-from .schedule.schedule_break import schedule_break
-from .schedule.easy_days import (
-    easy_days,
-    easy_day_for_sepcific_date,
-)
-from .schedule.remedy import remedy_hard_misuse, undo_remedy
-from .schedule import init_review_hook
-from .stats import init_stats
 from .browser.browser import init_browser
 from .configuration import Config, run_on_configuration_change
+from .dsr_state import init_dsr_status_hook
 from .i18n import t
+from .schedule import init_review_hook
+from .schedule.advance import advance
+from .schedule.disperse_siblings import disperse_siblings
+from .schedule.easy_days import (
+    easy_day_for_sepcific_date,
+    easy_days,
+)
+from .schedule.flatten import flatten
+from .schedule.postpone import postpone
+from .schedule.remedy import remedy_hard_misuse, undo_remedy
+from .schedule.reschedule import reschedule
+from .schedule.reset import clear_custom_data, clear_manual_rescheduling
+from .schedule.schedule_break import schedule_break
+from .stats import init_stats
+from .sync_hook import init_sync_hook
+from .utils import get_dr
 
 """
 Acknowledgement to Arthur Milchior, Carlos Duarte and oakkitten.

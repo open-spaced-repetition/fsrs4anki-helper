@@ -1,5 +1,3 @@
-from typing import List
-
 from anki.utils import ids2str
 from aqt.gui_hooks import sync_did_finish, sync_will_start
 from aqt.qt import QTimer
@@ -11,12 +9,12 @@ from .schedule.reschedule import reschedule
 from .utils import *
 
 
-def create_comparelog(local_rids: List[int]) -> None:
+def create_comparelog(local_rids: list[int]) -> None:
     local_rids.clear()
     local_rids.extend([id for id in mw.col.db.list("SELECT id FROM revlog")])
 
 
-def review_cid_remote(local_rids: List[int]):
+def review_cid_remote(local_rids: list[int]):
     config = Config()
     config.load()
     local_rid_string = ids2str(local_rids)
@@ -42,7 +40,7 @@ def push_changes() -> None:
     mw._sync_collection_and_media(mw._refresh_after_sync)
 
 
-def auto_reschedule(remote_reviewed_cids: List[int], texts: List[str]) -> bool:
+def auto_reschedule(remote_reviewed_cids: list[int], texts: list[str]) -> bool:
     if len(remote_reviewed_cids) == 0:
         return False
     texts.clear()
@@ -70,7 +68,7 @@ def auto_reschedule(remote_reviewed_cids: List[int], texts: List[str]) -> bool:
     return cnt > 0
 
 
-def auto_disperse(remote_reviewed_cids: List[int], texts: List[str]) -> bool:
+def auto_disperse(remote_reviewed_cids: list[int], texts: list[str]) -> bool:
     if len(remote_reviewed_cids) == 0:
         return False
     config = Config()

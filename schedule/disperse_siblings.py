@@ -1,7 +1,6 @@
 import time
 from bisect import bisect_left, bisect_right
 from heapq import heappop, heappush
-from typing import Dict, Tuple
 
 from anki.cards import Card
 from anki.utils import ids2str
@@ -298,7 +297,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
         tooltip(text + "<br/>".join(messages))
 
 
-def maximize_siblings_due_gap(points_dict: Dict[int, Tuple[int, int]]):
+def maximize_siblings_due_gap(points_dict: dict[int, tuple[int, int]]):
     """Maximize the minimum gap without imposing an order on sibling cards."""
     # Stable identities make the result independent of database/insertion order.
     points_list = sorted(points_dict.items())

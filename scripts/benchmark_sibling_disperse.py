@@ -20,7 +20,7 @@ from time import perf_counter_ns
 ROOT = Path(__file__).resolve().parents[1]
 # Support direct execution from any working directory.
 sys.path.insert(0, str(ROOT))
-from tests.sibling_gap_support import (  # noqa: E402
+from tests.sibling_gap_support import (
     Fixture,
     load_functions,
     load_solver,
