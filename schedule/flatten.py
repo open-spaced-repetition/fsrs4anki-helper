@@ -1,11 +1,13 @@
 import time
 from collections import defaultdict
+
 from anki.decks import DeckManager
-from anki.utils import ids2str
 from anki.stats import QUEUE_TYPE_REV
-from aqt.utils import tooltip, showWarning, getText
-from ..i18n import t
+from anki.utils import ids2str
+from aqt.utils import getText, showWarning, tooltip
+
 from ..configuration import Config
+from ..i18n import t
 from ..utils import *
 
 

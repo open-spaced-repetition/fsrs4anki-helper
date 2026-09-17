@@ -1,8 +1,10 @@
 import os
 from pathlib import Path
+
 from anki.utils import ids2str
-from aqt import QDateTime, QWidget, QVBoxLayout, QLabel, QPushButton, QDateEdit
-from aqt.utils import tooltip, showInfo
+from aqt import QDateEdit, QDateTime, QLabel, QPushButton, QVBoxLayout, QWidget
+from aqt.utils import showInfo, tooltip
+
 from ..i18n import t
 from ..utils import *
 

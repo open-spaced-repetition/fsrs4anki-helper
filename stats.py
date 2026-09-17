@@ -1,11 +1,12 @@
 import html
 
-from aqt.utils import tooltip
 from anki.stats import CollectionStats
 from anki.utils import ids2str
+from aqt.utils import tooltip
+
 from .configuration import Config
-from .steps import steps_stats
 from .i18n import t
+from .steps import steps_stats
 from .utils import *
 
 
@@ -488,8 +489,7 @@ def get_retention_graph(self: CollectionStats):
 
     step = round((recall_max - recall_min) / 5, 2)
     ticks = [
-        [recall_min + step * i, str(round(recall_min + step * i, 2))]
-        for i in range(0, 6)
+        [recall_min + step * i, str(round(recall_min + step * i, 2))] for i in range(6)
     ]
 
     conf = dict(
