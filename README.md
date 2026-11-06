@@ -165,6 +165,8 @@ By default, mature cards are defined as cards with an interval of 21 days or lon
 
 This feature allows you to correct historical misuse of the Hard button by converting Hard reviews (ease = 2) to Again reviews (ease = 1) within a specified date range. This can help improve the accuracy of your FSRS parameters and scheduling. You can also undo the remedy operation if needed.
 
+The action in the Tools menu applies to all decks. The entry in the deck browser gear menu limits the remedy to that deck and its subdecks.
+
 **Important:** This feature modifies your review history. It is recommended to create a backup before using this feature. You can undo this operation if you have the remedy record file.
 
 ## Reset

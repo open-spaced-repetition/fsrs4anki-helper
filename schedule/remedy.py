@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from anki.decks import DeckManager
 from anki.utils import ids2str
 from aqt import QDateTime, QWidget, QVBoxLayout, QLabel, QPushButton, QDateEdit
 from aqt.utils import tooltip, showInfo
@@ -8,12 +9,17 @@ from ..utils import *
 
 
 class RemedyDateRangeWidget(QWidget):
-    def __init__(self):
+    def __init__(self, did=None):
         super().__init__()
+        self.did = did
         self.setup_ui()
 
     def setup_ui(self):
         self.layout = QVBoxLayout()
+
+        if self.did is not None:
+            self.deck_label = QLabel(t("remedy-deck", deck=mw.col.decks.name(self.did)))
+            self.layout.addWidget(self.deck_label)
 
         self.start_date_label = QLabel(t("remedy-start-date"))
         self.start_date_edit = QDateEdit()
@@ -35,11 +41,20 @@ class RemedyDateRangeWidget(QWidget):
         self.resize(300, 200)
 
     def remedy_hard_misuse(self):
+        deck_query = ""
+        if self.did is not None:
+            DM = DeckManager(mw.col)
+            did_list = ids2str(DM.deck_and_child_ids(self.did))
+            # odid != 0: card is in a filtered deck, it belongs to its home deck
+            deck_query = f"""AND cid IN (SELECT id FROM cards
+            WHERE CASE WHEN odid == 0 THEN did ELSE odid END IN {did_list})"""
+
         revlog_ids = mw.col.db.list(f"""SELECT id
             FROM revlog
             WHERE ease = 2
             AND id > {self.start_date_edit.dateTime().toMSecsSinceEpoch()}
             AND id < {self.end_date_edit.dateTime().toMSecsSinceEpoch()}
+            {deck_query}
             """)
 
         if len(revlog_ids) == 0:
@@ -48,9 +63,16 @@ class RemedyDateRangeWidget(QWidget):
 
         start_date = self.start_date_edit.date().toString("yyyy-MM-dd")
         end_date = self.end_date_edit.date().toString("yyyy-MM-dd")
+        deck = (
+            t("remedy-all-decks") if self.did is None else mw.col.decks.name(self.did)
+        )
         yes = askUser(
-            t("remedy-confirmation").format(
-                count=len(revlog_ids), start_date=start_date, end_date=end_date
+            t(
+                "remedy-confirmation",
+                count=len(revlog_ids),
+                start_date=start_date,
+                end_date=end_date,
+                deck=deck,
             )
         )
 
@@ -68,7 +90,7 @@ class RemedyDateRangeWidget(QWidget):
         user_files.mkdir(parents=True, exist_ok=True)
         revlog_id_csv = os.path.join(user_files, f"{mw.pm.name}_hard_misuse_remedy.csv")
         with open(revlog_id_csv, "a") as f:
-            f.write("\n".join(map(str, revlog_ids)))
+            f.write("\n".join(map(str, revlog_ids)) + "\n")
 
         showInfo(t("remedy-success").format(count=len(revlog_ids)))
         mw.reset()
@@ -79,7 +101,7 @@ def remedy_hard_misuse(did):
     if not ask_one_way_sync():
         return
 
-    mw.date_range_widget = RemedyDateRangeWidget()
+    mw.date_range_widget = RemedyDateRangeWidget(did)
     mw.date_range_widget.show()
 
 

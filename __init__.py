@@ -190,6 +190,7 @@ menu_clear_manual_rescheduling = build_action(
 menu_disperse_siblings = build_action(disperse_siblings, t("disperse-all-siblings"))
 
 menu_remedy_hard_misuse = build_action(remedy_hard_misuse, t("remedy"))
+add_action_to_gear(remedy_hard_misuse, t("remedy-this-deck"))
 
 menu_undo_remedy = build_action(undo_remedy, t("undo"))
 
