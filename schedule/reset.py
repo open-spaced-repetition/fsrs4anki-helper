@@ -1,5 +1,6 @@
 from anki.utils import ids2str
 from aqt.utils import tooltip
+
 from ..i18n import t
 from ..utils import *
 

@@ -1,9 +1,11 @@
 from abc import abstractmethod
-from typing import Optional, Sequence
+from collections.abc import Sequence
+
 from anki.cards import Card
 from anki.collection import BrowserColumns
 from aqt.browser import Browser, CellRow, Column, ItemId
 from aqt.utils import tooltip
+
 from ..i18n import t
 from ..utils import *
 
@@ -43,7 +45,7 @@ class CustomColumn:
     ) -> str:
         raise NotImplementedError
 
-    def order_by_str(self) -> Optional[str]:
+    def order_by_str(self) -> str | None:
         """Return the SQL string that will be appended after "ORDER BY" to the query that
         fetches the search results when sorting by this column."""
         return None

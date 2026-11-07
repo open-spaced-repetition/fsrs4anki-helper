@@ -1,19 +1,19 @@
 import json
 import math
 import time
-from anki.decks import DeckManager
-from aqt.utils import askUser
-from typing import List
-from anki.stats_pb2 import CardStatsResponse
-from anki.cards import Card
-from anki.stats import (
-    REVLOG_LRN,
-    REVLOG_REV,
-    REVLOG_RELRN,
-    REVLOG_CRAM,
-)
-from aqt import mw
 from datetime import date, datetime, timedelta
+
+from anki.cards import Card
+from anki.decks import DeckManager
+from anki.stats import (
+    REVLOG_CRAM,
+    REVLOG_LRN,
+    REVLOG_RELRN,
+    REVLOG_REV,
+)
+from anki.stats_pb2 import CardStatsResponse
+from aqt import mw
+from aqt.utils import askUser
 
 
 def RepresentsInt(s):
@@ -23,7 +23,7 @@ def RepresentsInt(s):
         return None
 
 
-def reset_ivl_and_due(cid: int, revlogs: List[CardStatsResponse.StatsRevlogEntry]):
+def reset_ivl_and_due(cid: int, revlogs: list[CardStatsResponse.StatsRevlogEntry]):
     card = mw.col.get_card(cid)
     card.ivl = int(revlogs[0].interval / 86400)
     due = (
@@ -44,8 +44,8 @@ def get_revlogs(cid: int):
 
 
 def filter_revlogs(
-    revlogs: List[CardStatsResponse.StatsRevlogEntry],
-) -> List[CardStatsResponse.StatsRevlogEntry]:
+    revlogs: list[CardStatsResponse.StatsRevlogEntry],
+) -> list[CardStatsResponse.StatsRevlogEntry]:
     return list(
         filter(
             lambda x: (
@@ -93,14 +93,14 @@ def update_card_due_ivl(card: Card, new_ivl: int):
     return card
 
 
-def has_again(revlogs: List[CardStatsResponse.StatsRevlogEntry]):
+def has_again(revlogs: list[CardStatsResponse.StatsRevlogEntry]):
     for r in revlogs:
         if r.button_chosen == 1:
             return True
     return False
 
 
-def has_manual_reset(revlogs: List[CardStatsResponse.StatsRevlogEntry]):
+def has_manual_reset(revlogs: list[CardStatsResponse.StatsRevlogEntry]):
     last_kind = None
     for r in revlogs:
         if r.button_chosen == 0:

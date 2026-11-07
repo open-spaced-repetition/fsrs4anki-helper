@@ -1,18 +1,20 @@
-from typing import Optional, Sequence
+from collections.abc import Sequence
+
 from aqt.browser import Browser, CellRow, Column, ItemId, SearchContext
 from aqt.gui_hooks import (
     browser_did_fetch_columns,
     browser_did_fetch_row,
-    browser_will_show,
     browser_will_search,
+    browser_will_show,
 )
+
+from ..utils import *
 from .custom_columns import (
     CustomColumn,
     TargetRetrievabilityColumn,
 )
-from ..utils import *
 
-browser: Optional[Browser] = None
+browser: Browser | None = None
 
 custom_columns = [
     TargetRetrievabilityColumn(),

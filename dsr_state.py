@@ -2,13 +2,13 @@ from anki import hooks
 from anki.template import TemplateRenderContext, TemplateRenderOutput
 
 from .configuration import Config
+from .i18n import t
 from .utils import (
     get_decay,
-    power_forgetting_curve,
     get_last_review_date_and_interval,
     mw,
+    power_forgetting_curve,
 )
-from .i18n import t
 
 
 # called each time a custom filter is encountered

@@ -1,5 +1,4 @@
 import time
-from typing import Dict, Tuple
 
 from anki.cards import Card
 from anki.utils import ids2str
@@ -297,7 +296,7 @@ def disperse_siblings_when_review(reviewer, card: Card, ease):
 
 
 # Modifying the algorithm to accept a dictionary as input and return a dictionary as output
-def maximize_siblings_due_gap(points_dict: Dict[int, Tuple[int, int]]):
+def maximize_siblings_due_gap(points_dict: dict[int, tuple[int, int]]):
     """
     Function to find the arrangement that maximizes the gaps between adjacent points
     while maintaining the maximum minimum gap. Accepts and returns dictionaries.

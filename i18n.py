@@ -1,8 +1,10 @@
 import os.path
-from .python_i18n import i18n
 from pathlib import Path
+
 from aqt import mw
 from aqt.utils import tr
+
+from .python_i18n import i18n
 
 locale = mw.pm.meta["defaultLang"]
 if locale == "en":
