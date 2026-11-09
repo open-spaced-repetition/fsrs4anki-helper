@@ -1,5 +1,4 @@
 from aqt.gui_hooks import reviewer_did_answer_card
-
 from .disperse_siblings import disperse_siblings_when_review
 
 

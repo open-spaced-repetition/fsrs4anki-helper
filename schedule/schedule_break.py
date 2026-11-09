@@ -2,6 +2,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Dict, List, Optional
 
 from anki.cards import Card, FSRSMemoryState
 from anki.decks import DeckManager
@@ -35,7 +36,7 @@ class BreakCard:
     original_interval: int
 
 
-def _get_log_path() -> Path | None:
+def _get_log_path() -> Optional[Path]:
     try:
         profile_folder = mw.pm.profileFolder()
     except Exception:
@@ -43,7 +44,7 @@ def _get_log_path() -> Path | None:
     return Path(profile_folder) / "fsrs_schedule_break.log"
 
 
-def _append_log_entry(log_path: Path | None, break_card: BreakCard, new_due: int):
+def _append_log_entry(log_path: Optional[Path], break_card: BreakCard, new_due: int):
     if log_path is None:
         return
 
@@ -74,7 +75,7 @@ def _append_log_entry(log_path: Path | None, break_card: BreakCard, new_due: int
         pass
 
 
-def _ensure_memory_state(card: Card) -> FSRSMemoryState | None:
+def _ensure_memory_state(card: Card) -> Optional[FSRSMemoryState]:
     if card.memory_state:
         stability = card.memory_state.stability
         difficulty = card.memory_state.difficulty
@@ -131,7 +132,7 @@ def _prompt_break_parameters():
     return break_days, spread_days
 
 
-def _fetch_window_cards(window_end: int, did_query: str) -> list[Card]:
+def _fetch_window_cards(window_end: int, did_query: str) -> List[Card]:
     cids = mw.col.db.list(f"""
         SELECT id
         FROM cards
@@ -146,7 +147,7 @@ def _fetch_window_cards(window_end: int, did_query: str) -> list[Card]:
 def _build_break_card(
     card: Card,
     break_end: int,
-) -> BreakCard | None:
+) -> Optional[BreakCard]:
     memory_state = _ensure_memory_state(card)
     if memory_state is None:
         return None
@@ -164,11 +165,11 @@ def _build_break_card(
 
 
 def _allocate_break_cards(
-    cards: list[BreakCard],
-    candidate_days: list[int],
-    target_totals: dict[int, int],
-    log_path: Path | None,
-) -> dict[int, list[BreakCard]]:
+    cards: List[BreakCard],
+    candidate_days: List[int],
+    target_totals: Dict[int, int],
+    log_path: Optional[Path],
+) -> Dict[int, List[BreakCard]]:
     assigned = defaultdict(list)
     sorted_cards = sorted(
         cards,
@@ -205,7 +206,7 @@ def _allocate_break_cards(
     return assigned
 
 
-def _update_cards(assignments: dict[int, list[BreakCard]], total: int) -> int:
+def _update_cards(assignments: Dict[int, List[BreakCard]], total: int) -> int:
     updated_cards = []
     processed = 0
     for due_day, cards in assignments.items():
@@ -281,7 +282,7 @@ def _schedule_break_background(did, break_days: int, spread_days: int):
         )
     )
 
-    break_card_entries: list[BreakCard] = []
+    break_card_entries: List[BreakCard] = []
     skipped_cards = 0
     base_counts = defaultdict(int)
     candidate_set = set(candidate_days)

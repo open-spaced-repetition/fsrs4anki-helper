@@ -5,6 +5,7 @@ import argparse
 import zipfile
 from pathlib import Path
 
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARCHIVE = PROJECT_ROOT / "dist" / "fsrs4anki-helper.ankiaddon"
 REQUIRED_FILES = {

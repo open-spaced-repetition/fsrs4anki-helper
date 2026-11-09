@@ -2,6 +2,7 @@ import random
 import time
 from collections import defaultdict
 from datetime import date, datetime, timedelta
+from typing import Dict, List
 
 from anki.cards import Card, FSRSMemoryState
 from anki.decks import DeckManager
@@ -22,7 +23,7 @@ from ..utils import *
 from .disperse_siblings import disperse_siblings
 
 
-def check_review_distribution(actual_reviews: list[int], percentages: list[float]):
+def check_review_distribution(actual_reviews: List[int], percentages: List[float]):
     easy_days_modifier = []
     percentages = [p if p != 0 else 0.0001 for p in percentages]
     possible_days_cnt = len(actual_reviews)
@@ -48,17 +49,17 @@ class FSRS:
     reschedule_threshold: float
     maximum_interval: int
     desired_retention: float
-    easy_specific_due_dates: list[int]
-    due_cnt_per_day_per_preset: dict[int, dict[int, int]]
-    due_today_per_preset: dict[int, int]
-    reviewed_today_per_preset: dict[int, int]
+    easy_specific_due_dates: List[int]
+    due_cnt_per_day_per_preset: Dict[int, Dict[int, int]]
+    due_today_per_preset: Dict[int, int]
+    reviewed_today_per_preset: Dict[int, int]
     card: Card
     apply_easy_days: bool
     current_date: date
     today: int
     did: int
-    did_to_preset_id: dict[int, int]
-    preset_id_to_easy_days_percentages: dict[int, list[float]]
+    did_to_preset_id: Dict[int, int]
+    preset_id_to_easy_days_percentages: Dict[int, List[float]]
     load_balancer_enabled: bool
 
     def __init__(self) -> None:
@@ -168,8 +169,8 @@ class FSRS:
 
     def load_balance(
         self,
-        possible_intervals: list[int],
-        review_cnts: list[int],
+        possible_intervals: List[int],
+        review_cnts: List[int],
         last_review: int,
     ):
         weights = [
