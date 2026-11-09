@@ -45,9 +45,14 @@ class RemedyDateRangeWidget(QWidget):
         if self.did is not None:
             DM = DeckManager(mw.col)
             did_list = ids2str(DM.deck_and_child_ids(self.did))
-            # odid != 0: card is in a filtered deck, it belongs to its home deck
+            # Filtered decks use current membership; normal decks include borrowed cards.
+            deck_id_expr = (
+                "did"
+                if DM.is_filtered(self.did)
+                else "CASE WHEN odid == 0 THEN did ELSE odid END"
+            )
             deck_query = f"""AND cid IN (SELECT id FROM cards
-            WHERE CASE WHEN odid == 0 THEN did ELSE odid END IN {did_list})"""
+            WHERE {deck_id_expr} IN {did_list})"""
 
         revlog_ids = mw.col.db.list(f"""SELECT id
             FROM revlog
