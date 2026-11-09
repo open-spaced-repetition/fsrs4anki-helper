@@ -45,7 +45,8 @@ class RemedyDateRangeWidget(QWidget):
         if self.did is not None:
             DM = DeckManager(mw.col)
             did_list = ids2str(DM.deck_and_child_ids(self.did))
-            # Filtered decks use current membership; normal decks include borrowed cards.
+            # For filtered decks, match cards currently in the selected deck.
+            # For normal decks, also include cards moved into filtered decks.
             deck_id_expr = (
                 "did"
                 if DM.is_filtered(self.did)
