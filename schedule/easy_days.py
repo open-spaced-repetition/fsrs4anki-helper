@@ -1,4 +1,3 @@
-from anki.utils import ids2str
 from aqt import (
     QDateEdit,
     QDateTime,
@@ -8,12 +7,12 @@ from aqt import (
     QVBoxLayout,
     QWidget,
 )
+from anki.utils import ids2str
 from aqt.utils import tooltip
-
+from .reschedule import reschedule
 from ..configuration import Config
 from ..i18n import t
 from ..utils import *
-from .reschedule import reschedule
 
 
 def easy_days(did):
