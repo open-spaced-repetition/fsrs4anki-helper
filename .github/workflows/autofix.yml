@@ -13,14 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Use uv to ensure we have the same ruff version in CI and locally.
       - uses: astral-sh/setup-uv@557e51de59eb14aaaba2ed9621916900a91d50c6
         with:
           version: "0.4.20"
+      # Keep Ruff pinned to the required-version in ruff.toml.
       # Fix lint errors
-      - run: uvx ruff check --fix-only .
+      - run: uvx ruff==0.17.4 check --fix-only .
       # Format code
-      - run: uvx ruff format .
+      - run: uvx ruff==0.17.4 format .
 
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
       
