@@ -18,9 +18,9 @@ jobs:
           version: "0.4.20"
       # Keep Ruff pinned to the required-version in ruff.toml.
       # Fix lint errors
-      - run: uvx ruff==0.17.4 check --fix-only .
+      - run: uvx --from ruff==0.17.4 ruff check --fix-only .
       # Format code
-      - run: uvx ruff==0.17.4 format .
+      - run: uvx --from ruff==0.17.4 ruff format .
 
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
       
