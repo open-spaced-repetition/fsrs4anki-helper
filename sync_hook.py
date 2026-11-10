@@ -13,6 +13,10 @@ from .utils import *
 
 def create_comparelog(local_rids: List[int]) -> None:
     local_rids.clear()
+    config = Config()
+    config.load()
+    if not config.auto_reschedule_after_sync and not config.auto_disperse_after_sync:
+        return
     local_rids.extend([id for id in mw.col.db.list("SELECT id FROM revlog")])
 
 
@@ -25,15 +29,13 @@ def review_cid_remote(local_rids: List[int]):
     remote_reviewed_cids = [
         cid
         for cid in mw.col.db.list(
-            f"""SELECT DISTINCT revlog.cid
+            f"""SELECT DISTINCT cid
             FROM revlog
-            JOIN cards ON cards.id = revlog.cid
-            WHERE revlog.id NOT IN {local_rid_string}
-            AND cards.odid = 0
-            {"AND revlog.type != 4" if config.auto_disperse_after_reschedule else "AND revlog.ease > 0"}
-            AND (revlog.type < 3 OR revlog.factor != 0)
+            WHERE id NOT IN {local_rid_string}
+            {"AND type != 4" if config.auto_disperse_after_reschedule else "AND ease > 0"}
+            AND (type < 3 OR factor != 0)
             """
-        )  # revlog.type: 0=learn, 1=review, 2=relearn, 3=filtered, 4=manual, 5=reschedule
+        )  # type: 0=learn, 1=review, 2=relearn, 3=filtered, 4=manual, 5=reschedule
     ]
     return remote_reviewed_cids
 
@@ -114,6 +116,10 @@ def init_sync_hook():
     texts = []
 
     def on_sync_finished():
+        config = Config()
+        config.load()
+        if not config.auto_reschedule_after_sync and not config.auto_disperse_after_sync:
+            return
         remote_reviewed_cids = review_cid_remote(local_rids) if local_rids else []
         modified = auto_reschedule(remote_reviewed_cids, texts)
         modified = auto_disperse(remote_reviewed_cids, texts) or modified

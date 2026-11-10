@@ -15,6 +15,7 @@
       "one": "Reschedule cards reviewed in the last day",
       "other": "Reschedule cards reviewed in the last %{count} days"
     },
+    "reschedule-no-added-workload": "Reschedule without increasing immediate workload",
     "schedule-break-menu": "Schedule a Break",
     "schedule-break-dialog-title": "Schedule a Break",
     "schedule-break-dialog-break-days": "How many upcoming days will you be away from Anki?\n\nNote: Cards overdue (backlog), due today, and due during the break period will be rescheduled.",
@@ -56,7 +57,6 @@
     "apply-easy-days-specific": "Apply easy days for specific dates",
     "easy-days": "Easy Days",
     "recommended-addons": "Recommended Add-ons",
-
     "step-stats": "Step Stats",
     "step-stats-disabled": "If you would like to see your (re)learning step statistics, you can enable them with <code>Tools > FSRS Helper > Show step stats.</code><br/><br/>This graph will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "step-stats-subtitle": "Statistics for different first ratings during (re)learning steps",
@@ -83,7 +83,6 @@
     "lapse": "Lapse",
     "insufficient-learn-step-data": "(data is insufficient, please keep current setting)",
     "keep-steps-blank": "Keep the steps field blank.",
-
     "fsrs-stats": "FSRS Stats",
     "knowledge-acquisition-rate": "Knowledge acquisition rate",
     "studied-cards": "Studied cards",
@@ -103,13 +102,12 @@
     "true-retention-disabled": "If you would like to see your true retention statistics, you can enable them with <code>Tools > FSRS Helper > Show true retention.</code><br/><br/>This table will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "true-retention-mature-help": "By default, mature cards are defined as the cards with an interval of 21 days or longer. This cutoff can be adjusted in the add-on config.",
     "young-annotated": "Young (ivl < %{mature_ivl} d)",
-    "mature-annotated":"Mature (ivl ≥ %{mature_ivl} d)",
+    "mature-annotated": "Mature (ivl ≥ %{mature_ivl} d)",
     "total": "Total",
     "learned": "Learned",
     "relearned": "Relearned",
     "past": "Past",
     "reviews-on-cards": "Reviews on cards",
-
     "advance-inquire-text": "Enter the number of cards to be advanced.\n",
     "advance-notification-text-deck": "For this deck, it is relatively safe to advance up to %{count} cards.\n",
     "advance-notification-text-collection": "For this collection, it is relatively safe to advance up to %{count} cards.\n",
@@ -123,7 +121,6 @@
       "other": "%{count} cards have been advanced."
     },
     "advance-retention-change": "<br>Mean target retention of advanced cards: %{prev_retention} -> %{new_retention}",
-
     "flatten-inquire-text": "Enter the maximum number of reviews you want in the future.\n",
     "flatten-info-text": "This feature only affects the cards that have been scheduled by FSRS.\n",
     "flatten-warning-text": "This feature doesn't respect maximum interval settings, and may reduce your true retention significantly.\n",
@@ -134,7 +131,6 @@
     "flatten-progress": "%{count}/%{total} cards flattened",
     "flatten-result-text": "%{count} cards flattened in %{seconds} seconds.",
     "flatten-retention-change": "<br>Mean target retention of flattened cards: %{prev_retention} -> %{new_retention}",
-
     "postpone-inquire-text": "Enter the number of cards to be postponed.\n",
     "postpone-notification-text": "%{deck}, it is relatively safe to postpone up to %{safe_cnt} cards.\n",
     "postpone-warning-text": "You can postpone more cards if you wish, but it is not recommended.\nKeep in mind that whenever you use Postpone or Advance, you depart from the optimal scheduling.\n",
@@ -145,7 +141,6 @@
     "postpone-result-text": "%{count} cards postponed in %{seconds} seconds.",
     "postpone-retention-change": "<br>Mean target retention of postponed cards: %{prev_retention} -> %{new_retention}",
     "postpone-reach-max-ivl": "<br>Failed to postpone %{reach_max_ivl_cnt} cards because they had already reached the configured maximum interval.",
-
     "remedy-start-date": "Select the Start Date",
     "remedy-end-date": "Select the End Date",
     "remedy-title": "Remedy Hard Misuse",
@@ -157,22 +152,20 @@
     "undo-remedy-no-file": "No remedied reviews found",
     "undo-remedy-restored": "%{count} reviews restored",
     "undo-remedy-success": "%{count} reviews were restored.\nPlease re-optimize your FSRS parameters to incorporate the changes.",
-
     "x-%": "%{count}%",
     "x-cards": {
       "one": "1 card",
       "other": "%{count} cards"
     },
     "x-cards-per-hour": {
-      "one":"1 card/hour",
-      "other":"%{count} cards/hour"
+      "one": "1 card/hour",
+      "other": "%{count} cards/hour"
     },
     "x-days": {
       "one": "1 day",
       "other": "%{count} days"
     },
     "fsrs-status": "FSRS: %{status}",
-
     "disperse-label": "Dispersing Siblings",
     "disperse-progress": "%{count}/%{total} notes dispersed",
     "disperse-cards-in": "cards in",
@@ -181,11 +174,9 @@
     "disperse-card-range": "Card %{card_id} due range: %{start_due} - %{end_due}",
     "disperse-too-close": "Due dates are too close to disperse:",
     "disperse-result": "%{result} in %{count} seconds",
-
     "clear-custom-data-confirmation": "Clear custom data in all cards?\n    The custom scheduling of FSRS4Anki stored memory state in custom data.\n    It is unused when you enable the built-in FSRS.\n    Are you sure?",
     "clear-custom-data-result": "%{count} cards cleared in %{seconds} seconds.",
     "clear-manual-rescheduling-confirmation": "This option removes revlog entries generated by \"Set due date\" and \"Reschedule cards on change\" that immediately precede another manual or reschedule entry.\n\nThis action cannot be undone. Do you want to continue?",
-  
     "clear-manual-rescheduling-result": "%{count} review log entries deleted.",
     "easy-days-select-date": "Select the Date(s)",
     "easy-days-add-date": "Add the Selected Date",
@@ -202,7 +193,27 @@
     "reschedule-browser-action": "FSRS: Update memory state and reschedule",
     "reschedule-done-in-seconds": "%{result} in %{seconds} seconds",
     "not-available": "N/A",
-
-    "enable-fsrs-warning": "Please either enable FSRS in your deck options, or disable the FSRS helper add-on."
+    "enable-fsrs-warning": "Please either enable FSRS in your deck options, or disable the FSRS helper add-on.",
+    "reschedule-bilan-title": "FSRS Reschedule - Preview Summary",
+    "reschedule-bilan-deck": "Deck: %{deck}   |   Desired retention: %{retention}%",
+    "reschedule-bilan-rule-title": "Applied rule:",
+    "reschedule-bilan-rule-desc": "Only cards whose new due date is further in the future than their original due date will receive their new FSRS schedule.",
+    "reschedule-bilan-total-examined": "Review cards examined",
+    "reschedule-bilan-eligible-total": "Cards eligible for rescheduling (due date extended)",
+    "reschedule-bilan-future-pushed": "Future cards postponed further",
+    "reschedule-bilan-today-postponed": "Cards due today postponed into the future",
+    "reschedule-bilan-preserved-total": "Cards preserved without modification",
+    "reschedule-bilan-preserved-closer": "Shorter intervals avoided (not brought forward)",
+    "reschedule-bilan-preserved-today": "Cards kept for review today",
+    "reschedule-bilan-impact-title": "Immediate impact on today's reviews:",
+    "reschedule-bilan-impact-added": "New cards added today: 0",
+    "reschedule-bilan-impact-queue-reduced": "Today's review queue: %{before} -> %{after} (%{count} cards eased)",
+    "reschedule-bilan-impact-queue-intact": "Today's review queue intact (%{count} cards)",
+    "reschedule-bilan-confirm": "Confirm Reschedule",
+    "reschedule-bilan-cancel": "Cancel",
+    "reschedule-bilan-none-eligible": "No cards have a further due date with the current parameters (examined %{count} cards).",
+    "reschedule-bilan-done": "Rescheduling completed: %{count} cards updated in %{seconds}s.\n0 cards added today. Undoable with Ctrl+Z.",
+    "reschedule-bilan-cancelled": "Rescheduling cancelled. No cards were modified.",
+    "reschedule-bilan-calculating": "Calculating FSRS preview summary..."
   }
 }

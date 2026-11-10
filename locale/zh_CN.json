@@ -54,7 +54,6 @@
     "apply-easy-days-specific": "为特定日期应用轻松日",
     "easy-days": "轻松日",
     "recommended-addons": "推荐插件",
-
     "step-stats": "初学/重学统计",
     "step-stats-disabled": "如果您想查看初学/重学间隔的统计信息，可以使用<code>工具 > FSRS 助手 > 显示初学/重学间隔统计</code>来启用它们。<br/><br/>如果您有很多复习记录，这个图表将减慢这个页面的加载速度，所以要谨慎启用它。",
     "step-stats-subtitle": "初学/重学阶段中不同首次评分的统计",
@@ -79,7 +78,6 @@
     "lapse": "遗忘",
     "insufficient-learn-step-data": "（数据不足，请保持当前设置）",
     "keep-steps-blank": "保持初学/重学间隔字段为空。",
-
     "fsrs-stats": "FSRS 统计",
     "knowledge-acquisition-rate": "知识获取率",
     "studied-cards": "已学习卡片",
@@ -105,7 +103,6 @@
     "relearned": "已重新学习",
     "past": "过去",
     "reviews-on-cards": "卡片上的复习",
-
     "advance-inquire-text": "输入要提前的卡片数量。\n",
     "advance-notification-text-deck": "对于这个牌组，相对安全地提前最多 %{count} 张卡片。\n",
     "advance-notification-text-collection": "对于这个集合，相对安全地提前最多 %{count} 张卡片。\n",
@@ -119,7 +116,6 @@
       "other": "已提前 %{count} 张卡片。"
     },
     "advance-retention-change": "<br>提前卡片的平均目标保留率：%{prev_retention} -> %{new_retention}",
-
     "flatten-inquire-text": "输入您希望未来复习的最大数量。\n",
     "flatten-info-text": "此功能仅影响已由 FSRS 安排的卡片。\n",
     "flatten-warning-text": "此功能不尊重最大间隔设置，可能会显著降低您的真实保留率。\n",
@@ -130,7 +126,6 @@
     "flatten-progress": "已展平 %{count}/%{total} 张卡片",
     "flatten-result-text": "在 %{seconds} 秒内展平了 %{count} 张卡片。",
     "flatten-retention-change": "<br>展平卡片的平均目标保留率：%{prev_retention} -> %{new_retention}",
-
     "postpone-inquire-text": "输入要推迟的卡片数量。\n",
     "postpone-notification-text": "%{deck}，相对安全地推迟最多 %{safe_cnt} 张卡片。\n",
     "postpone-warning-text": "如果您愿意，可以推迟更多卡片，但不推荐。\n请记住，每当您使用推迟或提前功能时，都会偏离最优调度。\n",
@@ -141,7 +136,6 @@
     "postpone-result-text": "在 %{seconds} 秒内推迟了 %{count} 张卡片。",
     "postpone-retention-change": "<br>推迟卡片的平均目标保留率：%{prev_retention} -> %{new_retention}",
     "postpone-reach-max-ivl": "<br>未能推迟 %{reach_max_ivl_cnt} 张卡片，因为它们已达到配置的最大间隔。",
-
     "remedy-start-date": "选择开始日期",
     "remedy-end-date": "选择结束日期",
     "remedy-title": "修复困难按钮误用",
@@ -151,7 +145,6 @@
     "undo-remedy-no-file": "未找到已修复的复习记录",
     "undo-remedy-restored": "已恢复 %{count} 次复习",
     "undo-remedy-success": "已恢复 %{count} 次复习。\n请重新优化您的 FSRS 参数以纳入这些更改。",
-
     "x-%": "%{count}%",
     "x-cards": {
       "one": "1 张卡片",
@@ -161,7 +154,6 @@
       "one": "1 张卡片/小时",
       "other": "%{count} 张卡片/小时"
     },
-
     "disperse-label": "分散兄弟卡片中",
     "disperse-progress": "已分散 %{count}/%{total} 个笔记",
     "disperse-cards-in": "卡片在",
@@ -170,7 +162,6 @@
     "disperse-card-range": "卡片 %{card_id} 到期范围：%{start_due} - %{end_due}",
     "disperse-too-close": "到期日期太近，无法分散：",
     "disperse-result": "%{result}，用时 %{count} 秒",
-
     "clear-custom-data-confirmation": "清除所有卡片中的自定义数据？\n    FSRS4Anki 的自定义调度将记忆状态存储在自定义数据中。\n    当您启用内置 FSRS 时，这些数据不会被使用。\n    确定要清除吗？",
     "clear-custom-data-result": "在 %{seconds} 秒内清除了 %{count} 张卡片。",
     "clear-manual-rescheduling-confirmation": "此选项会删除由\"设置到期日\"和\"更改时重新安排卡片\"生成的复习记录条目，这些条目紧接在另一个手动或重新安排条目之前。\n\n此操作无法撤销。是否继续？",
@@ -189,7 +180,28 @@
     "reschedule-result": "已重新安排 %{count} 张卡片",
     "reschedule-browser-action": "FSRS：更新记忆状态并重新安排",
     "reschedule-done-in-seconds": "%{result}，用时 %{seconds} 秒",
-
-    "enable-fsrs-warning": "请在您的牌组选项中启用 FSRS，或禁用 FSRS 助手插件。"
+    "enable-fsrs-warning": "请在您的牌组选项中启用 FSRS，或禁用 FSRS 助手插件。",
+    "reschedule-no-added-workload": "重排且不增加即时工作量",
+    "reschedule-bilan-title": "FSRS 重排 - 预览摘要",
+    "reschedule-bilan-deck": "牌组: %{deck}   |   目标记忆率: %{retention}%",
+    "reschedule-bilan-rule-title": "应用规则:",
+    "reschedule-bilan-rule-desc": "仅当卡片的新到期日比原到期日更靠后时，才会应用新的 FSRS 计划。",
+    "reschedule-bilan-total-examined": "已检查的复习卡片",
+    "reschedule-bilan-eligible-total": "符合重排条件的卡片 (到期日后延)",
+    "reschedule-bilan-future-pushed": "未来卡片进一步延后",
+    "reschedule-bilan-today-postponed": "今日到期卡片延后至未来",
+    "reschedule-bilan-preserved-total": "保持原状未修改的卡片",
+    "reschedule-bilan-preserved-closer": "避免缩短间隔 (未提前)",
+    "reschedule-bilan-preserved-today": "保留在今日复习的卡片",
+    "reschedule-bilan-impact-title": "对今日复习的即时影响:",
+    "reschedule-bilan-impact-added": "今日新增卡片: 0",
+    "reschedule-bilan-impact-queue-reduced": "今日复习队列: %{before} -> %{after} (减轻了 %{count} 张卡片)",
+    "reschedule-bilan-impact-queue-intact": "今日复习队列保持不变 (%{count} 张卡片)",
+    "reschedule-bilan-confirm": "确认重排",
+    "reschedule-bilan-cancel": "取消",
+    "reschedule-bilan-none-eligible": "使用当前参数没有任何卡片的到期日被延后 (已检查 %{count} 张卡片)。",
+    "reschedule-bilan-done": "重排完成: 在 %{seconds} 秒内更新了 %{count} 张卡片。\n今日新增 0 张卡片。可随时用 Ctrl+Z 撤销。",
+    "reschedule-bilan-cancelled": "重排已取消。未修改任何卡片。",
+    "reschedule-bilan-calculating": "正在计算 FSRS 预览摘要..."
   }
-} 
+}

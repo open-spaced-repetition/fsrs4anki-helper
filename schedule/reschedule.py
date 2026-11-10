@@ -15,6 +15,15 @@ from anki.stats import (
 from anki.utils import ids2str, point_version
 from aqt import QAction, browser
 from aqt.gui_hooks import browser_menus_did_init
+from aqt.qt import (
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QFrame,
+    Qt,
+)
 from aqt.utils import tooltip
 
 from ..configuration import Config
@@ -254,6 +263,7 @@ def reschedule(
     easy_specific_due_dates=[],
     apply_easy_days=False,
     auto_reschedule=False,
+    skip_due_today=False,
 ):
     if not mw.col.get_config("fsrs"):
         tooltip(t("enable-fsrs-warning"))
@@ -290,11 +300,360 @@ def reschedule(
             easy_specific_due_dates,
             apply_easy_days,
             auto_reschedule,
+            skip_due_today,
         ),
         on_done,
     )
 
     return fut
+
+
+class RescheduleBilanDialog(QDialog):
+    def __init__(self, parent, stats: dict):
+        super().__init__(parent)
+        self.stats = stats
+        self.setWindowTitle(t("reschedule-bilan-title"))
+        self.setMinimumWidth(560)
+        self.setWindowModality(Qt.WindowModality.ApplicationModal)
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(14)
+        layout.setContentsMargins(22, 20, 22, 20)
+
+        # En-tête
+        title_label = QLabel(t("reschedule-bilan-title"))
+        title_label.setStyleSheet("font-size: 15px; font-weight: 600;")
+        layout.addWidget(title_label)
+
+        deck_info = QLabel(
+            t(
+                "reschedule-bilan-deck",
+                deck=self.stats["deck_name"],
+                retention=f"{self.stats['retention'] * 100:.1f}",
+            )
+        )
+        deck_info.setStyleSheet("color: #718096; font-size: 12px;")
+        layout.addWidget(deck_info)
+
+        # Règle explicative
+        rule_frame = QFrame()
+        rule_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        rule_frame.setStyleSheet(
+            "QFrame { border: 1px solid rgba(128, 128, 128, 0.25); border-radius: 6px; padding: 10px; background: rgba(128, 128, 128, 0.05); }"
+        )
+        rule_layout = QVBoxLayout(rule_frame)
+        rule_layout.setContentsMargins(6, 6, 6, 6)
+        rule_layout.setSpacing(3)
+
+        rule_title = QLabel(t("reschedule-bilan-rule-title"))
+        rule_title.setStyleSheet("font-weight: 600; font-size: 11px;")
+        rule_text = QLabel(t("reschedule-bilan-rule-desc"))
+        rule_text.setStyleSheet("font-size: 11px; line-height: 1.3;")
+        rule_layout.addWidget(rule_title)
+        rule_layout.addWidget(rule_text)
+        layout.addWidget(rule_frame)
+
+        # Tableau des métriques
+        metrics_frame = QFrame()
+        metrics_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        metrics_frame.setStyleSheet(
+            "QFrame { border: 1px solid rgba(128, 128, 128, 0.2); border-radius: 6px; padding: 12px; }"
+        )
+        metrics_layout = QVBoxLayout(metrics_frame)
+        metrics_layout.setContentsMargins(6, 6, 6, 6)
+        metrics_layout.setSpacing(8)
+
+        def add_metric_row(label_text, value_text, is_bold=False, indent=False):
+            row = QHBoxLayout()
+            prefix = "    " if indent else ""
+            lbl = QLabel(prefix + label_text)
+            val = QLabel(str(value_text))
+            val.setAlignment(Qt.AlignmentFlag.AlignRight)
+            if is_bold:
+                lbl.setStyleSheet("font-weight: 600;")
+                val.setStyleSheet("font-weight: 600;")
+            elif indent:
+                lbl.setStyleSheet("color: #718096; font-size: 11px;")
+                val.setStyleSheet("color: #718096; font-size: 11px;")
+            row.addWidget(lbl)
+            row.addStretch()
+            row.addWidget(val)
+            metrics_layout.addLayout(row)
+
+        add_metric_row(t("reschedule-bilan-total-examined"), self.stats["total_cnt"], is_bold=True)
+        add_metric_row(t("reschedule-bilan-eligible-total"), self.stats["rescheduled_total"], is_bold=True)
+        add_metric_row(t("reschedule-bilan-future-pushed"), self.stats["future_pushed"], indent=True)
+        add_metric_row(t("reschedule-bilan-today-postponed"), self.stats["today_postponed"], indent=True)
+
+        add_metric_row(t("reschedule-bilan-preserved-total"), self.stats["preserved_total"], is_bold=True)
+        add_metric_row(t("reschedule-bilan-preserved-closer"), self.stats["preserved_closer"], indent=True)
+        add_metric_row(t("reschedule-bilan-preserved-today"), self.stats["preserved_today"], indent=True)
+
+        layout.addWidget(metrics_frame)
+
+        # Impact sur aujourd'hui
+        impact_frame = QFrame()
+        impact_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        impact_frame.setStyleSheet(
+            "QFrame { border: 1px solid rgba(128, 128, 128, 0.2); border-radius: 6px; padding: 10px; background: rgba(128, 128, 128, 0.03); }"
+        )
+        impact_layout = QVBoxLayout(impact_frame)
+        impact_layout.setContentsMargins(6, 6, 6, 6)
+        impact_layout.setSpacing(4)
+
+        impact_title = QLabel(t("reschedule-bilan-impact-title"))
+        impact_title.setStyleSheet("font-weight: 600; font-size: 11px;")
+        impact_layout.addWidget(impact_title)
+
+        if self.stats["today_postponed"] > 0:
+            queue_text = t(
+                "reschedule-bilan-impact-queue-reduced",
+                before=self.stats["workload_today_before"],
+                after=self.stats["workload_today_after"],
+                count=self.stats["today_postponed"],
+            )
+        else:
+            queue_text = t(
+                "reschedule-bilan-impact-queue-intact",
+                count=self.stats["workload_today_before"],
+            )
+
+        impact_text = f"• {t('reschedule-bilan-impact-added')}\n• {queue_text}"
+        impact_desc = QLabel(impact_text)
+        impact_desc.setStyleSheet("font-size: 11px;")
+        impact_layout.addWidget(impact_desc)
+        layout.addWidget(impact_frame)
+
+        # Boutons d'action
+        btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(10)
+        btn_layout.addStretch()
+
+        self.btn_cancel = QPushButton(t("reschedule-bilan-cancel"))
+        self.btn_cancel.clicked.connect(self.reject)
+        btn_layout.addWidget(self.btn_cancel)
+
+        self.btn_confirm = QPushButton(t("reschedule-bilan-confirm"))
+        self.btn_confirm.setDefault(True)
+        self.btn_confirm.setStyleSheet("font-weight: 600; padding: 6px 14px;")
+        self.btn_confirm.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_confirm)
+
+        layout.addLayout(btn_layout)
+
+
+def reschedule_simulation_background(did=None, filtered_cids=None):
+    config = Config()
+    config.load()
+
+    fsrs = FSRS()
+    fsrs.reschedule_threshold = config.reschedule_threshold
+    did_query = None
+    if did is not None:
+        did_list = ids2str(fsrs.DM.deck_and_child_ids(did))
+        did_query = f"AND did IN {did_list}"
+
+    if fsrs.load_balancer_enabled:
+        fsrs.set_load_balance()
+
+    filter_query = ""
+    if filtered_cids:
+        filter_query = f"AND id IN {ids2str(filtered_cids)}"
+
+    skip_query = (
+        """
+            AND id NOT IN (
+                SELECT cid
+                FROM revlog
+                GROUP BY cid
+                HAVING MAX(CASE WHEN type = 4 THEN id ELSE NULL END) = MAX(id)
+            )
+        """
+        if not config.reschedule_set_due_date
+        else ""
+    )
+
+    cid_did_nid = mw.col.db.all(f"""
+        SELECT
+            id,
+            CASE WHEN odid==0
+            THEN did
+            ELSE odid
+            END,
+            nid
+        FROM cards
+        WHERE queue NOT IN ({QUEUE_TYPE_SUSPENDED}, {QUEUE_TYPE_NEW}, {QUEUE_TYPE_PREVIEW})
+        AND type = {CARD_TYPE_REV}
+        {did_query if did_query is not None else ""}
+        {filter_query}
+        {skip_query}
+        ORDER BY ivl
+    """)
+
+    deck_name = "Toute la collection"
+    desired_retention_val = 0.9
+    if did is not None:
+        deck_name = mw.col.decks.name(did)
+        desired_retention_val = get_dr(fsrs.DM, did)
+    elif cid_did_nid:
+        desired_retention_val = get_dr(fsrs.DM, cid_did_nid[0][1])
+
+    total_cnt = len(cid_did_nid)
+    today = fsrs.today
+
+    cards = map(
+        lambda x: (
+            x
+            + [
+                get_dr(fsrs.DM, x[1]),
+                fsrs.DM.config_dict_for_deck_id(x[1])["rev"]["maxIvl"],
+            ]
+        ),
+        cid_did_nid,
+    )
+
+    cards_to_update = []
+    filtered_nids = set()
+
+    future_pushed = 0
+    today_postponed = 0
+    preserved_closer = 0
+    preserved_today = 0
+    workload_today_before = 0
+
+    for (cid, card_did, nid, desired_retention, maximum_interval) in cards:
+        card = mw.col.get_card(cid)
+        due_before = card.odue if card.odid else card.due
+        is_due_today_before = (due_before <= today)
+        if is_due_today_before:
+            workload_today_before += 1
+
+        memory_state = mw.col.compute_memory_state(cid)
+        if not memory_state or memory_state.stability is None or memory_state.difficulty is None:
+            continue
+
+        s = memory_state.stability
+        d = memory_state.difficulty
+        decay = getattr(memory_state, "decay", 0.5) or 0.5
+
+        fsrs.desired_retention = desired_retention
+        fsrs.maximum_interval = maximum_interval
+        fsrs.did = card_did
+        fsrs.set_card(card)
+        fsrs.set_fuzz_factor(cid, card.reps)
+
+        new_ivl = fsrs.fuzzed_next_interval(s, -decay)
+        new_ivl = max(new_ivl, 1)
+
+        last_review_date, _ = get_last_review_date_and_interval(card)
+        new_due = last_review_date + new_ivl
+
+        is_further = (new_due > due_before)
+        is_postponed_beyond_today = (new_due > today)
+
+        if is_further and is_postponed_beyond_today:
+            if is_due_today_before:
+                today_postponed += 1
+            else:
+                future_pushed += 1
+
+            card.ivl = new_ivl
+            if card.odid:
+                card.odue = new_due if new_due != 0 else 1
+            else:
+                card.due = new_due
+            card.memory_state = FSRSMemoryState(stability=s, difficulty=d)
+            if hasattr(memory_state, "decay") and hasattr(card, "decay"):
+                card.decay = memory_state.decay
+            write_custom_data(card, "v", "reschedule")
+
+            cards_to_update.append(card)
+            filtered_nids.add(nid)
+        else:
+            if is_due_today_before:
+                preserved_today += 1
+            else:
+                preserved_closer += 1
+
+    workload_today_after = workload_today_before - today_postponed
+
+    stats = {
+        "deck_name": deck_name,
+        "retention": desired_retention_val,
+        "total_cnt": total_cnt,
+        "rescheduled_total": len(cards_to_update),
+        "future_pushed": future_pushed,
+        "today_postponed": today_postponed,
+        "preserved_total": preserved_closer + preserved_today,
+        "preserved_closer": preserved_closer,
+        "preserved_today": preserved_today,
+        "workload_today_before": workload_today_before,
+        "workload_today_after": workload_today_after,
+    }
+
+    return stats, cards_to_update, filtered_nids
+
+
+def apply_reschedule(cards_to_update, filtered_nids, did, stats, start_time):
+    config = Config()
+    config.load()
+    cnt = len(cards_to_update)
+
+    undo_entry = mw.col.add_custom_undo_entry(t("reschedule-bilan-title"))
+    mw.col.update_cards(cards_to_update)
+    mw.col.merge_undo_entries(undo_entry)
+
+    if config.auto_disperse_after_reschedule:
+        filtered_nid_string = ids2str(filtered_nids)
+        mw.reset()
+        disperse_siblings(did, True, filtered_nid_string, f"{cnt} cartes replanifiees", skip_due_today=True)
+    else:
+        mw.reset()
+        tooltip(
+            t(
+                "reschedule-bilan-done",
+                count=cnt,
+                seconds=f"{time.time() - start_time:.2f}",
+            )
+        )
+
+
+def reschedule_no_backlog(did=None, filtered_cids=None):
+    if not mw.col.get_config("fsrs"):
+        tooltip(t("enable-fsrs-warning"))
+        return None
+
+    start_time = time.time()
+
+    def do_dry_run():
+        return reschedule_simulation_background(did, filtered_cids)
+
+    def on_simulation_done(future):
+        mw.progress.finish()
+        try:
+            simulation_result = future.result()
+        except Exception as e:
+            tooltip(f"Erreur lors de la simulation : {e}")
+            return
+
+        if simulation_result is None:
+            return
+
+        stats, cards_to_update, filtered_nids = simulation_result
+        if not cards_to_update:
+            tooltip(t("reschedule-bilan-none-eligible", count=stats["total_cnt"]))
+            return
+
+        dialog = RescheduleBilanDialog(mw, stats)
+        if dialog.exec():
+            apply_reschedule(cards_to_update, filtered_nids, did, stats, start_time)
+        else:
+            tooltip(t("reschedule-bilan-cancelled"))
+
+    mw.progress.start(label=t("reschedule-bilan-calculating"), immediate=True)
+    mw.taskman.run_in_background(do_dry_run, on_simulation_done)
 
 
 def reschedule_background(
@@ -305,6 +664,7 @@ def reschedule_background(
     easy_specific_due_dates=[],
     apply_easy_days=False,
     auto_reschedule=False,
+    skip_due_today=False,
 ):
     config = Config()
     config.load()
@@ -411,7 +771,7 @@ def reschedule_background(
         fsrs.maximum_interval = maximum_interval
         fsrs.did = did
         card, interval_updated = reschedule_card(
-            cid, fsrs, filter_flag, auto_reschedule
+            cid, fsrs, filter_flag or skip_due_today, auto_reschedule, skip_due_today
         )
         if card is None:
             continue
@@ -441,7 +801,7 @@ def reschedule_background(
     return (cnt, finish_text)
 
 
-def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
+def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False, skip_due_today=False):
     card = mw.col.get_card(cid)
     if recompute:
         memory_state = mw.col.compute_memory_state(cid)
@@ -487,6 +847,18 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
 
         new_ivl = fsrs.fuzzed_next_interval(s, -decay)
         due_before = card.odue if card.odid else card.due
+        last_review_date, _ = get_last_review_date_and_interval(card)
+        check_due = last_review_date + max(new_ivl, 1)
+
+        if skip_due_today:
+            # Règle : aucune augmentation du travail immédiat
+            # 1. Carte qui n'était pas due aujourd'hui et qui le deviendrait : exclure
+            if due_before > fsrs.today and check_due <= fsrs.today:
+                return None, False
+            # 2. Carte déjà due aujourd'hui qui reste due aujourd'hui : laisser intacte
+            if due_before <= fsrs.today and check_due <= fsrs.today:
+                return None, False
+
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "reschedule")
         due_after = card.odue if card.odid else card.due
@@ -501,9 +873,17 @@ def reschedule_browser_selected_cards(browser: browser.Browser):
     reschedule(did=None, recent=False, filter_flag=True, filtered_cids=cids)
 
 
+def reschedule_browser_selected_cards_no_backlog(browser: browser.Browser):
+    cids = browser.selected_cards()
+    reschedule_no_backlog(did=None, filtered_cids=cids)
+
+
 @browser_menus_did_init.append
 def on_browser_menus_did_init(browser: browser.Browser):
     action = QAction(t("reschedule-browser-action"), browser)
     action.triggered.connect(lambda: reschedule_browser_selected_cards(browser))
+    action_no_backlog = QAction(t("reschedule-no-added-workload"), browser)
+    action_no_backlog.triggered.connect(lambda: reschedule_browser_selected_cards_no_backlog(browser))
     browser.form.menu_Cards.addSeparator()
     browser.form.menu_Cards.addAction(action)
+    browser.form.menu_Cards.addAction(action_no_backlog)

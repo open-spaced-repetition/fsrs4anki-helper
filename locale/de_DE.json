@@ -41,7 +41,6 @@
     "apply-easy-days-specific": "Für ein bestimmtes Datum anwenden",
     "easy-days": "Tage mit weniger Wiederholungen",
     "recommended-addons": "Empfohlene Erweiterungen",
-
     "step-stats": "Lernstufen",
     "step-stats-disabled": "Die Anzeige der Lernstufen-Statistik kann unter „<code>Extras→FSRS-Helfer→Lernstufen-Statistik anzeigen</code>“ aktiviert werden.<br/><br/>Bei umfangreichen Daten wird die Statistik-Seite dann langsamer laden. Aktivieren Sie diese Funktion nur bei Bedarf.",
     "step-stats-subtitle": "Aufgeschlüsselt nach der jeweils ersten Bewertung",
@@ -64,7 +63,6 @@
     "lapse": "",
     "insufficient-learn-step-data": "(Nicht genügend Daten verfügbar. Behalten Sie Ihre aktuellen Einstellungen bei.)",
     "keep-steps-blank": "„Es wird empfohlen, das Feld für die Lernstufen leer zu lassen.",
-
     "fsrs-stats": "FSRS-Statistiken",
     "knowledge-acquisition-rate": "Lerneffizienz",
     "studied-cards": "Gelernte Karten",
@@ -84,13 +82,12 @@
     "true-retention-disabled": "Die Anzeige der Statistik der tatsächliche Erinnerungsquote kann unter „<code>Extras→FSRS-Helfer→Tatsächliche Erinnerungsquote anzeigen</code>“ aktiviert werden.<br/><br/>Bei umfangreichen Daten wird die Statistik-Seite dann langsamer laden. Aktivieren Sie diese Funktion nur bei Bedarf.",
     "true-retention-mature-help": "Als Karten mit langem Intervall gelten standardmäßig Karten mit einem Intervall von 21 Tagen oder länger. Dieser Grenzwert kann in der Datei config.json angepasst werden.",
     "young-annotated": "Kurzes Intervall < %{mature_ivl} Tage",
-    "mature-annotated":"Langes Intervall ≥ %{mature_ivl} Tage",
+    "mature-annotated": "Langes Intervall ≥ %{mature_ivl} Tage",
     "total": "Insgesamt",
     "learned": "Lernen",
     "relearned": "Wiedererlernen",
     "past": "Zeitraum",
     "reviews-on-cards": "Anzahl der Wiederholungen",
-
     "advance-inquire-text": "Geben Sie die Anzahl der Karten ein, die vorverlegt werden sollen.\n\n",
     "advance-notification-text-deck": "Es ist recht sicher, bis zu %{count} Karten vorzuverlegen.\n\n",
     "advance-notification-text-collection": "Es ist recht sicher, bis zu %{count} Karten vorzuverlegen.\n\n",
@@ -104,7 +101,6 @@
       "other": "%{count} Karten wurden vorverlegt."
     },
     "advance-retention-change": "<br>Die durchschnittliche Erinnerungsquote der betroffenen Karten lag zuvor bei %{prev_retention} und liegt jetzt bei %{new_retention}.",
-
     "flatten-inquire-text": "Geben Sie einen Tageshöchstwert ein.\n\n",
     "flatten-info-text": "Diese Funktion wirkt sich nur auf Karten aus, die von FSRS geplant\nwurden.\n\n",
     "flatten-warning-text": "Diese Funktion berücksichtigt die Einstellungen für das\nHöchstintervall nicht und könnte Ihre tatsächliche\nErinnerungsquote erheblich verringern.\n",
@@ -115,7 +111,6 @@
     "flatten-progress": "%{count} von %{total} Karten das Fälligkeitsdatum\ngeändert, um einen Tageshöchstwert einzuhalten",
     "flatten-result-text": "Bei %{count} Karten wurde in %{seconds} Sekunden das Fälligkeitsdatum geändert, um einen Tageshöchstwert einzuhalten.",
     "flatten-retention-change": "<br>Die durchschnittliche Erinnerungsquote der betroffenen Karten lag zuvor bei %{prev_retention} und liegt jetzt bei %{new_retention}.",
-
     "postpone-inquire-text": "Geben Sie die Anzahl der Karten ein, die nach hinten verlegt\nwerden sollen.\n\n",
     "postpone-notification-text": "Es ist recht sicher, bis zu %{safe_cnt} Karten nach hinten zu verlegen.\n\n",
     "postpone-warning-text": "Sie können mehr Karten nach hinten verlegen, aber es wird\nnicht empfohlen. Beachten Sie, dass bei der Verwendung von\n„Nach hinten verlegen“ oder „Vorverlegen“ von der optimalen\nZeitplanung abgewichen wird.\n\n",
@@ -126,7 +121,6 @@
     "postpone-result-text": "%{count} Karten wurden in %{seconds} Sekunden nach hinten verlegt.",
     "postpone-retention-change": "<br>Die durchschnittliche Erinnerungsquote der betroffenen Karten lag zuvor bei %{prev_retention} und liegt jetzt bei %{new_retention}.",
     "postpone-reach-max-ivl": "<br>%{reach_max_ivl_cnt} Karten konnten nicht nach hinten verlegt werden, da sie bereits das eingestellte Höchstintervall erreicht haben.",
-
     "remedy-start-date": "Anfangsdatum",
     "remedy-end-date": "Enddatum",
     "remedy-title": "Fehlgebrauch von „Schwer“ korrigieren",
@@ -136,22 +130,20 @@
     "undo-remedy-no-file": "Nichts rückgängig zu machen",
     "undo-remedy-restored": "%{count} Korrekturen rückgängig gemacht",
     "undo-remedy-success": "%{count} Korrekturen rückgängig gemacht.\nBitte optimieren Sie jetzt die FSRS-Parameter.",
-
     "x-%": "%{count}%",
     "x-cards": {
       "one": "1 Karte",
       "other": "%{count} Karten"
     },
     "x-cards-per-hour": {
-      "one":"1 Karte/Stunde",
-      "other":"%{count} Karten/Stunde"
+      "one": "1 Karte/Stunde",
+      "other": "%{count} Karten/Stunde"
     },
     "x-days": {
       "one": "1 Tag",
       "other": "%{count} Tage"
     },
     "fsrs-status": "FSRS: %{status}",
-
     "disperse-label": "Abstände zwischen Geschwisterkarten vergrößern",
     "disperse-progress": "%{count} von %{total} Notizen",
     "disperse-cards-in": "Karten in",
@@ -160,12 +152,10 @@
     "disperse-card-range": "Bereich für das Fälligkeitsdatum von Karte %{card_id}: %{start_due} bis %{end_due}",
     "disperse-too-close": "Die Fälligkeitsdaten liegen zu nah beieinander, um die Abstände zu vergrößern:",
     "disperse-result": "%{result} in %{count} Sekunden",
-
     "clear-custom-data-confirmation": "Benutzerdefinierte Daten in allen Karten löschen?\n\nDie benutzerdefinierte Zeitplanung von FSRS4Anki speicherte den FSRS-Kartenstatus in benutzerdefinierten Daten. Diese werden nicht mehr verwendet, wenn Sie das integrierte FSRS verwenden.\n\nSind Sie sicher?",
     "clear-custom-data-result": "Benutzerdefinierte Daten von %{count} Karten in %{seconds} Sekunden gelöscht.",
     "clear-manual-rescheduling-confirmation": "Bei aufeinanderfolgenden Einträgen im Wiederholungsverlauf, die durch „Fälligkeitsdatum setzen“ oder „Bei Änderungen alle Karten umplanen“ erzeugt wurden, bleibt nur der letzte Eintrag erhalten. Alle vorherigen Einträge werden gelöscht.\n\nDiese Aktion kann nicht rückgängig gemacht werden. Möchten Sie fortfahren?",
     "clear-manual-rescheduling-result": "%{count} Einträge im Wiederholungsverlauf gelöscht.",
-
     "easy-days-select-date": "Datum",
     "easy-days-add-date": "Ausgewähltes Datum hinzufügen",
     "easy-days-apply-easy-days": "Anwenden",
@@ -181,7 +171,28 @@
     "reschedule-browser-action": "FSRS-Kartenstatus aktualisieren und Karte umplanen",
     "reschedule-done-in-seconds": "%{result} in %{seconds} Sekunden",
     "not-available": "–",
-
-    "enable-fsrs-warning": "Bitte entweder FSRS in den Einstellungen aktivieren oder die FSRS-Helfer-Erweiterung deaktivieren."
+    "enable-fsrs-warning": "Bitte entweder FSRS in den Einstellungen aktivieren oder die FSRS-Helfer-Erweiterung deaktivieren.",
+    "reschedule-no-added-workload": "Karten neu planen ohne Erhöhung des unmittelbaren Arbeitsaufwands",
+    "reschedule-bilan-title": "FSRS-Neuplanung - Vorschau",
+    "reschedule-bilan-deck": "Stapel: %{deck}   |   Gewünschte Behaltensrate: %{retention}%",
+    "reschedule-bilan-rule-title": "Angewendete Regel:",
+    "reschedule-bilan-rule-desc": "Nur Karten, deren neues Fälligkeitsdatum weiter in der Zukunft liegt als das ursprüngliche, werden neu geplant.",
+    "reschedule-bilan-total-examined": "Überprüfte Wiederholungskarten",
+    "reschedule-bilan-eligible-total": "Zur Neuplanung berechtigte Karten (Fälligkeit nach hinten verschoben)",
+    "reschedule-bilan-future-pushed": "Zukünftige Karten weiter nach hinten verschoben",
+    "reschedule-bilan-today-postponed": "Heute fällige Karten in die Zukunft verschoben",
+    "reschedule-bilan-preserved-total": "Unverändert beibehaltene Karten",
+    "reschedule-bilan-preserved-closer": "Kürzere Intervalle vermieden (nicht vorgezogen)",
+    "reschedule-bilan-preserved-today": "Für die heutige Wiederholung beibehalten",
+    "reschedule-bilan-impact-title": "Unmittelbare Auswirkung auf heutige Wiederholungen:",
+    "reschedule-bilan-impact-added": "Heute hinzugefügte neue Karten: 0",
+    "reschedule-bilan-impact-queue-reduced": "Heutige Wiederholungsliste: %{before} -> %{after} (%{count} Karten entlastet)",
+    "reschedule-bilan-impact-queue-intact": "Heutige Wiederholungsliste unverändert (%{count} Karten)",
+    "reschedule-bilan-confirm": "Neuplanung bestätigen",
+    "reschedule-bilan-cancel": "Abbrechen",
+    "reschedule-bilan-none-eligible": "Keine Karten haben mit den aktuellen Parametern ein weiteres Fälligkeitsdatum (%{count} Karten überprüft).",
+    "reschedule-bilan-done": "Neuplanung abgeschlossen: %{count} Karten in %{seconds}s aktualisiert.\nHeute 0 Karten hinzugefügt. Rückgängig machbar mit Strg+Z.",
+    "reschedule-bilan-cancelled": "Neuplanung abgebrochen. Es wurden keine Karten geändert.",
+    "reschedule-bilan-calculating": "FSRS-Vorschau wird berechnet..."
   }
 }

@@ -1,5 +1,27 @@
 {
-    "ja_JP": {
-        "show-steps-stats": "ステップ情報を見せる"
-    }
+  "ja_JP": {
+    "show-steps-stats": "ステップ情報を見せる",
+    "reschedule-no-added-workload": "当日の復習枚数を増やさずに再スケジュール",
+    "reschedule-bilan-title": "FSRS 再スケジュール - プレビュー",
+    "reschedule-bilan-deck": "デッキ: %{deck}   |   目標定着率: %{retention}%",
+    "reschedule-bilan-rule-title": "適用ルール:",
+    "reschedule-bilan-rule-desc": "新しい期日が元の期日よりも先の日付になるカードのみ再スケジュールされます。",
+    "reschedule-bilan-total-examined": "検査した復習カード",
+    "reschedule-bilan-eligible-total": "再スケジュール対象カード (期日が延長)",
+    "reschedule-bilan-future-pushed": "将来のカードをさらに先へ延期",
+    "reschedule-bilan-today-postponed": "本日分のカードを将来へ延期",
+    "reschedule-bilan-preserved-total": "変更せず保持されたカード",
+    "reschedule-bilan-preserved-closer": "間隔短縮を回避 (前倒しなし)",
+    "reschedule-bilan-preserved-today": "本日の復習として維持されたカード",
+    "reschedule-bilan-impact-title": "本日の復習への即時影響:",
+    "reschedule-bilan-impact-added": "本日追加されたカード: 0",
+    "reschedule-bilan-impact-queue-reduced": "本日の復習キュー: %{before} -> %{after} (%{count} 枚軽減)",
+    "reschedule-bilan-impact-queue-intact": "本日の復習キューは変更なし (%{count} 枚)",
+    "reschedule-bilan-confirm": "再スケジュールを確定",
+    "reschedule-bilan-cancel": "キャンセル",
+    "reschedule-bilan-none-eligible": "現在のパラメータでは期日が延長されるカードはありませんでした (%{count} 枚検査)。",
+    "reschedule-bilan-done": "再スケジュール完了: %{seconds} 秒で %{count} 枚のカードを更新しました。\n本日の追加は 0 枚です。Ctrl+Z で元に戻せます。",
+    "reschedule-bilan-cancelled": "再スケジュールをキャンセルしました。カードは変更されていません。",
+    "reschedule-bilan-calculating": "FSRS プレビューを計算中..."
+  }
 }

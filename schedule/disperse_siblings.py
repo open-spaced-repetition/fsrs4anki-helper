@@ -162,7 +162,7 @@ def disperse(siblings):
 
 
 def disperse_siblings(
-    did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""
+    did, filter_flag=False, filtered_nid_string="", text_from_reschedule="", skip_due_today=False
 ):
     if not mw.col:
         return None
@@ -186,7 +186,7 @@ def disperse_siblings(
 
     fut = mw.taskman.run_in_background(
         lambda: disperse_siblings_background(
-            did, filter_flag, filtered_nid_string, text_from_reschedule
+            did, filter_flag, filtered_nid_string, text_from_reschedule, skip_due_today
         ),
         on_done,
     )
@@ -195,7 +195,7 @@ def disperse_siblings(
 
 
 def disperse_siblings_background(
-    did, filter_flag=False, filtered_nid_string="", text_from_reschedule=""
+    did, filter_flag=False, filtered_nid_string="", text_from_reschedule="", skip_due_today=False
 ):
     nid_siblings = get_siblings(did, filter_flag, filtered_nid_string)
     sibilings_cnt = len(nid_siblings)
@@ -209,12 +209,21 @@ def disperse_siblings_background(
     card_cnt = 0
     note_cnt = 0
     dispersed_cards = []
+    today = mw.col.sched.today
     undo_entry = mw.col.add_custom_undo_entry(t("disperse-siblings"))
     for nid, siblings in nid_siblings.items():
         best_due_dates, _, _ = disperse(siblings)
         for cid, due in best_due_dates.items():
             card = mw.col.get_card(cid)
+            due_before = card.odue if card.odid else card.due
             last_review, _ = get_last_review_date_and_interval(card)
+            new_due = due
+
+            if skip_due_today:
+                # Ne jamais raccourcir une échéance ni rendre due aujourd'hui une carte non due
+                if new_due <= due_before or new_due <= today:
+                    continue
+
             card = update_card_due_ivl(card, due - last_review)
             write_custom_data(card, "v", "disperse")
             dispersed_cards.append(card)

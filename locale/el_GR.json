@@ -40,7 +40,6 @@
     "apply-easy-days-specific": "Εφαρμογή εύκολων ημερών για συγκεκριμένες ημερομηνίες",
     "easy-days": "Εύκολες ημέρες",
     "recommended-addons": "Συνιστώμενα πρόσθετα",
-
     "step-stats": "Στατιστικά βημάτων",
     "step-stats-disabled": "If you would like to see your (re)learning step statistics, you can enable them with <code>Tools > FSRS Helper > Show step stats.</code><br/><br/>This graph will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "step-stats-subtitle": "Statistics for different first ratings during (re)learning steps",
@@ -63,7 +62,6 @@
     "lapse": "Lapse",
     "insufficient-learn-step-data": "(τα δεδομένα είναι ανεπαρκή, διατηρήστε την τρέχουσα ρύθμιση)",
     "keep-steps-blank": "Κρατήστε κενό το πεδίο βήματα.",
-
     "fsrs-stats": "Στατιστικά FSRS",
     "knowledge-acquisition-rate": "Ποσοστό απόκτησης γνώσεων",
     "studied-cards": "Μελετημένες κάρτες",
@@ -83,13 +81,12 @@
     "true-retention-disabled": "If you would like to see your true retention statistics, you can enable them with <code>Tools > FSRS Helper > Show true retention.</code><br/><br/>This table will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "true-retention-mature-help": "Από προεπιλογή, ως ώριμες κάρτες ορίζονται οι κάρτες με διάστημα 21 ημερών ή μεγαλύτερο. Αυτό το όριο μπορεί να ρυθμιστεί στη ρύθμιση παραμέτρων του πρόσθετου.",
     "young-annotated": "Νέα (ivl < %{mature_ivl} d)",
-    "mature-annotated":"Ώριμα (ivl ≥ %{mature_ivl} d)",
+    "mature-annotated": "Ώριμα (ivl ≥ %{mature_ivl} d)",
     "total": "Σύνολο",
     "learned": "Learned",
     "relearned": "Relearned",
     "past": "Past",
     "reviews-on-cards": "Επαναλήψεις σε κάρτες",
-
     "advance-inquire-text": "Εισάγετε τον αριθμό των καρτών που θα προωθηθούν.\n",
     "advance-notification-text-deck": "Για αυτή την τράπουλα, είναι σχετικά ασφαλές να προωθήσετε έως και %{count} κάρτες.\n",
     "advance-notification-text-collection": "Για αυτή τη συλλογή, είναι σχετικά ασφαλές να προωθήσετε έως και %{count} κάρτες.\n",
@@ -103,7 +100,6 @@
       "other": "%{count} κάρτες έχουν προωθηθεί."
     },
     "advance-retention-change": "<br>Μέσος στόχος ανάκλησης προωθημένων καρτών: %{prev_retention} -> %{new_retention}",
-
     "flatten-inquire-text": "Εισάγετε τον μέγιστο αριθμό επαναλήψεων που θέλετε στο μέλλον.\n",
     "flatten-info-text": "Αυτή η λειτουργία επηρεάζει μόνο τις κάρτες που έχουν προγραμματιστεί από το FSRS.\n",
     "flatten-warning-text": "Αυτή η λειτουργία δεν σέβεται τις μέγιστες ρυθμίσεις διαστήματος και μπορεί να μειώσει σημαντικά την πραγματική σας ανάκληση.\n",
@@ -114,7 +110,6 @@
     "flatten-progress": "%{count}/%{total} κάρτες που εξομαλύνθηκαν",
     "flatten-result-text": "%{count} κάρτες που εξομαλύνθηκαν σε %{seconds} δευτερόλεπτα.",
     "flatten-retention-change": "<br>Μέσος στόχος διατήρησης των εξομαλυμένων καρτών: %{prev_retention} -> %{new_retention}",
-
     "postpone-inquire-text": "Εισάγετε τον αριθμό των καρτών που θα αναβληθούν.\n",
     "postpone-notification-text": "%{deck}, είναι σχετικά ασφαλές να αναβάλλετε μέχρι %{safe_cnt} κάρτες.\n",
     "postpone-warning-text": "Μπορείτε να αναβάλλετε περισσότερες κάρτες, αν το επιθυμείτε, αλλά δεν συνιστάται.\nΈχετε υπόψη σας ότι κάθε φορά που χρησιμοποιείτε τις επιλογές Postpone ή Advance, απομακρύνεστε από τον βέλτιστο προγραμματισμό.\n",
@@ -125,7 +120,6 @@
     "postpone-result-text": "%{count} κάρτες αναβλήθηκαν σε %{seconds} δευτερόλεπτα.",
     "postpone-retention-change": "<br>Μέσος στόχος ανάκλησης των αναβληθέντων καρτών: %{prev_retention} -> %{new_retention}",
     "postpone-reach-max-ivl": "<br>Failed to postpone %{reach_max_ivl_cnt} cards due to maximum interval.",
-
     "remedy-start-date": "Επιλέξτε την ημερομηνία έναρξης",
     "remedy-end-date": "Επιλέξτε την ημερομηνία λήξης",
     "remedy-title": "Επιδιόρθωση κατάχρησης του κουμπιού Hard",
@@ -135,22 +129,20 @@
     "undo-remedy-no-file": "Δεν βρέθηκαν επιδιορθωμένες επαναλήψεις",
     "undo-remedy-restored": "%{count} επαναλήψεις αποκαταστάθηκαν",
     "undo-remedy-success": "%%{count} επαναλήψεις αποκαταστάθηκαν.\nΠαρακαλούμε να βελτιστοποιήσετε εκ νέου τις παραμέτρους του FSRS για να ενσωματώσετε τις αλλαγές.",
-
     "x-%": "%{count}%",
     "x-cards": {
       "one": "1 κάρτα",
       "other": "%{count} κάρτες"
     },
     "x-cards-per-hour": {
-      "one":"1 κάρτα/ώρα",
-      "other":"%{count} κάρτες/ώρα"
+      "one": "1 κάρτα/ώρα",
+      "other": "%{count} κάρτες/ώρα"
     },
     "x-days": {
       "one": "1 ημέρα",
       "other": "%{count} ημέρες"
     },
     "fsrs-status": "FSRS: %{status}",
-
     "disperse-label": "Dispersing Siblings",
     "disperse-progress": "%{count}/%{total} notes dispersed",
     "disperse-cards-in": "cards in",
@@ -159,11 +151,9 @@
     "disperse-card-range": "Card %{card_id} due range: %{start_due} - %{end_due}",
     "disperse-too-close": "Due dates are too close to disperse:",
     "disperse-result": "%{result} σε %{count} δευτερόλεπτα",
-
     "clear-custom-data-confirmation": "Διαγραφή προσαρμοσμένων δεδομένων σε όλες τις κάρτες; \n Ο προσαρμοσμένος προγραμματισμός του FSRS4Anki αποθηκεύει την κατάσταση μνήμης στα προσαρμοσμένα δεδομένα.\n Δεν χρησιμοποιείται όταν ενεργοποιείτε το ενσωματωμένο FSRS.\n Είστε σίγουροι;",
     "clear-custom-data-result": "%{count} κάρτες εκκαθαρίστηκαν σε %{seconds} δευτερόλεπτα.",
     "clear-manual-rescheduling-confirmation": "Αυτή η επιλογή αφαιρεί τις εγγραφές του revlog που δημιουργούνται από τις επιλογές «Ορισμός ημερομηνίας λήξης» και «Επαναπρογραμματισμός καρτών κατά την αλλαγή», οι οποίες προηγούνται αμέσως μιας άλλης χειροκίνητης εγγραφής ή εγγραφής επαναπρογραμματισμού.\n\nΗ ενέργεια αυτή δεν μπορεί να ανακληθεί. Θέλετε να συνεχίσετε;",
-
     "clear-manual-rescheduling-result": "%{count} καταχωρίσεις επαναλήψεων διαγράφηκαν.",
     "easy-days-select-date": "Επιλέξτε την ημερομηνία(ες)",
     "easy-days-add-date": "Προσθέστε την επιλεγμένη ημερομηνία",
@@ -179,7 +169,28 @@
     "reschedule-result": "%{count} κάρτες επαναπρογραμματίστηκαν",
     "reschedule-browser-action": "FSRS: Ενημέρωση κατάστασης μνήμης και επαναπρογραμματισμός",
     "reschedule-done-in-seconds": "%{result} σε %{seconds} δευτερόλεπτα",
-
-    "enable-fsrs-warning": "Παρακαλούμε είτε ενεργοποιήστε το FSRS στις επιλογές της τράπουλας, είτε απενεργοποιήστε το πρόσθετο FSRS helper."
+    "enable-fsrs-warning": "Παρακαλούμε είτε ενεργοποιήστε το FSRS στις επιλογές της τράπουλας, είτε απενεργοποιήστε το πρόσθετο FSRS helper.",
+    "reschedule-no-added-workload": "Επαναπρογραμματισμός χωρίς αύξηση του άμεσου φόρτου εργασίας",
+    "reschedule-bilan-title": "Επαναπρογραμματισμός FSRS - Προεπισκόπηση",
+    "reschedule-bilan-deck": "Τράπουλα: %{deck}   |   Επιθυμητή διατήρηση: %{retention}%",
+    "reschedule-bilan-rule-title": "Εφαρμοσμένος κανόνας:",
+    "reschedule-bilan-rule-desc": "Μόνο οι κάρτες των οποίων η νέα ημερομηνία είναι πιο μακρινή από την αρχική θα επαναπρογραμματιστούν.",
+    "reschedule-bilan-total-examined": "Κάρτες επανάληψης που εξετάστηκαν",
+    "reschedule-bilan-eligible-total": "Κάρτες κατάλληλες για επαναπρογραμματισμό (παράταση)",
+    "reschedule-bilan-future-pushed": "Μελλοντικές κάρτες που αναβλήθηκαν περαιτέρω",
+    "reschedule-bilan-today-postponed": "Κάρτες που λήγουν σήμερα και αναβλήθηκαν",
+    "reschedule-bilan-preserved-total": "Κάρτες που διατηρήθηκαν χωρίς τροποποίηση",
+    "reschedule-bilan-preserved-closer": "Αποφυγή μικρότερων διαστημάτων",
+    "reschedule-bilan-preserved-today": "Κάρτες που διατηρήθηκαν για σημερινή επανάληψη",
+    "reschedule-bilan-impact-title": "Άμεση επίδραση στις σημερινές επαναλήψεις:",
+    "reschedule-bilan-impact-added": "Νέες κάρτες που προστέθηκαν σήμερα: 0",
+    "reschedule-bilan-impact-queue-reduced": "Σημερινή ουρά επανάληψης: %{before} -> %{after} (μείωση κατά %{count})",
+    "reschedule-bilan-impact-queue-intact": "Σημερινή ουρά επανάληψης αμετάβλητη (%{count} κάρτες)",
+    "reschedule-bilan-confirm": "Επιβεβαίωση επαναπρογραμματισμού",
+    "reschedule-bilan-cancel": "Ακύρωση",
+    "reschedule-bilan-none-eligible": "Δεν βρέθηκαν κάρτες με μεταγενέστερη ημερομηνία (%{count} εξετάστηκαν).",
+    "reschedule-bilan-done": "Ολοκληρώθηκε: %{count} κάρτες ενημερώθηκαν σε %{seconds}s.\n0 νέες κάρτες σήμερα. Αναίρεση με Ctrl+Z.",
+    "reschedule-bilan-cancelled": "Ο επαναπρογραμματισμός ακυρώθηκε. Καμία κάρτα δεν τροποποιήθηκε.",
+    "reschedule-bilan-calculating": "Υπολογισμός προεπισκόπησης FSRS..."
   }
 }

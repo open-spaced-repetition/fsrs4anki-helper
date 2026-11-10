@@ -9,7 +9,7 @@ from .utils import get_dr
 
 from .dsr_state import init_dsr_status_hook
 from .sync_hook import init_sync_hook
-from .schedule.reschedule import reschedule
+from .schedule.reschedule import reschedule, reschedule_no_backlog
 from .schedule.postpone import postpone
 from .schedule.advance import advance
 from .schedule.flatten import flatten
@@ -169,6 +169,15 @@ add_action_to_gear(
     t("reschedule-recent-cards", count=config.days_to_reschedule),
 )
 
+menu_reschedule_no_backlog = build_action(
+    reschedule_no_backlog,
+    t("reschedule-no-added-workload"),
+)
+add_action_to_gear(
+    reschedule_no_backlog,
+    t("reschedule-no-added-workload"),
+)
+
 menu_schedule_break = build_action(schedule_break, t("schedule-break-menu"))
 add_action_to_gear(schedule_break, t("schedule-break-menu"))
 
@@ -280,6 +289,7 @@ menu_for_easy_days = menu_for_helper.addMenu(t("less-anki-easy-days"))
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_reschedule_recent)
+menu_for_helper.addAction(menu_reschedule_no_backlog)
 menu_for_helper.addAction(menu_schedule_break)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)

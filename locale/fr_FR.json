@@ -14,6 +14,7 @@
       "one": "Reprogrammer les cartés révisées le jour dernier",
       "other": "Reprogrammer les cartés révisées lors des %{count} derniers jours"
     },
+    "reschedule-no-added-workload": "Replanifier sans augmenter le travail immédiat",
     "reschedule-skipped": "reprogrammation sautée",
     "postpone-all-decks": "Reporter les cartes de tous les paquets",
     "postpone-cards": "Reporter les cartes",
@@ -40,7 +41,6 @@
     "apply-easy-days-specific": "Appliquer les jours faciles à des dates spécifiques",
     "easy-days": "Jours Faciles",
     "recommended-addons": "Greffons recommandés",
-
     "step-stats": "Statistiques des Étapes",
     "step-stats-disabled": "If you would like to see your (re)learning step statistics, you can enable them with <code>Tools > FSRS Helper > Show step stats.</code><br/><br/>This graph will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "step-stats-subtitle": "Statistiques pour différentes premières évaluations pendant les étapes de (ré)apprentissage",
@@ -63,7 +63,6 @@
     "lapse": "Laps",
     "insufficient-learn-step-data": "(données insuffisantes, veuillez conserver les paramètres actuels)",
     "keep-steps-blank": "Gardez le champ des étapes vides.",
-
     "fsrs-stats": "Statistiques de FSRS",
     "knowledge-acquisition-rate": "Taux d'acquisition de connaissances",
     "studied-cards": "Cartes étudiées",
@@ -89,7 +88,6 @@
     "relearned": "Réapprises",
     "past": "Passé",
     "reviews-on-cards": "Révisions de cartes",
-
     "advance-inquire-text": "Entrez le nombre de cartes à avancer.\n",
     "advance-notification-text-deck": "Pour ce paquet, il est relativement sûr d'avancer jusqu'à %{count} cartes.\n",
     "advance-notification-text-collection": "Pour cette collection, il est relativement sûr d'avancer jusqu'à %{count} cartes.\n",
@@ -103,7 +101,6 @@
       "other": "%{count} cartes ont été avancées."
     },
     "advance-retention-change": "<br>Rétention moyenne ciblée des cartes avancées: %{prev_retention} -> %{new_retention}",
-
     "flatten-inquire-text": "Entrez le nombre maximal de révisions que vous souhaitez dans le futur.\n",
     "flatten-info-text": "Cette fonctionnalité n'affecte que les cartes qui ont été programmées par FSRS.\n",
     "flatten-warning-text": "Cette fonctionnalité ne respecte pas les paramètres d'intervalle maximum, et pourrait significativement réduire votre rétention réelle.\n",
@@ -114,7 +111,6 @@
     "flatten-progress": "%{count}/%{total} cartes aplanies",
     "flatten-result-text": "%{count} cartes aplanies en %{seconds} secondes.",
     "flatten-retention-change": "<br>Rétention moyenne ciblée des cartes aplanies: %{prev_retention} -> %{new_retention}",
-
     "postpone-inquire-text": "Entrez le nombre de cartes à reporter.\n",
     "postpone-notification-text": "%{deck}, il est relativement sûr de reporter jusqu'à %{safe_cnt} cartes.\n",
     "postpone-warning-text": "Vous pouvez reporter plus de cartes si vous le souhaitez, mais cela est déconseillé.\nGardez en tête qu'à chaque fois que vous utilisez Reporter or Avancer, vous divergez du programme optimal.\n",
@@ -125,7 +121,6 @@
     "postpone-result-text": "%{count} cartes reportées en %{seconds} secondes.",
     "postpone-retention-change": "<br>Rétention moyenne ciblée des cartes reportées: %{prev_retention} -> %{new_retention}",
     "postpone-reach-max-ivl": "<br>Failed to postpone %{reach_max_ivl_cnt} cards due to maximum interval.",
-
     "remedy-start-date": "Sélectionnez la Date de Départ",
     "remedy-end-date": "Sélectionnez la Date de Fin",
     "remedy-title": "Corriger les utilisations erronées de Difficile",
@@ -135,7 +130,6 @@
     "undo-remedy-no-file": "Aucune révision corrigée trouvée",
     "undo-remedy-restored": "%{count} révisions restaurées",
     "undo-remedy-success": "%{count} révisions ont été restaurées.\nVeuillez ré-optimiser vos paramètres FSRS pour incorporer les changements.",
-
     "x-%": "%{count}%",
     "x-cards": {
       "one": "1 carte",
@@ -150,7 +144,6 @@
       "other": "%{count} jours"
     },
     "fsrs-status": "FSRS: %{status}",
-
     "disperse-label": "Dispersement des Cartes Associées",
     "disperse-progress": "%{count}/%{total} notes dispersées",
     "disperse-cards-in": "cartes dans",
@@ -159,11 +152,9 @@
     "disperse-card-range": "Intervalle de révision de la carte %{card_id}: %{start_due} - %{end_due}",
     "disperse-too-close": "Dates de révisions trop proches pour les disperser:",
     "disperse-result": "%{result} en %{count} secondes",
-
     "clear-custom-data-confirmation": "Réinitialiser les données additionnelles de toutes les cartes?\n    La programmation spéciale de FSRS4Anki a stocké un état de mémoire dans les données additionnelles.\n    Elle n'est pas utilisée lorsque vous activez le FSRS intégré.\n    Êtes-vous sûr?",
     "clear-custom-data-result": "%{count} cartes vidées en %{seconds} secondes.",
     "clear-manual-rescheduling-confirmation": "Cette option retire les entrées de journaux de révisions générées par \"Fixer la date due\" et \"Reprogrammer les cartes en cas de changement\" qui précèdent directement une autre entrée manuelle ou de reprogrammation.\n\nCette action ne peut pas être annulée. Souhaitez-vous continuer?",
-
     "clear-manual-rescheduling-result": "%{count} entrées du journal de révisions supprimées.",
     "easy-days-select-date": "Sélectionnez la/les Date(s)",
     "easy-days-add-date": "Ajouter la Date Sélectionnée",
@@ -180,7 +171,27 @@
     "reschedule-browser-action": "FSRS: Mettre à jour l'état de mémoire et reprogrammer",
     "reschedule-done-in-seconds": "%{result} en %{seconds} secondes",
     "not-available": "Non disponible",
-
-    "enable-fsrs-warning": "Veuillez soit activer FSRS dans vos options de paquet, soit désactiver le greffon FSRS helper."
+    "enable-fsrs-warning": "Veuillez soit activer FSRS dans vos options de paquet, soit désactiver le greffon FSRS helper.",
+    "reschedule-bilan-title": "Replanification FSRS - Bilan prévisionnel",
+    "reschedule-bilan-deck": "Paquet : %{deck}   |   Rétention cible : %{retention} %",
+    "reschedule-bilan-rule-title": "Règle appliquée :",
+    "reschedule-bilan-rule-desc": "Seules les cartes dont la nouvelle échéance est plus éloignée dans le temps que l'échéance d'origine reçoivent leur nouvelle planification FSRS.",
+    "reschedule-bilan-total-examined": "Cartes de révision examinées",
+    "reschedule-bilan-eligible-total": "Cartes éligibles à la replanification (échéance repoussée)",
+    "reschedule-bilan-future-pushed": "Cartes futures repoussées plus loin",
+    "reschedule-bilan-today-postponed": "Cartes du jour repoussées dans le futur",
+    "reschedule-bilan-preserved-total": "Cartes préservées sans modification",
+    "reschedule-bilan-preserved-closer": "Échéance plus courte évitée (non rapprochées)",
+    "reschedule-bilan-preserved-today": "Cartes maintenues pour révision aujourd'hui",
+    "reschedule-bilan-impact-title": "Impact sur vos révisions du jour :",
+    "reschedule-bilan-impact-added": "Nouvelles cartes ajoutées aujourd'hui : 0",
+    "reschedule-bilan-impact-queue-reduced": "File de révision du jour : %{before} -> %{after} (%{count} cartes allégées)",
+    "reschedule-bilan-impact-queue-intact": "File de révision du jour intacte (%{count} cartes)",
+    "reschedule-bilan-confirm": "Confirmer la replanification",
+    "reschedule-bilan-cancel": "Annuler",
+    "reschedule-bilan-none-eligible": "Aucune carte n'a une échéance plus éloignée avec les paramètres actuels (%{count} cartes examinées).",
+    "reschedule-bilan-done": "Replanification terminée : %{count} cartes mises à jour en %{seconds}s.\n0 carte ajoutée aujourd'hui. Annulable avec Ctrl+Z.",
+    "reschedule-bilan-cancelled": "Replanification annulée. Aucune carte n'a été modifiée.",
+    "reschedule-bilan-calculating": "Calcul du bilan prévisionnel FSRS..."
   }
 }

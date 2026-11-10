@@ -39,7 +39,6 @@
     "apply-easy-days-specific": "Aplicar dias fáceis para datas específicas",
     "easy-days": "Dias fáceis",
     "recommended-addons": "Complementos recomendados",
-
     "step-stats": "Estatísticas dos Passos",
     "step-stats-disabled": "If you would like to see your (re)learning step statistics, you can enable them with <code>Tools > FSRS Helper > Show step stats.</code><br/><br/>This graph will slow down the speed at which this page loads if you have a lot of reviews, so enable it with caution.",
     "step-stats-subtitle": "Estatísticas para diferentes classificações iniciais durante os passos de (re)aprendizado",
@@ -61,6 +60,28 @@
     "recommended-relearning-steps": "Passos de reaprendizado recomendados",
     "lapse": "Reaprendido",
     "insufficient-learn-step-data": "(dados insuficientes, por favor mantenha a configuração atual)",
-    "keep-steps-blank": "Mantenha o campo de passos em branco."
+    "keep-steps-blank": "Mantenha o campo de passos em branco.",
+    "reschedule-no-added-workload": "Reagendar sem aumentar a carga de trabalho imediata",
+    "reschedule-bilan-title": "Reagendamento FSRS - Resumo Prévio",
+    "reschedule-bilan-deck": "Baralho: %{deck}   |   Retenção desejada: %{retention}%",
+    "reschedule-bilan-rule-title": "Regra aplicada:",
+    "reschedule-bilan-rule-desc": "Apenas os cartões cuja nova data de vencimento for mais distante no futuro do que a original receberão o novo agendamento FSRS.",
+    "reschedule-bilan-total-examined": "Cartões de revisão examinados",
+    "reschedule-bilan-eligible-total": "Cartões elegíveis para reagendamento (vencimento estendido)",
+    "reschedule-bilan-future-pushed": "Cartões futuros adiados para mais longe",
+    "reschedule-bilan-today-postponed": "Cartões vencendo hoje adiados para o futuro",
+    "reschedule-bilan-preserved-total": "Cartões preservados sem modificação",
+    "reschedule-bilan-preserved-closer": "Intervalos menores evitados (não adiantados)",
+    "reschedule-bilan-preserved-today": "Cartões mantidos para revisão hoje",
+    "reschedule-bilan-impact-title": "Impacto imediato nas revisões de hoje:",
+    "reschedule-bilan-impact-added": "Novos cartões adicionados hoje: 0",
+    "reschedule-bilan-impact-queue-reduced": "Fila de revisão de hoje: %{before} -> %{after} (%{count} cartões aliviados)",
+    "reschedule-bilan-impact-queue-intact": "Fila de revisão de hoje intacta (%{count} cartões)",
+    "reschedule-bilan-confirm": "Confirmar Reagendamento",
+    "reschedule-bilan-cancel": "Cancelar",
+    "reschedule-bilan-none-eligible": "Nenhum cartão tem vencimento mais distante com os parâmetros atuais (%{count} cartões examinados).",
+    "reschedule-bilan-done": "Reagendamento concluído: %{count} cartões atualizados em %{seconds}s.\n0 cartões adicionados hoje. Desfazível com Ctrl+Z.",
+    "reschedule-bilan-cancelled": "Reagendamento cancelado. Nenhum cartão foi modificado.",
+    "reschedule-bilan-calculating": "Calculando resumo prévio do FSRS..."
   }
 }
