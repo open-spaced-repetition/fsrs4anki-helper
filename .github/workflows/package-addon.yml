@@ -38,6 +38,9 @@ jobs:
           configuration.py i18n.py steps.py browser schedule
           python_i18n/i18n scripts
 
+      - name: Test sibling dispersion
+        run: python -m unittest discover -s tests -v
+
       - name: Package add-on
         run: ./package.sh . dist
 
