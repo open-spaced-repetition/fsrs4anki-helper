@@ -98,7 +98,7 @@ class RemedyDateRangeWidget(QWidget):
         with open(revlog_id_csv, "a") as f:
             f.write("\n".join(map(str, revlog_ids)) + "\n")
 
-        showInfo(t("remedy-success").format(count=len(revlog_ids)))
+        showInfo(t("remedy-success", count=len(revlog_ids)))
         mw.reset()
         self.close()
 
@@ -133,6 +133,6 @@ def undo_remedy(did):
     col_set_modified()
     mw.col.set_schema_modified()
     os.remove(revlog_id_csv)
-    tooltip(t("undo-remedy-restored").format(count=len(revlog_ids)))
-    showInfo(t("undo-remedy-success").format(count=len(revlog_ids)))
+    tooltip(t("undo-remedy-restored", count=len(revlog_ids)))
+    showInfo(t("undo-remedy-success", count=len(revlog_ids)))
     mw.reset()
